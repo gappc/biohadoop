@@ -1,9 +1,12 @@
 package at.ac.uibk.dps.biohadoop.master;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.ApplicationConstants;
@@ -25,12 +28,19 @@ import org.apache.hadoop.yarn.util.Records;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.ga.FileInput;
+import at.ac.uibk.dps.biohadoop.ga.Ga;
+import at.ac.uibk.dps.biohadoop.ga.Tsp;
 import at.ac.uibk.dps.biohadoop.server.ServerLoader;
+import at.ac.uibk.dps.biohadoop.torename.DistancesGlobal;
 import at.ac.uibk.dps.biohadoop.torename.Hostname;
 import at.ac.uibk.dps.biohadoop.torename.LocalResourceBuilder;
 
 public class Application {
 
+	@Inject
+	Ga ga;
+	
 	private static Logger logger = LoggerFactory.getLogger(Application.class);
 	
 	public void run(String[] args) {
@@ -39,9 +49,15 @@ public class Application {
 		
 		if (args.length >= 1 && ("local").equals(args[0])) {
 			try {
-				Thread.sleep(300000);
+				FileInput fileInput = new FileInput();
+				Tsp tsp = fileInput.readFile("/sdb/studium/master-thesis/code/git/masterthesis/data/att48.tsp");
+				DistancesGlobal.setDistances(tsp.getDistances());
+				ga.ga(tsp, 10, 100000);
+				Thread.sleep(3000000);
 			} catch (InterruptedException e) {
 				logger.info("Exception while sleep", e);
+			} catch (IOException e) {
+				logger.info("Exception while reading file", e);
 			}
 		}
 		else {

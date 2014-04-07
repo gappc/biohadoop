@@ -5,11 +5,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import at.ac.uibk.dps.biohadoop.queue.ResultQueue;
+import at.ac.uibk.dps.biohadoop.queue.SimpleQueue;
+
 public class Ga {
 	
 	private Random rand = new Random();
 
-	public int[] ga(Tsp tsp, int genomeSize, int maxIterations) {
+	public int[] ga(Tsp tsp, int genomeSize, int maxIterations) throws InterruptedException {
 		int citySize = tsp.getCities().length;
 		
 		boolean end = false;
@@ -17,6 +20,8 @@ public class Ga {
 
 		// Init: Generate random population
 		int[][] population = initPopulation(genomeSize, citySize);
+		
+		long start = System.currentTimeMillis();
 		
 		while (!end) {
 			// recombination
@@ -38,11 +43,28 @@ public class Ga {
 			// evaluation
 			double[] values = new double[genomeSize * 2];
 			for (int i = 0; i < genomeSize; i++) {
+				GaTask gaTask = new GaTask(i, population[i]);
+				SimpleQueue.put(gaTask);
 				values[i] = fitness(tsp.getDistances(), population[i]);
 			}
 			for (int i = 0; i < genomeSize; i++) {
+				GaTask gaTask = new GaTask(i + genomeSize, population[i]);
+				SimpleQueue.put(gaTask);
 				values[i + genomeSize] = fitness(tsp.getDistances(), mutated[i]);
 			}
+			while(ResultQueue.getCount() < genomeSize * 2) {
+//				System.out.println("Queue size:" + ResultQueue.getCount());
+				Thread.sleep(10);
+			}
+			System.out.println("Got all results for this round " + counter);
+			
+			for (int i = 0; i < genomeSize; i++) {
+				values[i] = ResultQueue.getResults()[i];
+			}
+			for (int i = 0; i < genomeSize; i++) {
+				values[i + genomeSize] = ResultQueue.getResults()[i + genomeSize];
+			}
+			ResultQueue.reset();
 			
 			// selection
 			for (int i = 0; i < genomeSize * 2; i++) {
@@ -85,8 +107,10 @@ public class Ga {
 				end = true;
 			}
 			
-			if (counter % 1e4 == 0 || counter < 10) {
+			if (counter % 1e3 == 0 || counter < 10) {
 //				System.out.println(counter + " " + values[0]);
+				System.out.println("counter: "+ counter + " | took " + (System.currentTimeMillis() - start) + "ms");
+				start = System.currentTimeMillis();
 				printGenome(tsp.getDistances(), population[0], citySize);
 			}
 		}

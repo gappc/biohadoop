@@ -21,6 +21,7 @@ import org.jboss.resteasy.spi.ResteasyDeployment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.rs.GaResource;
 import at.ac.uibk.dps.biohadoop.rs.SimpleRest;
 import at.ac.uibk.dps.biohadoop.torename.CDIListener;
 import at.ac.uibk.dps.biohadoop.torename.Hostname;
@@ -34,7 +35,7 @@ public class ServerLoader {
 	public void startServer() {
 		ResteasyDeployment deployment = new ResteasyDeployment();
 		deployment.getActualResourceClasses().addAll(
-				Arrays.asList(SimpleRest.class));
+				Arrays.asList(SimpleRest.class, GaResource.class));
 		deployment.getActualProviderClasses().addAll(new ArrayList<Class>());
 		deployment.setInjectorFactoryClass(CdiInjectorFactory.class.getName());
 
