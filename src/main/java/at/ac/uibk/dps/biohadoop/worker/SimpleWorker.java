@@ -50,7 +50,7 @@ public class SimpleWorker {
 				}
 
 				if (counter > 0) {
-					Thread.sleep(1000);
+					Thread.sleep(5000);
 				}
 			} while (counter > 0);
 			logger.info("############# Simple Worker stopped ###############");

@@ -12,7 +12,6 @@ public class ApplicationMaster {
 	public static void main(String[] args) throws Exception {
 		logger.info("############ Starting application master ##########");
 		logger.info("############ Starting application master ARGS: " + args);
-		logger.info("APPLICATION MASTER CLASSPATH: " + System.getProperty("java.class.path"));
 		
 		WeldLoader.startWeldContainer(args);
 

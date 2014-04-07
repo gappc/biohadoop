@@ -9,7 +9,11 @@ public class ArgumentChecker {
 			.getLogger(ArgumentChecker.class);
 
 	public static boolean checkArgs(String[] args) {
-		logger.debug("Checking arguments: " + args);
+		logger.debug("Checking arguments, length: " + args.length);
+		for (String s : args) {
+			logger.debug(s);
+		}
+		
 		if (args.length != 2) {
 			logger.error("Wrong number of arguments");
 			printArgumentUsage();
@@ -17,6 +21,8 @@ public class ArgumentChecker {
 		}
 		try {
 			Class.forName(args[0]);
+//			TODO Check if class implements interface
+//			TODO Check if worker impl is available 
 		} catch(ClassNotFoundException e) {
 			logger.error("Class \"" + args[0] + "\" could not be found");
 			printArgumentUsage();

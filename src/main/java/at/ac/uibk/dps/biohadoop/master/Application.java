@@ -33,17 +33,9 @@ public class Application {
 
 	private static Logger logger = LoggerFactory.getLogger(Application.class);
 	
-	private Configuration conf = new YarnConfiguration();
-	
-	private String libPath = "hdfs://master:54310/biohadoop/lib/";
-	
 	public void run(String[] args) {
 		ServerLoader loader = new ServerLoader();
 		loader.startServer();
-		
-		conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
-		conf.set("fs.file.impl", "org.apache.hadoop.fs.LocalFileSystem");
-		conf.set("fs.defaultFS", "hdfs://master:54310");
 		
 		if (args.length >= 1 && ("local").equals(args[0])) {
 			try {
@@ -71,11 +63,6 @@ public class Application {
 
 		// Initialize clients to ResourceManager and NodeManagers
 		Configuration conf = new YarnConfiguration();
-
-		conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
-		conf.set("fs.file.impl", "org.apache.hadoop.fs.LocalFileSystem");
-		conf.set("fs.defaultFS", "hdfs://master:54310");
-		conf.set("yarn.resourcemanager.scheduler.address", "master:8030");
 
 		AMRMClient<ContainerRequest> rmClient = AMRMClient.createAMRMClient();
 		rmClient.init(conf);
@@ -110,16 +97,24 @@ public class Application {
 		logger.info("Obtain allocated containers and launch");
 		int allocatedContainers = 0;
 		while (allocatedContainers < n) {
-			AllocateResponse response = rmClient.allocate(0);
+			AllocateResponse response = rmClient.allocate(0.1f);
 			for (Container container : response.getAllocatedContainers()) {
 				++allocatedContainers;
+				
+				logger.info("Launching shell command on a new container."
+				          + ", containerId=" + container.getId()
+				          + ", containerNode=" + container.getNodeId().getHost() 
+				          + ":" + container.getNodeId().getPort()
+				          + ", containerNodeURI=" + container.getNodeHttpAddress()
+				          + ", containerResourceMemory" + container.getResource().getMemory()
+						  + ", containerResourceVirtualCores" + container.getResource().getVirtualCores());
 
 				// Launch container by create ContainerLaunchContext
 				ContainerLaunchContext ctx = Records
 						.newRecord(ContainerLaunchContext.class);
 				
 				String clientCommand = "$JAVA_HOME/bin/java"
-						+ " -Xmx256M"
+						+ " -Xmx128M"
 						+ " at.ac.uibk.dps.biohadoop.worker.SimpleWorker "
 						+ Hostname.getHostname()
 						+ " 1>"
@@ -129,16 +124,22 @@ public class Application {
 				logger.info("!!!Client command: " + clientCommand);
 				ctx.setCommands(Collections.singletonList(clientCommand));
 				
+				String libPath = "hdfs://master:54310/biohadoop/lib/";
 				Map<String, LocalResource> jars = LocalResourceBuilder.getStandardResources(libPath, conf);
 				ctx.setLocalResources(jars);
 				
 				// Setup CLASSPATH for ApplicationMaster
 				Map<String, String> appMasterEnv = new HashMap<String, String>();
-				setupAppMasterEnv(appMasterEnv);
+				setupAppMasterEnv(appMasterEnv, conf);
 				ctx.setEnvironment(appMasterEnv);
 				
 				logger.info("Launching container " + allocatedContainers);
-				nmClient.startContainer(container, ctx);
+				
+				// Launch and start the container on a separate thread to keep the main 
+			    // thread unblocked as all containers may not be allocated at one go.
+				LaunchContainerRunnable containerRunnable = new LaunchContainerRunnable(nmClient, container, ctx);
+				Thread launchThread = new Thread(containerRunnable);
+				launchThread.start();
 			}
 			Thread.sleep(100);
 		}
@@ -147,8 +148,9 @@ public class Application {
 			logger.info("Waiting for " + n + " containers to complete");
 			int completedContainers = 0;
 			while (completedContainers < n) {
-				AllocateResponse response = rmClient.allocate(completedContainers
-						/ n);
+//				AllocateResponse response = rmClient.allocate(completedContainers
+//						/ n);
+				AllocateResponse response = rmClient.allocate(0.2f);
 				for (ContainerStatus status : response
 						.getCompletedContainersStatuses()) {
 					++completedContainers;
@@ -165,7 +167,7 @@ public class Application {
 		}
 	}
 	
-	private void setupAppMasterEnv(Map<String, String> appMasterEnv) {
+	private void setupAppMasterEnv(Map<String, String> appMasterEnv, Configuration conf) {
 		Apps.addToEnvironment(appMasterEnv, Environment.CLASSPATH.name(),
 				Environment.PWD.$() + File.separator + "*");
 		for (String c : conf.getStrings(
