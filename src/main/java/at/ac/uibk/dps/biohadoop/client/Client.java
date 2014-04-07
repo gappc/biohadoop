@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.ApplicationConstants;
 import org.apache.hadoop.yarn.api.ApplicationConstants.Environment;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -36,20 +35,21 @@ public class Client {
 	public static void main(String[] args) throws Exception {
 		logger.info("BIOHADOOP started at " + Hostname.getHostname());
 		long start = System.currentTimeMillis();
-		Client c = new Client();
-		c.run(args);
+		
+		if (ArgumentChecker.checkArgs(args)) {
+			Client c = new Client();
+			c.run(args);
+		}
+		
 		long end = System.currentTimeMillis();
 		logger.info("Time: " + (end - start) + "ms");
 	}
 
 	public void run(String[] args) throws Exception {
-		logger.info("CLIENT CLASSPATH: " + System.getProperty("java.class.path"));
-		
 		logger.info("############ Starting client ############");
 
 		final String command = args[0];
 		final int n = Integer.valueOf(args[1]);
-		final Path jarPath = new Path(args[2]);
 
 		// Create yarnClient
 		YarnConfiguration conf = new YarnConfiguration();
