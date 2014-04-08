@@ -34,7 +34,7 @@ public class GaWorker {
 
 			String masterHostname = args[0];
 
-			String url = "http://" + masterHostname + ":30000/ga";
+			String url = "http://" + masterHostname + ":30000/rs/ga";
 			String initUrl = url + "/init";
 			String workerUrl = url + "/work";
 			
@@ -48,14 +48,18 @@ public class GaWorker {
 			long start = System.currentTimeMillis();
 			long startRound = System.currentTimeMillis();
 			
+			response = client.target(workerUrl)
+					.request(MediaType.APPLICATION_JSON).get();
+			GaTask task = response.readEntity(GaTask.class);
+			
 			int counter = 0;
 			do {
 				try {
 					startRound = System.currentTimeMillis();
 					
-					response = client.target(workerUrl)
-							.request(MediaType.APPLICATION_JSON).get();
-					GaTask task = response.readEntity(GaTask.class);
+//					response = client.target(workerUrl)
+//							.request(MediaType.APPLICATION_JSON).get();
+//					GaTask task = response.readEntity(GaTask.class);
 
 					GaResult gaResult = new GaResult();
 					gaResult.setSlot(task.getSlot());
@@ -66,8 +70,10 @@ public class GaWorker {
 							.request(MediaType.APPLICATION_JSON)
 							.post(Entity.entity(gaResult,
 									MediaType.APPLICATION_JSON));
+					
+					task = response.readEntity(GaTask.class);
 
-					System.out.println("Took: " + (System.currentTimeMillis() - startRound));
+					System.out.println("Took: " + (System.currentTimeMillis() - startRound) + "ms");
 					
 					if (counter % 1e3 == 0) {
 						logger.info("response from ApplicationMaster: "

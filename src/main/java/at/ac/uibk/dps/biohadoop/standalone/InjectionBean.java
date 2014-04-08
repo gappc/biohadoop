@@ -4,7 +4,15 @@ import java.util.Random;
 
 public class InjectionBean {
 
+	private int random = new Random().nextInt();
+	
 	public int getRandom() {
-		return new Random().nextInt();
+		return random;
 	}
+
+	public void setRandom(int random) {
+		this.random = random;
+	}
+	
+	
 }

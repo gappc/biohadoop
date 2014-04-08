@@ -29,8 +29,9 @@ public class GaResource {
 	}
 	
 	@POST
-	public void writeResult(GaResult result) {
-		System.out.println("Got result: " + result);
+	public GaTask writeResult(GaResult result) throws InterruptedException {
+//		System.out.println("Got result: " + result);
 		ResultQueue.setResult(result.getSlot(), result.getResult());
+		return (GaTask)SimpleQueue.take();
 	}
 }

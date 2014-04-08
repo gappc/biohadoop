@@ -32,7 +32,7 @@ public class SimpleWorker {
 
 			String masterHostname = args[0];
 
-			String url = "http://" + masterHostname + ":30000/simple";
+			String url = "http://" + masterHostname + ":30000/rs/simple";
 			logger.info("######### client calls url: " + url);
 			Client client = ClientBuilder.newClient();
 
