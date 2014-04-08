@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.servlet.ServletException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.ApplicationConstants;
@@ -31,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.ga.FileInput;
 import at.ac.uibk.dps.biohadoop.ga.Ga;
 import at.ac.uibk.dps.biohadoop.ga.Tsp;
-import at.ac.uibk.dps.biohadoop.server.ServerLoader;
+import at.ac.uibk.dps.biohadoop.server.UndertowServer;
 import at.ac.uibk.dps.biohadoop.torename.DistancesGlobal;
 import at.ac.uibk.dps.biohadoop.torename.Hostname;
 import at.ac.uibk.dps.biohadoop.torename.LocalResourceBuilder;
@@ -40,17 +41,22 @@ public class Application {
 
 	@Inject
 	Ga ga;
-	
+
 	private static Logger logger = LoggerFactory.getLogger(Application.class);
-	
+
 	public void run(String[] args) {
-		ServerLoader loader = new ServerLoader();
-		loader.startServer();
-		
+		UndertowServer loader = new UndertowServer();
+		try {
+			loader.startServer();
+		} catch (IllegalArgumentException | IOException | ServletException e) {
+			logger.error("Could not start server", e);
+		}
+
 		if (args.length >= 1 && ("local").equals(args[0])) {
 			try {
 				FileInput fileInput = new FileInput();
-				Tsp tsp = fileInput.readFile("/sdb/studium/master-thesis/code/git/masterthesis/data/att48.tsp");
+				Tsp tsp = fileInput
+						.readFile("/sdb/studium/master-thesis/code/git/masterthesis/data/att48.tsp");
 				DistancesGlobal.setDistances(tsp.getDistances());
 				ga.ga(tsp, 10, 100000);
 				Thread.sleep(3000000);
@@ -59,8 +65,7 @@ public class Application {
 			} catch (IOException e) {
 				logger.info("Exception while reading file", e);
 			}
-		}
-		else {
+		} else {
 			try {
 				startWorker(args);
 				loader.stopServer();
@@ -69,11 +74,11 @@ public class Application {
 			}
 		}
 	}
-	
+
 	private void startWorker(String[] args) throws Exception {
 		final String command = args[0];
 		final int n = Integer.valueOf(args[1]);
-		
+
 		logger.info("#### COMMAND: " + command);
 		logger.info("#### NUMBER OF HOSTS: " + n);
 
@@ -116,44 +121,50 @@ public class Application {
 			AllocateResponse response = rmClient.allocate(0.1f);
 			for (Container container : response.getAllocatedContainers()) {
 				++allocatedContainers;
-				
+
 				logger.info("Launching shell command on a new container."
-				          + ", containerId=" + container.getId()
-				          + ", containerNode=" + container.getNodeId().getHost() 
-				          + ":" + container.getNodeId().getPort()
-				          + ", containerNodeURI=" + container.getNodeHttpAddress()
-				          + ", containerResourceMemory" + container.getResource().getMemory()
-						  + ", containerResourceVirtualCores" + container.getResource().getVirtualCores());
+						+ ", containerId=" + container.getId()
+						+ ", containerNode=" + container.getNodeId().getHost()
+						+ ":" + container.getNodeId().getPort()
+						+ ", containerNodeURI="
+						+ container.getNodeHttpAddress()
+						+ ", containerResourceMemory"
+						+ container.getResource().getMemory()
+						+ ", containerResourceVirtualCores"
+						+ container.getResource().getVirtualCores());
 
 				// Launch container by create ContainerLaunchContext
 				ContainerLaunchContext ctx = Records
 						.newRecord(ContainerLaunchContext.class);
-				
-				String clientCommand = "$JAVA_HOME/bin/java"
-						+ " -Xmx128M"
+
+				String clientCommand = "$JAVA_HOME/bin/java" + " -Xmx128M"
 						+ " at.ac.uibk.dps.biohadoop.worker.SimpleWorker "
-						+ Hostname.getHostname()
-						+ " 1>"
-						+ ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stdout"
-						+ " 2>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR
+						+ Hostname.getHostname() + " 1>"
+						+ ApplicationConstants.LOG_DIR_EXPANSION_VAR
+						+ "/stdout" + " 2>"
+						+ ApplicationConstants.LOG_DIR_EXPANSION_VAR
 						+ "/stderr";
 				logger.info("!!!Client command: " + clientCommand);
 				ctx.setCommands(Collections.singletonList(clientCommand));
-				
+
 				String libPath = "hdfs://master:54310/biohadoop/lib/";
-				Map<String, LocalResource> jars = LocalResourceBuilder.getStandardResources(libPath, conf);
+				Map<String, LocalResource> jars = LocalResourceBuilder
+						.getStandardResources(libPath, conf);
 				ctx.setLocalResources(jars);
-				
+
 				// Setup CLASSPATH for ApplicationMaster
 				Map<String, String> appMasterEnv = new HashMap<String, String>();
 				setupAppMasterEnv(appMasterEnv, conf);
 				ctx.setEnvironment(appMasterEnv);
-				
+
 				logger.info("Launching container " + allocatedContainers);
-				
-				// Launch and start the container on a separate thread to keep the main 
-			    // thread unblocked as all containers may not be allocated at one go.
-				LaunchContainerRunnable containerRunnable = new LaunchContainerRunnable(nmClient, container, ctx);
+
+				// Launch and start the container on a separate thread to keep
+				// the main
+				// thread unblocked as all containers may not be allocated at
+				// one go.
+				LaunchContainerRunnable containerRunnable = new LaunchContainerRunnable(
+						nmClient, container, ctx);
 				Thread launchThread = new Thread(containerRunnable);
 				launchThread.start();
 			}
@@ -164,8 +175,9 @@ public class Application {
 			logger.info("Waiting for " + n + " containers to complete");
 			int completedContainers = 0;
 			while (completedContainers < n) {
-//				AllocateResponse response = rmClient.allocate(completedContainers
-//						/ n);
+				// AllocateResponse response =
+				// rmClient.allocate(completedContainers
+				// / n);
 				AllocateResponse response = rmClient.allocate(0.2f);
 				for (ContainerStatus status : response
 						.getCompletedContainersStatuses()) {
@@ -174,16 +186,17 @@ public class Application {
 				}
 				Thread.sleep(100);
 			}
-	
+
 			logger.info("All containers completed, unregister with ResourceManager");
-			rmClient.unregisterApplicationMaster(FinalApplicationStatus.SUCCEEDED,
-					"", "");
-		} catch(Exception e) {
+			rmClient.unregisterApplicationMaster(
+					FinalApplicationStatus.SUCCEEDED, "", "");
+		} catch (Exception e) {
 			logger.error("******** Application error ***********", e);
 		}
 	}
-	
-	private void setupAppMasterEnv(Map<String, String> appMasterEnv, Configuration conf) {
+
+	private void setupAppMasterEnv(Map<String, String> appMasterEnv,
+			Configuration conf) {
 		Apps.addToEnvironment(appMasterEnv, Environment.CLASSPATH.name(),
 				Environment.PWD.$() + File.separator + "*");
 		for (String c : conf.getStrings(
@@ -193,5 +206,5 @@ public class Application {
 					c.trim());
 		}
 	}
-	
+
 }
