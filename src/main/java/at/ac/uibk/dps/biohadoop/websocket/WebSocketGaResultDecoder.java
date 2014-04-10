@@ -14,6 +14,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class WebSocketGaResultDecoder implements Decoder.Text<GaResult> {
 
+	private ObjectMapper om = new ObjectMapper();
+	
 	@Override
 	public void init(EndpointConfig config) {
 		// TODO Auto-generated method stub
@@ -28,7 +30,6 @@ public class WebSocketGaResultDecoder implements Decoder.Text<GaResult> {
 
 	@Override
 	public GaResult decode(String s) throws DecodeException {
-		ObjectMapper om = new ObjectMapper();
 		try {
 			return om.readValue(s, GaResult.class);
 		} catch (JsonParseException e) {

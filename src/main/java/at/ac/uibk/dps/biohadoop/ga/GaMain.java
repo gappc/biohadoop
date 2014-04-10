@@ -13,7 +13,7 @@ public class GaMain {
 			Tsp tsp = fileInput.readFile("/sdb/studium/master-thesis/code/git/masterthesis/data/att48.tsp");
 			System.out.println(tsp.toString());
 			Ga ga = new Ga();
-			int[] path = ga.ga(tsp, 100, 1000000);
+			int[] path = ga.ga(tsp, 10, 100000);
 			
 			checkPathValid(path);
 		} catch (IOException e) {

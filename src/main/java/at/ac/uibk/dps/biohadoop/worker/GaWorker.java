@@ -37,54 +37,48 @@ public class GaWorker {
 			String url = "http://" + masterHostname + ":30000/rs/ga";
 			String initUrl = url + "/init";
 			String workerUrl = url + "/work";
-			
+
 			logger.info("######### client calls url: " + url);
 			Client client = ClientBuilder.newClient();
 
 			Response response = client.target(initUrl)
 					.request(MediaType.APPLICATION_JSON).get();
 			double[][] distances = response.readEntity(double[][].class);
-			
+
 			long start = System.currentTimeMillis();
-			long startRound = System.currentTimeMillis();
+
+			GaResult gaResult = new GaResult();
+			gaResult.setSlot(-1);
+			gaResult.setResult(-1);
 			
-			response = client.target(workerUrl)
-					.request(MediaType.APPLICATION_JSON).get();
+			response = client.target(workerUrl).request(MediaType.APPLICATION_JSON)
+					.post(Entity.entity(gaResult, MediaType.APPLICATION_JSON));
 			GaTask task = response.readEntity(GaTask.class);
 			
 			int counter = 0;
 			do {
 				try {
-					startRound = System.currentTimeMillis();
-					
-//					response = client.target(workerUrl)
-//							.request(MediaType.APPLICATION_JSON).get();
-//					GaTask task = response.readEntity(GaTask.class);
-
-					GaResult gaResult = new GaResult();
 					gaResult.setSlot(task.getSlot());
 					gaResult.setResult(fitness(distances, task.getGenome()));
 
 					response = client
-							.target(url)
+							.target(workerUrl)
 							.request(MediaType.APPLICATION_JSON)
 							.post(Entity.entity(gaResult,
 									MediaType.APPLICATION_JSON));
-					
+
 					task = response.readEntity(GaTask.class);
 
-					System.out.println("Took: " + (System.currentTimeMillis() - startRound) + "ms");
-					
 					if (counter % 1e3 == 0) {
 						logger.info("response from ApplicationMaster: "
-								+ counter + " | took " + (System.currentTimeMillis() - start) + "ms");
+								+ counter + " | took "
+								+ (System.currentTimeMillis() - start) + "ms");
 						start = System.currentTimeMillis();
 					}
 				} catch (Exception e) {
 					logger.error("Error reading Task", e);
 				}
 				counter++;
-//				Thread.sleep(100);
 			} while (counter < Integer.MAX_VALUE);
 			logger.info("############# GA Worker stopped ###############");
 		} catch (Exception e) {

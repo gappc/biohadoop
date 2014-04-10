@@ -6,14 +6,14 @@ import javax.websocket.DecodeException;
 import javax.websocket.Decoder;
 import javax.websocket.EndpointConfig;
 
-import at.ac.uibk.dps.biohadoop.ga.GaResult;
-
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class WebSocketDistancesDecoder implements Decoder.Text<double[][]> {
 
+	private ObjectMapper om = new ObjectMapper();
+	
 	@Override
 	public void init(EndpointConfig config) {
 		// TODO Auto-generated method stub
@@ -28,7 +28,6 @@ public class WebSocketDistancesDecoder implements Decoder.Text<double[][]> {
 
 	@Override
 	public double[][] decode(String s) throws DecodeException {
-		ObjectMapper om = new ObjectMapper();
 		try {
 			return om.readValue(s, double[][].class);
 		} catch (JsonParseException e) {

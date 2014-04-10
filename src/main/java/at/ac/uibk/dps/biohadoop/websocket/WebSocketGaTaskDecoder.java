@@ -15,6 +15,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class WebSocketGaTaskDecoder implements Decoder.Text<GaTask> {
 
+	private ObjectMapper om = new ObjectMapper();
+	
 	@Override
 	public void init(EndpointConfig config) {
 		// TODO Auto-generated method stub
@@ -29,7 +31,6 @@ public class WebSocketGaTaskDecoder implements Decoder.Text<GaTask> {
 
 	@Override
 	public GaTask decode(String s) throws DecodeException {
-		ObjectMapper om = new ObjectMapper();
 		try {
 			return om.readValue(s, GaTask.class);
 		} catch (JsonParseException e) {
