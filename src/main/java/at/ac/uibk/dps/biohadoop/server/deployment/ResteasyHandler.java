@@ -5,7 +5,6 @@ import io.undertow.server.HttpHandler;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
-import io.undertow.servlet.api.ListenerInfo;
 import io.undertow.servlet.api.ServletInfo;
 
 import java.util.ArrayList;
@@ -13,13 +12,10 @@ import java.util.List;
 
 import javax.servlet.ServletException;
 
-import org.jboss.resteasy.cdi.CdiInjectorFactory;
 import org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher;
 import org.jboss.resteasy.spi.ResteasyDeployment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import at.ac.uibk.dps.biohadoop.torename.CDIListener;
 
 /**
  * @author Christian Gapp
