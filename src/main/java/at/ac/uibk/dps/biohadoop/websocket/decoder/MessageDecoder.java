@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.websocket;
+package at.ac.uibk.dps.biohadoop.websocket.decoder;
 
 import java.io.IOException;
 
@@ -6,14 +6,13 @@ import javax.websocket.DecodeException;
 import javax.websocket.Decoder;
 import javax.websocket.EndpointConfig;
 
-import at.ac.uibk.dps.biohadoop.ga.GaResult;
-import at.ac.uibk.dps.biohadoop.ga.GaTask;
+import at.ac.uibk.dps.biohadoop.websocket.message.Message;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class WebSocketGaTaskDecoder implements Decoder.Text<GaTask> {
+public class MessageDecoder implements Decoder.Text<Message> {
 
 	private ObjectMapper om = new ObjectMapper();
 	
@@ -30,9 +29,9 @@ public class WebSocketGaTaskDecoder implements Decoder.Text<GaTask> {
 	}
 
 	@Override
-	public GaTask decode(String s) throws DecodeException {
+	public Message decode(String s) throws DecodeException {
 		try {
-			return om.readValue(s, GaTask.class);
+			return om.readValue(s, Message.class);
 		} catch (JsonParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -18,7 +18,6 @@ import org.xnio.Xnio;
 import org.xnio.XnioWorker;
 
 import at.ac.uibk.dps.biohadoop.websocket.GaWebSocketResource;
-import at.ac.uibk.dps.biohadoop.websocket.WebSocketRegistration;
 
 /**
  * @author Christian Gapp
@@ -65,8 +64,7 @@ public class WebSocketHandler {
 		final XnioWorker xnioWorker = xnio.createWorker(OptionMap.builder()
 				.getMap());
 		final WebSocketDeploymentInfo webSockets = new WebSocketDeploymentInfo()
-				.addEndpoint(GaWebSocketResource.class)
-				.addEndpoint(WebSocketRegistration.class).setWorker(xnioWorker);
+				.addEndpoint(GaWebSocketResource.class).setWorker(xnioWorker);
 
 		return new DeploymentInfo()
 				.setClassLoader(Thread.currentThread().getContextClassLoader())
