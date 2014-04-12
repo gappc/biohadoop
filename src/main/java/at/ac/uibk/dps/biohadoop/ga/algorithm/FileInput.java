@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.ga;
+package at.ac.uibk.dps.biohadoop.ga.algorithm;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

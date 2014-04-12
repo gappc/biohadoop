@@ -1,19 +1,19 @@
-package at.ac.uibk.dps.biohadoop.standalone;
+package at.ac.uibk.dps.biohadoop.websocket;
 
 import java.io.IOException;
 
 import javax.websocket.DecodeException;
 import javax.websocket.Decoder;
-import javax.websocket.EncodeException;
 import javax.websocket.EndpointConfig;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class InjectionBeanDecoder implements Decoder.Text<InjectionBean> {
+public class MessageDecoder implements Decoder.Text<Message> {
 
+	private ObjectMapper om = new ObjectMapper();
+	
 	@Override
 	public void init(EndpointConfig config) {
 		// TODO Auto-generated method stub
@@ -27,10 +27,9 @@ public class InjectionBeanDecoder implements Decoder.Text<InjectionBean> {
 	}
 
 	@Override
-	public InjectionBean decode(String s) throws DecodeException {
-		ObjectMapper om = new ObjectMapper();
+	public Message decode(String s) throws DecodeException {
 		try {
-			return om.readValue(s, InjectionBean.class);
+			return om.readValue(s, Message.class);
 		} catch (JsonParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -46,9 +45,7 @@ public class InjectionBeanDecoder implements Decoder.Text<InjectionBean> {
 
 	@Override
 	public boolean willDecode(String s) {
-		// TODO Auto-generated method stub
 		return true;
 	}
-
 
 }

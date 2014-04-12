@@ -1,9 +1,7 @@
-package at.ac.uibk.dps.biohadoop.master;
+package at.ac.uibk.dps.biohadoop.hadoop.master;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import at.ac.uibk.dps.biohadoop.loader.WeldLoader;
 
 public class ApplicationMaster {
 	
@@ -13,7 +11,8 @@ public class ApplicationMaster {
 		logger.info("############ Starting application master ##########");
 		logger.info("############ Starting application master ARGS: " + args);
 		
-		WeldLoader.startWeldContainer(args);
+		Application application = new Application();
+		application.run(args);
 
 		logger.info("############ Stopping application master ##########");
 	}

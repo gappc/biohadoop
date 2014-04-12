@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.worker;
+package at.ac.uibk.dps.biohadoop.ga.worker;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -9,8 +9,8 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.ga.GaResult;
-import at.ac.uibk.dps.biohadoop.ga.GaTask;
+import at.ac.uibk.dps.biohadoop.ga.algorithm.GaResult;
+import at.ac.uibk.dps.biohadoop.ga.algorithm.GaTask;
 
 public class GaWorker {
 
@@ -58,6 +58,7 @@ public class GaWorker {
 			int counter = 0;
 			do {
 				try {
+					gaResult.setId(task.getId());
 					gaResult.setSlot(task.getSlot());
 					gaResult.setResult(fitness(distances, task.getGenome()));
 

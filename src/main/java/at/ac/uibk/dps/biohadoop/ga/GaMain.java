@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import at.ac.uibk.dps.biohadoop.ga.algorithm.FileInput;
+import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
+import at.ac.uibk.dps.biohadoop.ga.algorithm.Tsp;
+
 public class GaMain {
 
 	public static void main(String[] args) {

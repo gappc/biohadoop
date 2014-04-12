@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.worker;
+package at.ac.uibk.dps.biohadoop.ga.worker;
 
 import java.io.IOException;
 import java.net.URI;
@@ -22,19 +22,19 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import at.ac.uibk.dps.biohadoop.ga.GaResult;
-import at.ac.uibk.dps.biohadoop.ga.GaTask;
-import at.ac.uibk.dps.biohadoop.rs.GaResource;
-import at.ac.uibk.dps.biohadoop.websocket.decoder.MessageDecoder;
-import at.ac.uibk.dps.biohadoop.websocket.encoder.WebSocketEncoder;
-import at.ac.uibk.dps.biohadoop.websocket.message.Message;
-import at.ac.uibk.dps.biohadoop.websocket.message.MessageType;
+import at.ac.uibk.dps.biohadoop.ga.algorithm.GaResult;
+import at.ac.uibk.dps.biohadoop.ga.algorithm.GaTask;
+import at.ac.uibk.dps.biohadoop.ga.master.GaRestResource;
+import at.ac.uibk.dps.biohadoop.websocket.Message;
+import at.ac.uibk.dps.biohadoop.websocket.MessageDecoder;
+import at.ac.uibk.dps.biohadoop.websocket.MessageType;
+import at.ac.uibk.dps.biohadoop.websocket.WebSocketEncoder;
 
 @ClientEndpoint(encoders = WebSocketEncoder.class, decoders = MessageDecoder.class)
 public class WebSocketClient {
 
 	private static final Logger logger = LoggerFactory
-			.getLogger(GaResource.class);
+			.getLogger(GaRestResource.class);
 
 	private CountDownLatch latch = new CountDownLatch(1);
 	private double[][] distances;

@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.websocket.message;
+package at.ac.uibk.dps.biohadoop.websocket;
 
 public class Message {
 

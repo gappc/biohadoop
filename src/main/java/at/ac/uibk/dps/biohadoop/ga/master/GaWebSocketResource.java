@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.websocket;
+package at.ac.uibk.dps.biohadoop.ga.master;
 
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -10,15 +10,15 @@ import javax.websocket.server.ServerEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.ga.Ga;
-import at.ac.uibk.dps.biohadoop.ga.GaResult;
+import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
+import at.ac.uibk.dps.biohadoop.ga.algorithm.GaResult;
 import at.ac.uibk.dps.biohadoop.job.JobManager;
 import at.ac.uibk.dps.biohadoop.job.Task;
 import at.ac.uibk.dps.biohadoop.torename.DistancesGlobal;
-import at.ac.uibk.dps.biohadoop.websocket.decoder.MessageDecoder;
-import at.ac.uibk.dps.biohadoop.websocket.encoder.WebSocketEncoder;
-import at.ac.uibk.dps.biohadoop.websocket.message.Message;
-import at.ac.uibk.dps.biohadoop.websocket.message.MessageType;
+import at.ac.uibk.dps.biohadoop.websocket.Message;
+import at.ac.uibk.dps.biohadoop.websocket.MessageDecoder;
+import at.ac.uibk.dps.biohadoop.websocket.MessageType;
+import at.ac.uibk.dps.biohadoop.websocket.WebSocketEncoder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

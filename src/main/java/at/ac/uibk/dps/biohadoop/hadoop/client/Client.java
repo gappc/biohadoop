@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.client;
+package at.ac.uibk.dps.biohadoop.hadoop.client;
 
 import java.io.File;
 import java.util.Collections;

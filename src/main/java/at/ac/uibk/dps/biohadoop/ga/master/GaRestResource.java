@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.rs;
+package at.ac.uibk.dps.biohadoop.ga.master;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -6,15 +6,15 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import at.ac.uibk.dps.biohadoop.ga.Ga;
-import at.ac.uibk.dps.biohadoop.ga.GaResult;
-import at.ac.uibk.dps.biohadoop.ga.GaTask;
+import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
+import at.ac.uibk.dps.biohadoop.ga.algorithm.GaResult;
+import at.ac.uibk.dps.biohadoop.ga.algorithm.GaTask;
 import at.ac.uibk.dps.biohadoop.job.JobManager;
 import at.ac.uibk.dps.biohadoop.torename.DistancesGlobal;
 
 @Path("/ga")
 @Produces(MediaType.APPLICATION_JSON)
-public class GaResource {
+public class GaRestResource {
 	
 	private JobManager jobManager = JobManager.getInstance();
 

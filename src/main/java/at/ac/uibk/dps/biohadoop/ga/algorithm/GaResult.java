@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.ga;
+package at.ac.uibk.dps.biohadoop.ga.algorithm;
 
 import at.ac.uibk.dps.biohadoop.job.Slotted;
 import at.ac.uibk.dps.biohadoop.job.Task;

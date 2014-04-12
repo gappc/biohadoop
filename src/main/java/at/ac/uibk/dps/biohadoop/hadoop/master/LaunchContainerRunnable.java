@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.master;
+package at.ac.uibk.dps.biohadoop.hadoop.master;
 
 import java.io.IOException;
 

@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.ga;
+package at.ac.uibk.dps.biohadoop.ga.algorithm;
 
 import java.util.ArrayList;
 import java.util.Collections;
