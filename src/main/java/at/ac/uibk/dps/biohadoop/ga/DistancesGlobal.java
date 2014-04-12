@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.torename;
+package at.ac.uibk.dps.biohadoop.ga;
 
 public class DistancesGlobal {
 

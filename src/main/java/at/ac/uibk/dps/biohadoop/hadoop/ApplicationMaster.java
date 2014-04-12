@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.hadoop.master;
+package at.ac.uibk.dps.biohadoop.hadoop;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,18 +28,29 @@ import org.apache.hadoop.yarn.util.Records;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.ga.DistancesGlobal;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.FileInput;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.Tsp;
 import at.ac.uibk.dps.biohadoop.server.UndertowServer;
-import at.ac.uibk.dps.biohadoop.torename.DistancesGlobal;
 import at.ac.uibk.dps.biohadoop.torename.Hostname;
+import at.ac.uibk.dps.biohadoop.torename.LaunchContainerRunnable;
 import at.ac.uibk.dps.biohadoop.torename.LocalResourceBuilder;
 
-public class Application {
+public class ApplicationMaster {
+	
+	private static Logger logger = LoggerFactory.getLogger(ApplicationMaster.class);
+	
+	public static void main(String[] args) throws Exception {
+		logger.info("############ Starting application master ##########");
+		logger.info("############ Starting application master ARGS: " + args);
+		
+		ApplicationMaster master = new ApplicationMaster();
+		master.run(args);
 
-	private static Logger logger = LoggerFactory.getLogger(Application.class);
-
+		logger.info("############ Stopping application master ##########");
+	}
+	
 	public void run(String[] args) {
 		UndertowServer loader = new UndertowServer();
 		try {
@@ -179,7 +190,7 @@ public class Application {
 				for (ContainerStatus status : response
 						.getCompletedContainersStatuses()) {
 					++completedContainers;
-					logger.info("Completed container " + completedContainers);
+					logger.info("Completed container {} with status {}", completedContainers, status);
 				}
 				Thread.sleep(100);
 			}

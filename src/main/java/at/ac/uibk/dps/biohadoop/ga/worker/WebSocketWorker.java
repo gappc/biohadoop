@@ -31,7 +31,7 @@ import at.ac.uibk.dps.biohadoop.websocket.MessageType;
 import at.ac.uibk.dps.biohadoop.websocket.WebSocketEncoder;
 
 @ClientEndpoint(encoders = WebSocketEncoder.class, decoders = MessageDecoder.class)
-public class WebSocketClient {
+public class WebSocketWorker {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(GaRestResource.class);
@@ -40,13 +40,16 @@ public class WebSocketClient {
 	private double[][] distances;
 	private long start = System.currentTimeMillis();
 	private int counter = 0;
-	
 	private ObjectMapper om = new ObjectMapper();
 
-	public WebSocketClient() {
+	public static void main(String[] args) throws Exception {
+		WebSocketWorker client = new WebSocketWorker(URI.create("ws://kleintroppl:30000/websocket/ga"));
+	}
+	
+	public WebSocketWorker() {
 	}
 
-	public WebSocketClient(URI uri) throws DeploymentException, IOException,
+	public WebSocketWorker(URI uri) throws DeploymentException, IOException,
 			InterruptedException, EncodeException {
 		WebSocketContainer container = ContainerProvider
 				.getWebSocketContainer();

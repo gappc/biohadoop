@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.hadoop.client;
+package at.ac.uibk.dps.biohadoop.torename;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

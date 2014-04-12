@@ -6,11 +6,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import at.ac.uibk.dps.biohadoop.ga.DistancesGlobal;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaResult;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaTask;
 import at.ac.uibk.dps.biohadoop.job.JobManager;
-import at.ac.uibk.dps.biohadoop.torename.DistancesGlobal;
 
 @Path("/ga")
 @Produces(MediaType.APPLICATION_JSON)

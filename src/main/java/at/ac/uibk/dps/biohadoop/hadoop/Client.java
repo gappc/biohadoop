@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.hadoop.client;
+package at.ac.uibk.dps.biohadoop.hadoop;
 
 import java.io.File;
 import java.util.Collections;
@@ -23,6 +23,7 @@ import org.apache.hadoop.yarn.util.Records;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.torename.ArgumentChecker;
 import at.ac.uibk.dps.biohadoop.torename.Hostname;
 import at.ac.uibk.dps.biohadoop.torename.LocalResourceBuilder;
 
