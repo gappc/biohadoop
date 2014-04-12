@@ -76,18 +76,18 @@ public class ResteasyHandler {
 		ResteasyDeployment deployment = new ResteasyDeployment();
 		deployment.getActualResourceClasses().addAll(resourceClasses);
 		deployment.getActualProviderClasses().addAll(providerClasses);
-		deployment.setInjectorFactoryClass(CdiInjectorFactory.class.getName());
+//		deployment.setInjectorFactoryClass(CdiInjectorFactory.class.getName());
 		return deployment;
 	}
 
 	private DeploymentInfo buildDeploymentInfo(ResteasyDeployment deployment,
 			String contextPath) {
 		logger.debug("Building Resteasy DeploymentInfo");
-		ListenerInfo listener = Servlets.listener(CDIListener.class);
+//		ListenerInfo listener = Servlets.listener(CDIListener.class);
 		ServletInfo resteasyServlet = buildResteasyServlet();
 
 		return new DeploymentInfo()
-				.addListener(listener)
+//				.addListener(listener)
 				.setContextPath(contextPath)
 				.addServletContextAttribute(ResteasyDeployment.class.getName(),
 						deployment).addServlet(resteasyServlet)
