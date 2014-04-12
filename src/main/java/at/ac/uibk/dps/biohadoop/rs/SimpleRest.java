@@ -7,7 +7,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import at.ac.uibk.dps.biohadoop.entity.Task;
+import at.ac.uibk.dps.biohadoop.entity.DeletableTask;
 import at.ac.uibk.dps.biohadoop.standalone.InjectionBean;
 
 @Path("/simple")
@@ -26,8 +26,8 @@ public class SimpleRest {
 //	}
 	
 	@GET
-	public Task getTask() {
-		Task task = new Task();
+	public DeletableTask getTask() {
+		DeletableTask task = new DeletableTask();
 		task.setId(counter > 0 ? counter-- : 0);
 		return task;
 	}

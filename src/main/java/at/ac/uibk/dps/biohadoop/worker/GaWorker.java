@@ -69,7 +69,7 @@ public class GaWorker {
 
 					task = response.readEntity(GaTask.class);
 
-					if (counter % 1e3 == 0) {
+					if (counter % 1e2 == 0) {
 						logger.info("response from ApplicationMaster: "
 								+ counter + " | took "
 								+ (System.currentTimeMillis() - start) + "ms");

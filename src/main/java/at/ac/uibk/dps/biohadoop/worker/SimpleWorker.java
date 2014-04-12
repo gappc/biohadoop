@@ -8,7 +8,7 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.entity.Task;
+import at.ac.uibk.dps.biohadoop.entity.DeletableTask;
 
 public class SimpleWorker {
 
@@ -41,7 +41,7 @@ public class SimpleWorker {
 				Response response = client.target(url)
 						.request(MediaType.APPLICATION_JSON).get();
 				try {
-					Task task = response.readEntity(Task.class);
+					DeletableTask task = response.readEntity(DeletableTask.class);
 					counter = task.getId();
 					logger.info("############# Simple Worker: response from ApplicationMaster: "
 							+ counter);

@@ -1,10 +1,33 @@
 package at.ac.uibk.dps.biohadoop.ga;
 
-public class GaResult {
+import at.ac.uibk.dps.biohadoop.job.Slotted;
+import at.ac.uibk.dps.biohadoop.job.Task;
 
+public class GaResult implements Task, Slotted {
+
+	private long id;
 	private int slot;
-	private double result;
+	private double result;	
 	
+	public GaResult() {}
+	
+	public GaResult(int slot, double result) {
+		super();
+		this.slot = slot;
+		this.result = result;
+	}
+
+	@Override
+	public long getId() {
+		return id;
+	}
+	
+	@Override
+	public void setId(long id) {
+		this.id = id;
+	}
+	
+	@Override
 	public int getSlot() {
 		return slot;
 	}

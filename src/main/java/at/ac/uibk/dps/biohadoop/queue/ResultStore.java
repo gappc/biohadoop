@@ -5,6 +5,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.job.Task;
+
 /**
  * Provides a size-limited storage for results. The results are stored at a
  * given index. After <i>size</i> storage operations, the observer is notified
@@ -14,31 +16,35 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public class ResultStore {
-	
-	private static final Logger logger = LoggerFactory.getLogger(ResultStore.class);
+
+	private static final Logger logger = LoggerFactory
+			.getLogger(ResultStore.class);
 
 	private int size = 0;
 	private AtomicInteger count = new AtomicInteger();
-	private Object[] results;
-	private Monitor monitor;
+	private Task[] results;
+	private Monitor monitor = new Monitor();
 
-	public ResultStore(int size, Monitor monitor) {
+	public ResultStore(int size) {
 		this.size = size;
-		this.monitor = monitor;
-		results = new Object[size];
+		results = new Task[size];
 	}
 
-	public Object[] getResults() {
-		return results;
+	public Task[] getResults() {
+		synchronized (results) {
+			return results;
+		}
 	}
 
-	public void store(int index, Object result) {
-		results[index] = result;
-		count.incrementAndGet();
-//		logger.debug("ResultStore size = " + count.intValue());
-		if (count.intValue() == size) {
-			wakeObserver();
-			count.set(0);
+	public synchronized void store(int index, Task result) {
+		synchronized (results) {
+			results[index] = result;
+			count.incrementAndGet();
+			logger.debug("ResultStore size = " + count.intValue());
+			if (count.intValue() == size) {
+				wakeObserver();
+				count.set(0);
+			}
 		}
 	}
 
@@ -50,13 +56,17 @@ public class ResultStore {
 		return count.intValue();
 	}
 
+	public Monitor getMonitor() {
+		return monitor;
+	}
+
 	public void wakeObserver() {
 		if (monitor != null) {
 			synchronized (monitor) {
-//				logger.debug("NOTIFY!!!");
+				logger.debug("NOTIFY!!!");
 				monitor.setWasSignalled(true);
-				monitor.notify();
-//				logger.debug("NOTIFIED!!!");
+				monitor.notifyAll();
+				logger.debug("NOTIFIED!!!");
 			}
 		}
 	}

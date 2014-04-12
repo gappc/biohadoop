@@ -4,25 +4,21 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.BlockingQueue;
 
-import at.ac.uibk.dps.biohadoop.queue.MessagingFactory;
+import com.jcraft.jsch.Logger;
+
+import at.ac.uibk.dps.biohadoop.job.JobManager;
+import at.ac.uibk.dps.biohadoop.job.Task;
 import at.ac.uibk.dps.biohadoop.queue.Monitor;
-import at.ac.uibk.dps.biohadoop.queue.ResultStore;
 
 public class Ga {
 
 	public static final String GA_WORK_QUEUE = "GA_WORK_QUEUE";
 	public static final String GA_RESULT_STORE = "GA_RESULT_STORE";
 
-	private Monitor monitor = new Monitor();
-	
 	private Random rand = new Random();
-	private BlockingQueue<Object> workQueue = MessagingFactory
-			.getWorkQueue(GA_WORK_QUEUE);
-	private ResultStore resultStore = MessagingFactory.getResultStore(
-			GA_RESULT_STORE, 20, monitor);
-
+	private JobManager jobManager = JobManager.getInstance();
+	private Monitor monitor = jobManager.getResultStoreMonitor(GA_RESULT_STORE);
 
 	public int[] ga(Tsp tsp, int genomeSize, int maxIterations)
 			throws InterruptedException {
@@ -58,14 +54,12 @@ public class Ga {
 			// evaluation
 			double[] values = new double[genomeSize * 2];
 			for (int i = 0; i < genomeSize; i++) {
-				GaTask gaTask = new GaTask(i, population[i]);
-				workQueue.put(gaTask);
-//				values[i] = fitness(tsp.getDistances(), population[i]);
+				GaTask task = new GaTask(i, population[i]);
+				jobManager.scheduleTask(GA_WORK_QUEUE, task);
 			}
 			for (int i = 0; i < genomeSize; i++) {
-				GaTask gaTask = new GaTask(i + genomeSize, population[i]);
-				workQueue.put(gaTask);
-//				values[i + genomeSize] = fitness(tsp.getDistances(), mutated[i]);
+				GaTask task = new GaTask(i + genomeSize, population[i]);
+				jobManager.scheduleTask(GA_WORK_QUEUE, task);
 			}
 
 			synchronized (monitor) {
@@ -77,12 +71,13 @@ public class Ga {
 
 			// System.out.println("Got all results for this round " + counter);
 
+			Task[] results = jobManager.readResult(GA_RESULT_STORE);
 			for (int i = 0; i < genomeSize; i++) {
-				values[i] = (double)resultStore.getResults()[i];
+				values[i] = (double) ((GaResult) results[i]).getResult();
 			}
 			for (int i = 0; i < genomeSize; i++) {
-				values[i + genomeSize] = (double)resultStore.getResults()[i
-						+ genomeSize];
+				values[i + genomeSize] = (double) ((GaResult) results[i
+						+ genomeSize]).getResult();
 			}
 
 			// selection
@@ -140,22 +135,16 @@ public class Ga {
 
 			@Override
 			public void run() {
-				System.out.println("STARTNG");
-
-				int i = 0;
-				GaResult gaResult = new GaResult();
-				gaResult.setSlot(-1);
-				gaResult.setResult(-1);
 				while (true) {
 					try {
-//						if (i % 1000 == 0) {
-//							System.out.println(i);
-//						}
-//						i++;
-						GaTask task = (GaTask) workQueue.take();
-						gaResult.setSlot(task.getSlot());
-						gaResult.setResult(fitness(distances, task.getGenome()));
-						resultStore.store(gaResult.getSlot(), gaResult.getResult());
+						GaTask task = (GaTask) jobManager
+								.getTaskForExecution(GA_WORK_QUEUE);
+
+						double fitness = fitness(distances, task.getGenome());
+						GaResult gaResult = new GaResult(task.getSlot(),
+								fitness);
+						gaResult.setId(task.getId());
+						jobManager.writeResult(GA_RESULT_STORE, gaResult);
 						Thread.sleep(1);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block

@@ -7,30 +7,37 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
-import at.ac.uibk.dps.biohadoop.torename.DistancesGlobal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@ServerEndpoint(value="/ga/register", encoders=WebSocketEncoder.class)
+import at.ac.uibk.dps.biohadoop.torename.DistancesGlobal;
+import at.ac.uibk.dps.biohadoop.websocket.registration.Registration;
+
+@ServerEndpoint(value = "/ga/register", encoders = WebSocketEncoder.class)
 public class WebSocketRegistration {
+
+	private static final Logger logger = LoggerFactory
+			.getLogger(WebSocketRegistration.class);
 
 	@OnOpen
 	public void open(Session session) {
-		System.out.println("Registration opened");
+		logger.info("WebSocket worker registration at URI {}, sessionId={}", session.getRequestURI(), session.getId());
 	}
 
 	@OnClose
 	public void onClose(Session session) {
-		System.out.println("Registration closed");
+		logger.info("WebSocket worker unregistered at URI {}, sessionId={}", session.getRequestURI(), session.getId());
 	}
 
 	@OnMessage
-	public double[][] onMessage(String message, Session session) {
-		System.out.println("Registration:" + message);
-		return DistancesGlobal.getDistances();
+	public Registration onMessage(String message, Session session) {
+		logger.debug("WebSocket worker message at URI {}, sessionId={}: {}", session.getRequestURI(), session.getId(), message);
+		Registration registration = new Registration(DistancesGlobal.getDistances());
+		return registration;
 	}
 
 	@OnError
 	public void onError(Session session, Throwable t) {
-		System.out.println("Registration error");
-		t.printStackTrace();
+		logger.error("WebSocket worker error at URI {}, sessionId={}", session.getRequestURI(), session.getId());
 	}
 }

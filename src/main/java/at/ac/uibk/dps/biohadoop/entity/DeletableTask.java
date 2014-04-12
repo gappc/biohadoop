@@ -1,6 +1,6 @@
 package at.ac.uibk.dps.biohadoop.entity;
 
-public class Task {
+public class DeletableTask {
 
 	private int id;
 

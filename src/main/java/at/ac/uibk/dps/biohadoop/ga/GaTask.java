@@ -1,7 +1,11 @@
 package at.ac.uibk.dps.biohadoop.ga;
 
-public class GaTask {
+import at.ac.uibk.dps.biohadoop.job.Slotted;
+import at.ac.uibk.dps.biohadoop.job.Task;
 
+public class GaTask implements Task, Slotted {
+
+	private long id;
 	private int slot;
 	private int[] genome;
 	
@@ -13,6 +17,17 @@ public class GaTask {
 		this.genome = genome;
 	}
 
+	@Override
+	public long getId() {
+		return id;
+	}
+	
+	@Override
+	public void setId(long id) {
+		this.id = id;
+	}
+	
+	@Override
 	public int getSlot() {
 		return slot;
 	}
@@ -29,4 +44,10 @@ public class GaTask {
 		this.genome = genome;
 	}
 	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("id=").append(id).append("|slot=").append(slot);
+		return sb.toString();
+	}
 }

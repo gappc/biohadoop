@@ -15,7 +15,7 @@
 	</root>
 
 	<logger name="at.ac.uibk.dps.biohadoop" additivity="false">
-		<level value="debug" />
+		<level value="info" />
 		<appender-ref ref="console" />
 	</logger>
 

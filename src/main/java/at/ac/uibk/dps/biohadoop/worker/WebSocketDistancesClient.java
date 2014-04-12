@@ -16,6 +16,7 @@ import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
 import at.ac.uibk.dps.biohadoop.websocket.WebSocketDistancesDecoder;
+import at.ac.uibk.dps.biohadoop.websocket.registration.Registration;
 
 @ClientEndpoint(decoders=WebSocketDistancesDecoder.class)
 public class WebSocketDistancesClient {
@@ -30,7 +31,6 @@ public class WebSocketDistancesClient {
 		WebSocketContainer container = ContainerProvider
 				.getWebSocketContainer();
 		Session session = container.connectToServer(this, uri);
-//		session.getBasicRemote().sendText("sdfsf");
 		latch.await();
 	}
 	
@@ -46,7 +46,7 @@ public class WebSocketDistancesClient {
     }
 	
 	@OnMessage
-	public void onMessage(double[][] message) throws DeploymentException, IOException, InterruptedException {
+	public void onMessage(Registration message) throws DeploymentException, IOException, InterruptedException {
 		System.out.println("Received Message: " + message);
 		System.out.println("RUNNING CLIENT");
 		WebSocketGaClient client = new WebSocketGaClient(URI.create("ws://kleintroppl:30000/websocket/ga"), message);

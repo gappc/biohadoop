@@ -5,19 +5,21 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import at.ac.uibk.dps.biohadoop.job.Task;
+
 /**
  * @author Christian Gapp
  * 
  */
 public class MessagingFactory {
 
-	private static Map<String, BlockingQueue<Object>> workQueues = new HashMap<String, BlockingQueue<Object>>();
+	private static Map<String, BlockingQueue<Task>> workQueues = new HashMap<String, BlockingQueue<Task>>();
 	private static Map<String, ResultStore> resultStores = new HashMap<String, ResultStore>();
 
-	public static BlockingQueue<Object> getWorkQueue(String name) {
-		BlockingQueue<Object> queue = workQueues.get(name);
+	public static synchronized BlockingQueue<Task> getWorkQueue(String name) {
+		BlockingQueue<Task> queue = workQueues.get(name);
 		if (queue == null) {
-			queue = new LinkedBlockingQueue<Object>();
+			queue = new LinkedBlockingQueue<Task>();
 			workQueues.put(name, queue);
 		}
 		return queue;
@@ -30,11 +32,10 @@ public class MessagingFactory {
 	 * @param size
 	 * @return
 	 */
-	public static ResultStore getResultStore(String name, int size,
-			Monitor monitor) {
+	public static synchronized ResultStore getResultStore(String name, int size) {
 		ResultStore store = resultStores.get(name);
 		if (store == null) {
-			store = new ResultStore(size, monitor);
+			store = new ResultStore(size);
 			resultStores.put(name, store);
 		}
 		return store;
@@ -47,10 +48,11 @@ public class MessagingFactory {
 	 * @param name
 	 * @return
 	 */
-	public static ResultStore getResultStore(String name) {
+	public static synchronized ResultStore getResultStore(String name) {
 		ResultStore store = resultStores.get(name);
 		if (store == null) {
-			throw new RuntimeException("ResultStore with name " + name + " could not be found");
+			throw new RuntimeException("ResultStore with name " + name
+					+ " could not be found");
 		}
 		return store;
 	}
