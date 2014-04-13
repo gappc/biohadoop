@@ -48,7 +48,6 @@ public class TaskSupervisor implements Runnable, WorkObserver {
 				}
 
 				LOGGER.info("Hanging jobs: " + count);
-				LOGGER.info("-------------------------------");
 				Thread.sleep(sleep);
 			}
 		} catch (Exception e) {
