@@ -27,9 +27,18 @@ import at.ac.uibk.dps.biohadoop.ga.master.GaWebSocketResource;
  */
 public class WebSocketHandler {
 
-	private static Logger logger = LoggerFactory
+	private static final Logger LOGGER = LoggerFactory
 			.getLogger(WebSocketHandler.class);
 
+	private XnioWorker xnioWorker;
+	
+	/**
+	 * Needs to be performed manually, else Undertow won't shut down
+	 */
+	public void stop() {
+		xnioWorker.shutdown();
+	}
+	
 	/**
 	 * Construct and get an Undertow handler for Resteasy
 	 * 
@@ -55,16 +64,17 @@ public class WebSocketHandler {
 
 		return deploymentManager.start();
 	}
-
+	
 	private DeploymentInfo buildDeploymentInfo(String contextPath)
 			throws IllegalArgumentException, IOException {
-		logger.debug("Building WebSocket DeploymentInfo");
+		LOGGER.debug("Building WebSocket DeploymentInfo");
 		final Xnio xnio = Xnio.getInstance("nio",
 				Undertow.class.getClassLoader());
-		final XnioWorker xnioWorker = xnio.createWorker(OptionMap.builder()
+		xnioWorker = xnio.createWorker(OptionMap.builder()
 				.getMap());
 		final WebSocketDeploymentInfo webSockets = new WebSocketDeploymentInfo()
-				.addEndpoint(GaWebSocketResource.class).setWorker(xnioWorker);
+				.addEndpoint(GaWebSocketResource.class)
+				.setWorker(xnioWorker);
 
 		return new DeploymentInfo()
 				.setClassLoader(Thread.currentThread().getContextClassLoader())

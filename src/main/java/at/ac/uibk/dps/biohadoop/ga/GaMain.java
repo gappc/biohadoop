@@ -5,27 +5,35 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import at.ac.uibk.dps.biohadoop.ga.algorithm.FileInput;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.Tsp;
 
 public class GaMain {
 
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(GaMain.class);
+	
+	private GaMain() {
+	}
+	
 	public static void main(String[] args) {
 		FileInput fileInput = new FileInput();
 		try {
 			Tsp tsp = fileInput.readFile("/sdb/studium/master-thesis/code/git/masterthesis/data/att48.tsp");
-			System.out.println(tsp.toString());
+			DistancesGlobal.setDistances(tsp.getDistances());
+			LOGGER.info(tsp.toString());
 			Ga ga = new Ga();
-			int[] path = ga.ga(tsp, 10, 1000000);
+			int[] path = ga.ga(tsp, 10, 10000);
 			
 			checkPathValid(path);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("Exception while running GaMain", e);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("Exception while running GaMain", e);
 		}
 	}
 	
@@ -40,12 +48,12 @@ public class GaMain {
 		
 		for (int i = 0; i < path.length; i++) {
 			if (res.get(i) != i) {
-				System.out.println("!!!! PATH NOT VALID !!!!");
+				LOGGER.error("!!!! PATH NOT VALID !!!!");
 				return;
 			}
 		}
 		
-		System.out.println("Path is valid");
+		LOGGER.info("Path is valid");
 		
 	}
 }

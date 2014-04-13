@@ -39,24 +39,24 @@ import at.ac.uibk.dps.biohadoop.torename.LocalResourceBuilder;
 
 public class ApplicationMaster {
 	
-	private static Logger logger = LoggerFactory.getLogger(ApplicationMaster.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationMaster.class);
 	
 	public static void main(String[] args) throws Exception {
-		logger.info("############ Starting application master ##########");
-		logger.info("############ Starting application master ARGS: " + args);
+		LOGGER.info("############ Starting application master ##########");
+		LOGGER.info("############ Starting application master ARGS: " + args);
 		
 		ApplicationMaster master = new ApplicationMaster();
 		master.run(args);
 
-		logger.info("############ Stopping application master ##########");
+		LOGGER.info("############ Stopping application master ##########");
 	}
 	
 	public void run(String[] args) {
-		UndertowServer loader = new UndertowServer();
+		UndertowServer server = new UndertowServer();
 		try {
-			loader.startServer();
+			server.startServer();
 		} catch (IllegalArgumentException | IOException | ServletException e) {
-			logger.error("Could not start server", e);
+			LOGGER.error("Could not start server", e);
 		}
 
 		if (args.length >= 1 && ("local").equals(args[0])) {
@@ -67,28 +67,27 @@ public class ApplicationMaster {
 				DistancesGlobal.setDistances(tsp.getDistances());
 				Ga ga = new Ga();
 				ga.ga(tsp, 10, 100000);
-				Thread.sleep(3000000);
 			} catch (InterruptedException e) {
-				logger.info("Exception while sleep", e);
+				LOGGER.info("Exception while sleep", e);
 			} catch (IOException e) {
-				logger.info("Exception while reading file", e);
+				LOGGER.info("Exception while reading file", e);
 			}
 		} else {
 			try {
 				startWorker(args);
-				loader.stopServer();
 			} catch (Exception e) {
-				logger.info("Exception while starting worker", e);
+				LOGGER.info("Exception while starting worker", e);
 			}
 		}
+		server.stopServer();
 	}
 
 	private void startWorker(String[] args) throws Exception {
 		final String command = args[0];
 		final int n = Integer.valueOf(args[1]);
 
-		logger.info("#### COMMAND: " + command);
-		logger.info("#### NUMBER OF HOSTS: " + n);
+		LOGGER.info("#### COMMAND: " + command);
+		LOGGER.info("#### NUMBER OF HOSTS: " + n);
 
 		// Initialize clients to ResourceManager and NodeManagers
 		Configuration conf = new YarnConfiguration();
@@ -102,9 +101,9 @@ public class ApplicationMaster {
 		nmClient.start();
 
 		// Register with ResourceManager
-		logger.info("registerApplicationMaster 0");
+		LOGGER.info("registerApplicationMaster 0");
 		rmClient.registerApplicationMaster("", 0, "");
-		logger.info("registerApplicationMaster 1");
+		LOGGER.info("registerApplicationMaster 1");
 
 		// Priority for worker containers - priorities are intra-application
 		Priority priority = Records.newRecord(Priority.class);
@@ -115,22 +114,22 @@ public class ApplicationMaster {
 		capability.setMemory(128);
 		capability.setVirtualCores(1);
 
-		logger.info("Make container requests to ResourceManager");
+		LOGGER.info("Make container requests to ResourceManager");
 		for (int i = 0; i < n; ++i) {
 			ContainerRequest containerAsk = new ContainerRequest(capability,
 					null, null, priority);
-			logger.info("Making res-req " + i);
+			LOGGER.info("Making res-req " + i);
 			rmClient.addContainerRequest(containerAsk);
 		}
 
-		logger.info("Obtain allocated containers and launch");
+		LOGGER.info("Obtain allocated containers and launch");
 		int allocatedContainers = 0;
 		while (allocatedContainers < n) {
 			AllocateResponse response = rmClient.allocate(0.1f);
 			for (Container container : response.getAllocatedContainers()) {
 				++allocatedContainers;
 
-				logger.info("Launching shell command on a new container."
+				LOGGER.info("Launching shell command on a new container."
 						+ ", containerId=" + container.getId()
 						+ ", containerNode=" + container.getNodeId().getHost()
 						+ ":" + container.getNodeId().getPort()
@@ -152,7 +151,7 @@ public class ApplicationMaster {
 						+ "/stdout" + " 2>"
 						+ ApplicationConstants.LOG_DIR_EXPANSION_VAR
 						+ "/stderr";
-				logger.info("!!!Client command: " + clientCommand);
+				LOGGER.info("!!!Client command: " + clientCommand);
 				ctx.setCommands(Collections.singletonList(clientCommand));
 
 				String libPath = "hdfs://master:54310/biohadoop/lib/";
@@ -165,7 +164,7 @@ public class ApplicationMaster {
 				setupAppMasterEnv(appMasterEnv, conf);
 				ctx.setEnvironment(appMasterEnv);
 
-				logger.info("Launching container " + allocatedContainers);
+				LOGGER.info("Launching container " + allocatedContainers);
 
 				// Launch and start the container on a separate thread to keep
 				// the main
@@ -180,26 +179,23 @@ public class ApplicationMaster {
 		}
 
 		try {
-			logger.info("Waiting for " + n + " containers to complete");
+			LOGGER.info("Waiting for " + n + " containers to complete");
 			int completedContainers = 0;
 			while (completedContainers < n) {
-				// AllocateResponse response =
-				// rmClient.allocate(completedContainers
-				// / n);
 				AllocateResponse response = rmClient.allocate(0.2f);
 				for (ContainerStatus status : response
 						.getCompletedContainersStatuses()) {
 					++completedContainers;
-					logger.info("Completed container {} with status {}", completedContainers, status);
+					LOGGER.info("Completed container {} with status {}", completedContainers, status);
 				}
 				Thread.sleep(100);
 			}
 
-			logger.info("All containers completed, unregister with ResourceManager");
+			LOGGER.info("All containers completed, unregister with ResourceManager");
 			rmClient.unregisterApplicationMaster(
 					FinalApplicationStatus.SUCCEEDED, "", "");
 		} catch (Exception e) {
-			logger.error("******** Application error ***********", e);
+			LOGGER.error("******** Application error ***********", e);
 		}
 	}
 

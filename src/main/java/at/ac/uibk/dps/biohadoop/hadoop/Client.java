@@ -29,10 +29,10 @@ import at.ac.uibk.dps.biohadoop.torename.LocalResourceBuilder;
 
 public class Client {
 
-	private static Logger logger = LoggerFactory.getLogger(Client.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Client.class);
 
 	public static void main(String[] args) throws Exception {
-		logger.info("BIOHADOOP started at " + Hostname.getHostname());
+		LOGGER.info("BIOHADOOP started at " + Hostname.getHostname());
 		long start = System.currentTimeMillis();
 		
 		if (ArgumentChecker.checkArgs(args)) {
@@ -41,11 +41,11 @@ public class Client {
 		}
 		
 		long end = System.currentTimeMillis();
-		logger.info("Time: " + (end - start) + "ms");
+		LOGGER.info("Time: " + (end - start) + "ms");
 	}
 
 	public void run(String[] args) throws Exception {
-		logger.info("############ Starting client ############");
+		LOGGER.info("############ Starting client ############");
 
 		final String algorithm = args[0];
 		final String containerCount = args[1];
@@ -95,14 +95,14 @@ public class Client {
 
 		// Submit application
 		ApplicationId appId = appContext.getApplicationId();
-		logger.info("Submitting application " + appId);
+		LOGGER.info("Submitting application " + appId);
 		yarnClient.submitApplication(appContext);
 
 		ApplicationReport appReport = yarnClient.getApplicationReport(appId);
 		YarnApplicationState appState = appReport.getYarnApplicationState();
 		
-		logger.info("Tracking URL: " + appReport.getTrackingUrl());
-		logger.info("Application Master running at: " + appReport.getHost());
+		LOGGER.info("Tracking URL: " + appReport.getTrackingUrl());
+		LOGGER.info("Application Master running at: " + appReport.getHost());
 		
 		while (appState != YarnApplicationState.FINISHED
 				&& appState != YarnApplicationState.KILLED
@@ -110,10 +110,10 @@ public class Client {
 			Thread.sleep(100);
 			appReport = yarnClient.getApplicationReport(appId);
 			appState = appReport.getYarnApplicationState();
-			logger.info("Progress: " + appReport.getProgress());
+			LOGGER.info("Progress: " + appReport.getProgress());
 		}
 		
-		logger.info("Application " + appId + " finished with"
+		LOGGER.info("Application " + appId + " finished with"
 				+ " state " + appState + " at " + appReport.getFinishTime());
 	}
 

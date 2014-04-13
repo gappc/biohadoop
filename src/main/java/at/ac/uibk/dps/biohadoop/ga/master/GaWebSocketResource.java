@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ServerEndpoint(value = "/ga", encoders = WebSocketEncoder.class, decoders = MessageDecoder.class)
 public class GaWebSocketResource {
 
-	private static final Logger logger = LoggerFactory
+	private static final Logger LOGGER = LoggerFactory
 			.getLogger(GaWebSocketResource.class);
 
 	private JobManager jobManager = JobManager.getInstance();
@@ -34,20 +34,20 @@ public class GaWebSocketResource {
 
 	@OnOpen
 	public void open(Session session) {
-		logger.info("Opened Websocket connection to URI {}, sessionId={}",
+		LOGGER.info("Opened Websocket connection to URI {}, sessionId={}",
 				session.getRequestURI(), session.getId());
 	}
 
 	@OnClose
 	public void onClose(Session session) {
-		logger.info("Closed Websocket connection to URI {}, sessionId={}",
+		LOGGER.info("Closed Websocket connection to URI {}, sessionId={}",
 				session.getRequestURI(), session.getId());
 	}
 
 	@OnMessage
 	public Message onMessage(Message message, Session session)
 			throws InterruptedException {
-		logger.debug("WebSocket message for URI {} and sessionId {}: {}",
+		LOGGER.debug("WebSocket message for URI {} and sessionId {}: {}",
 				session.getRequestURI(), session.getId(), message);
 
 		if (message.getType() == MessageType.REGISTRATION_REQUEST) {
@@ -70,45 +70,16 @@ public class GaWebSocketResource {
 
 		throw new RuntimeException(
 				"Could not identify Websocket worker request");
-
-		// if (message.getSlot() != -1) {
-		// jobManager.writeResult(Ga.GA_RESULT_STORE, message);
-		// }
-		// currentTask = (Task)
-		// jobManager.getTaskForExecution(Ga.GA_WORK_QUEUE);
-		// return (GaTask) currentTask;
 	}
-
-	/*
-	 * Example for Simple message passing, using JSON measured: about 150ms for
-	 * 1000 calls from WebSocketGaClient
-	 */
-	// @OnMessage
-	// public GaTask onMessage(GaResult result, Session session)
-	// throws InterruptedException {
-	// GaTask task = new GaTask();
-	// task.setGenome(new int[2]);
-	// task.setSlot(0);
-	// return task;
-	// }
-
-	/*
-	 * Example for Simple message passing, using JSON measured: about 80ms -
-	 * 100ms for 1000 calls from WebSocketGaClient
-	 */
-	// @OnMessage
-	// public String onMessage(String result, Session session)
-	// throws InterruptedException {
-	// return res;
-	// }
 
 	@OnError
 	public void onError(Session session, Throwable t)
 			throws InterruptedException {
-		logger.error(
+		LOGGER.error(
 				"Websocket error for URI {} and sessionId {}, affected task: {} ",
 				session.getRequestURI(), session.getId(), currentTask, t);
 		jobManager.reScheduleTask(Ga.GA_WORK_QUEUE, currentTask);
-		t.printStackTrace();
+		LOGGER.error("GaWebSocketResource error for URI {}, sessionId={}",
+				session.getRequestURI(), session.getId(), t);
 	}
 }

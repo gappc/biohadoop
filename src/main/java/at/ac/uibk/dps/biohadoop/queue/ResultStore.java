@@ -17,7 +17,7 @@ import at.ac.uibk.dps.biohadoop.job.Task;
  */
 public class ResultStore {
 
-	private static final Logger logger = LoggerFactory
+	private static final Logger LOGGER = LoggerFactory
 			.getLogger(ResultStore.class);
 
 	private int size = 0;
@@ -40,7 +40,7 @@ public class ResultStore {
 		synchronized (results) {
 			results[index] = result;
 			count.incrementAndGet();
-			logger.debug("ResultStore size = " + count.intValue());
+			LOGGER.debug("ResultStore size = " + count.intValue());
 			if (count.intValue() == size) {
 				wakeObserver();
 				count.set(0);
@@ -63,10 +63,10 @@ public class ResultStore {
 	public void wakeObserver() {
 		if (monitor != null) {
 			synchronized (monitor) {
-				logger.debug("NOTIFY!!!");
+				LOGGER.debug("NOTIFY!!!");
 				monitor.setWasSignalled(true);
 				monitor.notifyAll();
-				logger.debug("NOTIFIED!!!");
+				LOGGER.debug("NOTIFIED!!!");
 			}
 		}
 	}

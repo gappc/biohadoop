@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ResteasyHandler {
 
-	private static Logger logger = LoggerFactory
+	private static final Logger LOGGER = LoggerFactory
 			.getLogger(ResteasyHandler.class);
 
 	/**
@@ -68,22 +68,19 @@ public class ResteasyHandler {
 
 	private ResteasyDeployment buildDeployment(List<Class<?>> resourceClasses,
 			List<Class<?>> providerClasses) {
-		logger.debug("Building Resteasy Deployment");
+		LOGGER.debug("Building Resteasy Deployment");
 		ResteasyDeployment deployment = new ResteasyDeployment();
 		deployment.getActualResourceClasses().addAll(resourceClasses);
 		deployment.getActualProviderClasses().addAll(providerClasses);
-//		deployment.setInjectorFactoryClass(CdiInjectorFactory.class.getName());
 		return deployment;
 	}
 
 	private DeploymentInfo buildDeploymentInfo(ResteasyDeployment deployment,
 			String contextPath) {
-		logger.debug("Building Resteasy DeploymentInfo");
-//		ListenerInfo listener = Servlets.listener(CDIListener.class);
+		LOGGER.debug("Building Resteasy DeploymentInfo");
 		ServletInfo resteasyServlet = buildResteasyServlet();
 
 		return new DeploymentInfo()
-//				.addListener(listener)
 				.setContextPath(contextPath)
 				.addServletContextAttribute(ResteasyDeployment.class.getName(),
 						deployment).addServlet(resteasyServlet)
@@ -92,7 +89,7 @@ public class ResteasyHandler {
 	}
 
 	private ServletInfo buildResteasyServlet() {
-		logger.debug("Configuring Resteasy servlet");
+		LOGGER.debug("Configuring Resteasy servlet");
 		return servlet("ResteasyServlet", HttpServlet30Dispatcher.class)
 				.setAsyncSupported(true).setLoadOnStartup(1).addMapping("/");
 	}

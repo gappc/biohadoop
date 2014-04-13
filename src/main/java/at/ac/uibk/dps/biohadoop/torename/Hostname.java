@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class Hostname {
+	
+	private Hostname() {
+	}
 
 	public static String getHostname() throws IOException {
 		Process process = Runtime.getRuntime().exec("hostname");

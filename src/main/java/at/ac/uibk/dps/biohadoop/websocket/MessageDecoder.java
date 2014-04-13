@@ -6,39 +6,32 @@ import javax.websocket.DecodeException;
 import javax.websocket.Decoder;
 import javax.websocket.EndpointConfig;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class MessageDecoder implements Decoder.Text<Message> {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(MessageDecoder.class);
 	private ObjectMapper om = new ObjectMapper();
-	
+
 	@Override
 	public void init(EndpointConfig config) {
-		// TODO Auto-generated method stub
-		
+		LOGGER.debug("MessageDecoder init");
 	}
 
 	@Override
 	public void destroy() {
-		// TODO Auto-generated method stub
-		
+		LOGGER.debug("MessageDecoder destroy");
 	}
 
 	@Override
 	public Message decode(String s) throws DecodeException {
 		try {
 			return om.readValue(s, Message.class);
-		} catch (JsonParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("Error while Json decoding", e);
 		}
 		return null;
 	}

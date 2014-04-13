@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 public class LaunchContainerRunnable implements Runnable {
 
-	private static Logger logger = LoggerFactory
+	private static final Logger LOGGER = LoggerFactory
 			.getLogger(LaunchContainerRunnable.class);
 
 	private NMClient nmClient;
@@ -30,9 +30,9 @@ public class LaunchContainerRunnable implements Runnable {
 		try {
 			nmClient.startContainer(container, ctx);
 		} catch (YarnException e) {
-			logger.error("Error while starting container {}", container.getId(), e);
+			LOGGER.error("Error while starting container {}", container.getId(), e);
 		} catch (IOException e) {
-			logger.error("Error while starting container {}", container.getId(), e);
+			LOGGER.error("Error while starting container {}", container.getId(), e);
 		}
 	}
 

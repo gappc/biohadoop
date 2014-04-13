@@ -5,8 +5,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import com.jcraft.jsch.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.ga.worker.LocalGaWorker;
 import at.ac.uibk.dps.biohadoop.job.JobManager;
 import at.ac.uibk.dps.biohadoop.job.Task;
 import at.ac.uibk.dps.biohadoop.queue.Monitor;
@@ -16,13 +18,15 @@ public class Ga {
 	public static final String GA_WORK_QUEUE = "GA_WORK_QUEUE";
 	public static final String GA_RESULT_STORE = "GA_RESULT_STORE";
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(Ga.class);
+	
 	private Random rand = new Random();
 	private JobManager jobManager = JobManager.getInstance();
 	private Monitor monitor = jobManager.getResultStoreMonitor(GA_RESULT_STORE);
 
 	public int[] ga(Tsp tsp, int genomeSize, int maxIterations)
 			throws InterruptedException {
-		runLocalWorker(tsp.getDistances());
+		new Thread(new LocalGaWorker()).start();
 
 		int citySize = tsp.getCities().length;
 
@@ -68,8 +72,6 @@ public class Ga {
 				}
 				monitor.setWasSignalled(false);
 			}
-
-			// System.out.println("Got all results for this round " + counter);
 
 			Task[] results = jobManager.readResult(GA_RESULT_STORE);
 			for (int i = 0; i < genomeSize; i++) {
@@ -119,41 +121,16 @@ public class Ga {
 			}
 
 			if (counter % 1e3 == 0 || counter < 10) {
-				// System.out.println(counter + " " + values[0]);
-				System.out.println("counter: " + counter + " | took "
+				LOGGER.info("counter: " + counter + " | took "
 						+ (System.currentTimeMillis() - start) + "ms");
 				start = System.currentTimeMillis();
 				printGenome(tsp.getDistances(), population[0], citySize);
 			}
 		}
+		
+		jobManager.stopAllWorkers();
 
 		return population[0];
-	}
-
-	private void runLocalWorker(final double[][] distances) {
-		Thread thread = new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				while (true) {
-					try {
-						GaTask task = (GaTask) jobManager
-								.getTaskForExecution(GA_WORK_QUEUE);
-
-						double fitness = fitness(distances, task.getGenome());
-						GaResult gaResult = new GaResult(task.getSlot(),
-								fitness);
-						gaResult.setId(task.getId());
-						jobManager.writeResult(GA_RESULT_STORE, gaResult);
-						Thread.sleep(1);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}
-		});
-		thread.start();
 	}
 
 	private int[][] initPopulation(int genomeSize, int citieSize) {
@@ -212,23 +189,12 @@ public class Ga {
 		return ds;
 	}
 
-	private double fitness(double[][] distances, int[] ds) {
-		double pathLength = 0.0;
-		for (int i = 0; i < ds.length - 1; i++) {
-			pathLength += distances[ds[i]][ds[i + 1]];
-		}
-
-		pathLength += distances[ds[ds.length - 1]][ds[0]];
-
-		return pathLength;
-	}
-
 	private void printGenome(double[][] distances, int[] solution, int citySize) {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < citySize; i++) {
 			sb.append(solution[i] + " | ");
 		}
-		System.out.println("fitness: " + fitness(distances, solution) + " | "
+		LOGGER.info("fitness: " + GaFitness.computeFitness(distances, solution) + " | "
 				+ sb.toString());
 	}
 

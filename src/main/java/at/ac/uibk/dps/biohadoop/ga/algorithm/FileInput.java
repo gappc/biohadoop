@@ -8,7 +8,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class FileInput {
+
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(FileInput.class);
 
 	public Tsp readFile(String pathname) throws IOException {
 		Path path = Paths.get(pathname);
@@ -23,7 +29,7 @@ public class FileInput {
 				city[1] = Double.parseDouble(tokens[2]);
 				citiesList.add(city);
 			} catch (Exception e) {
-				System.out.println("Line contains not a valid city: " + line);
+				LOGGER.error("Line contains not a valid city: {}", line, e);
 			}
 		}
 
@@ -33,7 +39,7 @@ public class FileInput {
 		Tsp tsp = new Tsp();
 		tsp.setCities(cities);
 		tsp.setDistances(distances);
-		
+
 		return tsp;
 	}
 
@@ -43,15 +49,17 @@ public class FileInput {
 
 	private double[][] getDistances(double[][] cities) {
 		double[][] distances = new double[cities.length][cities.length];
-		
+
 		for (int i = 0; i < cities.length; i++) {
 			for (int j = i; j < cities.length; j++) {
-				double distance = Math.sqrt(Math.pow(cities[i][0] - cities[j][0], 2) + Math.pow(cities[i][1] - cities[j][1], 2));
+				double distance = Math.sqrt(Math.pow(cities[i][0]
+						- cities[j][0], 2)
+						+ Math.pow(cities[i][1] - cities[j][1], 2));
 				distances[i][j] = distance;
 				distances[j][i] = distance;
 			}
 		}
-		
+
 		return distances;
 	}
 }

@@ -16,6 +16,9 @@ public class MessagingFactory {
 	private static Map<String, BlockingQueue<Task>> workQueues = new HashMap<String, BlockingQueue<Task>>();
 	private static Map<String, ResultStore> resultStores = new HashMap<String, ResultStore>();
 
+	private MessagingFactory() {
+	}
+
 	public static synchronized BlockingQueue<Task> getWorkQueue(String name) {
 		BlockingQueue<Task> queue = workQueues.get(name);
 		if (queue == null) {

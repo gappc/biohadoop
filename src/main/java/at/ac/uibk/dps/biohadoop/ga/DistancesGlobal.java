@@ -4,6 +4,9 @@ public class DistancesGlobal {
 
 	private static double[][] distances;
 	
+	private DistancesGlobal() {
+	}
+	
 	public static void setDistances(double[][] distances) {
 		DistancesGlobal.distances = distances;
 	}

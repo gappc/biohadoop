@@ -1,6 +1,7 @@
 package at.ac.uibk.dps.biohadoop.job;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -17,10 +18,9 @@ import at.ac.uibk.dps.biohadoop.queue.ResultStore;
 public class JobManager {
 
 	private Monitor jobMonitor = new Monitor();
-	private List<String> errors = new ArrayList<String>();
 	private Random rand = new Random();
 
-	private static final Logger logger = LoggerFactory
+	private static final Logger LOGGER = LoggerFactory
 			.getLogger(JobManager.class);
 
 	private static int storeSize = 20;
@@ -29,9 +29,10 @@ public class JobManager {
 	private static Map<String, BlockingQueue<Task>> queues = new ConcurrentHashMap<String, BlockingQueue<Task>>();
 	private static Map<Long, Job> tasks = new ConcurrentHashMap<Long, Job>();
 	private static Map<String, ResultStore> resultStores = new ConcurrentHashMap<String, ResultStore>();
+	private static List<WorkObserver> workObservers = new ArrayList<WorkObserver>();
 
 	private JobManager() {
-		checkFuckedUp();
+		new Thread(new TaskSupervisor(1000)).start();
 	}
 
 	public static JobManager getInstance() {
@@ -56,37 +57,39 @@ public class JobManager {
 			throws InterruptedException {
 		task.setId(rand.nextLong());
 		Job job = new Job(task, TaskState.NEW);
-		
-		if (((ConcurrentHashMap<Long, Job>)tasks).putIfAbsent(task.getId(), job) != null) {
-			synchronized (errors) {
-				errors.add("PUTTING FUCK");
-			}
+
+		if (((ConcurrentHashMap<Long, Job>) tasks).putIfAbsent(task.getId(),
+				job) != null) {
+			LOGGER.error("PUTTING FUCK");
 		}
 
 		getQueue(queueName).put(task);
-		logger.debug("Task {} {}", task.getId(), TaskState.NEW);
+		LOGGER.debug("Task {} {}", task.getId(), TaskState.NEW);
 	}
-	
-	public void reScheduleTask(String queueName, Task task) throws InterruptedException {
+
+	public void reScheduleTask(String queueName, Task task)
+			throws InterruptedException {
 		Job job = tasks.get(task.getId());
 		TaskState state = job.getTaskState();
 		if (state == TaskState.RUNNING) {
-			logger.info("Rescheduling task: {}", task);
+			LOGGER.info("Rescheduling task: {}", task);
 			job.setTaskState(TaskState.NEW);
 			getQueue(queueName).put(task);
-		}
-		else {
-			logger.error("Rescheduling of task {} not possible, because it is state {}", task, state);
+		} else {
+			LOGGER.error(
+					"Rescheduling of task {} not possible, because it is state {}",
+					task, state);
 		}
 	}
 
-	public Task getTaskForExecution(String queueName) throws InterruptedException {
+	public Task getTaskForExecution(String queueName)
+			throws InterruptedException {
 		Task task = getQueue(queueName).take();
 
 		Job job = tasks.get(task.getId());
 		job.setTaskState(TaskState.RUNNING);
 
-		logger.debug("Task {} {}", task.getId(), TaskState.RUNNING);
+		LOGGER.debug("Task {} {}", task.getId(), TaskState.RUNNING);
 		return task;
 	}
 
@@ -102,13 +105,12 @@ public class JobManager {
 			Job job = tasks.get(result.getId());
 			job.setTaskState(TaskState.FINISHED);
 		}
-		logger.debug("Task {} {}", result.getId(), TaskState.FINISHED);
+		LOGGER.debug("Task {} {}", result.getId(), TaskState.FINISHED);
 	}
 
 	public Task[] readResult(String resultStoreName) {
 		synchronized (jobMonitor) {
 			ResultStore resultStore = getResultStore(resultStoreName);
-//			logger.info("Stored {}", tasks.size());
 			for (Task t : resultStore.getResults()) {
 				tasks.remove(t.getId());
 			}
@@ -116,54 +118,44 @@ public class JobManager {
 		}
 	}
 
-	public void checkFuckedUp() {
-		new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					int sleep = 1000;
-					while (true) {
-						int count = 0;
-						Long now = System.currentTimeMillis();
-						for (Long l : tasks.keySet()) {
-							Job job = tasks.get(l);
-							if (job != null) {
-								if (now - job.getCreated() > sleep) {
-									logger.error("Job {} fucked up!!! {}", job
-											.getTask().getId(), job
-											.getTaskState());
-									count++;
-								}
-							}
-						}
-
-						try {
-							System.out.println("FUCKUP COUNT: " + count);
-							synchronized (errors) {
-								for (String s : errors) {
-									System.out.println(s);
-								}
-							}
-							System.out
-									.println("-------------------------------");
-							Thread.sleep(sleep);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-				} catch (Exception e) {
-					synchronized (errors) {
-						errors.add("#######'FUCKUP Thread - fuck you");
-					}
-				}
-			}
-		}).start();
-	}
-
 	public Monitor getResultStoreMonitor(String resultStoreName) {
 		ResultStore resultStore = getResultStore(resultStoreName);
 		return resultStore.getMonitor();
+	}
+
+	public void addObserver(WorkObserver observer) {
+		LOGGER.info("Registering WorkObserver {}", observer);
+		boolean observerRegistered = workObservers.contains(observer);
+		if (!observerRegistered) {
+			workObservers.add(observer);
+			LOGGER.info("WorkObserver {} registered", observer);
+		} else {
+			LOGGER.warn("WorkObserver {} was already registered", observer);
+		}
+	}
+
+	public boolean removeObserver(WorkObserver observer) {
+		LOGGER.info("Removing WorkObserver {}", observer);
+		boolean observerRegistered = workObservers.remove(observer);
+		if (observerRegistered) {
+			LOGGER.info("WorkObserver {} unregistered", observer);
+		} else {
+			LOGGER.warn("WorkObserver {} was not registered", observer);
+		}
+		return observerRegistered;
+	}
+
+	public void stopAllWorkers() throws InterruptedException {
+		for (WorkObserver observer : workObservers) {
+			for (String queueName : queues.keySet()) {
+				scheduleTask(queueName, new EmptyTask());
+			}
+			observer.stop();
+		}
+	}
+
+	public Map<Long, Job> getTasks() {
+		return Collections.unmodifiableMap(tasks);
 	}
 
 	private BlockingQueue<Task> getQueue(String queueName) {
@@ -184,5 +176,4 @@ public class JobManager {
 		}
 		return resultStore;
 	}
-
 }

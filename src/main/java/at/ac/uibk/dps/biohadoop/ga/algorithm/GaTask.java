@@ -8,9 +8,10 @@ public class GaTask implements Task, Slotted {
 	private long id;
 	private int slot;
 	private int[] genome;
-	
-	public GaTask(){}
-	
+
+	public GaTask() {
+	}
+
 	public GaTask(int slot, int[] genome) {
 		super();
 		this.slot = slot;
@@ -21,12 +22,12 @@ public class GaTask implements Task, Slotted {
 	public long getId() {
 		return id;
 	}
-	
+
 	@Override
 	public void setId(long id) {
 		this.id = id;
 	}
-	
+
 	@Override
 	public int getSlot() {
 		return slot;
@@ -43,7 +44,7 @@ public class GaTask implements Task, Slotted {
 	public void setGenome(int[] genome) {
 		this.genome = genome;
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

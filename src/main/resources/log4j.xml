@@ -14,9 +14,9 @@
 		<appender-ref ref="console" />
 	</root>
 
-	<logger name="at.ac.uibk.dps.biohadoop" additivity="false">
+<!-- 	<logger name="at.ac.uibk.dps.biohadoop" additivity="false">
 		<level value="info" />
 		<appender-ref ref="console" />
-	</logger>
+	</logger> -->
 
 </log4j:configuration>

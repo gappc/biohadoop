@@ -21,34 +21,37 @@ import at.ac.uibk.dps.biohadoop.torename.Hostname;
 
 public class UndertowServer {
 
-	private static Logger logger = LoggerFactory.getLogger(UndertowServer.class);
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(UndertowServer.class);
 
 	private Undertow server;
 
+	private WebSocketHandler webSocket;
+
 	public void startServer() throws IllegalArgumentException, IOException,
 			ServletException {
-		logger.info("Starting Undertow");
+		LOGGER.info("Starting Undertow");
 
 		server = Undertow.builder()
 				.addHttpListener(30000, Hostname.getHostname())
 				.setHandler(getPathHandler()).build();
 		server.start();
-		logger.info("Undertow started at " + Hostname.getHostname());
+		LOGGER.info("Undertow started at " + Hostname.getHostname());
 	}
 
 	private PathHandler getPathHandler() throws IllegalArgumentException,
 			IOException, ServletException {
 		String resteasyContextPath = "/rs";
 		ResteasyHandler resteasy = new ResteasyHandler();
-		
+
 		List<Class<?>> resources = new ArrayList<Class<?>>();
 		resources.add(GaRestResource.class);
-		
+
 		HttpHandler resteasyHandler = resteasy.getHandler(resteasyContextPath,
 				resources, null);
 
 		String webSocketContextPath = "/websocket";
-		WebSocketHandler webSocket = new WebSocketHandler();
+		webSocket = new WebSocketHandler();
 		HttpHandler webSocketHandler = webSocket
 				.getHandler(webSocketContextPath);
 
@@ -57,9 +60,10 @@ public class UndertowServer {
 	}
 
 	public void stopServer() {
+		LOGGER.info("Stopping Undertow");
 		if (server != null) {
-			logger.info("Stopping Undertow");
 			server.stop();
+			webSocket.stop();
 		}
 	}
 }

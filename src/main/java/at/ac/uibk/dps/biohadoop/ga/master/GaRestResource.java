@@ -24,12 +24,6 @@ public class GaRestResource {
 		return DistancesGlobal.getDistances();
 	}
 	
-//	@GET
-//	@Path("work")
-//	public GaTask getWork() throws InterruptedException {
-//		return (GaTask)workQueue.take();
-//	}
-	
 	@POST
 	@Path("work")
 	public GaTask writeResult(GaResult result) throws InterruptedException {

@@ -18,6 +18,9 @@ import org.apache.hadoop.yarn.util.Records;
 
 public class LocalResourceBuilder {
 
+	private LocalResourceBuilder() {
+	}
+	
 	public static Builder builder() {
 		return new Builder();
 	}
