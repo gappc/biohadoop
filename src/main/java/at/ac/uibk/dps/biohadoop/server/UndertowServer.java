@@ -62,8 +62,14 @@ public class UndertowServer {
 	public void stopServer() {
 		LOGGER.info("Stopping Undertow");
 		if (server != null) {
-			server.stop();
+//			TODO really needed?
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				LOGGER.error("Error during server shutdown sleep", e);
+			}
 			webSocket.stop();
+			server.stop();
 		}
 	}
 }

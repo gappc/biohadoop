@@ -64,16 +64,21 @@ public class Client {
 				.newRecord(ContainerLaunchContext.class);
 		amContainer.setCommands(Collections.singletonList("$JAVA_HOME/bin/java"
 				+ " -Xmx256M"
-				+ " at.ac.uibk.dps.biohadoop.master.ApplicationMaster "
+				+ " at.ac.uibk.dps.biohadoop.hadoop.ApplicationMaster "
 				+ algorithm + " " + containerCount + " 1>"
 				+ ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stdout"
 				+ " 2>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR
 				+ "/stderr"));
 
 		// Set libs
-		String libPath = "hdfs://" + Hostname.getHostname() + ":54310/biohadoop/lib/";	
+		String libPath = "hdfs://" + Hostname.getHostname() + ":54310/biohadoop/lib/";
+		String dataPath = "hdfs://" + Hostname.getHostname() + ":54310/biohadoop/data/";
 		Map<String, LocalResource> jars = LocalResourceBuilder.getStandardResources(libPath, conf);
-		amContainer.setLocalResources(jars);
+		Map<String, LocalResource> data = LocalResourceBuilder.getStandardResources(dataPath, conf);
+		Map<String, LocalResource> combinedFiles = new HashMap<String, LocalResource>();
+		combinedFiles.putAll(jars);
+		combinedFiles.putAll(data);
+		amContainer.setLocalResources(combinedFiles);
 
 		// Setup CLASSPATH for ApplicationMaster
 		Map<String, String> appMasterEnv = new HashMap<String, String>();

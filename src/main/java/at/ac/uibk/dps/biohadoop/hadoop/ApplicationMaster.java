@@ -66,7 +66,7 @@ public class ApplicationMaster {
 						.readFile("/sdb/studium/master-thesis/code/git/masterthesis/data/att48.tsp");
 				DistancesGlobal.setDistances(tsp.getDistances());
 				Ga ga = new Ga();
-				ga.ga(tsp, 10, 100000);
+				ga.ga(tsp, 10, 10000);
 			} catch (InterruptedException e) {
 				LOGGER.info("Exception while sleep", e);
 			} catch (IOException e) {
@@ -74,6 +74,26 @@ public class ApplicationMaster {
 			}
 		} else {
 			try {
+				FileInput fileInput = new FileInput();
+				final Tsp tsp = fileInput
+						.readFile("att48.tsp");
+				LOGGER.debug("*********** SUCCESSFULLY READ DATA *************");
+				DistancesGlobal.setDistances(tsp.getDistances());
+				
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						LOGGER.info("Now running GA main");
+						Ga ga = new Ga();
+						try {
+							ga.ga(tsp, 10, 10000);
+						} catch (InterruptedException e) {
+							LOGGER.error("Failure while running GA thread", e);
+						}
+						
+					}
+				}).start();
+				
 				startWorker(args);
 			} catch (Exception e) {
 				LOGGER.info("Exception while starting worker", e);
@@ -145,7 +165,7 @@ public class ApplicationMaster {
 						.newRecord(ContainerLaunchContext.class);
 
 				String clientCommand = "$JAVA_HOME/bin/java" + " -Xmx128M"
-						+ " at.ac.uibk.dps.biohadoop.worker.SimpleWorker "
+						+ " at.ac.uibk.dps.biohadoop.ga.worker.WebSocketWorker "
 						+ Hostname.getHostname() + " 1>"
 						+ ApplicationConstants.LOG_DIR_EXPANSION_VAR
 						+ "/stdout" + " 2>"

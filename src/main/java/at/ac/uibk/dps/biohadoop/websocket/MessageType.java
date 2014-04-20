@@ -1,10 +1,12 @@
 package at.ac.uibk.dps.biohadoop.websocket;
 
 public enum MessageType {
+	NONE,
 	REGISTRATION_REQUEST,
 	REGISTRATION_RESPONSE,
 	WORK_INIT_REQUEST,
 	WORK_INIT_RESPONSE,
 	WORK_REQUEST,
-	WORK_RESPONSE
+	WORK_RESPONSE,
+	SHUTDOWN
 }

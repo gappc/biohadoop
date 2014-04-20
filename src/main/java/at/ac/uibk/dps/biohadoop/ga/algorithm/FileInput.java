@@ -29,7 +29,7 @@ public class FileInput {
 				city[1] = Double.parseDouble(tokens[2]);
 				citiesList.add(city);
 			} catch (Exception e) {
-				LOGGER.error("Line contains not a valid city: {}", line, e);
+				LOGGER.error("Line contains not a valid city: {}", line);
 			}
 		}
 

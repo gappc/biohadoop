@@ -43,7 +43,17 @@ public class WebSocketWorker {
 	private ObjectMapper om = new ObjectMapper();
 
 	public static void main(String[] args) throws Exception {
-		new WebSocketWorker(URI.create("ws://kleintroppl:30000/websocket/ga"));
+		LOGGER.info("args.length: " + args.length);
+		for (String s : args) {
+			LOGGER.info(s);
+		}
+
+		String masterHostname = args[0];
+
+		String url = "ws://" + masterHostname + ":30000/websocket/ga";
+
+		LOGGER.info("######### WebSocket client calls url: " + url);
+		new WebSocketWorker(URI.create(url));
 	}
 
 	public WebSocketWorker() {
@@ -92,7 +102,7 @@ public class WebSocketWorker {
 	}
 
 	@OnMessage
-	public Message onMessage(Message message, Session session) {
+	public Message onMessage(Message message, Session session) throws IOException {
 		counter++;
 		if (counter % 1000 == 0) {
 			LOGGER.debug("WebSocketGaClient Received Message: "
@@ -105,11 +115,15 @@ public class WebSocketWorker {
 				"WebSocketWorker received message from URI {} and sessionId {}: {}",
 				session.getRequestURI(), session.getId(), message);
 
+		MessageType messageType = MessageType.NONE;
+		Object response = null;
+		
 		if (message.getType() == MessageType.REGISTRATION_RESPONSE) {
 			LOGGER.debug(
 					"WebSocketWorker registration successful for URI {} and sessionId {}",
 					session.getRequestURI(), session.getId());
-			return new Message(MessageType.WORK_INIT_REQUEST, null);
+			messageType = MessageType.WORK_INIT_REQUEST;
+			response = null;
 		}
 
 		if (message.getType() == MessageType.WORK_INIT_RESPONSE) {
@@ -121,7 +135,9 @@ public class WebSocketWorker {
 			List<Object> data = (List<Object>) message.getData();
 			distances = convertDistances(data.get(0));
 			GaTask task = om.convertValue(data.get(1), GaTask.class);
-			return new Message(MessageType.WORK_REQUEST, computeResult(task));
+			
+			messageType = MessageType.WORK_REQUEST;
+			response = computeResult(task);
 		}
 
 		if (message.getType() == MessageType.WORK_RESPONSE) {
@@ -130,11 +146,15 @@ public class WebSocketWorker {
 					session.getRequestURI(), session.getId());
 			GaTask task = om.convertValue(message.getData(), GaTask.class);
 
-			return new Message(MessageType.WORK_REQUEST, computeResult(task));
+			messageType = MessageType.WORK_REQUEST;
+			response = computeResult(task);
 		}
-
-		throw new RuntimeException(
-				"Could not identify Websocket server response");
+		if (message.getType() == MessageType.SHUTDOWN) {
+			LOGGER.info("WebSocketWorker got SHUTDOWN message, now shutting down");
+			session.close();
+			latch.countDown();
+		}
+		return new Message(messageType, response);
 	}
 
 	private GaResult computeResult(GaTask task) {
@@ -149,5 +169,6 @@ public class WebSocketWorker {
 	public void onError(Session session, Throwable t) {
 		LOGGER.error("WebSocketWorker error for URI {}, sessionId={}",
 				session.getRequestURI(), session.getId(), t);
+		latch.countDown();
 	}
 }

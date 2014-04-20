@@ -13,8 +13,10 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.ga.DistancesGlobal;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaResult;
+import at.ac.uibk.dps.biohadoop.job.EmptyTask;
 import at.ac.uibk.dps.biohadoop.job.JobManager;
 import at.ac.uibk.dps.biohadoop.job.Task;
+import at.ac.uibk.dps.biohadoop.job.WorkObserver;
 import at.ac.uibk.dps.biohadoop.websocket.Message;
 import at.ac.uibk.dps.biohadoop.websocket.MessageDecoder;
 import at.ac.uibk.dps.biohadoop.websocket.MessageType;
@@ -23,7 +25,7 @@ import at.ac.uibk.dps.biohadoop.websocket.WebSocketEncoder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ServerEndpoint(value = "/ga", encoders = WebSocketEncoder.class, decoders = MessageDecoder.class)
-public class GaWebSocketResource {
+public class GaWebSocketResource implements WorkObserver {
 
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(GaWebSocketResource.class);
@@ -31,11 +33,17 @@ public class GaWebSocketResource {
 	private JobManager jobManager = JobManager.getInstance();
 	private Task currentTask;
 	private ObjectMapper om = new ObjectMapper();
+	private Session resourceSession;
+
+	public GaWebSocketResource() {
+		jobManager.addObserver(this);
+	}
 
 	@OnOpen
 	public void open(Session session) {
 		LOGGER.info("Opened Websocket connection to URI {}, sessionId={}",
 				session.getRequestURI(), session.getId());
+		resourceSession = session;
 	}
 
 	@OnClose
@@ -50,26 +58,36 @@ public class GaWebSocketResource {
 		LOGGER.debug("WebSocket message for URI {} and sessionId {}: {}",
 				session.getRequestURI(), session.getId(), message);
 
+		MessageType messageType = MessageType.NONE;
+		Object response = null;
+
 		if (message.getType() == MessageType.REGISTRATION_REQUEST) {
-			return new Message(MessageType.REGISTRATION_RESPONSE, null);
+			messageType = MessageType.REGISTRATION_RESPONSE;
+			response = null;
 		}
 		if (message.getType() == MessageType.WORK_INIT_REQUEST) {
 			currentTask = (Task) jobManager
 					.getTaskForExecution(Ga.GA_WORK_QUEUE);
-			return new Message(MessageType.WORK_INIT_RESPONSE, new Object[] {
-					DistancesGlobal.getDistances(), currentTask });
+			messageType = MessageType.WORK_INIT_RESPONSE;
+			response = new Object[] { DistancesGlobal.getDistances(),
+					currentTask };
 		}
 		if (message.getType() == MessageType.WORK_REQUEST) {
-			GaResult result = om.convertValue(message.getData(), GaResult.class);
-			jobManager
-					.writeResult(Ga.GA_RESULT_STORE, result);
+			GaResult result = om
+					.convertValue(message.getData(), GaResult.class);
+			jobManager.writeResult(Ga.GA_RESULT_STORE, result);
 			currentTask = (Task) jobManager
 					.getTaskForExecution(Ga.GA_WORK_QUEUE);
-			return new Message(MessageType.WORK_RESPONSE, currentTask);
+
+			if (currentTask instanceof EmptyTask) {
+				messageType = MessageType.SHUTDOWN;
+			} else {
+				messageType = MessageType.WORK_RESPONSE;
+			}
+			response = currentTask;
 		}
 
-		throw new RuntimeException(
-				"Could not identify Websocket worker request");
+		return new Message(messageType, response);
 	}
 
 	@OnError
@@ -79,7 +97,15 @@ public class GaWebSocketResource {
 				"Websocket error for URI {} and sessionId {}, affected task: {} ",
 				session.getRequestURI(), session.getId(), currentTask, t);
 		jobManager.reScheduleTask(Ga.GA_WORK_QUEUE, currentTask);
-		LOGGER.error("GaWebSocketResource error for URI {}, sessionId={}",
-				session.getRequestURI(), session.getId(), t);
+	}
+
+	@Override
+	public void stop() {
+		if (resourceSession != null) {
+			LOGGER.info("WebSocket closing for URI {} and sessionId {}",
+					resourceSession.getRequestURI(), resourceSession.getId());
+		} else {
+			LOGGER.info("WebSocket was not opened");
+		}
 	}
 }

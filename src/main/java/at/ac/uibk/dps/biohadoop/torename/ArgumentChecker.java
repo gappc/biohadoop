@@ -12,9 +12,9 @@ public class ArgumentChecker {
 	}
 
 	public static boolean checkArgs(String[] args) {
-		LOGGER.debug("Checking arguments, length: " + args.length);
+		LOGGER.info("Checking arguments, length: " + args.length);
 		for (String s : args) {
-			LOGGER.debug(s);
+			LOGGER.info(s);
 		}
 
 		if (args.length != 2) {
