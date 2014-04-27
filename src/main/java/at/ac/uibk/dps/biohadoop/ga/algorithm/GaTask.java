@@ -1,10 +1,14 @@
 package at.ac.uibk.dps.biohadoop.ga.algorithm;
 
+import java.io.Serializable;
+
 import at.ac.uibk.dps.biohadoop.job.Slotted;
 import at.ac.uibk.dps.biohadoop.job.Task;
 
-public class GaTask implements Task, Slotted {
+public class GaTask implements Task, Slotted, Serializable {
 
+	private static final long serialVersionUID = 3446084594992308113L;
+	
 	private long id;
 	private int slot;
 	private int[] genome;

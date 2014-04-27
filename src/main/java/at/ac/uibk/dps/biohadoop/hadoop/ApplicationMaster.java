@@ -32,6 +32,7 @@ import at.ac.uibk.dps.biohadoop.ga.DistancesGlobal;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.FileInput;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.Tsp;
+import at.ac.uibk.dps.biohadoop.ga.master.GaSocketResource;
 import at.ac.uibk.dps.biohadoop.server.UndertowServer;
 import at.ac.uibk.dps.biohadoop.torename.Hostname;
 import at.ac.uibk.dps.biohadoop.torename.LaunchContainerRunnable;
@@ -52,6 +53,8 @@ public class ApplicationMaster {
 	}
 	
 	public void run(String[] args) {
+		GaSocketResource gaSocketResource = new GaSocketResource();
+		
 		UndertowServer server = new UndertowServer();
 		try {
 			server.startServer();

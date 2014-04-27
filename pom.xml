@@ -4,6 +4,11 @@
 	<groupId>at.ac.uibk.dps</groupId>
 	<artifactId>biohadoop</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
@@ -103,11 +108,8 @@
 			<artifactId>resteasy-jackson2-provider</artifactId>
 			<version>3.0.6.Final</version>
 		</dependency>
-<!-- 		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-cdi</artifactId>
-			<version>3.0.6.Final</version>
-		</dependency> -->
+		<!-- <dependency> <groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-cdi</artifactId> 
+			<version>3.0.6.Final</version> </dependency> -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>

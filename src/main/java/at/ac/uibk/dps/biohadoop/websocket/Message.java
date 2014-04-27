@@ -1,7 +1,11 @@
 package at.ac.uibk.dps.biohadoop.websocket;
 
-public class Message {
+import java.io.Serializable;
 
+public class Message implements Serializable {
+
+	private static final long serialVersionUID = 5855511080071800033L;
+	
 	private MessageType type;
 	private Object data;
 	
@@ -26,5 +30,4 @@ public class Message {
 	public void setData(Object data) {
 		this.data = data;
 	}
-	
 }

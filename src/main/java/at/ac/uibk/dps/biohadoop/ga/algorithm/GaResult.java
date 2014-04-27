@@ -1,10 +1,14 @@
 package at.ac.uibk.dps.biohadoop.ga.algorithm;
 
+import java.io.Serializable;
+
 import at.ac.uibk.dps.biohadoop.job.Slotted;
 import at.ac.uibk.dps.biohadoop.job.Task;
 
-public class GaResult implements Task, Slotted {
+public class GaResult implements Task, Slotted, Serializable {
 
+	private static final long serialVersionUID = -5779890460327400560L;
+	
 	private long id;
 	private int slot;
 	private double result;
