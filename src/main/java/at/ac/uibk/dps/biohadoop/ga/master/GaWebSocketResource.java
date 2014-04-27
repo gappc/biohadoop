@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.ga.DistancesGlobal;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaResult;
-import at.ac.uibk.dps.biohadoop.job.EmptyTask;
+import at.ac.uibk.dps.biohadoop.job.StopTask;
 import at.ac.uibk.dps.biohadoop.job.JobManager;
 import at.ac.uibk.dps.biohadoop.job.Task;
 import at.ac.uibk.dps.biohadoop.job.WorkObserver;
@@ -79,7 +79,7 @@ public class GaWebSocketResource implements WorkObserver {
 			currentTask = (Task) jobManager
 					.getTaskForExecution(Ga.GA_WORK_QUEUE);
 
-			if (currentTask instanceof EmptyTask) {
+			if (currentTask instanceof StopTask) {
 				messageType = MessageType.SHUTDOWN;
 			} else {
 				messageType = MessageType.WORK_RESPONSE;

@@ -8,6 +8,7 @@ import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaFitness;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaResult;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaTask;
+import at.ac.uibk.dps.biohadoop.job.StopTask;
 import at.ac.uibk.dps.biohadoop.job.JobManager;
 import at.ac.uibk.dps.biohadoop.job.Task;
 import at.ac.uibk.dps.biohadoop.job.WorkObserver;
@@ -34,14 +35,16 @@ public class LocalGaWorker implements Runnable, WorkObserver {
 					}
 				}
 
-				GaTask gaTask = (GaTask) task;
+				if (!(task instanceof StopTask)) {
+					GaTask gaTask = (GaTask) task;
 
-				double fitness = GaFitness.computeFitness(
-						DistancesGlobal.getDistances(), gaTask.getGenome());
-				GaResult gaResult = new GaResult(gaTask.getSlot(), fitness);
-				gaResult.setId(task.getId());
-				jobManager.writeResult(Ga.GA_RESULT_STORE, gaResult);
-				Thread.sleep(1);
+					double fitness = GaFitness.computeFitness(
+							DistancesGlobal.getDistances(), gaTask.getGenome());
+					GaResult gaResult = new GaResult(gaTask.getSlot(), fitness);
+					gaResult.setId(task.getId());
+					jobManager.writeResult(Ga.GA_RESULT_STORE, gaResult);
+					Thread.sleep(1);
+				}
 			} catch (InterruptedException e) {
 				LOGGER.error("Error while running LocalGaWorker", e);
 			}

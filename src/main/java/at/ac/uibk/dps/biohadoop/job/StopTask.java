@@ -2,7 +2,7 @@ package at.ac.uibk.dps.biohadoop.job;
 
 import java.io.Serializable;
 
-public class EmptyTask implements Task, Serializable {
+public class StopTask implements Task, Serializable {
 
 	private static final long serialVersionUID = -4330113855077499683L;
 	

@@ -148,7 +148,7 @@ public class JobManager {
 	public void stopAllWorkers() throws InterruptedException {
 		for (WorkObserver observer : workObservers) {
 			for (String queueName : queues.keySet()) {
-				scheduleTask(queueName, new EmptyTask());
+				scheduleTask(queueName, new StopTask());
 			}
 			observer.stop();
 		}
