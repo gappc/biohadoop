@@ -14,6 +14,10 @@ import javax.websocket.EncodeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaFitness;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaResult;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaTask;
@@ -59,14 +63,20 @@ public class SocketGaWorker {
 		ObjectInputStream is = new ObjectInputStream(new BufferedInputStream(
 				clientSocket.getInputStream()));
 
+		// Kryo kryo = new Kryo();
+		// kryo.setReferences(false);
+		// Output output = new Output(clientSocket.getOutputStream());
+		// Input input = new Input(clientSocket.getInputStream());
+
 		register(os);
+		// registerKryo(kryo, output);
 
 		MessageType messageType = MessageType.NONE;
 		Object response = null;
 
 		while (true) {
 			counter++;
-			if (counter % 1000 == 0) {
+			if (counter % 10000 == 0) {
 				LOGGER.info("SocketGaWorker Received Message: "
 						+ (System.currentTimeMillis() - start) + "ms");
 				this.start = System.currentTimeMillis();
@@ -76,7 +86,8 @@ public class SocketGaWorker {
 
 			messageType = MessageType.NONE;
 			response = null;
-			Message message = (Message) is.readObject();
+			Message message = (Message) is.readUnshared();
+			// Message message = kryo.readObject(input, Message.class);
 
 			if (message.getType() == MessageType.REGISTRATION_RESPONSE) {
 				LOGGER.info("SocketGaWorker registration successful");
@@ -88,13 +99,13 @@ public class SocketGaWorker {
 				LOGGER.debug("SocketGaWorker WORK_INIT_RESPONSE");
 				Object[] data = (Object[]) message.getData();
 				distances = (double[][]) data[0];
-				GaTask task = (GaTask)data[1];
+				GaTask task = (GaTask) data[1];
 				messageType = MessageType.WORK_REQUEST;
 				response = computeResult(task);
 			}
 			if (message.getType() == MessageType.WORK_RESPONSE) {
 				LOGGER.debug("SocketGaWorker WORK_RESPONSE");
-				GaTask task = (GaTask)message.getData();
+				GaTask task = (GaTask) message.getData();
 				messageType = MessageType.WORK_REQUEST;
 				response = computeResult(task);
 			}
@@ -103,7 +114,9 @@ public class SocketGaWorker {
 				break;
 			}
 
-			os.writeObject(new Message(messageType, response));
+			// kryo.writeObject(output, new Message(messageType, response));
+			// output.flush();
+			os.writeUnshared(new Message(messageType, response));
 			os.flush();
 		}
 		is.close();
@@ -114,8 +127,15 @@ public class SocketGaWorker {
 	private void register(ObjectOutputStream os) throws EncodeException,
 			IOException {
 		Message message = new Message(MessageType.REGISTRATION_REQUEST, null);
-		os.writeObject(message);
+		os.writeUnshared(message);
 		os.flush();
+	}
+
+	private void registerKryo(Kryo kryo, Output output) throws EncodeException,
+			IOException {
+		Message message = new Message(MessageType.REGISTRATION_REQUEST, null);
+		kryo.writeObject(output, message);
+		output.flush();
 	}
 
 	private GaResult computeResult(GaTask task) {

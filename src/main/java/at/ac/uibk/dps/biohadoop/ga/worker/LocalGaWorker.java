@@ -43,7 +43,7 @@ public class LocalGaWorker implements Runnable, WorkObserver {
 					GaResult gaResult = new GaResult(gaTask.getSlot(), fitness);
 					gaResult.setId(task.getId());
 					jobManager.writeResult(Ga.GA_RESULT_STORE, gaResult);
-					Thread.sleep(1);
+//					Thread.sleep(1);
 				}
 			} catch (InterruptedException e) {
 				LOGGER.error("Error while running LocalGaWorker", e);

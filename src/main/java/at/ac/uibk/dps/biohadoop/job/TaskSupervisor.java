@@ -10,7 +10,7 @@ public class TaskSupervisor implements Runnable, WorkObserver {
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(TaskSupervisor.class);
 
-	private int sleep = 1000;
+	private int sleep = 2000;
 	private Boolean stop = false;
 
 	public TaskSupervisor() {

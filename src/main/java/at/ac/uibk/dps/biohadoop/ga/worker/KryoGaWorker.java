@@ -79,7 +79,7 @@ public class KryoGaWorker {
 				if (object instanceof Message) {
 					Message message = (Message)object;
 					MessageType messageType = MessageType.NONE;
-					Object response = null;
+					GaResult response = null;
 					
 					counter++;
 					if (counter % 1000 == 0) {

@@ -9,6 +9,10 @@ import java.net.Socket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+
 import at.ac.uibk.dps.biohadoop.ga.DistancesGlobal;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaResult;
@@ -45,11 +49,24 @@ public class GaSocketResource implements Runnable, WorkObserver {
 			ObjectInputStream is = new ObjectInputStream(
 					new BufferedInputStream(socket.getInputStream()));
 
+			Kryo kryo = new Kryo();
+			kryo.setReferences(false);
+			Output output = new Output(socket.getOutputStream());
+			Input input = new Input(socket.getInputStream());
+			
 			MessageType messageType = MessageType.NONE;
 			Object response = null;
 
+			int counter = 0;
 			while (true) {
-				Message message = (Message) is.readObject();
+				counter++;
+				if (counter % 10000 == 0) {
+					counter = 0;
+					os.reset();
+				}
+				
+				Message message = (Message) is.readUnshared();
+//				Message message = kryo.readObject(input, Message.class);
 
 				messageType = MessageType.NONE;
 				response = null;
@@ -79,8 +96,11 @@ public class GaSocketResource implements Runnable, WorkObserver {
 					response = currentTask;
 				}
 
-				os.writeObject(new Message(messageType, response));
+				os.writeUnshared(new Message(messageType, response));
 				os.flush();
+				
+//				kryo.writeObject(output, new Message(messageType, response));
+//				output.flush();
 
 				if (messageType == MessageType.SHUTDOWN) {
 					break;

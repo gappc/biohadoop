@@ -78,7 +78,7 @@ public class ApplicationMaster {
 						.readFile("/sdb/studium/master-thesis/code/git/masterthesis/data/att48.tsp");
 				DistancesGlobal.setDistances(tsp.getDistances());
 				Ga ga = new Ga();
-				ga.ga(tsp, 10, 10000);
+				ga.ga(tsp, 10, 2000000);
 			} catch (InterruptedException e) {
 				LOGGER.info("Exception while sleep", e);
 			} catch (IOException e) {
