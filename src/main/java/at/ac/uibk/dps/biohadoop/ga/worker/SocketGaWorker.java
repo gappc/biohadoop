@@ -71,6 +71,7 @@ public class SocketGaWorker {
 						+ (System.currentTimeMillis() - start) + "ms");
 				this.start = System.currentTimeMillis();
 				counter = 0;
+				os.reset();
 			}
 
 			messageType = MessageType.NONE;

@@ -26,8 +26,6 @@ public class Ga {
 
 	public int[] ga(Tsp tsp, int genomeSize, int maxIterations)
 			throws InterruptedException {
-		new Thread(new LocalGaWorker()).start();
-
 		int citySize = tsp.getCities().length;
 
 		boolean end = false;

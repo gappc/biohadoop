@@ -42,7 +42,7 @@ public class TaskSupervisor implements Runnable, WorkObserver {
 					Job job = tasks.get(l);
 					if (job != null && now - job.getCreated() > sleep) {
 						LOGGER.error("Job {} hanging at state {}", job
-								.getTask().getId(), job.getTaskState());
+								.getTask(), job.getTaskState());
 						count++;
 					}
 				}

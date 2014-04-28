@@ -1,8 +1,11 @@
 package at.ac.uibk.dps.biohadoop.websocket;
 
-import java.io.Serializable;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
-public class Message implements Serializable {
+public class Message implements Externalizable {
 
 	private static final long serialVersionUID = 5855511080071800033L;
 	
@@ -29,5 +32,18 @@ public class Message implements Serializable {
 	}
 	public void setData(Object data) {
 		this.data = data;
+	}
+
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		out.writeInt(type.ordinal());
+		out.writeObject(data);
+	}
+
+	@Override
+	public void readExternal(ObjectInput in) throws IOException,
+			ClassNotFoundException {
+		type = MessageType.values()[in.readInt()];
+		data = in.readObject();
 	}
 }

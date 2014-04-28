@@ -32,31 +32,38 @@ import at.ac.uibk.dps.biohadoop.ga.DistancesGlobal;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.FileInput;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.Tsp;
-import at.ac.uibk.dps.biohadoop.ga.master.GaKryoResource;
-import at.ac.uibk.dps.biohadoop.ga.master.GaSocketResource;
+import at.ac.uibk.dps.biohadoop.ga.master.kryo.GaKryoResource;
+import at.ac.uibk.dps.biohadoop.ga.master.local.GaLocalResource;
+import at.ac.uibk.dps.biohadoop.ga.master.socket.GaSocketServer;
+import at.ac.uibk.dps.biohadoop.job.TaskSupervisor;
 import at.ac.uibk.dps.biohadoop.server.UndertowServer;
 import at.ac.uibk.dps.biohadoop.torename.Hostname;
 import at.ac.uibk.dps.biohadoop.torename.LaunchContainerRunnable;
 import at.ac.uibk.dps.biohadoop.torename.LocalResourceBuilder;
 
 public class ApplicationMaster {
-	
-	private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationMaster.class);
-	
+
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(ApplicationMaster.class);
+
 	public static void main(String[] args) throws Exception {
 		LOGGER.info("############ Starting application master ##########");
 		LOGGER.info("############ Starting application master ARGS: " + args);
-		
+
 		ApplicationMaster master = new ApplicationMaster();
 		master.run(args);
 
 		LOGGER.info("############ Stopping application master ##########");
 	}
-	
+
 	public void run(String[] args) {
-		new GaSocketResource();
+		new Thread(new TaskSupervisor(1000),
+				TaskSupervisor.class.getSimpleName()).start();
+
+		new GaSocketServer();
 		new GaKryoResource();
-		
+		new GaLocalResource();
+
 		UndertowServer server = new UndertowServer();
 		try {
 			server.startServer();
@@ -80,25 +87,24 @@ public class ApplicationMaster {
 		} else {
 			try {
 				FileInput fileInput = new FileInput();
-				final Tsp tsp = fileInput
-						.readFile("att48.tsp");
+				final Tsp tsp = fileInput.readFile("att48.tsp");
 				LOGGER.debug("*********** SUCCESSFULLY READ DATA *************");
 				DistancesGlobal.setDistances(tsp.getDistances());
-				
+
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
 						LOGGER.info("Now running GA main");
 						Ga ga = new Ga();
 						try {
-							ga.ga(tsp, 10, 10000);
+							ga.ga(tsp, 10, 20000);
 						} catch (InterruptedException e) {
 							LOGGER.error("Failure while running GA thread", e);
 						}
-						
+
 					}
 				}).start();
-				
+
 				startWorker(args);
 			} catch (Exception e) {
 				LOGGER.info("Exception while starting worker", e);
@@ -169,7 +175,8 @@ public class ApplicationMaster {
 				ContainerLaunchContext ctx = Records
 						.newRecord(ContainerLaunchContext.class);
 
-				String clientCommand = "$JAVA_HOME/bin/java" + " -Xmx128M"
+				String clientCommand = "$JAVA_HOME/bin/java"
+						+ " -Xmx128M"
 						+ " at.ac.uibk.dps.biohadoop.ga.worker.WebSocketWorker "
 						+ Hostname.getHostname() + " 1>"
 						+ ApplicationConstants.LOG_DIR_EXPANSION_VAR
@@ -211,7 +218,8 @@ public class ApplicationMaster {
 				for (ContainerStatus status : response
 						.getCompletedContainersStatuses()) {
 					++completedContainers;
-					LOGGER.info("Completed container {} with status {}", completedContainers, status);
+					LOGGER.info("Completed container {} with status {}",
+							completedContainers, status);
 				}
 				Thread.sleep(100);
 			}

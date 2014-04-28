@@ -1,11 +1,14 @@
 package at.ac.uibk.dps.biohadoop.ga.algorithm;
 
-import java.io.Serializable;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
 import at.ac.uibk.dps.biohadoop.job.Slotted;
 import at.ac.uibk.dps.biohadoop.job.Task;
 
-public class GaResult implements Task, Slotted, Serializable {
+public class GaResult implements Task, Slotted, Externalizable {
 
 	private static final long serialVersionUID = -5779890460327400560L;
 	
@@ -52,5 +55,20 @@ public class GaResult implements Task, Slotted, Serializable {
 	@Override
 	public String toString() {
 		return "Slot: " + slot + " | solution: " + result;
+	}
+
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		out.writeLong(id);
+		out.writeInt(slot);
+		out.writeDouble(result);
+	}
+
+	@Override
+	public void readExternal(ObjectInput in) throws IOException,
+			ClassNotFoundException {
+		id = in.readLong();
+		slot = in.readInt();
+		result = in.readDouble();
 	}
 }

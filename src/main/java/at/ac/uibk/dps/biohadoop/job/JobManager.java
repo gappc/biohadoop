@@ -32,7 +32,7 @@ public class JobManager {
 	private static List<WorkObserver> workObservers = new ArrayList<WorkObserver>();
 
 	private JobManager() {
-		new Thread(new TaskSupervisor(1000)).start();
+//		new Thread(new TaskSupervisor(1000)).start();
 	}
 
 	public static JobManager getInstance() {

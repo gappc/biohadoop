@@ -1,7 +1,6 @@
 package at.ac.uibk.dps.biohadoop.ga.worker;
 
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.concurrent.CountDownLatch;
 
 import javax.websocket.ClientEndpoint;
@@ -74,7 +73,6 @@ public class KryoGaWorker {
 		kryo.register(double[].class);
 		kryo.register(int[].class);
 		kryo.register(StopTask.class);
-		System.out.println("REGISTRATION DONE");
 		
 		client.addListener(new Listener() {
 			public void received(Connection connection, Object object) {
@@ -102,14 +100,22 @@ public class KryoGaWorker {
 						Object[] data = (Object[]) message.getData();
 						distances = (double[][]) data[0];
 						GaTask task = (GaTask)data[1];
+						
+//						System.out.println(task);
+						
 						messageType = MessageType.WORK_REQUEST;
 						response = computeResult(task);
+						System.out.println(response);
 					}
 					if (message.getType() == MessageType.WORK_RESPONSE) {
 						LOGGER.debug("SocketGaWorker WORK_RESPONSE");
 						GaTask task = (GaTask)message.getData();
+						
+//						System.out.println(task);
+						
 						messageType = MessageType.WORK_REQUEST;
 						response = computeResult(task);
+//						System.out.println(response);
 					}
 					if (message.getType() == MessageType.SHUTDOWN) {
 						LOGGER.info("SocketGaWorker got SHUTDOWN message, now shutting down");
@@ -118,6 +124,7 @@ public class KryoGaWorker {
 					}
 	
 					connection.sendTCP(new Message(messageType, response));
+//					System.out.println("SEND");
 				}
 			}
 		});
