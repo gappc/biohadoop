@@ -20,12 +20,14 @@ public class Ga {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Ga.class);
 
 	private Random rand = new Random();
-	private JobManager jobManager = JobManager.getInstance();
-	private Monitor monitor = jobManager.getResultStoreMonitor(GA_RESULT_STORE);
 	private int logSteps = 1000;
 
 	public int[] ga(Tsp tsp, int populationSize, int maxIterations)
 			throws InterruptedException {
+		JobManager jobManager = JobManager.getInstance();
+		jobManager.setNewStoreSize(2 * populationSize);
+		Monitor monitor = jobManager.getResultStoreMonitor(GA_RESULT_STORE);
+		
 		int citySize = tsp.getCities().length;
 
 		boolean end = false;
