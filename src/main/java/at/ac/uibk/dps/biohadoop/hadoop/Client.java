@@ -103,21 +103,9 @@ public class Client {
 		
 		String libPath = "hdfs://" + Hostname.getHostname()
 				+ ":54310/biohadoop/lib/";
-		String dataPath = "hdfs://" + Hostname.getHostname()
-				+ ":54310/biohadoop/data/";
-		String confPath = "hdfs://" + Hostname.getHostname()
-				+ ":54310/biohadoop/conf/";
 		Map<String, LocalResource> jars = LocalResourceBuilder
 				.getStandardResources(libPath, yarnConfiguration);
-		Map<String, LocalResource> data = LocalResourceBuilder
-				.getStandardResources(dataPath, yarnConfiguration);
-		Map<String, LocalResource> conf = LocalResourceBuilder
-				.getStandardResources(confPath, yarnConfiguration);
-		Map<String, LocalResource> combinedFiles = new HashMap<String, LocalResource>();
-		combinedFiles.putAll(jars);
-		combinedFiles.putAll(data);
-		combinedFiles.putAll(conf);
-		amContainer.setLocalResources(combinedFiles);
+		amContainer.setLocalResources(jars);
 
 		// Setup CLASSPATH for ApplicationMaster
 		Map<String, String> appMasterEnv = new HashMap<String, String>();

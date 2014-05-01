@@ -1,0 +1,15 @@
+{
+  "version" : "0.1",
+  "launcherClass" : "at.ac.uibk.dps.biohadoop.ga.config.GaLauncher",
+  "includePaths" : [ "/biohadoop/lib/" ],
+  "masterEndpoints" : [ "at.ac.uibk.dps.biohadoop.ga.master.socket.GaSocketServer", "at.ac.uibk.dps.biohadoop.ga.master.kryo.GaKryoResource", "at.ac.uibk.dps.biohadoop.server.UndertowServer", "at.ac.uibk.dps.biohadoop.ga.master.local.GaLocalResource" ],
+  "workers" : {
+    "at.ac.uibk.dps.biohadoop.ga.worker.SocketGaWorker" : 2
+  },
+  "algorithmConfig" : {
+    "dataFile" : "/biohadoop/data/att48.tsp",
+    "algorithm" : "at.ac.uibk.dps.biohadoop.ga.algorithm.Ga",
+    "populationSize" : 10,
+    "maxIterations" : 10000
+  }
+}
