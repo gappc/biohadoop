@@ -1,8 +1,8 @@
 {
   "version" : "0.1",
   "launcherClass" : "at.ac.uibk.dps.biohadoop.ga.config.GaLauncher",
-  "includePaths" : [ "/biohadoop/lib/" ],
-  "masterEndpoints" : [ "at.ac.uibk.dps.biohadoop.ga.master.socket.GaSocketServer", "at.ac.uibk.dps.biohadoop.ga.master.kryo.GaKryoResource", "at.ac.uibk.dps.biohadoop.server.UndertowServer", "at.ac.uibk.dps.biohadoop.ga.master.local.GaLocalResource" ],
+  "includePaths" : [ "/biohadoop/lib/", "/biohadoop/conf/" ],
+  "masterEndpoints" : [ "at.ac.uibk.dps.biohadoop.ga.master.socket.GaSocketServer", "at.ac.uibk.dps.biohadoop.ga.master.kryo.GaKryoResource", "at.ac.uibk.dps.biohadoop.server.UndertowServer" ],
   "workers" : {
     "at.ac.uibk.dps.biohadoop.ga.worker.SocketGaWorker" : 2
   },
