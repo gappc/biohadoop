@@ -37,13 +37,13 @@ public class Client {
 		long start = System.currentTimeMillis();
 
 		Client c = new Client();
-		c.run(args, new YarnConfiguration());
+		c.run(new YarnConfiguration(), args);
 
 		long end = System.currentTimeMillis();
 		LOGGER.info("Client stopped, time: {}ms", end - start);
 	}
 
-	public void run(String[] args, YarnConfiguration conf) {
+	public void run(YarnConfiguration conf, String[] args) {
 		if (!checkArguments(conf, args)) {
 			return;
 		}
@@ -90,17 +90,6 @@ public class Client {
 
 		amContainer.setCommands(Collections.singletonList(launchCommand));
 
-		// Set libs
-//		Map<String, LocalResource> combinedFiles = new HashMap<String, LocalResource>();
-//		String defaultFs = yarnConfiguration.get("fs.defaultFS");
-//		Launcher launcher = LaunchBuilder.buildLauncher(yarnConfiguration, configFilename);
-//		for (String includePath : launcher.getConfiguration(configFilename).getIncludePaths()) {
-//			Map<String, LocalResource> includes = LocalResourceBuilder
-//					.getStandardResources(defaultFs + includePath, yarnConfiguration);
-//			combinedFiles.putAll(includes);
-//		}
-//		amContainer.setLocalResources(combinedFiles);
-		
 		String libPath = "hdfs://" + Hostname.getHostname()
 				+ ":54310/biohadoop/lib/";
 		Map<String, LocalResource> jars = LocalResourceBuilder
