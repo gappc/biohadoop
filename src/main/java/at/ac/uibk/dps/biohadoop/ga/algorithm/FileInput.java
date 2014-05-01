@@ -1,6 +1,9 @@
 package at.ac.uibk.dps.biohadoop.ga.algorithm;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,10 +19,23 @@ public class FileInput {
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(FileInput.class);
 
+	public Tsp readFile(InputStream is) throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		List<String> lines = new ArrayList<String>();
+		String line = null;
+		while ((line = br.readLine()) != null) {
+			lines.add(line);
+		}
+		return readFile(lines);
+	}
+	
 	public Tsp readFile(String pathname) throws IOException {
 		Path path = Paths.get(pathname);
 		List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
+		return readFile(lines);
+	}
 
+	public Tsp readFile(List<String> lines) {
 		List<double[]> citiesList = new ArrayList<double[]>();
 		for (String line : lines) {
 			try {

@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import at.ac.uibk.dps.biohadoop.hadoop.AbstractBiohadoopConfig;
+import at.ac.uibk.dps.biohadoop.hadoop.AbstractConfig;
 
 /**
  * @author Christian Gapp
  * 
  */
-public class GaConfig extends AbstractBiohadoopConfig {
+public class GaConfig extends AbstractConfig {
 
 	/**
 	 * List of classnames for endpoints, that YARN appliation master should

@@ -1,6 +1,7 @@
 package at.ac.uibk.dps.biohadoop.ga.config;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,7 +32,10 @@ import at.ac.uibk.dps.biohadoop.ga.DistancesGlobal;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.FileInput;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.Tsp;
+import at.ac.uibk.dps.biohadoop.hadoop.Config;
+import at.ac.uibk.dps.biohadoop.hadoop.LaunchException;
 import at.ac.uibk.dps.biohadoop.hadoop.Launcher;
+import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;
 import at.ac.uibk.dps.biohadoop.torename.Hostname;
 import at.ac.uibk.dps.biohadoop.torename.LaunchContainerRunnable;
 import at.ac.uibk.dps.biohadoop.torename.LocalResourceBuilder;
@@ -42,23 +46,57 @@ public class GaLauncher implements Launcher {
 
 	private static Logger LOGGER = LoggerFactory.getLogger(GaLauncher.class);
 	
+	private YarnConfiguration yarnConfiguration = new YarnConfiguration();
+	private ObjectMapper mapper = new ObjectMapper();
+
 	@Override
-	public void launch(String configFilename) throws Exception {
-		ObjectMapper mapper = new ObjectMapper();
-		GaConfig gaConfig = mapper.readValue(new File(configFilename), GaConfig.class);
+	public Config getConfiguration(String configFilename) {
+		try {
+			return mapper.readValue(HdfsUtil.openFile(yarnConfiguration, configFilename), GaConfig.class);
+		} catch (IOException e) {
+			LOGGER.error("Could not read configuration {}", configFilename);
+			return null;
+		}
+	}
+	
+	@Override
+	public boolean isConfigurationValid(String configFilename) {
+		GaConfig gaConfig = (GaConfig)getConfiguration(configFilename);
+		if (gaConfig == null) {
+			LOGGER.error("Could not read configuration {}", configFilename);
+			return false;
+		}
+		String dataFilename = gaConfig.getAlgorithmConfig().getDataFile();
+		if (!(HdfsUtil.fileExists(yarnConfiguration, configFilename))) {
+			LOGGER.error("Data file {} does not exist", dataFilename);
+			return false;
+		}
+		return true;
+	}
+	
+	@Override
+	public void launch(String configFilename) throws LaunchException {
+		if (!isConfigurationValid(configFilename)) {
+			throw new LaunchException("Configuration " + configFilename + " is not valid");
+		}
 		
-		launchAlgorithm(gaConfig);
-		launchMasterEndpoints(gaConfig);
-		
-		if (System.getProperty("local") == null) {
-			launchWorkers(gaConfig, configFilename);
+		try {
+			GaConfig gaConfig = mapper.readValue(HdfsUtil.openFile(yarnConfiguration, configFilename), GaConfig.class);
+			launchAlgorithm(gaConfig);
+			launchMasterEndpoints(gaConfig);
+			
+			if (System.getProperty("local") == null) {
+				launchWorkers(gaConfig, configFilename);
+			}
+		} catch (Exception e) {
+			throw new LaunchException("Error while launching program", e);
 		}
 	}
 	
 	private void launchAlgorithm(GaConfig config) throws Exception {
 		final GaAlgorithmConfig ac = ((GaConfig)config).getAlgorithmConfig();
 		FileInput fileInput = new FileInput();
-		final Tsp tsp = fileInput.readFile(ac.getDataFile());
+		final Tsp tsp = fileInput.readFile(HdfsUtil.openFile(new YarnConfiguration(), ac.getDataFile()));
 		LOGGER.debug("*********** SUCCESSFULLY READ DATA *************");
 		DistancesGlobal.setDistances(tsp.getDistances());
 
