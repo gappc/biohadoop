@@ -6,17 +6,24 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaFitness;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaResult;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaTask;
+import at.ac.uibk.dps.biohadoop.websocket.Message;
+import at.ac.uibk.dps.biohadoop.websocket.MessageType;
 
 public class RestGaWorker {
 
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(RestGaWorker.class);
+	
+	private String url;
+	private Client client;
+	private int logSteps = 1000;
 
 	public static void main(String[] args) throws InterruptedException {
 		LOGGER.info("!!!!!!!GaWorker args[0]: " + args[0]);
@@ -26,64 +33,69 @@ public class RestGaWorker {
 
 	private void runClient(String[] args) {
 		try {
-			LOGGER.info("############# GA Worker started ##############");
-
-			LOGGER.info("args.length: " + args.length);
+			long startTime = System.currentTimeMillis();
+			LOGGER.info("############# {} started ##############", RestGaWorker.class.getSimpleName());
+			LOGGER.debug("args.length: " + args.length);
 			for (String s : args) {
-				LOGGER.info(s);
+				LOGGER.debug(s);
 			}
 
 			String masterHostname = args[0];
+			url = "http://" + masterHostname + ":30000/rs/ga";
 
-			String url = "http://" + masterHostname + ":30000/rs/ga";
-			String initUrl = url + "/init";
-			String workerUrl = url + "/work";
+			LOGGER.info("############# client calls url: {} #############", url);
+			client = ClientBuilder.newClient();
 
-			LOGGER.info("######### client calls url: " + url);
-			Client client = ClientBuilder.newClient();
+			Message message = sendAndReceive(new Message(
+					MessageType.REGISTRATION_REQUEST, null));
 
-			Response response = client.target(initUrl)
-					.request(MediaType.APPLICATION_JSON).get();
-			double[][] distances = response.readEntity(double[][].class);
+			if (message.getType() == MessageType.REGISTRATION_RESPONSE) {
+				message = sendAndReceive(new Message(
+						MessageType.WORK_INIT_REQUEST, null));
 
-			long start = System.currentTimeMillis();
-
-			GaResult gaResult = new GaResult();
-			gaResult.setSlot(-1);
-			gaResult.setResult(-1);
-
-			response = client.target(workerUrl)
-					.request(MediaType.APPLICATION_JSON)
-					.post(Entity.entity(gaResult, MediaType.APPLICATION_JSON));
-			GaTask task = response.readEntity(GaTask.class);
-
-			int counter = 0;
-			do {
-				gaResult.setId(task.getId());
-				gaResult.setSlot(task.getSlot());
-				gaResult.setResult(GaFitness.computeFitness(distances,
-						task.getGenome()));
-
-				response = client
-						.target(workerUrl)
-						.request(MediaType.APPLICATION_JSON)
-						.post(Entity.entity(gaResult,
-								MediaType.APPLICATION_JSON));
-
-				task = response.readEntity(GaTask.class);
-
-				if (counter % 1e2 == 0) {
-					LOGGER.info("response from ApplicationMaster: " + counter
-							+ " | took " + (System.currentTimeMillis() - start)
-							+ "ms");
-					start = System.currentTimeMillis();
+				if (message.getType() == MessageType.WORK_INIT_RESPONSE) {
+					ObjectMapper mapper = new ObjectMapper();
+					Object[] registration = mapper.convertValue(message.getData(), Object[].class);
+					double[][] distances = mapper.convertValue(registration[0], double[][].class);
+					
+					GaTask gaTask = mapper.convertValue(registration[1], GaTask.class);
+					
+					GaResult gaResult = new GaResult();
+					int counter = 0;
+					while (message.getType() != MessageType.SHUTDOWN) {
+						counter++;
+						if (counter % logSteps == 0) {
+							long endTime = System.currentTimeMillis();
+							LOGGER.info("{}ms for last {} computations",
+									endTime - startTime, logSteps);
+							startTime = System.currentTimeMillis();
+							counter = 0;
+						}
+						
+						gaResult.setId(gaTask.getId());
+						gaResult.setSlot(gaTask.getSlot());
+						gaResult.setResult(GaFitness.computeFitness(distances,
+								gaTask.getGenome()));
+						
+						message = sendAndReceive(new Message(
+								MessageType.WORK_REQUEST, gaResult));
+						
+						gaTask = mapper.convertValue(message.getData(), GaTask.class);
+					}
 				}
-				counter++;
-			} while (counter < Integer.MAX_VALUE);
-			LOGGER.info("############# GA Worker stopped ###############");
+			}
+			LOGGER.info("############# {} Worker stopped ###############", RestGaWorker.class.getSimpleName());
 		} catch (Exception e) {
 			LOGGER.error("Worker error", e);
 			return;
 		}
+	}
+
+	private Message sendAndReceive(Message message) {
+		Response response = client.target(url)
+				.request(MediaType.APPLICATION_JSON)
+				.post(Entity.entity(message, MediaType.APPLICATION_JSON));
+
+		return response.readEntity(Message.class);
 	}
 }

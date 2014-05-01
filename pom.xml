@@ -108,8 +108,6 @@
 			<artifactId>resteasy-jackson2-provider</artifactId>
 			<version>3.0.6.Final</version>
 		</dependency>
-		<!-- <dependency> <groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-cdi</artifactId> 
-			<version>3.0.6.Final</version> </dependency> -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
@@ -120,10 +118,10 @@
 			<artifactId>undertow-websockets-jsr</artifactId>
 			<version>1.0.3.Final</version>
 		</dependency>
-		<!-- <dependency>
+		<dependency>
 			<groupId>com.esotericsoftware.kryo</groupId>
-			<artifactId>kryo</artifactId>
-			<version>2.23.0</version>
-		</dependency> -->
+			<artifactId>kryonet</artifactId>
+			<version>2.21-all</version>
+		</dependency>
 	</dependencies>
 </project>

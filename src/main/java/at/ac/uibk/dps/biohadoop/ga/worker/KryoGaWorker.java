@@ -32,37 +32,40 @@ public class KryoGaWorker {
 			.getLogger(KryoGaWorker.class);
 
 	private double[][] distances;
-	private long start = System.currentTimeMillis();
+	private long startTime = System.currentTimeMillis();
 	private int counter = 0;
-	private static CountDownLatch latch = new CountDownLatch(1);
+	private int logSteps = 1000;
+	private CountDownLatch latch = new CountDownLatch(1);
 
 	public static void main(String[] args) throws Exception {
-		LOGGER.info("args.length: " + args.length);
+		LOGGER.info("############# {} started ##############",
+				KryoGaWorker.class.getSimpleName());
+
+		LOGGER.info("args.length: {}", args.length);
 		for (String s : args) {
 			LOGGER.info(s);
 		}
 
 		String masterHostname = args[0];
 
-		String url = "ws://" + masterHostname + ":30000/websocket/ga";
-
-		LOGGER.info("######### SocketGaWorker client calls url: " + url);
-		new KryoGaWorker("localhost", 30001);
+		LOGGER.info("######### {} client calls master at: {}",
+				KryoGaWorker.class.getSimpleName(), masterHostname);
+		new KryoGaWorker(masterHostname, 30015);
 	}
 
 	public KryoGaWorker() {
 	}
 
-	public KryoGaWorker(String hostname, int port)
-			throws DeploymentException, IOException, InterruptedException,
-			EncodeException, ClassNotFoundException {
-		
+	public KryoGaWorker(String hostname, int port) throws DeploymentException,
+			IOException, InterruptedException, EncodeException,
+			ClassNotFoundException {
+
 		Log.set(Log.LEVEL_DEBUG);
-		
+
 		final Client client = new Client(64 * 1024, 64 * 1024);
 		client.start();
 		client.connect(15000, "localhost", 30015);
-		
+
 		Kryo kryo = client.getKryo();
 		kryo.register(Message.class);
 		kryo.register(MessageType.class);
@@ -73,58 +76,54 @@ public class KryoGaWorker {
 		kryo.register(double[].class);
 		kryo.register(int[].class);
 		kryo.register(StopTask.class);
-		
+
 		client.addListener(new Listener() {
 			public void received(Connection connection, Object object) {
 				if (object instanceof Message) {
-					Message message = (Message)object;
+					Message message = (Message) object;
 					MessageType messageType = MessageType.NONE;
 					GaResult response = null;
-					
+
 					counter++;
-					if (counter % 1000 == 0) {
-						LOGGER.info("SocketGaWorker Received Message: "
-								+ (System.currentTimeMillis() - start) + "ms");
-						start = System.currentTimeMillis();
+					if (counter % logSteps == 0) {
+						long endTime = System.currentTimeMillis();
+						LOGGER.info("{}ms for last {} computations",
+								endTime - startTime, logSteps);
+						startTime = System.currentTimeMillis();
 						counter = 0;
 					}
-	
+
 					if (message.getType() == MessageType.REGISTRATION_RESPONSE) {
-						LOGGER.info("SocketGaWorker registration successful");
+						LOGGER.info("Registration successful");
 						messageType = MessageType.WORK_INIT_REQUEST;
 						response = null;
 					}
-	
+
 					if (message.getType() == MessageType.WORK_INIT_RESPONSE) {
-						LOGGER.debug("SocketGaWorker WORK_INIT_RESPONSE");
+						LOGGER.debug("WORK_INIT_RESPONSE");
 						Object[] data = (Object[]) message.getData();
 						distances = (double[][]) data[0];
-						GaTask task = (GaTask)data[1];
-						
-//						System.out.println(task);
-						
+						GaTask task = (GaTask) data[1];
+
 						messageType = MessageType.WORK_REQUEST;
 						response = computeResult(task);
-						System.out.println(response);
 					}
 					if (message.getType() == MessageType.WORK_RESPONSE) {
-						LOGGER.debug("SocketGaWorker WORK_RESPONSE");
-						GaTask task = (GaTask)message.getData();
-						
-//						System.out.println(task);
-						
+						LOGGER.debug("WORK_RESPONSE");
+						GaTask task = (GaTask) message.getData();
+
 						messageType = MessageType.WORK_REQUEST;
 						response = computeResult(task);
-//						System.out.println(response);
 					}
 					if (message.getType() == MessageType.SHUTDOWN) {
-						LOGGER.info("SocketGaWorker got SHUTDOWN message, now shutting down");
+						LOGGER.info(
+								"############# {} Worker stopped ###############",
+								KryoGaWorker.class.getSimpleName());
 						client.close();
 						latch.countDown();
 					}
-	
+
 					connection.sendTCP(new Message(messageType, response));
-//					System.out.println("SEND");
 				}
 			}
 		});

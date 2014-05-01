@@ -66,6 +66,7 @@ public class GaKryoResource implements WorkObserver {
 				public void disconnected(Connection connection) {
 					workerCount.decrementAndGet();
 					System.out.println("DEC " + workerCount.get());
+					stop();
 				}
 
 				public void received(final Connection connection,
@@ -155,8 +156,9 @@ public class GaKryoResource implements WorkObserver {
 
 	@Override
 	public void stop() {
-		LOGGER.info("GaKryo server shutting down");
 		if (workerCount.intValue() == 0) {
+			LOGGER.info("GaKryo server shutting down");
+			executorService.shutdown();
 			server.stop();
 		}
 	}

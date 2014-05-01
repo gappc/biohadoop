@@ -5,13 +5,13 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+import at.ac.uibk.dps.biohadoop.job.Slotted;
+import at.ac.uibk.dps.biohadoop.job.Task;
+
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.KryoSerializable;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-
-import at.ac.uibk.dps.biohadoop.job.Slotted;
-import at.ac.uibk.dps.biohadoop.job.Task;
 
 public class GaResult implements Task, Slotted, Externalizable, KryoSerializable {
 

@@ -36,22 +36,23 @@ public class Client {
 		long start = System.currentTimeMillis();
 		
 		if (ArgumentChecker.checkArgs(args)) {
+			YarnConfiguration conf = new YarnConfiguration();
 			Client c = new Client();
-			c.run(args);
+			c.run(conf, args);
 		}
 		
 		long end = System.currentTimeMillis();
 		LOGGER.info("Time: " + (end - start) + "ms");
 	}
 
-	public void run(String[] args) throws Exception {
+//	TODO change, that it is runnable from main but also from oozie
+	public void run(YarnConfiguration conf, String[] args) throws Exception {
 		LOGGER.info("############ Starting client ############");
 
 		final String algorithm = args[0];
 		final String containerCount = args[1];
 
-		// Create yarnClient
-		YarnConfiguration conf = new YarnConfiguration();
+		// Configure yarnClient
 		YarnClient yarnClient = YarnClient.createYarnClient();
 		yarnClient.init(conf);
 		yarnClient.start();

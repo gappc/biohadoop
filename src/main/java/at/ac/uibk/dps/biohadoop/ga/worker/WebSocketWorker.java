@@ -38,21 +38,25 @@ public class WebSocketWorker {
 
 	private CountDownLatch latch = new CountDownLatch(1);
 	private double[][] distances;
-	private long start = System.currentTimeMillis();
+	private long startTime = System.currentTimeMillis();
 	private int counter = 0;
+	private int logSteps = 1000;
 	private ObjectMapper om = new ObjectMapper();
 
 	public static void main(String[] args) throws Exception {
-		LOGGER.info("args.length: " + args.length);
+		LOGGER.info("############# {} started ##############",
+				WebSocketWorker.class.getSimpleName());
+		LOGGER.debug("args.length: " + args.length);
 		for (String s : args) {
-			LOGGER.info(s);
+			LOGGER.debug(s);
 		}
 
 		String masterHostname = args[0];
-
 		String url = "ws://" + masterHostname + ":30000/websocket/ga";
 
-		LOGGER.info("######### WebSocket client calls url: " + url);
+		LOGGER.info(
+				"############# WebSocket client calls url: {} #############",
+				url);
 		new WebSocketWorker(URI.create(url));
 	}
 
@@ -89,60 +93,58 @@ public class WebSocketWorker {
 
 	@OnOpen
 	public void onOpen(Session session) throws IOException {
-		LOGGER.info(
-				"WebSocketWorker opened connection to URI {}, sessionId={}",
+		LOGGER.info("Opened connection to URI {}, sessionId={}",
 				session.getRequestURI(), session.getId());
 	}
 
 	@OnClose
 	public void onClose(Session session, CloseReason reason) throws IOException {
-		LOGGER.info(
-				"WebSocketWorker closed connection to URI {}, sessionId={}",
+		LOGGER.info("Closed connection to URI {}, sessionId={}",
 				session.getRequestURI(), session.getId());
+		LOGGER.info("############# {} stopped #############",
+				WebSocketWorker.class.getSimpleName());
 	}
 
 	@OnMessage
-	public Message onMessage(Message message, Session session) throws IOException {
+	public Message onMessage(Message message, Session session)
+			throws IOException {
 		counter++;
-		if (counter % 1000 == 0) {
-			LOGGER.debug("WebSocketGaClient Received Message: "
-					+ (System.currentTimeMillis() - start) + "ms");
-			this.start = System.currentTimeMillis();
+		if (counter % logSteps == 0) {
+			long endTime = System.currentTimeMillis();
+			LOGGER.info("{}ms for last {} computations",
+					endTime - startTime, logSteps);
+			startTime = System.currentTimeMillis();
 			counter = 0;
 		}
 
-		LOGGER.debug(
-				"WebSocketWorker received message from URI {} and sessionId {}: {}",
+		LOGGER.debug("Received message from URI {} and sessionId {}: {}",
 				session.getRequestURI(), session.getId(), message);
 
 		MessageType messageType = MessageType.NONE;
 		Object response = null;
-		
+
 		if (message.getType() == MessageType.REGISTRATION_RESPONSE) {
-			LOGGER.debug(
-					"WebSocketWorker registration successful for URI {} and sessionId {}",
+			LOGGER.debug("Registration successful for URI {} and sessionId {}",
 					session.getRequestURI(), session.getId());
 			messageType = MessageType.WORK_INIT_REQUEST;
 			response = null;
 		}
 
 		if (message.getType() == MessageType.WORK_INIT_RESPONSE) {
-			LOGGER.debug(
-					"WebSocketWorker WORK_INIT_RESPONSE for URI {} and sessionId {}",
+			LOGGER.debug("WORK_INIT_RESPONSE for URI {} and sessionId {}",
 					session.getRequestURI(), session.getId());
 
 			@SuppressWarnings("unchecked")
 			List<Object> data = (List<Object>) message.getData();
 			distances = convertDistances(data.get(0));
 			GaTask task = om.convertValue(data.get(1), GaTask.class);
-			
+
 			messageType = MessageType.WORK_REQUEST;
 			response = computeResult(task);
 		}
 
 		if (message.getType() == MessageType.WORK_RESPONSE) {
-			LOGGER.debug(
-					"WebSocketWorker WORK_RESPONSE for URI {} and sessionId {}",
+			LOGGER.debug("WORK_RESPONSE for URI {} and sessionId {}",
 					session.getRequestURI(), session.getId());
 			GaTask task = om.convertValue(message.getData(), GaTask.class);
 
@@ -150,7 +152,7 @@ public class WebSocketWorker {
 			response = computeResult(task);
 		}
 		if (message.getType() == MessageType.SHUTDOWN) {
-			LOGGER.info("WebSocketWorker got SHUTDOWN message, now shutting down");
+			LOGGER.info("Got SHUTDOWN message, now shutting down");
 			session.close();
 			latch.countDown();
 		}
@@ -167,8 +169,8 @@ public class WebSocketWorker {
 
 	@OnError
 	public void onError(Session session, Throwable t) {
-		LOGGER.error("WebSocketWorker error for URI {}, sessionId={}",
-				session.getRequestURI(), session.getId(), t);
+		LOGGER.error("Error for URI {}, sessionId={}", session.getRequestURI(),
+				session.getId(), t);
 		latch.countDown();
 	}
 }

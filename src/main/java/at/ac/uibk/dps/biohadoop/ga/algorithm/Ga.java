@@ -8,7 +8,6 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.ga.worker.LocalGaWorker;
 import at.ac.uibk.dps.biohadoop.job.JobManager;
 import at.ac.uibk.dps.biohadoop.job.Task;
 import at.ac.uibk.dps.biohadoop.queue.Monitor;
@@ -19,12 +18,13 @@ public class Ga {
 	public static final String GA_RESULT_STORE = "GA_RESULT_STORE";
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Ga.class);
-	
+
 	private Random rand = new Random();
 	private JobManager jobManager = JobManager.getInstance();
 	private Monitor monitor = jobManager.getResultStoreMonitor(GA_RESULT_STORE);
+	private int logSteps = 1000;
 
-	public int[] ga(Tsp tsp, int genomeSize, int maxIterations)
+	public int[] ga(Tsp tsp, int populationSize, int maxIterations)
 			throws InterruptedException {
 		int citySize = tsp.getCities().length;
 
@@ -32,35 +32,35 @@ public class Ga {
 		int counter = 0;
 
 		// Init: Generate random population
-		int[][] population = initPopulation(genomeSize, citySize);
+		int[][] population = initPopulation(populationSize, citySize);
 
-		long start = System.currentTimeMillis();
+		long startTime = System.currentTimeMillis();
 
 		while (!end) {
 			// recombination
-			int[][] offsprings = new int[genomeSize][citySize];
-			for (int i = 0; i < genomeSize; i++) {
-				int indexParent1 = rand.nextInt(genomeSize);
-				int indexParent2 = rand.nextInt(genomeSize);
+			int[][] offsprings = new int[populationSize][citySize];
+			for (int i = 0; i < populationSize; i++) {
+				int indexParent1 = rand.nextInt(populationSize);
+				int indexParent2 = rand.nextInt(populationSize);
 
 				offsprings[i] = recombination(population[indexParent1],
 						population[indexParent2]);
 			}
 
 			// mutation
-			int[][] mutated = new int[genomeSize][citySize];
-			for (int i = 0; i < genomeSize; i++) {
+			int[][] mutated = new int[populationSize][citySize];
+			for (int i = 0; i < populationSize; i++) {
 				mutated[i] = mutation(offsprings[i]);
 			}
 
 			// evaluation
-			double[] values = new double[genomeSize * 2];
-			for (int i = 0; i < genomeSize; i++) {
+			double[] values = new double[populationSize * 2];
+			for (int i = 0; i < populationSize; i++) {
 				GaTask task = new GaTask(i, population[i]);
 				jobManager.scheduleTask(GA_WORK_QUEUE, task);
 			}
-			for (int i = 0; i < genomeSize; i++) {
-				GaTask task = new GaTask(i + genomeSize, population[i]);
+			for (int i = 0; i < populationSize; i++) {
+				GaTask task = new GaTask(i + populationSize, population[i]);
 				jobManager.scheduleTask(GA_WORK_QUEUE, task);
 			}
 
@@ -72,43 +72,43 @@ public class Ga {
 			}
 
 			Task[] results = jobManager.readResult(GA_RESULT_STORE);
-			for (int i = 0; i < genomeSize; i++) {
+			for (int i = 0; i < populationSize; i++) {
 				values[i] = (double) ((GaResult) results[i]).getResult();
 			}
-			for (int i = 0; i < genomeSize; i++) {
-				values[i + genomeSize] = (double) ((GaResult) results[i
-						+ genomeSize]).getResult();
+			for (int i = 0; i < populationSize; i++) {
+				values[i + populationSize] = (double) ((GaResult) results[i
+						+ populationSize]).getResult();
 			}
 
 			// selection
-			for (int i = 0; i < genomeSize * 2; i++) {
-				for (int j = i + 1; j < genomeSize * 2; j++) {
+			for (int i = 0; i < populationSize * 2; i++) {
+				for (int j = i + 1; j < populationSize * 2; j++) {
 					if (values[j] < values[i]) {
 						double tmp = values[j];
 						values[j] = values[i];
 						values[i] = tmp;
 
 						int[] tmpGenome;
-						if (i < genomeSize && j < genomeSize) {
+						if (i < populationSize && j < populationSize) {
 							// i and j refer to population
 							tmpGenome = population[i];
 							population[i] = population[j];
 							population[j] = tmpGenome;
-						} else if (i >= genomeSize && j < genomeSize) {
+						} else if (i >= populationSize && j < populationSize) {
 							// i refer to mutated, j refer to population
-							tmpGenome = mutated[i - genomeSize];
-							mutated[i - genomeSize] = population[j];
+							tmpGenome = mutated[i - populationSize];
+							mutated[i - populationSize] = population[j];
 							population[j] = tmpGenome;
-						} else if (i < genomeSize && j >= genomeSize) {
+						} else if (i < populationSize && j >= populationSize) {
 							// i refer to population, j refer to mutated
 							tmpGenome = population[i];
-							population[i] = mutated[j - genomeSize];
-							mutated[j - genomeSize] = tmpGenome;
+							population[i] = mutated[j - populationSize];
+							mutated[j - populationSize] = tmpGenome;
 						} else {
 							// i and j refer to mutated
-							tmpGenome = mutated[i - genomeSize];
-							mutated[i - genomeSize] = mutated[j - genomeSize];
-							mutated[j - genomeSize] = tmpGenome;
+							tmpGenome = mutated[i - populationSize];
+							mutated[i - populationSize] = mutated[j - populationSize];
+							mutated[j - populationSize] = tmpGenome;
 						}
 					}
 				}
@@ -118,14 +118,15 @@ public class Ga {
 				end = true;
 			}
 
-			if (counter % 1e3 == 0 || counter < 10) {
-				LOGGER.info("counter: " + counter + " | took "
-						+ (System.currentTimeMillis() - start) + "ms");
-				start = System.currentTimeMillis();
+			if (counter % logSteps == 0 || counter < 10) {
+				long endTime = System.currentTimeMillis();
+				LOGGER.info("Counter: {} ({} computations) | last {} computations took {} ms",
+						counter, 2 * counter * populationSize, logSteps, endTime - startTime);
+				startTime = endTime;
 				printGenome(tsp.getDistances(), population[0], citySize);
 			}
 		}
-		
+
 		jobManager.stopAllWorkers();
 
 		return population[0];
@@ -192,8 +193,8 @@ public class Ga {
 		for (int i = 0; i < citySize; i++) {
 			sb.append(solution[i] + " | ");
 		}
-		LOGGER.info("fitness: " + GaFitness.computeFitness(distances, solution) + " | "
-				+ sb.toString());
+		LOGGER.info("fitness: {} | {}",
+				GaFitness.computeFitness(distances, solution), sb.toString());
 	}
 
 }

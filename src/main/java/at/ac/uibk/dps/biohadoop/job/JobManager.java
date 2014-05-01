@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +32,9 @@ public class JobManager {
 	private static Map<String, ResultStore> resultStores = new ConcurrentHashMap<String, ResultStore>();
 	private static List<WorkObserver> workObservers = new ArrayList<WorkObserver>();
 
+	private static AtomicBoolean stop = new AtomicBoolean(false);
+	
 	private JobManager() {
-//		new Thread(new TaskSupervisor(1000)).start();
 	}
 
 	public static JobManager getInstance() {
@@ -146,12 +148,17 @@ public class JobManager {
 	}
 
 	public void stopAllWorkers() throws InterruptedException {
+		stop.set(true);
 		for (WorkObserver observer : workObservers) {
 			for (String queueName : queues.keySet()) {
 				scheduleTask(queueName, new StopTask());
 			}
 			observer.stop();
 		}
+	}
+	
+	public boolean isStop() {
+		return stop.get();
 	}
 
 	public Map<Long, Job> getTasks() {

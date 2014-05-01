@@ -7,47 +7,42 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-import javax.websocket.ClientEndpoint;
 import javax.websocket.DeploymentException;
 import javax.websocket.EncodeException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
-
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaFitness;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaResult;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaTask;
 import at.ac.uibk.dps.biohadoop.websocket.Message;
-import at.ac.uibk.dps.biohadoop.websocket.MessageDecoder;
 import at.ac.uibk.dps.biohadoop.websocket.MessageType;
-import at.ac.uibk.dps.biohadoop.websocket.WebSocketEncoder;
 
-@ClientEndpoint(encoders = WebSocketEncoder.class, decoders = MessageDecoder.class)
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Output;
+
 public class SocketGaWorker {
 
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(SocketGaWorker.class);
 
 	private double[][] distances;
-	private long start = System.currentTimeMillis();
-	private int counter = 0;
+	private int logSteps = 1000;
 
 	public static void main(String[] args) throws Exception {
-		LOGGER.info("args.length: " + args.length);
+		LOGGER.info("############# {} started ##############",
+				SocketGaWorker.class.getSimpleName());
+		LOGGER.debug("args.length: {}", args.length);
 		for (String s : args) {
-			LOGGER.info(s);
+			LOGGER.debug(s);
 		}
 
 		String masterHostname = args[0];
 
-		String url = "ws://" + masterHostname + ":30000/websocket/ga";
-
-		LOGGER.info("######### SocketGaWorker client calls url: " + url);
-		new SocketGaWorker("localhost", 30001);
+		LOGGER.info("############# {} client calls master at: {} #############",
+				SocketGaWorker.class.getSimpleName(), masterHostname);
+		new SocketGaWorker(masterHostname, 30001);
 	}
 
 	public SocketGaWorker() {
@@ -56,7 +51,7 @@ public class SocketGaWorker {
 	public SocketGaWorker(String hostname, int port)
 			throws DeploymentException, IOException, InterruptedException,
 			EncodeException, ClassNotFoundException {
-		Socket clientSocket = new Socket(hostname, 30001);
+		Socket clientSocket = new Socket(hostname, port);
 		ObjectOutputStream os = new ObjectOutputStream(
 				new BufferedOutputStream(clientSocket.getOutputStream()));
 		os.flush();
@@ -74,12 +69,15 @@ public class SocketGaWorker {
 		MessageType messageType = MessageType.NONE;
 		Object response = null;
 
+		long startTime = System.currentTimeMillis();
+		int counter = 0;
 		while (true) {
 			counter++;
-			if (counter % 10000 == 0) {
-				LOGGER.info("SocketGaWorker Received Message: "
-						+ (System.currentTimeMillis() - start) + "ms");
-				this.start = System.currentTimeMillis();
+			if (counter % logSteps == 0) {
+				long endTime = System.currentTimeMillis();
+				LOGGER.info("{}ms for last {} computations",
+						endTime - startTime, logSteps);
+				startTime = System.currentTimeMillis();
 				counter = 0;
 				os.reset();
 			}
@@ -110,7 +108,6 @@ public class SocketGaWorker {
 				response = computeResult(task);
 			}
 			if (message.getType() == MessageType.SHUTDOWN) {
-				LOGGER.info("SocketGaWorker got SHUTDOWN message, now shutting down");
 				break;
 			}
 
@@ -122,6 +119,9 @@ public class SocketGaWorker {
 		is.close();
 		os.close();
 		clientSocket.close();
+
+		LOGGER.info("############# {} stopped #############",
+				SocketGaWorker.class.getSimpleName());
 	}
 
 	private void register(ObjectOutputStream os) throws EncodeException,

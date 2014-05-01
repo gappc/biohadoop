@@ -6,8 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.ServletException;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.ApplicationConstants;
 import org.apache.hadoop.yarn.api.ApplicationConstants.Environment;
@@ -35,6 +33,7 @@ import at.ac.uibk.dps.biohadoop.ga.algorithm.Tsp;
 import at.ac.uibk.dps.biohadoop.ga.master.kryo.GaKryoResource;
 import at.ac.uibk.dps.biohadoop.ga.master.local.GaLocalResource;
 import at.ac.uibk.dps.biohadoop.ga.master.socket.GaSocketServer;
+import at.ac.uibk.dps.biohadoop.job.JobManager;
 import at.ac.uibk.dps.biohadoop.job.TaskSupervisor;
 import at.ac.uibk.dps.biohadoop.server.UndertowServer;
 import at.ac.uibk.dps.biohadoop.torename.Hostname;
@@ -57,20 +56,14 @@ public class ApplicationMaster {
 	}
 
 	public void run(String[] args) {
-		new Thread(new TaskSupervisor(1000),
+		new Thread(new TaskSupervisor(2000),
 				TaskSupervisor.class.getSimpleName()).start();
 
 		new GaSocketServer();
 		new GaKryoResource();
 		new GaLocalResource();
-
-		UndertowServer server = new UndertowServer();
-		try {
-			server.startServer();
-		} catch (IllegalArgumentException | IOException | ServletException e) {
-			LOGGER.error("Could not start server", e);
-		}
-
+		new UndertowServer();
+		
 		if (args.length >= 1 && ("local").equals(args[0])) {
 			try {
 				FileInput fileInput = new FileInput();
@@ -78,39 +71,48 @@ public class ApplicationMaster {
 						.readFile("/sdb/studium/master-thesis/code/git/masterthesis/data/att48.tsp");
 				DistancesGlobal.setDistances(tsp.getDistances());
 				Ga ga = new Ga();
-				ga.ga(tsp, 10, 2000000);
+				ga.ga(tsp, 10, 10000);
 			} catch (InterruptedException e) {
 				LOGGER.info("Exception while sleep", e);
 			} catch (IOException e) {
 				LOGGER.info("Exception while reading file", e);
 			}
 		} else {
+			Thread algorithmRunner = null;
 			try {
 				FileInput fileInput = new FileInput();
 				final Tsp tsp = fileInput.readFile("att48.tsp");
 				LOGGER.debug("*********** SUCCESSFULLY READ DATA *************");
 				DistancesGlobal.setDistances(tsp.getDistances());
 
-				new Thread(new Runnable() {
+				algorithmRunner = new Thread(new Runnable() {
 					@Override
 					public void run() {
 						LOGGER.info("Now running GA main");
 						Ga ga = new Ga();
 						try {
-							ga.ga(tsp, 10, 20000);
+							ga.ga(tsp, 10, 10000);
 						} catch (InterruptedException e) {
 							LOGGER.error("Failure while running GA thread", e);
 						}
 
 					}
-				}).start();
+				});
+				algorithmRunner.setName("AlgorithmRunner");
+				algorithmRunner.start();
 
 				startWorker(args);
 			} catch (Exception e) {
-				LOGGER.info("Exception while starting worker", e);
+				LOGGER.error("Exception while starting worker", e);
+				//TODO handle exception in a better way
+				algorithmRunner.stop();
+				try {
+					JobManager.getInstance().stopAllWorkers();
+				} catch (InterruptedException e1) {
+					LOGGER.error("Error while forced shutdown of all Threads", e1);
+				}
 			}
 		}
-		server.stopServer();
 	}
 
 	private void startWorker(String[] args) throws Exception {
@@ -177,7 +179,7 @@ public class ApplicationMaster {
 
 				String clientCommand = "$JAVA_HOME/bin/java"
 						+ " -Xmx128M"
-						+ " at.ac.uibk.dps.biohadoop.ga.worker.WebSocketWorker "
+						+ " " + command + " "
 						+ Hostname.getHostname() + " 1>"
 						+ ApplicationConstants.LOG_DIR_EXPANSION_VAR
 						+ "/stdout" + " 2>"

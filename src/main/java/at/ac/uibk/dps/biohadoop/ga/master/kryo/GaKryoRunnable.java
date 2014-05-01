@@ -22,6 +22,7 @@ public class GaKryoRunnable implements Runnable {
 	private Message message;
 	private Connection connection;
 	private JobManager jobManager = JobManager.getInstance();
+	private boolean stop = false;
 	
 	public void setMessage(Message message) {
 		this.message = message;
