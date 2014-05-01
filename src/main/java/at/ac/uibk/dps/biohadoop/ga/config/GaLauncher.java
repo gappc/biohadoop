@@ -96,7 +96,7 @@ public class GaLauncher implements Launcher {
 	private void launchAlgorithm(GaConfig config) throws Exception {
 		final GaAlgorithmConfig ac = ((GaConfig)config).getAlgorithmConfig();
 		FileInput fileInput = new FileInput();
-		final Tsp tsp = fileInput.readFile(HdfsUtil.openFile(new YarnConfiguration(), ac.getDataFile()));
+		final Tsp tsp = fileInput.readFile(HdfsUtil.openFile(yarnConfiguration, ac.getDataFile()));
 		LOGGER.debug("*********** SUCCESSFULLY READ DATA *************");
 		DistancesGlobal.setDistances(tsp.getDistances());
 
@@ -128,14 +128,14 @@ public class GaLauncher implements Launcher {
 		LOGGER.info("#### startWorker: ");
 
 		// Initialize clients to ResourceManager and NodeManagers
-		Configuration conf = new YarnConfiguration();
+//		Configuration conf = new YarnConfiguration();
 
 		AMRMClient<ContainerRequest> rmClient = AMRMClient.createAMRMClient();
-		rmClient.init(conf);
+		rmClient.init(yarnConfiguration);
 		rmClient.start();
 
 		NMClient nmClient = NMClient.createNMClient();
-		nmClient.init(conf);
+		nmClient.init(yarnConfiguration);
 		nmClient.start();
 
 		// Register with ResourceManager
@@ -197,12 +197,12 @@ public class GaLauncher implements Launcher {
 
 				String libPath = "hdfs://master:54310/biohadoop/lib/";
 				Map<String, LocalResource> jars = LocalResourceBuilder
-						.getStandardResources(libPath, conf);
+						.getStandardResources(libPath, yarnConfiguration);
 				ctx.setLocalResources(jars);
 
 				// Setup CLASSPATH for ApplicationMaster
 				Map<String, String> appMasterEnv = new HashMap<String, String>();
-				setupAppMasterEnv(appMasterEnv, conf);
+				setupAppMasterEnv(appMasterEnv, yarnConfiguration);
 				ctx.setEnvironment(appMasterEnv);
 
 				LOGGER.info("Launching container " + allocatedContainers);

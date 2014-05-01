@@ -16,6 +16,7 @@ public class ApplicationMaster {
 			.getLogger(ApplicationMaster.class);
 	
 	private Launcher launcher;
+	private YarnConfiguration yarnConfiguration = new YarnConfiguration();
 
 	public static void main(String[] args) {
 		LOGGER.info("ApplicationMaster started at " + Hostname.getHostname());
@@ -45,12 +46,11 @@ public class ApplicationMaster {
 		if (!ArgumentChecker.isArgumentCountValid(args, 1)) {
 			return false;
 		}
-		LOGGER.info("args[0]= {}", args[0]);
-		if (!HdfsUtil.fileExists(new YarnConfiguration(), args[0])) {
+		if (!HdfsUtil.fileExists(yarnConfiguration, args[0])) {
 			return false;
 		}
 		try {
-			launcher = LaunchBuilder.buildLauncher(new YarnConfiguration(), args[0]);
+			launcher = LaunchBuilder.buildLauncher(yarnConfiguration, args[0]);
 			if (!launcher.isConfigurationValid(args[0])) {
 				LOGGER.error("Launch configuration {} invalid", args[0]);
 				return false;

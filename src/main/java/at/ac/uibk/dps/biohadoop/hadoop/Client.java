@@ -1,8 +1,14 @@
 package at.ac.uibk.dps.biohadoop.hadoop;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
@@ -20,6 +26,7 @@ import org.apache.hadoop.yarn.client.api.YarnClientApplication;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.util.Apps;
 import org.apache.hadoop.yarn.util.Records;
+import org.mortbay.util.ajax.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +38,8 @@ import at.ac.uibk.dps.biohadoop.torename.LocalResourceBuilder;
 public class Client {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Client.class);
+	
+	private List<String> includePaths = new ArrayList<String>();
 
 	public static void main(String[] args) {
 		LOGGER.info("Client started at " + Hostname.getHostname());
@@ -54,13 +63,33 @@ public class Client {
 		}
 	}
 
-	private boolean checkArguments(YarnConfiguration conf, String[] args) {
+	private boolean checkArguments(YarnConfiguration yarnConfiguration, String[] args) {
 		LOGGER.info("Checking arguments");
 		if (!ArgumentChecker.isArgumentCountValid(args, 1)) {
 			return false;
 		}
-		if (!HdfsUtil.fileExists(conf, args[0])) {
+		if (!HdfsUtil.fileExists(yarnConfiguration, args[0])) {
 			return false;
+		}
+		try {
+			InputStream is = HdfsUtil
+					.openFile(yarnConfiguration, args[0]);
+			Reader reader = new BufferedReader(new InputStreamReader(is));
+			
+			@SuppressWarnings("rawtypes")
+			Map jsonConfigAsMap = (Map) JSON.parse(reader);
+			for (Object o : (Object[])jsonConfigAsMap.get("includePaths")) {
+				String includePath = o.toString();
+				
+				LOGGER.info("Including includePath {}", includePath);
+				if (!HdfsUtil.fileExists(yarnConfiguration, includePath)) {
+					LOGGER.error("Could not find includePath {}", includePath);
+					return false;
+				}
+				includePaths.add(includePath);
+			}
+		} catch (Exception e) {
+			LOGGER.error("Error while checking if includePaths paths are available", e);
 		}
 		return true;
 	}
@@ -82,19 +111,29 @@ public class Client {
 				.newRecord(ContainerLaunchContext.class);
 
 		String launchCommand = "$JAVA_HOME/bin/java" + " -Xmx256M "
-				+ ApplicationMaster.class.getName() + " " + configFilename + " 1>"
-				+ ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stdout"
-				+ " 2>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR
-				+ "/stderr";
+				+ ApplicationMaster.class.getName() + " " + configFilename
+				+ " 1>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR
+				+ "/stdout" + " 2>"
+				+ ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stderr";
 		LOGGER.info("Launch command: {}", launchCommand);
 
 		amContainer.setCommands(Collections.singletonList(launchCommand));
 
-		String libPath = "hdfs://" + Hostname.getHostname()
-				+ ":54310/biohadoop/lib/";
-		Map<String, LocalResource> jars = LocalResourceBuilder
-				.getStandardResources(libPath, yarnConfiguration);
-		amContainer.setLocalResources(jars);
+		Map<String, LocalResource> combinedFiles = new HashMap<String, LocalResource>();
+		String defaultFs = yarnConfiguration.get("fs.defaultFS");
+		for (String includePath : includePaths) {
+			Map<String, LocalResource> includes = LocalResourceBuilder
+					.getStandardResources(defaultFs + includePath, yarnConfiguration);
+			combinedFiles.putAll(includes);
+		}
+		amContainer.setLocalResources(combinedFiles);
+
+		
+//		String libPath = "hdfs://" + Hostname.getHostname()
+//				+ ":54310/biohadoop/lib/";
+//		Map<String, LocalResource> jars = LocalResourceBuilder
+//				.getStandardResources(libPath, yarnConfiguration);
+//		amContainer.setLocalResources(jars);
 
 		// Setup CLASSPATH for ApplicationMaster
 		Map<String, String> appMasterEnv = new HashMap<String, String>();
