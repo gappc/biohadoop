@@ -125,6 +125,8 @@ public class Ga {
 				startTime = endTime;
 				printGenome(tsp.getDistances(), population[0], citySize);
 			}
+			
+			jobManager.setCompleted((float)counter / (float)maxIterations);
 		}
 
 		jobManager.stopAllWorkers();

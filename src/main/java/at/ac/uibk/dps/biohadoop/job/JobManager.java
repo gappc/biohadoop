@@ -18,12 +18,12 @@ import at.ac.uibk.dps.biohadoop.queue.ResultStore;
 
 public class JobManager {
 
-	private Monitor jobMonitor = new Monitor();
-	private Random rand = new Random();
-
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(JobManager.class);
 
+	private Monitor jobMonitor = new Monitor();
+	private Random rand = new Random();
+	
 	private static int storeSize = 20;
 
 	private static JobManager manager = new JobManager();
@@ -33,6 +33,7 @@ public class JobManager {
 	private static List<WorkObserver> workObservers = new ArrayList<WorkObserver>();
 
 	private static AtomicBoolean stop = new AtomicBoolean(false);
+	private static float completed = 0.0f;
 	
 	private JobManager() {
 	}
@@ -165,6 +166,14 @@ public class JobManager {
 		return Collections.unmodifiableMap(tasks);
 	}
 
+	public float getCompleted() {
+		return completed;
+	}
+
+	public void setCompleted(float completed) {
+		JobManager.completed = completed;
+	}
+
 	private BlockingQueue<Task> getQueue(String queueName) {
 		BlockingQueue<Task> queue = queues.get(queueName);
 		if (queue == null) {
@@ -183,4 +192,5 @@ public class JobManager {
 		}
 		return resultStore;
 	}
+	
 }

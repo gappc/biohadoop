@@ -128,13 +128,6 @@ public class Client {
 		}
 		amContainer.setLocalResources(combinedFiles);
 
-		
-//		String libPath = "hdfs://" + Hostname.getHostname()
-//				+ ":54310/biohadoop/lib/";
-//		Map<String, LocalResource> jars = LocalResourceBuilder
-//				.getStandardResources(libPath, yarnConfiguration);
-//		amContainer.setLocalResources(jars);
-
 		// Setup CLASSPATH for ApplicationMaster
 		Map<String, String> appMasterEnv = new HashMap<String, String>();
 		setupAppMasterEnv(appMasterEnv, yarnConfiguration);
@@ -164,13 +157,16 @@ public class Client {
 		LOGGER.info("Tracking URL: {}", appReport.getTrackingUrl());
 		LOGGER.info("Application Master running at: {}", appReport.getHost());
 
+		int count = 0;
 		while (appState != YarnApplicationState.FINISHED
 				&& appState != YarnApplicationState.KILLED
 				&& appState != YarnApplicationState.FAILED) {
 			Thread.sleep(100);
 			appReport = yarnClient.getApplicationReport(appId);
 			appState = appReport.getYarnApplicationState();
-			LOGGER.info("Progress: {}", appReport.getProgress());
+			if (count++ % 20 == 0) {
+				LOGGER.info("Progress: {}", appReport.getProgress());
+			}
 		}
 
 		LOGGER.info("Application {} finished with state {} at {}", appId,

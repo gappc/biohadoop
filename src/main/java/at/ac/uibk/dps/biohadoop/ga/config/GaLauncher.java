@@ -35,6 +35,7 @@ import at.ac.uibk.dps.biohadoop.ga.algorithm.Tsp;
 import at.ac.uibk.dps.biohadoop.hadoop.Config;
 import at.ac.uibk.dps.biohadoop.hadoop.LaunchException;
 import at.ac.uibk.dps.biohadoop.hadoop.Launcher;
+import at.ac.uibk.dps.biohadoop.job.JobManager;
 import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;
 import at.ac.uibk.dps.biohadoop.torename.Hostname;
 import at.ac.uibk.dps.biohadoop.torename.LaunchContainerRunnable;
@@ -166,7 +167,7 @@ public class GaLauncher implements Launcher {
 		LOGGER.info("Obtain allocated containers and launch");
 		int allocatedContainers = 0;
 		while (allocatedContainers < containerCount) {
-			AllocateResponse response = rmClient.allocate(0.1f);
+			AllocateResponse response = rmClient.allocate(0.0f);
 			for (Container container : response.getAllocatedContainers()) {
 				++allocatedContainers;
 
@@ -192,7 +193,7 @@ public class GaLauncher implements Launcher {
 						+ ApplicationConstants.LOG_DIR_EXPANSION_VAR
 						+ "/stderr";
 				workerList.remove(0);
-				LOGGER.info("!!!Client command: " + clientCommand);
+				LOGGER.info("Client command: " + clientCommand);
 				ctx.setCommands(Collections.singletonList(clientCommand));
 
 				String libPath = "hdfs://master:54310/biohadoop/lib/";
@@ -219,11 +220,13 @@ public class GaLauncher implements Launcher {
 			Thread.sleep(100);
 		}
 
+		JobManager jobManager = JobManager.getInstance();
+		
 		try {
 			LOGGER.info("Waiting for " + containerCount + " containers to complete");
 			int completedContainers = 0;
 			while (completedContainers < containerCount) {
-				AllocateResponse response = rmClient.allocate(0.2f);
+				AllocateResponse response = rmClient.allocate(jobManager.getCompleted());
 				for (ContainerStatus status : response
 						.getCompletedContainersStatuses()) {
 					++completedContainers;
@@ -232,6 +235,7 @@ public class GaLauncher implements Launcher {
 				}
 				Thread.sleep(100);
 			}
+			rmClient.allocate(1.0f);
 
 			LOGGER.info("All containers completed, unregister with ResourceManager");
 			rmClient.unregisterApplicationMaster(
