@@ -1,16 +1,17 @@
 package at.ac.uibk.dps.biohadoop.ga.config;
 
-public class GaAlgorithmConfig {
 
-	/**
-	 * Classname of algorithm to start
-	 */
-	private String algorithm;
+public class GaAlgorithmConfig {
 
 	/**
 	 * Filename for input data
 	 */
 	private String dataFile;
+	
+	/**
+	 * Classname for algorithm, that should be run
+	 */
+	private String algorithm;
 
 	/**
 	 * Number of genomes, that are used for computation
@@ -22,14 +23,6 @@ public class GaAlgorithmConfig {
 	 * (good enough) result is found
 	 */
 	private int maxIterations;
-
-	public String getAlgorithm() {
-		return algorithm;
-	}
-
-	public void setAlgorithm(String algorithm) {
-		this.algorithm = algorithm;
-	}
 
 	public String getDataFile() {
 		return dataFile;
@@ -53,6 +46,14 @@ public class GaAlgorithmConfig {
 
 	public void setMaxIterations(int maxIterations) {
 		this.maxIterations = maxIterations;
+	}
+
+	public String getAlgorithm() {
+		return algorithm;
+	}
+
+	public void setAlgorithm(String algorithm) {
+		this.algorithm = algorithm;
 	}
 	
 }

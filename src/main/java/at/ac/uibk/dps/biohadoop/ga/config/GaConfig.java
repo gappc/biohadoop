@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import at.ac.uibk.dps.biohadoop.hadoop.ApplicationConfig;
+import at.ac.uibk.dps.biohadoop.hadoop.AbstractBiohadoopConfig;
 
 /**
  * @author Christian Gapp
  * 
  */
-public class GaConfig extends ApplicationConfig {
+public class GaConfig extends AbstractBiohadoopConfig {
 
 	/**
 	 * List of classnames for endpoints, that YARN appliation master should
@@ -28,26 +28,10 @@ public class GaConfig extends ApplicationConfig {
 	 * Special configurations for the GA-TSP algorithm
 	 */
 	private GaAlgorithmConfig algorithmConfig = new GaAlgorithmConfig();
-	
+
 	public GaConfig() {
 	}
 	
-	public GaConfig(String applicationMaster) {
-		super(applicationMaster);
-	}
-	
-	public GaConfig(List<String> masterEndpoints, Map<String, Integer> workers) {
-		super();
-		this.masterEndpoints = masterEndpoints;
-		this.workers = workers;
-	}
-	
-	public GaConfig(String applicationMaster, List<String> masterEndpoints, Map<String, Integer> workers) {
-		super(applicationMaster);
-		this.masterEndpoints = masterEndpoints;
-		this.workers = workers;
-	}
-
 	public List<String> getMasterEndpoints() {
 		return masterEndpoints;
 	}

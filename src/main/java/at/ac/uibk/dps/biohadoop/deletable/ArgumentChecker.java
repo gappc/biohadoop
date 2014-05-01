@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.torename;
+package at.ac.uibk.dps.biohadoop.deletable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,7 @@ public class ArgumentChecker {
 			LOGGER.info(s);
 		}
 
-		if (args.length != 2) {
+		if (args.length != 1) {
 			LOGGER.error("Wrong number of arguments");
 			printArgumentUsage();
 			return false;
