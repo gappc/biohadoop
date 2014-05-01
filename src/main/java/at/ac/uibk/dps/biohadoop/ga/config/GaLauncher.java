@@ -81,7 +81,7 @@ public class GaLauncher implements Launcher {
 		}
 		
 		try {
-			GaConfig gaConfig = mapper.readValue(HdfsUtil.openFile(yarnConfiguration, configFilename), GaConfig.class);
+			GaConfig gaConfig = (GaConfig)getConfiguration(configFilename);
 			launchAlgorithm(gaConfig);
 			launchMasterEndpoints(gaConfig);
 			
