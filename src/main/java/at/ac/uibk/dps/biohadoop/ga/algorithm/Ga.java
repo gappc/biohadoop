@@ -122,7 +122,7 @@ public class Ga {
 
 			if (counter % logSteps == 0 || counter < 10) {
 				long endTime = System.currentTimeMillis();
-				LOGGER.info("Counter: {} ({} computations) | last {} computations took {} ms",
+				LOGGER.info("Counter: {} ({} worker computations) | last {} GA iterations took {} ms",
 						counter, 2 * counter * populationSize, logSteps, endTime - startTime);
 				startTime = endTime;
 				printGenome(tsp.getDistances(), population[0], citySize);

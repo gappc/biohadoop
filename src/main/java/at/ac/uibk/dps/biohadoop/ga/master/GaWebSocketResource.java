@@ -34,6 +34,7 @@ public class GaWebSocketResource implements WorkObserver {
 	private Task currentTask;
 	private ObjectMapper om = new ObjectMapper();
 	private Session resourceSession;
+	private boolean close = false;
 
 	public GaWebSocketResource() {
 		jobManager.addObserver(this);
@@ -47,9 +48,13 @@ public class GaWebSocketResource implements WorkObserver {
 	}
 
 	@OnClose
-	public void onClose(Session session) {
+	public void onClose(Session session) throws InterruptedException {
 		LOGGER.info("Closed Websocket connection to URI {}, sessionId={}",
 				session.getRequestURI(), session.getId());
+		if (!(currentTask instanceof StopTask)) {
+			jobManager.reScheduleTask(Ga.GA_WORK_QUEUE, currentTask);
+		}
+		close = true;
 	}
 
 	@OnMessage
@@ -101,10 +106,11 @@ public class GaWebSocketResource implements WorkObserver {
 
 	@Override
 	public void stop() {
-		if (resourceSession != null) {
+		if (resourceSession != null && !close) {
 			LOGGER.info("WebSocket closing for URI {} and sessionId {}",
 					resourceSession.getRequestURI(), resourceSession.getId());
-		} else {
+		}
+		if (resourceSession == null) {
 			LOGGER.info("WebSocket was not opened");
 		}
 	}
