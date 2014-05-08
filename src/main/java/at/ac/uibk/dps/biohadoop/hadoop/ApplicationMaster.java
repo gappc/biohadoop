@@ -4,6 +4,7 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.job.TaskSupervisor;
 import at.ac.uibk.dps.biohadoop.torename.ArgumentChecker;
 import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;
 import at.ac.uibk.dps.biohadoop.torename.Hostname;
@@ -14,7 +15,7 @@ public class ApplicationMaster {
 
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(ApplicationMaster.class);
-	
+
 	private Launcher launcher;
 	private YarnConfiguration yarnConfiguration = new YarnConfiguration();
 
@@ -34,6 +35,8 @@ public class ApplicationMaster {
 			return;
 		}
 		try {
+			new Thread(new TaskSupervisor(2000),
+					TaskSupervisor.class.getSimpleName()).start();
 			launcher.launch(args[0]);
 		} catch (LaunchException e) {
 			LOGGER.error("Error while launching application", e);
@@ -42,7 +45,7 @@ public class ApplicationMaster {
 
 	private boolean checkArguments(String[] args) {
 		LOGGER.info("Checking arguments");
-		
+
 		if (!ArgumentChecker.isArgumentCountValid(args, 1)) {
 			return false;
 		}
