@@ -4,12 +4,14 @@
   "includePaths" : [ "/biohadoop/lib/", "/biohadoop/conf/" ],
   "masterEndpoints" : [ "at.ac.uibk.dps.biohadoop.ga.master.socket.GaSocketServer", "at.ac.uibk.dps.biohadoop.ga.master.kryo.GaKryoResource", "at.ac.uibk.dps.biohadoop.server.UndertowServer" ],
   "workers" : {
-    "at.ac.uibk.dps.biohadoop.ga.worker.SocketGaWorker" : 3
+    "at.ac.uibk.dps.biohadoop.moead.worker.SocketMoeadWorker" : 3
   },
   "algorithmConfig" : {
-    "dataFile" : "/biohadoop/data/att48.tsp",
-    "algorithm" : "at.ac.uibk.dps.biohadoop.ga.algorithm.Ga",
-    "populationSize" : 10,
-    "maxIterations" : 20000
+    "outputFile" : "/biohadoop/data/moead-sol.out",
+    "algorithm" : "at.ac.uibk.dps.biohadoop.moead.algorithm.Moead",
+    "populationSize" : 300,
+    "neighborSize" : 290,
+    "genomeSize" : 100,
+    "maxIterations" : 1000
   }
 }

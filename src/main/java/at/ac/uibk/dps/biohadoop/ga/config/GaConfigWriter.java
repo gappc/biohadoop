@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.torename;
+package at.ac.uibk.dps.biohadoop.ga.config;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,9 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
-import at.ac.uibk.dps.biohadoop.ga.config.GaAlgorithmConfig;
-import at.ac.uibk.dps.biohadoop.ga.config.GaConfig;
-import at.ac.uibk.dps.biohadoop.ga.config.GaLauncher;
 import at.ac.uibk.dps.biohadoop.ga.master.kryo.GaKryoResource;
 import at.ac.uibk.dps.biohadoop.ga.master.socket.GaSocketServer;
 import at.ac.uibk.dps.biohadoop.ga.worker.SocketGaWorker;
@@ -24,10 +21,14 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-public class HadoopConfigWriter {
+public class GaConfigWriter {
 
-	private static boolean local = false;
-	private static String confOutputDir = "/sdb/studium/master-thesis/code/git/masterthesis/conf";
+	private static String CONF_OUTPUT_DIR = "/sdb/studium/master-thesis/code/git/masterthesis/conf";
+	private static String CONF_NAME = "biohadoop-ga";
+	private static String LOCAL_NAME = CONF_OUTPUT_DIR + "/" + CONF_NAME
+			+ "-local.json";
+	private static String REMOTE_NAME = CONF_OUTPUT_DIR + "/" + CONF_NAME
+			+ ".json";
 
 	public static void main(String[] args) throws JsonGenerationException,
 			JsonMappingException, IOException, ClassNotFoundException,
@@ -35,32 +36,34 @@ public class HadoopConfigWriter {
 
 		System.out.println(System.getProperty("local"));
 
-//		List<String> endpoints = Arrays.asList(GaSocketServer.class.getName(),
-//				GaKryoResource.class.getName(), UndertowServer.class.getName(),
-//				GaLocalResource.class.getName());
+		// List<String> endpoints =
+		// Arrays.asList(GaSocketServer.class.getName(),
+		// GaKryoResource.class.getName(), UndertowServer.class.getName(),
+		// GaLocalResource.class.getName());
 		List<String> endpoints = Arrays.asList(GaSocketServer.class.getName(),
 				GaKryoResource.class.getName(), UndertowServer.class.getName());
 		Map<String, Integer> workers = new HashMap<String, Integer>();
-		workers.put(SocketGaWorker.class.getName(), 2);
+		workers.put(SocketGaWorker.class.getName(), 3);
 		GaConfig config = new GaConfig();
 		config.setVersion("0.1");
 		config.setMasterEndpoints(endpoints);
 		config.setWorkers(workers);
 		config.setLauncherClass(GaLauncher.class.getName());
-		config.setAlgorithmConfig(buildAlgorithmConfig());
-		config.setIncludePaths(Arrays.asList("/biohadoop/lib/", "/biohadoop/conf/"));
+		config.setIncludePaths(Arrays.asList("/biohadoop/lib/",
+				"/biohadoop/conf/"));
 
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
-		if (local) {
-			mapper.writeValue(new File(confOutputDir + "/biohadoop-ga-local.json"), config);
-		} else {
-			mapper.writeValue(new File(confOutputDir + "/biohadoop-ga.json"), config);
-		}
+
+		config.setAlgorithmConfig(buildAlgorithmConfig(true));
+		mapper.writeValue(new File(LOCAL_NAME), config);
+		
+		config.setAlgorithmConfig(buildAlgorithmConfig(false));
+		mapper.writeValue(new File(REMOTE_NAME), config);
 		readAlgorithmConfig();
 	}
 
-	private static GaAlgorithmConfig buildAlgorithmConfig() {
+	private static GaAlgorithmConfig buildAlgorithmConfig(boolean local) {
 		GaAlgorithmConfig config = new GaAlgorithmConfig();
 		config.setAlgorithm(Ga.class.getName());
 		if (local) {
@@ -68,7 +71,7 @@ public class HadoopConfigWriter {
 		} else {
 			config.setDataFile("/biohadoop/data/att48.tsp");
 		}
-		config.setMaxIterations(10000);
+		config.setMaxIterations(20000);
 		config.setPopulationSize(10);
 		return config;
 	}
@@ -82,14 +85,8 @@ public class HadoopConfigWriter {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
 				false);
-		if (local) {
-			config = mapper.readValue(new File(confOutputDir + "/biohadoop-ga-local.json"),
-					config.getClass());
-		}
-		else {
-			config = mapper.readValue(new File(confOutputDir + "/biohadoop-ga.json"),
-					config.getClass());
-		}
+			config = mapper.readValue(new File(LOCAL_NAME), config.getClass());
+			config = mapper.readValue(new File(REMOTE_NAME), config.getClass());
 
 		System.out.println(config);
 		System.out.println(config.getClass().getName());

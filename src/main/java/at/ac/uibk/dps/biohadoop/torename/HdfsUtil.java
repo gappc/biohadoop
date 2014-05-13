@@ -3,6 +3,7 @@ package at.ac.uibk.dps.biohadoop.torename;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -40,6 +41,14 @@ public class HdfsUtil {
 		Path path = new Path(defaultFs + filename);
 		FileSystem fs = FileSystem.get(conf);
 		return fs.open(path);
+	}
+	
+	public static OutputStream createFile(YarnConfiguration conf, String filename)
+			throws IOException {
+		String defaultFs = conf.get("fs.defaultFS");
+		Path path = new Path(defaultFs + filename);
+		FileSystem fs = FileSystem.get(conf);
+		return fs.create(path);
 	}
 
 }
