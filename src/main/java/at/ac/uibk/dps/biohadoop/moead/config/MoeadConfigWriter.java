@@ -7,13 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import at.ac.uibk.dps.biohadoop.ga.config.GaLauncher;
-import at.ac.uibk.dps.biohadoop.ga.master.kryo.GaKryoResource;
-import at.ac.uibk.dps.biohadoop.ga.master.socket.GaSocketServer;
 import at.ac.uibk.dps.biohadoop.hadoop.Config;
 import at.ac.uibk.dps.biohadoop.moead.algorithm.Moead;
-import at.ac.uibk.dps.biohadoop.moead.worker.SocketMoeadWorker;
-import at.ac.uibk.dps.biohadoop.server.UndertowServer;
+import at.ac.uibk.dps.biohadoop.moead.master.local.MoeadLocalResource;
+import at.ac.uibk.dps.biohadoop.moead.worker.LocalMoeadWorker;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -35,15 +32,14 @@ public class MoeadConfigWriter {
 			JsonMappingException, IOException, ClassNotFoundException,
 			InstantiationException, IllegalAccessException {
 
-		List<String> endpoints = Arrays.asList(GaSocketServer.class.getName(),
-				GaKryoResource.class.getName(), UndertowServer.class.getName());
+		List<String> endpoints = Arrays.asList(MoeadLocalResource.class.getName());
 		Map<String, Integer> workers = new HashMap<String, Integer>();
-		workers.put(SocketMoeadWorker.class.getName(), 3);
+		workers.put(LocalMoeadWorker.class.getName(), 1);
 		MoeadConfig config = new MoeadConfig();
 		config.setVersion("0.1");
 		config.setMasterEndpoints(endpoints);
 		config.setWorkers(workers);
-		config.setLauncherClass(GaLauncher.class.getName());
+		config.setLauncherClass(MoeadLauncher.class.getName());
 		config.setIncludePaths(Arrays.asList("/biohadoop/lib/",
 				"/biohadoop/conf/"));
 
@@ -62,9 +58,9 @@ public class MoeadConfigWriter {
 		MoeadAlgorithmConfig config = new MoeadAlgorithmConfig();
 		config.setAlgorithm(Moead.class.getName());
 		if (local) {
-			config.setOutputFile("/tmp/moead-sol.out");
+			config.setOutputFile("/tmp/moead-sol.txt");
 		} else {
-			config.setOutputFile("/biohadoop/data/moead-sol.out");
+			config.setOutputFile("/biohadoop/data/moead-sol.txt");
 		}
 		
 		config.setMaxIterations(1000);
@@ -77,7 +73,7 @@ public class MoeadConfigWriter {
 	private static void readAlgorithmConfig() throws JsonParseException,
 			JsonMappingException, IOException, ClassNotFoundException,
 			InstantiationException, IllegalAccessException {
-		Config config = (Config) Class.forName(MoeadAlgorithmConfig.class.getName())
+		Config config = (Config) Class.forName(MoeadConfig.class.getName())
 				.newInstance();
 
 		ObjectMapper mapper = new ObjectMapper();

@@ -3,15 +3,14 @@ package at.ac.uibk.dps.biohadoop.moead.worker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.ga.DistancesGlobal;
-import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
-import at.ac.uibk.dps.biohadoop.ga.algorithm.GaFitness;
-import at.ac.uibk.dps.biohadoop.ga.algorithm.GaResult;
-import at.ac.uibk.dps.biohadoop.ga.algorithm.GaTask;
 import at.ac.uibk.dps.biohadoop.job.JobManager;
 import at.ac.uibk.dps.biohadoop.job.StopTask;
 import at.ac.uibk.dps.biohadoop.job.Task;
 import at.ac.uibk.dps.biohadoop.job.WorkObserver;
+import at.ac.uibk.dps.biohadoop.moead.algorithm.Functions;
+import at.ac.uibk.dps.biohadoop.moead.algorithm.Moead;
+import at.ac.uibk.dps.biohadoop.moead.algorithm.MoeadResult;
+import at.ac.uibk.dps.biohadoop.moead.algorithm.MoeadTask;
 
 public class LocalMoeadWorker implements Runnable, WorkObserver {
 
@@ -40,7 +39,7 @@ public class LocalMoeadWorker implements Runnable, WorkObserver {
 				}
 				
 				Task task = (Task) jobManager
-						.getTaskForExecution(Ga.GA_WORK_QUEUE);
+						.getTaskForExecution(Moead.MOEAD_WORK_QUEUE);
 
 				synchronized (stop) {
 					if (stop) {
@@ -50,21 +49,20 @@ public class LocalMoeadWorker implements Runnable, WorkObserver {
 				}
 
 				if (!(task instanceof StopTask)) {
-					GaTask gaTask = (GaTask) task;
-
-					double fitness = GaFitness.computeFitness(
-							DistancesGlobal.getDistances(), gaTask.getGenome());
-					GaResult gaResult = new GaResult(gaTask.getSlot(), fitness);
-					gaResult.setId(task.getId());
-					jobManager.writeResult(Ga.GA_RESULT_STORE, gaResult);
-					Thread.sleep(1);
+					MoeadTask moeadTask = (MoeadTask)task;
+					double[] fValues = new double[2];
+					fValues[0] = Functions.f1(moeadTask.getY());
+					fValues[1] = Functions.f2(moeadTask.getY());
+					
+					MoeadResult result = new MoeadResult(moeadTask.getId(), moeadTask.getSlot(), fValues);
+					jobManager.writeResult(Moead.MOEAD_RESULT_STORE, result);
 				}
 			} catch (InterruptedException e) {
 				LOGGER.error("Error while running LocalGaWorker", e);
 			}
 		}
 	}
-
+	
 	@Override
 	public void stop() {
 		synchronized (stop) {

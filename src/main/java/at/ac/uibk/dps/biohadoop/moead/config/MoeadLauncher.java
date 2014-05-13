@@ -64,12 +64,12 @@ public class MoeadLauncher implements Launcher {
 
 	@Override
 	public boolean isConfigurationValid(String configFilename) {
-		MoeadConfig gaConfig = (MoeadConfig) getConfiguration(configFilename);
-		if (gaConfig == null) {
+		MoeadConfig moeadConfig = (MoeadConfig) getConfiguration(configFilename);
+		if (moeadConfig == null) {
 			LOGGER.error("Could not read configuration {}", configFilename);
 			return false;
 		}
-		String outputFilename = gaConfig.getAlgorithmConfig().getOutputFile();
+		String outputFilename = moeadConfig.getAlgorithmConfig().getOutputFile();
 		if (!(HdfsUtil.fileExists(yarnConfiguration, configFilename))) {
 			LOGGER.error("Data file {} does not exist", outputFilename);
 			return false;
@@ -85,12 +85,12 @@ public class MoeadLauncher implements Launcher {
 		}
 
 		try {
-			MoeadConfig gaConfig = (MoeadConfig) getConfiguration(configFilename);
-			launchAlgorithm(gaConfig);
-			launchMasterEndpoints(gaConfig);
+			MoeadConfig moeadConfig = (MoeadConfig) getConfiguration(configFilename);
+			launchAlgorithm(moeadConfig);
+			launchMasterEndpoints(moeadConfig);
 
 			if (System.getProperty("local") == null) {
-				launchWorkers(gaConfig, configFilename);
+				launchWorkers(moeadConfig, configFilename);
 			}
 		} catch (Exception e) {
 			throw new LaunchException("Error while launching program", e);
@@ -110,9 +110,15 @@ public class MoeadLauncher implements Launcher {
 						ac.getMaxIterations(), ac.getPopulationSize(),
 						ac.getNeighborSize(), ac.getGenomeSize());
 				saveToFile(ac.getOutputFile(), solution);
+				try {
+					JobManager.getInstance().stopAllWorkers();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		});
-		algorithmRunner.setName("GaRunner");
+		algorithmRunner.setName("MoeadRunner");
 		algorithmRunner.start();
 	}
 
