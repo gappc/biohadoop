@@ -13,9 +13,9 @@ import javax.websocket.EncodeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.ga.algorithm.GaFitness;
-import at.ac.uibk.dps.biohadoop.ga.algorithm.GaResult;
-import at.ac.uibk.dps.biohadoop.ga.algorithm.GaTask;
+import at.ac.uibk.dps.biohadoop.moead.algorithm.Functions;
+import at.ac.uibk.dps.biohadoop.moead.algorithm.MoeadResult;
+import at.ac.uibk.dps.biohadoop.moead.algorithm.MoeadTask;
 import at.ac.uibk.dps.biohadoop.websocket.Message;
 import at.ac.uibk.dps.biohadoop.websocket.MessageType;
 
@@ -24,12 +24,11 @@ public class SocketMoeadWorker {
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(SocketMoeadWorker.class);
 
-	private double[][] distances;
+	private static String className = SocketMoeadWorker.class.getSimpleName();
 	private int logSteps = 1000;
 
 	public static void main(String[] args) throws Exception {
-		LOGGER.info("############# {} started ##############",
-				SocketMoeadWorker.class.getSimpleName());
+		LOGGER.info("############# {} started ##############", className);
 		LOGGER.debug("args.length: {}", args.length);
 		for (String s : args) {
 			LOGGER.debug(s);
@@ -37,15 +36,16 @@ public class SocketMoeadWorker {
 
 		String masterHostname = args[0];
 
-		LOGGER.info("############# {} client calls master at: {} #############",
-				SocketMoeadWorker.class.getSimpleName(), masterHostname);
+		LOGGER.info(
+				"############# {} client calls master at: {} #############",
+				className, masterHostname);
 		new SocketMoeadWorker(masterHostname, 30001);
 	}
 
 	public SocketMoeadWorker() {
 	}
-	
-//	TODO use try-with-resource
+
+	// TODO use try-with-resource
 	public SocketMoeadWorker(String hostname, int port)
 			throws DeploymentException, IOException, InterruptedException,
 			EncodeException, ClassNotFoundException {
@@ -67,8 +67,8 @@ public class SocketMoeadWorker {
 			counter++;
 			if (counter % logSteps == 0) {
 				long endTime = System.currentTimeMillis();
-				LOGGER.info("{}ms for last {} computations",
-						endTime - startTime, logSteps);
+				LOGGER.info("{}ms for last {} computations", endTime
+						- startTime, logSteps);
 				startTime = System.currentTimeMillis();
 				counter = 0;
 				os.reset();
@@ -79,22 +79,20 @@ public class SocketMoeadWorker {
 			Message message = (Message) is.readUnshared();
 
 			if (message.getType() == MessageType.REGISTRATION_RESPONSE) {
-				LOGGER.info("SocketGaWorker registration successful");
+				LOGGER.info("{} registration successful", className);
 				messageType = MessageType.WORK_INIT_REQUEST;
 				response = null;
 			}
 
 			if (message.getType() == MessageType.WORK_INIT_RESPONSE) {
-				LOGGER.debug("SocketGaWorker WORK_INIT_RESPONSE");
-				Object[] data = (Object[]) message.getData();
-				distances = (double[][]) data[0];
-				GaTask task = (GaTask) data[1];
+				LOGGER.debug("{} WORK_INIT_RESPONSE", className);
+				MoeadTask task = (MoeadTask) message.getData();
 				messageType = MessageType.WORK_REQUEST;
 				response = computeResult(task);
 			}
 			if (message.getType() == MessageType.WORK_RESPONSE) {
-				LOGGER.debug("SocketGaWorker WORK_RESPONSE");
-				GaTask task = (GaTask) message.getData();
+				LOGGER.debug("{} WORK_RESPONSE", className);
+				MoeadTask task = (MoeadTask) message.getData();
 				messageType = MessageType.WORK_REQUEST;
 				response = computeResult(task);
 			}
@@ -109,8 +107,7 @@ public class SocketMoeadWorker {
 		os.close();
 		clientSocket.close();
 
-		LOGGER.info("############# {} stopped #############",
-				SocketMoeadWorker.class.getSimpleName());
+		LOGGER.info("############# {} stopped #############", className);
 	}
 
 	private void register(ObjectOutputStream os) throws EncodeException,
@@ -120,11 +117,12 @@ public class SocketMoeadWorker {
 		os.flush();
 	}
 
-	private GaResult computeResult(GaTask task) {
-		GaResult gaResult = new GaResult();
-		gaResult.setSlot(task.getSlot());
-		gaResult.setResult(GaFitness.computeFitness(distances, task.getGenome()));
-		gaResult.setId(task.getId());
-		return gaResult;
+	private MoeadResult computeResult(MoeadTask task) {
+		double[] result = new double[2];
+		result[0] = Functions.f1(task.getY());
+		result[1] = Functions.f2(task.getY());
+		MoeadResult moeadResult = new MoeadResult(task.getId(), task.getSlot(),
+				result);
+		return moeadResult;
 	}
 }

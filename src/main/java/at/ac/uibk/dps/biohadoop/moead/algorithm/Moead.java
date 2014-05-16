@@ -25,7 +25,7 @@ public class Moead {
 	private double minF2 = Double.MAX_VALUE;
 	private double maxF2 = -Double.MAX_VALUE;
 
-	public List<List<Double>> moead(int iterations, int N, int neighborSize,
+	public List<List<Double>> moead(int maxIterations, int N, int neighborSize,
 			int genomeSize) {
 		long startTime = System.currentTimeMillis();
 		
@@ -95,6 +95,8 @@ public class Moead {
 				// Dosen't work as expected, so was commented out
 				// updateEP(EP, y, weightVectors[i], z);
 			}
+			
+			jobManager.setCompleted((float)counter / (float)maxIterations);
 
 			counter++;
 			if (counter % 100 == 0) {
@@ -103,7 +105,7 @@ public class Moead {
 						counter, logSteps, endTime - startTime);
 				startTime = endTime;
 			}
-			if (counter >= iterations) {
+			if (counter >= maxIterations) {
 				end = true;
 			}
 		}

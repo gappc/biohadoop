@@ -41,13 +41,9 @@ public class MoeadSocketServerRunnable implements WorkObserver, Runnable {
 				}
 			}
 			serverSocket.close();
-//			jobManager.getTaskForExecution(Ga.GA_WORK_QUEUE);
 		} catch (IOException e) {
 			LOGGER.error("ServerSocket error", e);
 		}
-//		catch (InterruptedException e) {
-//			LOGGER.error("Couldn't get task for execution", e);
-//		}
 	}
 	
 	@Override

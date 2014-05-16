@@ -9,13 +9,12 @@ import java.net.Socket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.ga.DistancesGlobal;
-import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
-import at.ac.uibk.dps.biohadoop.ga.algorithm.GaResult;
 import at.ac.uibk.dps.biohadoop.job.JobManager;
 import at.ac.uibk.dps.biohadoop.job.StopTask;
 import at.ac.uibk.dps.biohadoop.job.Task;
 import at.ac.uibk.dps.biohadoop.job.WorkObserver;
+import at.ac.uibk.dps.biohadoop.moead.algorithm.Moead;
+import at.ac.uibk.dps.biohadoop.moead.algorithm.MoeadResult;
 import at.ac.uibk.dps.biohadoop.websocket.Message;
 import at.ac.uibk.dps.biohadoop.websocket.MessageType;
 
@@ -67,16 +66,15 @@ public class MoeadSocketResource implements Runnable, WorkObserver {
 				}
 				if (message.getType() == MessageType.WORK_INIT_REQUEST) {
 					currentTask = (Task) jobManager
-							.getTaskForExecution(Ga.GA_WORK_QUEUE);
+							.getTaskForExecution(Moead.MOEAD_WORK_QUEUE);
 					messageType = MessageType.WORK_INIT_RESPONSE;
-					response = new Object[] {
-							DistancesGlobal.getDistances(), currentTask };
+					response = currentTask;
 				}
 				if (message.getType() == MessageType.WORK_REQUEST) {
-					GaResult result = (GaResult)message.getData();
-					jobManager.writeResult(Ga.GA_RESULT_STORE, result);
+					MoeadResult result = (MoeadResult)message.getData();
+					jobManager.writeResult(Moead.MOEAD_RESULT_STORE, result);
 					currentTask = (Task) jobManager
-							.getTaskForExecution(Ga.GA_WORK_QUEUE);
+							.getTaskForExecution(Moead.MOEAD_WORK_QUEUE);
 
 					if (currentTask instanceof StopTask) {
 						messageType = MessageType.SHUTDOWN;
@@ -89,9 +87,6 @@ public class MoeadSocketResource implements Runnable, WorkObserver {
 				os.writeUnshared(new Message(messageType, response));
 				os.flush();
 				
-//				kryo.writeObject(output, new Message(messageType, response));
-//				output.flush();
-
 				if (messageType == MessageType.SHUTDOWN) {
 					break;
 				}
@@ -102,7 +97,7 @@ public class MoeadSocketResource implements Runnable, WorkObserver {
 			LOGGER.error("Error while running {} socket server", className, e);
 			try {
 				jobManager
-						.reScheduleTask(Ga.GA_WORK_QUEUE, currentTask);
+						.reScheduleTask(Moead.MOEAD_WORK_QUEUE, currentTask);
 			} catch (InterruptedException e1) {
 				LOGGER.error("Could not reschedule task at {}", className, e);
 			}

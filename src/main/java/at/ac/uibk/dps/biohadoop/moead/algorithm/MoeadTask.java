@@ -1,10 +1,14 @@
 package at.ac.uibk.dps.biohadoop.moead.algorithm;
 
+import java.io.Serializable;
+
 import at.ac.uibk.dps.biohadoop.job.Slotted;
 import at.ac.uibk.dps.biohadoop.job.Task;
 
-public class MoeadTask implements Task, Slotted {
+public class MoeadTask implements Task, Slotted, Serializable {
 
+	private static final long serialVersionUID = 9203471831359558968L;
+	
 	private long id;
 	private int slot;
 	private double[] y;
