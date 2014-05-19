@@ -30,7 +30,7 @@ public class Moead {
 		long startTime = System.currentTimeMillis();
 		
 		JobManager jobManager = JobManager.getInstance();
-		jobManager.setNewStoreSize(300);
+		jobManager.setNewStoreSize(N);
 		Monitor monitor = jobManager.getResultStoreMonitor(MOEAD_RESULT_STORE);
 
 		double[][] weightVectors = Initializer.generateWeightVectors(N);
@@ -77,8 +77,7 @@ public class Moead {
 					monitor.setWasSignalled(false);
 				}
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOG.error("Error while schduling task", e);
 			}
 			
 			Task[] results = jobManager.readResult(MOEAD_RESULT_STORE);
