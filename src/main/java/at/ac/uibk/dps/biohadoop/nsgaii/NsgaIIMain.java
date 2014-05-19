@@ -4,9 +4,9 @@ import at.ac.uibk.dps.biohadoop.nsgaii.algorithm.NsgaII;
 
 public class NsgaIIMain {
 	
-	private static final int ITERATIONS = 250;
-	private static final int POPULATION_SIZE = 500;
-	private static final int GENOME_SIZE = 3;
+	private static final int ITERATIONS = 500;
+	private static final int POPULATION_SIZE = 300;
+	private static final int GENOME_SIZE = 300;
 	
 	public static void main(String[] args) {
 		NsgaII nsgaII = new NsgaII();
