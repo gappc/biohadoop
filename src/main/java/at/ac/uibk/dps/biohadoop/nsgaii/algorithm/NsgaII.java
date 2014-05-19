@@ -1,22 +1,39 @@
 package at.ac.uibk.dps.biohadoop.nsgaii.algorithm;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.job.JobManager;
+import at.ac.uibk.dps.biohadoop.job.Task;
+import at.ac.uibk.dps.biohadoop.moead.algorithm.MoeadResult;
+import at.ac.uibk.dps.biohadoop.moead.algorithm.MoeadTask;
+import at.ac.uibk.dps.biohadoop.queue.Monitor;
+
 public class NsgaII {
+
+	public static final String NSGAII_WORK_QUEUE = "NSGAII_WORK_QUEUE";
+	public static final String NSGAII_RESULT_STORE = "NSGAII_RESULT_STORE";
 
 	private static final Logger LOG = LoggerFactory.getLogger(NsgaII.class);
 	private int logSteps = 100;
 
-	public void run(int maxIterations, int populationSize, int genomeSize) {
+	private JobManager jobManager;
+	private Monitor monitor;
+
+	public List<List<Double>> run(int maxIterations, int populationSize,
+			int genomeSize) {
 		long startTime = System.currentTimeMillis();
+
+		jobManager = JobManager.getInstance();
+		jobManager.setNewStoreSize(populationSize * 2);
+		monitor = jobManager.getResultStoreMonitor(NSGAII_RESULT_STORE);
 
 		// Initialize population, where first half (of size populationSize) is
 		// filled with random numbers, and second half is initialized with
@@ -24,29 +41,27 @@ public class NsgaII {
 		double[][] population = initializePopulation(populationSize * 2,
 				genomeSize);
 
-		double[][] functionValues = new double[populationSize * 2][2];
-		computeFunctionValues(population, functionValues, 0, populationSize);
+		double[][] objectiveValues = new double[populationSize * 2][2];
+		computeObjectiveValues(population, objectiveValues, 0, populationSize);
 
 		int counter = 0;
 		boolean end = false;
 		while (!end) {
-			produceOffsprings(population);
-			computeFunctionValues(population, functionValues, populationSize,
+			produceOffsprings(population, objectiveValues);
+			computeObjectiveValues(population, objectiveValues, populationSize,
 					populationSize * 2);
 
-			List<List<Integer>> nondominatedSortedFront = fastNondominatedSort(
-					population, functionValues);
-			List<List<Double>> crowdingDistances = crowdingDistance(population,
-					nondominatedSortedFront);
+			NondominatedSortResult nondominatedSortResult = fastNondominatedSort(
+					population, objectiveValues, populationSize * 2);
+			double[] crowdingDistances = crowdingDistance(objectiveValues,
+					nondominatedSortResult.getFronts());
 			double[][] newPopulation = new double[populationSize * 2][genomeSize];
 
 			int currentRank = 0;
 			int newPopSize = 0;
 			while (newPopSize < populationSize) {
-				List<Integer> front = nondominatedSortedFront.get(currentRank);
-				// System.out.println("newPopSize: " + newPopSize
-				// + " currentRank: " + currentRank + " frontSize: "
-				// + front.size());
+				List<Integer> front = nondominatedSortResult.getFronts().get(
+						currentRank);
 				// if there is place enough for a complete rank, just insert it
 				if (newPopSize + front.size() <= populationSize) {
 					for (int genome : front) {
@@ -56,10 +71,12 @@ public class NsgaII {
 				// if there is not enough place, use crowding distance to choose
 				// best solutions from current front
 				else {
-					List<Double> distances = crowdingDistances.get(currentRank);
 					List<TupleSort> tuples = new ArrayList<TupleSort>();
-					for (int i = 0; i < distances.size(); i++) {
-						tuples.add(new TupleSort(distances.get(i), front.get(i)));
+					for (int i = 0; i < front.size(); i++) {
+						int index = front.get(i);
+						TupleSort tuple = new TupleSort(
+								crowdingDistances[index], index);
+						tuples.add(tuple);
 					}
 					Collections.sort(tuples);
 					Collections.reverse(tuples);
@@ -75,7 +92,10 @@ public class NsgaII {
 
 			population = newPopulation;
 
-			computeFunctionValues(population, functionValues, 0, populationSize);
+			computeObjectiveValues(population, objectiveValues, 0,
+					populationSize);
+
+			jobManager.setCompleted((float) counter / (float) maxIterations);
 
 			counter++;
 			if (counter % 100 == 0) {
@@ -87,14 +107,6 @@ public class NsgaII {
 			if (counter >= maxIterations) {
 				end = true;
 			}
-			System.out.println("\n-------" + counter
-					+ "-----------------------------\n");
-			// for (int i = 0; i < populationSize; i++) {
-			// System.out.println(functionValues[i][0] + " " +
-			// functionValues[i][1]);
-			// }
-			// System.out.println("\n-------" + counter
-			// + "-----------------------------\n");
 		}
 
 		// normalize
@@ -103,57 +115,28 @@ public class NsgaII {
 		double minF2 = Double.MAX_VALUE;
 		double maxF2 = -Double.MAX_VALUE;
 		for (int i = 0; i < populationSize; i++) {
-			if (functionValues[i][0] < minF1) {
-				minF1 = functionValues[i][0];
+			if (objectiveValues[i][0] < minF1) {
+				minF1 = objectiveValues[i][0];
 			}
-			if (functionValues[i][0] > maxF1) {
-				maxF1 = functionValues[i][0];
+			if (objectiveValues[i][0] > maxF1) {
+				maxF1 = objectiveValues[i][0];
 			}
-			if (functionValues[i][1] < minF2) {
-				minF2 = functionValues[i][1];
+			if (objectiveValues[i][1] < minF2) {
+				minF2 = objectiveValues[i][1];
 			}
-			if (functionValues[i][1] > maxF2) {
-				maxF2 = functionValues[i][1];
+			if (objectiveValues[i][1] > maxF2) {
+				maxF2 = objectiveValues[i][1];
 			}
 		}
-		try (BufferedWriter bw = new BufferedWriter(new FileWriter(
-				"/tmp/nsgaii-sol.txt"))) {
-			for (int i = 0; i < populationSize; i++) {
-				String output = ((functionValues[i][0] - minF1) / (maxF1 - minF1))
-						+ " "
-						+ ((functionValues[i][1] - minF2) / (maxF2 - minF2));
-				System.out.println(output);
-				bw.write(output + "\n");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 
-	}
-
-	// no binary tournament selection for parents implemented (would need
-	// information about rank and crowding distance). Instead, random parent
-	// selection is used
-	private void produceOffsprings(double[][] population) {
-		Random rand = new Random();
-		int populationSize = population.length / 2;
-		int genomeSize = population[0].length;
+		List<List<Double>> result = new ArrayList<List<Double>>();
 		for (int i = 0; i < populationSize; i++) {
-
-			// recombine
-			int parent1 = rand.nextInt(populationSize);
-			int parent2 = rand.nextInt(populationSize);
-			for (int j = 0; j < genomeSize; j++) {
-				population[i + populationSize][j] = (population[parent1][j] + population[parent2][j]) / 2.0;
-			}
-
-			// mutate; parameters taken from
-			// http://repository.ias.ac.in/83498/1/2-a.pdf, page 8
-			if (rand.nextDouble() > 1 / populationSize) {
-				int pos = rand.nextInt(genomeSize);
-				population[i + populationSize][pos] = rand.nextDouble();
-			}
+			List<Double> solution = new ArrayList<Double>();
+			solution.add((objectiveValues[i][0] - minF1) / (maxF1 - minF1));
+			solution.add((objectiveValues[i][1] - minF2) / (maxF2 - minF2));
+			result.add(solution);
 		}
+		return result;
 	}
 
 	private double[][] initializePopulation(int populationSize, int genomeSize) {
@@ -167,54 +150,102 @@ public class NsgaII {
 		return population;
 	}
 
-	// public static void main(String[] args) {
-	// NsgaII nsgaII = new NsgaII();
-	// double[] A = new double[] { 1.0, 10.0 };
-	// double[] A1 = new double[] { 1.0, 7.0 };
-	// double[] B = new double[] { 3.0, 2.0 };
-	// double[] C = new double[] { 2.0, 3.0 };
-	// double[] D = new double[] { 4.0, 5.0 };
-	// double[] E = new double[] { 5.0, 4.0 };
-	// System.out.println(nsgaII.dominates(A, D));
-	// System.out.println(nsgaII.dominates(B, D));
-	//
-	// double[][] all = new double[][] { A, B, C, D, E };
-	//
-	// List<List<Integer>> frontRanking = nsgaII.fastNondominatedSort(all);
-	// System.out.println(frontRanking);
-	//
-	// List<List<Double>> distances = nsgaII.crowdingDistanceAssignment(all,
-	// frontRanking);
-	// System.out.println(distances);
-	// }
+	private void produceOffsprings(double[][] population,
+			double[][] objectiveValues) {
+		Random rand = new Random();
+		int populationSize = population.length / 2;
+		int genomeSize = population[0].length;
+
+		NondominatedSortResult nondominatedSortedFront = fastNondominatedSort(
+				population, objectiveValues, populationSize);
+		double[] crowdingDistances = crowdingDistance(objectiveValues,
+				nondominatedSortedFront.getFronts());
+
+		for (int i = 0; i < populationSize; i++) {
+			// int[] parents = parentSelectionRandom(populationSize);
+			int[] parents = parentSelectionTournament(populationSize,
+					nondominatedSortedFront, crowdingDistances);
+			for (int j = 0; j < genomeSize; j++) {
+				population[i + populationSize][j] = (population[parents[0]][j] + population[parents[1]][j]) / 2.0;
+			}
+
+			// mutate; parameters taken from
+			// http://repository.ias.ac.in/83498/1/2-a.pdf, page 8
+			if (rand.nextDouble() > 1 / populationSize) {
+				for (int j = 0; j < populationSize / 30; j++) {
+					int pos = rand.nextInt(genomeSize);
+					population[i + populationSize][pos] = rand.nextDouble();
+				}
+			}
+		}
+	}
+
+	private int[] parentSelectionRandom(int populationSize) {
+		Random rand = new Random();
+		int[] parents = new int[2];
+		parents[0] = rand.nextInt(populationSize);
+		parents[1] = rand.nextInt(populationSize);
+		return parents;
+	}
+
+	private int[] parentSelectionTournament(final int populationSize,
+			final NondominatedSortResult nondominatedSortedFront,
+			final double[] crowdingDistances) {
+		Random rand = new Random();
+		int[] parents = new int[2];
+
+		// increase pool size to get from binary tournament to higher order
+		int poolSize = 2;
+		Integer[] parentPool = new Integer[poolSize];
+
+		for (int i = 0; i < 2; i++) {
+			for (int j = 0; j < poolSize; j++) {
+				parentPool[j] = rand.nextInt(populationSize);
+			}
+
+			Arrays.sort(parentPool, new Comparator<Integer>() {
+				@Override
+				public int compare(Integer o1, Integer o2) {
+					int ranking1 = nondominatedSortedFront.getElementsRanking()[o1];
+					int ranking2 = nondominatedSortedFront.getElementsRanking()[o2];
+
+					if (ranking1 != ranking2) {
+						return ranking1 - ranking2;
+					}
+
+					return new Double(Math.signum(crowdingDistances[o1]
+							- crowdingDistances[o2])).intValue();
+				}
+			});
+			parents[i] = parentPool[0];
+		}
+		return parents;
+	}
 
 	// taken from http://repository.ias.ac.in/83498/1/2-a.pdf
-	private List<List<Integer>> fastNondominatedSort(double[][] population,
-			double[][] functionValues) {
-		// double[][] functionValues =
-		// computeFunctionValues(combinedPopulation);
-		// double[][] functionValues = combinedPopulation;
+	private NondominatedSortResult fastNondominatedSort(double[][] population,
+			double[][] objectiveValues, int size) {
+		int[] elementRanking = new int[size];
 
-		int popSize = population.length;
 		List<List<Integer>> S = new ArrayList<List<Integer>>();
 		List<List<Integer>> frontRanking = new ArrayList<List<Integer>>();
-		for (int i = 0; i < popSize; i++) {
+		for (int i = 0; i < size + 1; i++) {
 			S.add(new ArrayList<Integer>());
 			frontRanking.add(new ArrayList<Integer>());
 		}
 
-		int[] n = new int[popSize];
+		int[] n = new int[size];
 
-		for (int i = 0; i < popSize; i++) {
-			for (int j = 0; j < popSize; j++) {
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
 				// if p (= combinedPopulation[i]) dominates q (=
 				// combinedPopulation[j]) then include q in Sp (which is S[i])
-				if (dominates(functionValues[i], functionValues[j])) {
+				if (dominates(objectiveValues[i], objectiveValues[j])) {
 					// solution i dominates solution j
 					S.get(i).add(j);
 				}
 				// if p is dominated by q then increment np (which is n[i])
-				else if (dominates(functionValues[j], functionValues[i])) {
+				else if (dominates(objectiveValues[j], objectiveValues[i])) {
 					// solution i is dominated by an additional other solution
 					n[i]++;
 				}
@@ -238,17 +269,39 @@ public class NsgaII {
 			}
 			i++;
 			frontRanking.set(i, H);
+			for (int index : H) {
+				elementRanking[index] = i;
+			}
 		}
-		return frontRanking;
+		return new NondominatedSortResult(frontRanking, elementRanking);
 	}
 
-	private double[][] computeFunctionValues(double[][] population,
-			double[][] functionValues, int start, int end) {
+	private double[][] computeObjectiveValues(double[][] population,
+			double[][] objectiveValues, int start, int end) {
 		for (int i = start; i < end; i++) {
-			functionValues[i][0] = Functions.f1(population[i]);
-			functionValues[i][1] = Functions.f2(population[i]);
+			objectiveValues[i][0] = Functions.f1(population[i]);
+			objectiveValues[i][1] = Functions.f2(population[i]);
 		}
-		return functionValues;
+//		try {
+//			for (int i = start; i < end; i++) {
+//				NsgaIITask task = new NsgaIITask(i, population[i]);
+//				jobManager.scheduleTask(NSGAII_WORK_QUEUE, task);
+//			}
+//			synchronized (monitor) {
+//				if (!monitor.isWasSignalled()) {
+//					monitor.wait();
+//				}
+//				monitor.setWasSignalled(false);
+//			}
+//
+//			Task[] results = jobManager.readResult(NSGAII_RESULT_STORE);
+//			for (int i = start; i < end; i++) {
+//				objectiveValues[i] = ((NsgaIIResult) results[i]).getResult();
+//			}
+//		} catch (InterruptedException e) {
+//			LOG.error("Error while schduling task", e);
+//		}
+		return objectiveValues;
 	}
 
 	private boolean dominates(double[] ds, double[] ds2) {
@@ -264,48 +317,46 @@ public class NsgaII {
 		return lesser;
 	}
 
-	private List<List<Double>> crowdingDistance(double[][] functionValue,
+	private double[] crowdingDistance(double[][] objectiveValues,
 			List<List<Integer>> frontRanking) {
-		List<List<Double>> result = new ArrayList<List<Double>>();
+
+		double[] result = new double[objectiveValues.length];
+
 		for (List<Integer> front : frontRanking) {
-			List<Double> distances = new ArrayList<Double>();
-			result.add(distances);
 
 			int l = front.size();
 			if (l > 0) {
-				double[] distance = new double[l];
 				// m is objective
-				for (int m = 0; m < functionValue[0].length; m++) {
-					int[] sorted = sortAccordingObjective(functionValue, front,
-							m);
-					distance[0] = Double.MAX_VALUE;
-					distance[l - 1] = Double.MAX_VALUE;
+				for (int m = 0; m < objectiveValues[0].length; m++) {
+					int[] sorted = sortAccordingObjective(objectiveValues,
+							front, m);
+					result[sorted[0]] = Double.MAX_VALUE;
+					result[sorted[l - 1]] = Double.MAX_VALUE;
 
-					double fmin = functionValue[sorted[0]][m];
-					double fmax = functionValue[sorted[l - 1]][m];
+					double fmin = objectiveValues[sorted[0]][m];
+					double fmax = objectiveValues[sorted[l - 1]][m];
 
 					for (int i = 1; i < l - 1; i++) {
-						distance[i] += (functionValue[sorted[i + 1]][m] - functionValue[sorted[i - 1]][m])
-								/ (fmax - fmin);
+						result[sorted[i]] += (objectiveValues[sorted[i + 1]][m] - objectiveValues[sorted[i - 1]][m]);
+						// / (fmax - fmin);
 					}
 				}
-				for (double d : distance) {
-					distances.add(d);
-				}
+			} else {
+				break;
 			}
 		}
 
 		return result;
 	}
 
-	private int[] sortAccordingObjective(double[][] functionValue,
+	private int[] sortAccordingObjective(double[][] objectiveValues,
 			List<Integer> front, int m) {
 		int[] result = new int[front.size()];
 
 		List<TupleSort> objectiveSorts = new ArrayList<TupleSort>();
 		for (int i = 0; i < front.size(); i++) {
-			objectiveSorts
-					.add(new TupleSort(functionValue[i][m], front.get(i)));
+			objectiveSorts.add(new TupleSort(objectiveValues[i][m], front
+					.get(i)));
 		}
 
 		Collections.sort(objectiveSorts);
