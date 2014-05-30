@@ -23,12 +23,14 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaFitness;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaResult;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaTask;
-import at.ac.uibk.dps.biohadoop.websocket.Message;
+import at.ac.uibk.dps.biohadoop.jobmanager.Task;
+import at.ac.uibk.dps.biohadoop.jobmanager.remote.Message;
+import at.ac.uibk.dps.biohadoop.jobmanager.remote.MessageType;
 import at.ac.uibk.dps.biohadoop.websocket.MessageDecoder;
-import at.ac.uibk.dps.biohadoop.websocket.MessageType;
 import at.ac.uibk.dps.biohadoop.websocket.WebSocketEncoder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.primitives.Ints;
 
 @ClientEndpoint(encoders = WebSocketEncoder.class, decoders = MessageDecoder.class)
 public class WebSocketWorker {
@@ -78,19 +80,6 @@ public class WebSocketWorker {
 		session.getBasicRemote().sendObject(message);
 	}
 
-	private double[][] convertDistances(Object data) {
-		@SuppressWarnings("unchecked")
-		List<List<Double>> input = (List<List<Double>>) data;
-		double[][] result = new double[input.size()][input.size()];
-		for (int i = 0; i < input.size(); i++) {
-			for (int j = i; j < input.size(); j++) {
-				result[i][j] = input.get(i).get(j);
-				result[j][i] = input.get(i).get(j);
-			}
-		}
-		return result;
-	}
-
 	@OnOpen
 	public void onOpen(Session session) throws IOException {
 		LOGGER.info("Opened connection to URI {}, sessionId={}",
@@ -111,8 +100,8 @@ public class WebSocketWorker {
 		counter++;
 		if (counter % logSteps == 0) {
 			long endTime = System.currentTimeMillis();
-			LOGGER.info("{}ms for last {} computations",
-					endTime - startTime, logSteps);
+			LOGGER.info("{}ms for last {} computations", endTime - startTime,
+					logSteps);
 			startTime = System.currentTimeMillis();
 			counter = 0;
 		}
@@ -121,50 +110,38 @@ public class WebSocketWorker {
 				session.getRequestURI(), session.getId(), message);
 
 		MessageType messageType = MessageType.NONE;
-		Object response = null;
 
 		if (message.getType() == MessageType.REGISTRATION_RESPONSE) {
 			LOGGER.debug("Registration successful for URI {} and sessionId {}",
 					session.getRequestURI(), session.getId());
+			Task<List<List<Double>>> task = om.convertValue(message.getPayload(),
+					Task.class);
+
+			List<List<Double>> inputDistances = task.getData();
+			convertDistances(inputDistances);
+
 			messageType = MessageType.WORK_INIT_REQUEST;
-			response = null;
+			return new Message(messageType, null);
 		}
 
-		if (message.getType() == MessageType.WORK_INIT_RESPONSE) {
-			LOGGER.debug("WORK_INIT_RESPONSE for URI {} and sessionId {}",
+		if (message.getType() == MessageType.WORK_INIT_RESPONSE
+				|| message.getType() == MessageType.WORK_RESPONSE) {
+			LOGGER.debug("{} for URI {} and sessionId {}", message.getType(),
 					session.getRequestURI(), session.getId());
 
-			@SuppressWarnings("unchecked")
-			List<Object> data = (List<Object>) message.getData();
-			distances = convertDistances(data.get(0));
-			GaTask task = om.convertValue(data.get(1), GaTask.class);
+			Task<List<Integer>> inputTask = om.convertValue(message.getPayload(),
+					Task.class);
+			Task<Double> response = computeResult(inputTask);
 
-			messageType = MessageType.WORK_REQUEST;
-			response = computeResult(task);
-		}
-
-		if (message.getType() == MessageType.WORK_RESPONSE) {
-			LOGGER.debug("WORK_RESPONSE for URI {} and sessionId {}",
-					session.getRequestURI(), session.getId());
-			GaTask task = om.convertValue(message.getData(), GaTask.class);
-
-			messageType = MessageType.WORK_REQUEST;
-			response = computeResult(task);
+			return new Message<Double>(MessageType.WORK_REQUEST, response);
 		}
 		if (message.getType() == MessageType.SHUTDOWN) {
 			LOGGER.info("Got SHUTDOWN message, now shutting down");
 			session.close();
 			latch.countDown();
 		}
-		return new Message(messageType, response);
-	}
-
-	private GaResult computeResult(GaTask task) {
-		GaResult gaResult = new GaResult();
-		gaResult.setSlot(task.getSlot());
-		gaResult.setResult(GaFitness.computeFitness(distances, task.getGenome()));
-		gaResult.setId(task.getId());
-		return gaResult;
+		System.out.println("!!!!!!!! SHOULD NOT COME HERE !!!!!!!");
+		return new Message(messageType, null);
 	}
 
 	@OnError
@@ -172,5 +149,24 @@ public class WebSocketWorker {
 		LOGGER.error("Error for URI {}, sessionId={}", session.getRequestURI(),
 				session.getId(), t);
 		latch.countDown();
+	}
+	
+	private void convertDistances(List<List<Double>> inputDistances) {
+		int length1 = inputDistances.size();
+		int length2 = length1 != 0 ? inputDistances.get(0).size() : 0;
+		distances = new double[length1][length2];
+		for (int i = 0; i < length1; i++) {
+			for (int j = i; j < length2; j++) {
+				distances[i][j] = inputDistances.get(i).get(j);
+				distances[j][i] = inputDistances.get(j).get(i);
+			}
+		}
+	}
+
+	private Task<Double> computeResult(Task<List<Integer>> task) {
+		int[] data = Ints.toArray(task.getData());
+		double fitness = GaFitness.computeFitness(distances, data);
+		Task<Double> response = new Task<Double>(task.getTaskId(), fitness);
+		return response;
 	}
 }
