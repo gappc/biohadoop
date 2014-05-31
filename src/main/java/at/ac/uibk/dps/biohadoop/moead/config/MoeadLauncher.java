@@ -31,10 +31,13 @@ import org.apache.hadoop.yarn.util.Records;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.applicationmanager.Application;
+import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationId;
+import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
+import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationState;
 import at.ac.uibk.dps.biohadoop.hadoop.Config;
 import at.ac.uibk.dps.biohadoop.hadoop.LaunchException;
 import at.ac.uibk.dps.biohadoop.hadoop.Launcher;
-import at.ac.uibk.dps.biohadoop.job.JobManager;
 import at.ac.uibk.dps.biohadoop.moead.algorithm.Moead;
 import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;
 import at.ac.uibk.dps.biohadoop.torename.Hostname;
@@ -49,6 +52,8 @@ public class MoeadLauncher implements Launcher {
 
 	private YarnConfiguration yarnConfiguration = new YarnConfiguration();
 	private ObjectMapper mapper = new ObjectMapper();
+
+	private ApplicationId applicationId;
 
 	@Override
 	public Config getConfiguration(String configFilename) {
@@ -69,7 +74,8 @@ public class MoeadLauncher implements Launcher {
 			LOGGER.error("Could not read configuration {}", configFilename);
 			return false;
 		}
-		String outputFilename = moeadConfig.getAlgorithmConfig().getOutputFile();
+		String outputFilename = moeadConfig.getAlgorithmConfig()
+				.getOutputFile();
 		if (!(HdfsUtil.fileExists(yarnConfiguration, configFilename))) {
 			LOGGER.error("Data file {} does not exist", outputFilename);
 			return false;
@@ -101,20 +107,31 @@ public class MoeadLauncher implements Launcher {
 		final MoeadAlgorithmConfig ac = ((MoeadConfig) config)
 				.getAlgorithmConfig();
 
+		Application application = new Application("MOEAD-"
+				+ Thread.currentThread().getName());
+		final ApplicationManager applicationManager = ApplicationManager
+				.getInstance();
+		final ApplicationId applicationId = applicationManager
+				.addApplication(application);
+		this.applicationId = applicationId;
+
 		Thread algorithmRunner = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				LOGGER.info("Now running MOEAD main");
-				Moead moead = new Moead();
-				List<List<Double>> solution = moead.moead(
-						ac.getMaxIterations(), ac.getPopulationSize(),
-						ac.getNeighborSize(), ac.getGenomeSize());
-				saveToFile(ac.getOutputFile(), solution);
+				Moead moead = new Moead(applicationId);
 				try {
-					JobManager.getInstance().stopAllWorkers();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					applicationManager.setApplicationState(applicationId,
+							ApplicationState.NEW);
+
+					List<List<Double>> solution = moead.moead(
+							ac.getMaxIterations(), ac.getPopulationSize(),
+							ac.getNeighborSize(), ac.getGenomeSize());
+					saveToFile(ac.getOutputFile(), solution);
+					applicationManager.setApplicationState(applicationId,
+							ApplicationState.FINISHED);
+				} catch (Exception e) {
+					LOGGER.error("Failure while running MOEAD thread", e);
 				}
 			}
 		});
@@ -226,15 +243,16 @@ public class MoeadLauncher implements Launcher {
 			Thread.sleep(100);
 		}
 
-		JobManager jobManager = JobManager.getInstance();
+		ApplicationManager applicationManager = ApplicationManager
+				.getInstance();
 
 		try {
 			LOGGER.info("Waiting for " + containerCount
 					+ " containers to complete");
 			int completedContainers = 0;
 			while (completedContainers < containerCount) {
-				AllocateResponse response = rmClient.allocate(jobManager
-						.getCompleted());
+				AllocateResponse response = rmClient
+						.allocate(applicationManager.getProgress(applicationId));
 				for (ContainerStatus status : response
 						.getCompletedContainersStatuses()) {
 					++completedContainers;

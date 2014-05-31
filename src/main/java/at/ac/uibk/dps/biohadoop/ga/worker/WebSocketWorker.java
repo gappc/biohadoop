@@ -21,18 +21,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaFitness;
-import at.ac.uibk.dps.biohadoop.ga.algorithm.GaResult;
-import at.ac.uibk.dps.biohadoop.ga.algorithm.GaTask;
 import at.ac.uibk.dps.biohadoop.jobmanager.Task;
 import at.ac.uibk.dps.biohadoop.jobmanager.remote.Message;
 import at.ac.uibk.dps.biohadoop.jobmanager.remote.MessageType;
-import at.ac.uibk.dps.biohadoop.websocket.MessageDecoder;
+import at.ac.uibk.dps.biohadoop.websocket.WebSocketDecoder;
 import at.ac.uibk.dps.biohadoop.websocket.WebSocketEncoder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.primitives.Ints;
 
-@ClientEndpoint(encoders = WebSocketEncoder.class, decoders = MessageDecoder.class)
+@ClientEndpoint(encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
 public class WebSocketWorker {
 
 	private static final Logger LOGGER = LoggerFactory
@@ -76,7 +74,7 @@ public class WebSocketWorker {
 	}
 
 	private void register(Session session) throws EncodeException, IOException {
-		Message message = new Message(MessageType.REGISTRATION_REQUEST, null);
+		Message<?> message = new Message<Object>(MessageType.REGISTRATION_REQUEST, null);
 		session.getBasicRemote().sendObject(message);
 	}
 
@@ -95,7 +93,7 @@ public class WebSocketWorker {
 	}
 
 	@OnMessage
-	public Message onMessage(Message message, Session session)
+	public Message<?> onMessage(Message<?> message, Session session)
 			throws IOException {
 		counter++;
 		if (counter % logSteps == 0) {
@@ -114,6 +112,8 @@ public class WebSocketWorker {
 		if (message.getType() == MessageType.REGISTRATION_RESPONSE) {
 			LOGGER.debug("Registration successful for URI {} and sessionId {}",
 					session.getRequestURI(), session.getId());
+			
+			@SuppressWarnings("unchecked")
 			Task<List<List<Double>>> task = om.convertValue(message.getPayload(),
 					Task.class);
 
@@ -121,7 +121,7 @@ public class WebSocketWorker {
 			convertDistances(inputDistances);
 
 			messageType = MessageType.WORK_INIT_REQUEST;
-			return new Message(messageType, null);
+			return new Message<Object>(messageType, null);
 		}
 
 		if (message.getType() == MessageType.WORK_INIT_RESPONSE
@@ -129,6 +129,7 @@ public class WebSocketWorker {
 			LOGGER.debug("{} for URI {} and sessionId {}", message.getType(),
 					session.getRequestURI(), session.getId());
 
+			@SuppressWarnings("unchecked")
 			Task<List<Integer>> inputTask = om.convertValue(message.getPayload(),
 					Task.class);
 			Task<Double> response = computeResult(inputTask);
@@ -136,14 +137,15 @@ public class WebSocketWorker {
 			return new Message<Double>(MessageType.WORK_REQUEST, response);
 		}
 		if (message.getType() == MessageType.SHUTDOWN) {
-			LOGGER.info("Got SHUTDOWN message, now shutting down");
+			LOGGER.info(
+					"############# {} Worker stopped ###############",
+					WebSocketWorker.class.getSimpleName());
 			session.close();
 			latch.countDown();
 		}
-		System.out.println("!!!!!!!! SHOULD NOT COME HERE !!!!!!!");
-		return new Message(messageType, null);
+		return new Message<Object>(messageType, null);
 	}
-
+	
 	@OnError
 	public void onError(Session session, Throwable t) {
 		LOGGER.error("Error for URI {}, sessionId={}", session.getRequestURI(),

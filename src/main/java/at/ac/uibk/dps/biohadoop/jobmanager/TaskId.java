@@ -1,8 +1,12 @@
 package at.ac.uibk.dps.biohadoop.jobmanager;
 
+import java.io.Serializable;
 import java.util.Random;
 
-public class TaskId {
+public class TaskId implements Serializable {
+
+	private static final long serialVersionUID = -7342309576690203270L;
+	
 	private static final Random rand = new Random();
 	private final int id;
 	

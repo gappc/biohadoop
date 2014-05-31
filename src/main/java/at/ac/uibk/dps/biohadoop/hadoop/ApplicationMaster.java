@@ -4,12 +4,12 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.job.TaskSupervisor;
 import at.ac.uibk.dps.biohadoop.torename.ArgumentChecker;
 import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;
 import at.ac.uibk.dps.biohadoop.torename.Hostname;
 import at.ac.uibk.dps.biohadoop.torename.LaunchBuilder;
 import at.ac.uibk.dps.biohadoop.torename.LaunchBuilderException;
+import at.ac.uibk.dps.biohadoop.torename.TaskSupervisor;
 
 public class ApplicationMaster {
 

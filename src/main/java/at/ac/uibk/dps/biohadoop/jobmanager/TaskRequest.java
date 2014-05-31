@@ -27,4 +27,12 @@ public class TaskRequest<T> {
 		this.taskState = taskState;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("taskId: ").append(task).append(" | state: ")
+				.append(taskState);
+		return sb.toString();
+	}
+
 }

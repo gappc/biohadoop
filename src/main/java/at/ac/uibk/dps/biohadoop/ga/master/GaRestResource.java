@@ -1,67 +1,67 @@
 package at.ac.uibk.dps.biohadoop.ga.master;
 
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import at.ac.uibk.dps.biohadoop.ga.DistancesGlobal;
-import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
-import at.ac.uibk.dps.biohadoop.ga.algorithm.GaResult;
-import at.ac.uibk.dps.biohadoop.job.JobManager;
-import at.ac.uibk.dps.biohadoop.job.StopTask;
-import at.ac.uibk.dps.biohadoop.job.Task;
-import at.ac.uibk.dps.biohadoop.websocket.Message;
-import at.ac.uibk.dps.biohadoop.websocket.MessageType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
+import at.ac.uibk.dps.biohadoop.endpoint.Master;
+import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
+import at.ac.uibk.dps.biohadoop.endpoint.SendException;
+import at.ac.uibk.dps.biohadoop.endpoint.ShutdownException;
+import at.ac.uibk.dps.biohadoop.jobmanager.remote.Message;
 
 @Path("/ga")
 @Produces(MediaType.APPLICATION_JSON)
-public class GaRestResource {
+public class GaRestResource implements Endpoint {
 
-	private JobManager jobManager = JobManager.getInstance();
+	private static final Logger LOG = LoggerFactory.getLogger(GaRestResource.class);
+	
+	private Message<?> inputMessage;
+	private Message<?> outputMessage;
+	
+	@GET
+	@Path("registration")
+	public Message<?> registration() throws InterruptedException {
+		Master<?> master = new GaMasterImpl<>(this);
+		master.handleRegistration();
+		return outputMessage;
+	}
 
-//	@GET
-//	@Path("init")
-//	public double[][] init() throws InterruptedException {
-//		return DistancesGlobal.getDistances();
-//	}
+	@GET
+	@Path("workinit")
+	public Message<?> workInit() throws InterruptedException {
+		Master<?> master = new GaMasterImpl<>(this);
+		master.handleWorkInit();
+		return outputMessage;
+	}
 
 	@POST
-//	@Path("work")
-	public Message writeResult(Message message) throws InterruptedException {
-		MessageType messageType = null;
-		Object response = null;
-		if (message.getType() == MessageType.REGISTRATION_REQUEST) {
-			messageType = MessageType.REGISTRATION_RESPONSE;
-			response = null;
+	@Path("work")
+	public Message<?> work(Message<?> message) throws InterruptedException {
+		inputMessage = message;
+		Master<?> master = new GaMasterImpl<>(this);
+		try {
+			master.handleWork();
+		} catch (ShutdownException e) {
+			LOG.info("Got shutdown event");
 		}
-		if (message.getType() == MessageType.WORK_INIT_REQUEST) {
-			Task task = (Task) jobManager.getTaskForExecution(Ga.GA_WORK_QUEUE);
-			messageType = MessageType.WORK_INIT_RESPONSE;
-			response = new Object[] { DistancesGlobal.getDistances(), task };
-		}
-		if (message.getType() == MessageType.WORK_REQUEST) {
-			ObjectMapper mapper = new ObjectMapper();
-			GaResult gaResult = mapper.convertValue(message.getData(),
-					GaResult.class);
+		return outputMessage;
+	}
 
-			jobManager.writeResult(Ga.GA_RESULT_STORE, gaResult);
-			
-			if (jobManager.isStop()) {
-				messageType = MessageType.SHUTDOWN;
-			}
-			else {
-				messageType = MessageType.WORK_RESPONSE;
-				response = jobManager.getTaskForExecution(Ga.GA_WORK_QUEUE);
-				if (response instanceof StopTask) {
-					messageType = MessageType.SHUTDOWN;
-					response = null;
-				}
-			}
-		}
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> Message<T> receive() throws ReceiveException {
+		return (Message<T>)inputMessage;
+	}
 
-		return new Message(messageType, response);
+	@Override
+	public void send(Message<?> message) throws SendException {
+		outputMessage = message;
 	}
 }

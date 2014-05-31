@@ -7,50 +7,46 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-import javax.websocket.DeploymentException;
 import javax.websocket.EncodeException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaFitness;
-import at.ac.uibk.dps.biohadoop.ga.algorithm.GaResult;
-import at.ac.uibk.dps.biohadoop.ga.algorithm.GaTask;
-import at.ac.uibk.dps.biohadoop.websocket.Message;
-import at.ac.uibk.dps.biohadoop.websocket.MessageType;
-
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Output;
+import at.ac.uibk.dps.biohadoop.jobmanager.Task;
+import at.ac.uibk.dps.biohadoop.jobmanager.remote.Message;
+import at.ac.uibk.dps.biohadoop.jobmanager.remote.MessageType;
+import at.ac.uibk.dps.biohadoop.torename.Helper;
+import at.ac.uibk.dps.biohadoop.torename.PerformanceLogger;
 
 public class SocketGaWorker {
 
-	private static final Logger LOGGER = LoggerFactory
+	private static final Logger LOG = LoggerFactory
 			.getLogger(SocketGaWorker.class);
 
+	private static String className = Helper.getClassname(SocketGaWorker.class);
 	private double[][] distances;
 	private int logSteps = 1000;
 
 	public static void main(String[] args) throws Exception {
-		LOGGER.info("############# {} started ##############",
+		LOG.info("############# {} started ##############",
 				SocketGaWorker.class.getSimpleName());
-		LOGGER.debug("args.length: {}", args.length);
+		LOG.debug("args.length: {}", args.length);
 		for (String s : args) {
-			LOGGER.debug(s);
+			LOG.debug(s);
 		}
 
 		String masterHostname = args[0];
 
-		LOGGER.info("############# {} client calls master at: {} #############",
-				SocketGaWorker.class.getSimpleName(), masterHostname);
+		LOG.info("############# {} client calls master at: {} #############",
+				className, masterHostname);
 		new SocketGaWorker(masterHostname, 30001);
+		LOG.info("############# {} stopped #############", className);
 	}
 
-	public SocketGaWorker() {
-	}
-
-	public SocketGaWorker(String hostname, int port)
-			throws DeploymentException, IOException, InterruptedException,
-			EncodeException, ClassNotFoundException {
+	// TODO remove "throws" and add proper error handling
+	public SocketGaWorker(String hostname, int port) throws IOException,
+			InterruptedException, EncodeException, ClassNotFoundException {
 		Socket clientSocket = new Socket(hostname, port);
 		ObjectOutputStream os = new ObjectOutputStream(
 				new BufferedOutputStream(clientSocket.getOutputStream()));
@@ -58,91 +54,97 @@ public class SocketGaWorker {
 		ObjectInputStream is = new ObjectInputStream(new BufferedInputStream(
 				clientSocket.getInputStream()));
 
-		// Kryo kryo = new Kryo();
-		// kryo.setReferences(false);
-		// Output output = new Output(clientSocket.getOutputStream());
-		// Input input = new Input(clientSocket.getInputStream());
+		doRegistration(os, hostname, port);
+		handleRegistrationResponse(is, os);
+		doWorkInit(os);
+		handleWork(is, os);
 
-		register(os);
-		// registerKryo(kryo, output);
-
-		MessageType messageType = MessageType.NONE;
-		Object response = null;
-
-		long startTime = System.currentTimeMillis();
-		int counter = 0;
-		while (true) {
-			counter++;
-			if (counter % logSteps == 0) {
-				long endTime = System.currentTimeMillis();
-				LOGGER.info("{}ms for last {} computations",
-						endTime - startTime, logSteps);
-				startTime = System.currentTimeMillis();
-				counter = 0;
-				os.reset();
-			}
-
-			messageType = MessageType.NONE;
-			response = null;
-			Message message = (Message) is.readUnshared();
-			// Message message = kryo.readObject(input, Message.class);
-
-			if (message.getType() == MessageType.REGISTRATION_RESPONSE) {
-				LOGGER.info("SocketGaWorker registration successful");
-				messageType = MessageType.WORK_INIT_REQUEST;
-				response = null;
-			}
-
-			if (message.getType() == MessageType.WORK_INIT_RESPONSE) {
-				LOGGER.debug("SocketGaWorker WORK_INIT_RESPONSE");
-				Object[] data = (Object[]) message.getData();
-				distances = (double[][]) data[0];
-				GaTask task = (GaTask) data[1];
-				messageType = MessageType.WORK_REQUEST;
-				response = computeResult(task);
-			}
-			if (message.getType() == MessageType.WORK_RESPONSE) {
-				LOGGER.debug("SocketGaWorker WORK_RESPONSE");
-				GaTask task = (GaTask) message.getData();
-				messageType = MessageType.WORK_REQUEST;
-				response = computeResult(task);
-			}
-			if (message.getType() == MessageType.SHUTDOWN) {
-				break;
-			}
-
-			// kryo.writeObject(output, new Message(messageType, response));
-			// output.flush();
-			os.writeUnshared(new Message(messageType, response));
-			os.flush();
-		}
 		is.close();
 		os.close();
 		clientSocket.close();
-
-		LOGGER.info("############# {} stopped #############",
-				SocketGaWorker.class.getSimpleName());
 	}
 
-	private void register(ObjectOutputStream os) throws EncodeException,
-			IOException {
-		Message message = new Message(MessageType.REGISTRATION_REQUEST, null);
+	private void doRegistration(ObjectOutputStream os, String hostname, int port)
+			throws IOException {
+		LOG.debug("{} starting registration to {}:{}", className, hostname,
+				port);
+		Message<Object> message = new Message<Object>(
+				MessageType.REGISTRATION_REQUEST, null);
+		send(os, message);
+	}
+
+	private void handleRegistrationResponse(ObjectInputStream is,
+			ObjectOutputStream os) throws ClassNotFoundException, IOException {
+		Message<Double[][]> message = receive(is);
+		LOG.info("{} registration successful", className);
+
+		Double[][] inputDistances = message.getPayload().getData();
+		convertDistances(inputDistances);
+	}
+
+	private void doWorkInit(ObjectOutputStream os) throws IOException {
+		LOG.debug("{} starting work");
+		Message<Object> message = new Message<Object>(
+				MessageType.WORK_INIT_REQUEST, null);
+		send(os, message);
+	}
+
+	private void handleWork(ObjectInputStream is, ObjectOutputStream os)
+			throws IOException, ClassNotFoundException {
+		PerformanceLogger performanceLogger = new PerformanceLogger(
+				System.currentTimeMillis(), 0, logSteps);
+		int counter = 0;
+		while (true) {
+			performanceLogger.step(LOG);
+			counter++;
+			if (counter % 1000 == 0) {
+				os.reset();
+				counter = 0;
+			}
+
+			Message<int[]> inputMessage = receive(is);
+
+			LOG.debug("{} WORK_RESPONSE", className);
+
+			if (inputMessage.getType() == MessageType.SHUTDOWN) {
+				break;
+			}
+
+			Task<int[]> inputTask = inputMessage.getPayload();
+			Task<Double> response = computeResult(inputTask);
+
+			Message<Double> message = new Message<Double>(
+					MessageType.WORK_REQUEST, response);
+			send(os, message);
+		}
+	}
+
+	private void convertDistances(Double[][] inputDistances) {
+		int length1 = inputDistances.length;
+		int length2 = length1 != 0 ? inputDistances[0].length : 0;
+		distances = new double[length1][length2];
+		for (int i = 0; i < length1; i++) {
+			for (int j = 0; j < length2; j++) {
+				distances[i][j] = inputDistances[i][j];
+			}
+		}
+	}
+
+	private Task<Double> computeResult(Task<int[]> task) {
+		double fitness = GaFitness.computeFitness(distances, task.getData());
+		Task<Double> response = new Task<Double>(task.getTaskId(), fitness);
+		return response;
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> Message<T> receive(ObjectInputStream is) throws IOException,
+			ClassNotFoundException {
+		return (Message<T>) is.readUnshared();
+	}
+
+	private void send(ObjectOutputStream os, Message<?> message)
+			throws IOException {
 		os.writeUnshared(message);
 		os.flush();
-	}
-
-	private void registerKryo(Kryo kryo, Output output) throws EncodeException,
-			IOException {
-		Message message = new Message(MessageType.REGISTRATION_REQUEST, null);
-		kryo.writeObject(output, message);
-		output.flush();
-	}
-
-	private GaResult computeResult(GaTask task) {
-		GaResult gaResult = new GaResult();
-		gaResult.setSlot(task.getSlot());
-		gaResult.setResult(GaFitness.computeFitness(distances, task.getGenome()));
-		gaResult.setId(task.getId());
-		return gaResult;
 	}
 }

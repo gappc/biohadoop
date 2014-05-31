@@ -1,6 +1,8 @@
 package at.ac.uibk.dps.biohadoop.jobmanager;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,15 +15,16 @@ import at.ac.uibk.dps.biohadoop.jobmanager.api.JobResponseData;
 import at.ac.uibk.dps.biohadoop.jobmanager.api.JobState;
 import at.ac.uibk.dps.biohadoop.jobmanager.handler.JobHandler;
 
-public class Job<T> {
+public class Job<T, S> {
 
 	private final JobId jobId;
 	private AtomicInteger openTasksCount = new AtomicInteger();
 	private JobState jobState = JobState.NEW;
 	private Map<TaskId, TaskRequest<T>> taskRequests = new ConcurrentHashMap<>();
-	private Map<TaskId, TaskResponse<T>> taskResponses = new ConcurrentHashMap<>();
+	private Map<TaskId, TaskResponse<S>> taskResponses = new ConcurrentHashMap<>();
 	private List<JobHandler<T>> jobHandlers = new ArrayList<>();
-
+	private JobResponse<S> jobResponse;
+	
 	public Job(JobId jobId, JobRequest<T> jobRequest) {
 		this.jobId = jobId;
 		addJobHandler(jobRequest.getHandler());
@@ -55,16 +58,17 @@ public class Job<T> {
 		return taskRequests.get(taskId);
 	}
 
-	public void addResult(Task<T> task) {
+	public void addResult(Task<S> task) {
 		TaskId taskId = task.getTaskId();
 		TaskRequest<T> taskRequest = taskRequests.get(taskId);
 
 		int slot = taskRequest.getSlot();
-		TaskResponse<T> taskResponse = new TaskResponse<>(task, slot);
+		TaskResponse<S> taskResponse = new TaskResponse<>(task, slot);
 		taskResponses.put(taskId, taskResponse);
 
 		taskRequest.setTaskState(TaskState.FINISHED);
-		if (openTasksCount.decrementAndGet() == 0) {
+		openTasksCount.decrementAndGet();
+		if (openTasksCount.compareAndSet(0, 0)) {
 			setJobState(JobState.FINISHED);
 		}
 	}
@@ -74,7 +78,10 @@ public class Job<T> {
 	}
 
 	public void setJobState(JobState jobState) {
-		this.jobState = jobState;
+		synchronized (jobState) {
+			this.jobState = jobState;
+		}
+		
 		switch (jobState) {
 		case NEW:
 			for (JobHandler<T> jobHandler : jobHandlers) {
@@ -93,7 +100,7 @@ public class Job<T> {
 			break;
 		case FINISHED:
 			for (JobHandler<T> jobHandler : jobHandlers) {
-				jobHandler.onFinished(getResult());
+				jobHandler.onFinished(jobId);
 			}
 			break;
 		case ERROR:
@@ -119,16 +126,37 @@ public class Job<T> {
 		taskRequest.setTaskState(taskState);
 	}
 
-	private JobResponse<T> getResult() {
-		JobResponse<T> response = new JobResponse<>(jobId);
-		for (TaskId taskId : taskResponses.keySet()) {
-			TaskResponse<T> taskResponse = taskResponses.get(taskId);
-			T data = taskResponse.getData().getData();
-			int slot = taskResponse.getSlot();
-			JobResponseData<T> responseData = new JobResponseData<T>(data, slot);
-			response.add(responseData);
+	public JobResponse<S> getResult() {
+		if (jobState != JobState.FINISHED) {
+			for (TaskId taskId : taskRequests.keySet()) {
+				TaskRequest<T> taskRequest = taskRequests.get(taskId);
+				System.out.println(taskRequest);
+			}
+			System.out.println("openTasksCount: " + openTasksCount.get());
+			System.out.println("jobState: " + jobState);
+			return null;
 		}
-		return response;
+		if (jobResponse == null) {
+			List<JobResponseData<S>> jobResponseDatas = new ArrayList<>();
+			
+			for (TaskId taskId : taskResponses.keySet()) {
+				TaskResponse<S> taskResponse = taskResponses.get(taskId);
+				S data = taskResponse.getData().getData();
+				int slot = taskResponse.getSlot();
+				JobResponseData<S> responseData = new JobResponseData<S>(data, slot);
+				jobResponseDatas.add(responseData);
+			}
+			
+			Collections.sort(jobResponseDatas, new Comparator<JobResponseData<S>>() {
+				@Override
+				public int compare(JobResponseData<S> o1, JobResponseData<S> o2) {
+					return o1.getSlot() - o2.getSlot();
+				}
+			});
+			
+			jobResponse = new JobResponse<>(jobId, jobResponseDatas);
+		}
+		return jobResponse;
 	}
 
 }

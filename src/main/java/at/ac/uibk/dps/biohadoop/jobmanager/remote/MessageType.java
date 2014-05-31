@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.websocket;
+package at.ac.uibk.dps.biohadoop.jobmanager.remote;
 
 public enum MessageType {
 	NONE,

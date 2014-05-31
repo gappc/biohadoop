@@ -1,12 +1,18 @@
 package at.ac.uibk.dps.biohadoop.jobmanager.remote;
 
+import java.io.Serializable;
+
 import at.ac.uibk.dps.biohadoop.jobmanager.Task;
-import at.ac.uibk.dps.biohadoop.websocket.MessageType;
 
-public class Message<T> {
+public class Message<T> implements Serializable {
 
-	private final MessageType type;
-	private final Task<T> payload;
+	private static final long serialVersionUID = -6406631824326170469L;
+	
+	private MessageType type;
+	private Task<T> payload;
+
+	public Message() {
+	}
 
 	public Message(MessageType type, Task<T> payload) {
 		this.type = type;
@@ -19,5 +25,10 @@ public class Message<T> {
 
 	public Task<T> getPayload() {
 		return payload;
+	}
+	
+	@Override
+	public String toString() {
+		return type.toString();
 	}
 }

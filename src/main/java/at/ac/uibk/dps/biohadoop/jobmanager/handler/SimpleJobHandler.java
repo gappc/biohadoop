@@ -1,6 +1,6 @@
 package at.ac.uibk.dps.biohadoop.jobmanager.handler;
 
-import at.ac.uibk.dps.biohadoop.jobmanager.api.JobResponse;
+import at.ac.uibk.dps.biohadoop.jobmanager.JobId;
 
 public class SimpleJobHandler<T> implements JobHandler<T> {
 
@@ -17,7 +17,7 @@ public class SimpleJobHandler<T> implements JobHandler<T> {
 	}
 
 	@Override
-	public void onFinished(JobResponse<T> jobResponse) {
+	public void onFinished(JobId jobId) {
 	}
 
 	@Override

@@ -8,20 +8,19 @@ import java.net.SocketTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.job.JobManager;
-import at.ac.uibk.dps.biohadoop.job.WorkObserver;
+import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
+import at.ac.uibk.dps.biohadoop.applicationmanager.ShutdownHandler;
 
-public class GaSocketServerRunnable implements WorkObserver, Runnable {
+public class GaSocketServerRunnable implements Runnable, ShutdownHandler {
 
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(GaSocketServerRunnable.class);
 	
-	private JobManager jobManager = JobManager.getInstance();
 	private boolean stop;
 
 	@Override
 	public void run() {
-		jobManager.addObserver(this);
+		ApplicationManager.getInstance().registerShutdownHandler(this);
 		try {
 			int socketTimeout = 1000;
 			ServerSocket serverSocket = new ServerSocket(30001);
@@ -41,17 +40,13 @@ public class GaSocketServerRunnable implements WorkObserver, Runnable {
 				}
 			}
 			serverSocket.close();
-//			jobManager.getTaskForExecution(Ga.GA_WORK_QUEUE);
 		} catch (IOException e) {
 			LOGGER.error("ServerSocket error", e);
 		}
-//		catch (InterruptedException e) {
-//			LOGGER.error("Couldn't get task for execution", e);
-//		}
 	}
-	
+
 	@Override
-	public void stop() {
+	public void shutdown() {
 		LOGGER.info("shutting down");
 		stop = true;
 	}

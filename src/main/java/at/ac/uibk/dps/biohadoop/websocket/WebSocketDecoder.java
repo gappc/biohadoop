@@ -9,11 +9,13 @@ import javax.websocket.EndpointConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.jobmanager.remote.Message;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class MessageDecoder implements Decoder.Text<Message> {
+public class WebSocketDecoder implements Decoder.Text<Message<?>> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(MessageDecoder.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketDecoder.class);
 	private ObjectMapper om = new ObjectMapper();
 
 	@Override
@@ -27,7 +29,7 @@ public class MessageDecoder implements Decoder.Text<Message> {
 	}
 
 	@Override
-	public Message decode(String s) throws DecodeException {
+	public Message<?> decode(String s) throws DecodeException {
 		try {
 			return om.readValue(s, Message.class);
 		} catch (IOException e) {

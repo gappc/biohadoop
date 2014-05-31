@@ -9,7 +9,6 @@ import java.util.Map;
 
 import at.ac.uibk.dps.biohadoop.hadoop.Config;
 import at.ac.uibk.dps.biohadoop.nsgaii.algorithm.NsgaII;
-import at.ac.uibk.dps.biohadoop.nsgaii.master.local.NsgaIILocalResource;
 import at.ac.uibk.dps.biohadoop.nsgaii.master.socket.NsgaIISocketServer;
 import at.ac.uibk.dps.biohadoop.nsgaii.worker.SocketNsgaIIWorker;
 
@@ -33,7 +32,8 @@ public class NsgaIIConfigWriter {
 			JsonMappingException, IOException, ClassNotFoundException,
 			InstantiationException, IllegalAccessException {
 
-		List<String> endpoints = Arrays.asList(NsgaIILocalResource.class.getName(), NsgaIISocketServer.class.getName());
+//		List<String> endpoints = Arrays.asList(NsgaIILocalResource.class.getName(), NsgaIISocketServer.class.getName());
+		List<String> endpoints = Arrays.asList(NsgaIISocketServer.class.getName());
 //		Map<String, Integer> workers = Collections.EMPTY_MAP;
 		Map<String, Integer> workers = new HashMap<String, Integer>();
 		workers.put(SocketNsgaIIWorker.class.getName(), 3);
@@ -65,8 +65,8 @@ public class NsgaIIConfigWriter {
 			config.setOutputFile("/biohadoop/data/nsgaii-sol.txt");
 		}
 		
-		config.setMaxIterations(250);
-		config.setPopulationSize(100);
+		config.setMaxIterations(500);
+		config.setPopulationSize(300);
 		config.setGenomeSize(100);
 		return config;
 	}

@@ -1,6 +1,5 @@
 package at.ac.uibk.dps.biohadoop.moead.algorithm;
 
-import java.util.List;
 
 //Look at http://en.wikipedia.org/wiki/Test_functions_for_optimization for optimizations
 public class Functions {
@@ -52,28 +51,28 @@ public class Functions {
 //	}
 
 	// ZDT3
-//	 public static double f1(double[] x) {
-//	 return x[0];
-//	 }
-//	
-//	 public static double f2(double[] x) {
-//	 return g(x) * h(f1(x), g(x));
-//	 }
-//	
-//	 private static double g(double[] x) {
-//	 double result = 0;
-//	
-//	 for (int i = 1; i < x.length; i++) {
-//	 result += x[i];
-//	 }
-//	
-//	 return 1 + 9/29 * result;
-//	 }
-//	
-//	 private static double h(double f1_x, double g_x) {
-//	 return 1 - Math.sqrt(f1_x / g_x) - (f1_x / g_x) * Math.sin(10 * Math.PI *
-//	 f1_x);
-//	 }
+	 public static double f1(double[] x) {
+	 return x[0];
+	 }
+	
+	 public static double f2(double[] x) {
+	 return g(x) * h(f1(x), g(x));
+	 }
+	
+	 private static double g(double[] x) {
+	 double result = 0;
+	
+	 for (int i = 1; i < x.length; i++) {
+	 result += x[i];
+	 }
+	
+	 return 1 + 9/29 * result;
+	 }
+	
+	 private static double h(double f1_x, double g_x) {
+	 return 1 - Math.sqrt(f1_x / g_x) - (f1_x / g_x) * Math.sin(10 * Math.PI *
+	 f1_x);
+	 }
 
 	// ZDT2
 //	 public static double f1(double[] x) {
@@ -122,75 +121,75 @@ public class Functions {
 //	 }
 
 	// From PS ws2013-2014
-	 public static double f1(List<Double> x) {
-	 double result = x.get(0);
-	 int n = x.size();
-	
-	 double sum = 0;
-	 double count = 0; // length of J
-	 for (int j = 3; j < n; j += 2) {
-	 double pow = 0.5 * (1.0 + (3 * (j - 2)) / (n + 2));
-	 double term = Math.pow(x.get(j) - Math.pow(x.get(0), pow), 2);
-	 sum += term;
-	 count++;
-	 }
-	
-	 return result + (2 / count) * sum;
-	 }
-	
-	 public static double f2(List<Double> x) {
-	 double result = 1 - Math.sqrt(x.get(0));
-	 int n = x.size();
-	
-	 double sum = 0;
-	 double count = 0; // length of J
-	 for (int j = 2; j < n; j += 2) {
-	 double pow = 0.5 * (1.0 + (3 * (j - 2)) / (n + 2));
-	 double term = Math.pow(x.get(j) - Math.pow(x.get(0), pow), 2);
-	 sum += term;
-	 count++;
-	 }
-	
-	 return result + (2 / count) * sum;
-	 }
-	
-	 public static double f1(double[] x) {
-	 double result = x[0];
-	 int n = x.length;
-	
-	 double sum = 0;
-	 double count = 0; // length of J
-	 for (int j = 3; j < n; j += 2) {
-	 double pow = 0.5 * (1.0 + (3 * (j - 2)) / (n + 2));
-	 double term = Math.pow(x[j] - Math.pow(x[0], pow), 2);
-	 sum += term;
-	 count++;
-	 }
-	
-	 return result + (2 / count) * sum;
-	 }
-	
-	 public static double f2(double[] x) {
-	 double result = 1 - Math.sqrt(x[0]);
-	 int n = x.length;
-	
-	 double sum = 0;
-	 double count = 0; // length of J
-	 for (int j = 2; j < n; j += 2) {
-	 double pow = 0.5 * (1.0 + (3 * (j - 2)) / (n + 2));
-	 double term = Math.pow(x[j] - Math.pow(x[0], pow), 2);
-	 sum += term;
-	 count++;
-	 }
-	
-	 return result + (2 / count) * sum;
-	 }
-	
-	 public static double f1Norm(double[] x, double min, double max) {
-	 return f1(x) / (max - min);
-	 }
-	
-	 public static double f2Norm(double[] x, double min, double max) {
-	 return f2(x) / (max - min);
-	 }
+//	 public static double f1(List<Double> x) {
+//	 double result = x.get(0);
+//	 int n = x.size();
+//	
+//	 double sum = 0;
+//	 double count = 0; // length of J
+//	 for (int j = 3; j < n; j += 2) {
+//	 double pow = 0.5 * (1.0 + (3 * (j - 2)) / (n + 2));
+//	 double term = Math.pow(x.get(j) - Math.pow(x.get(0), pow), 2);
+//	 sum += term;
+//	 count++;
+//	 }
+//	
+//	 return result + (2 / count) * sum;
+//	 }
+//	
+//	 public static double f2(List<Double> x) {
+//	 double result = 1 - Math.sqrt(x.get(0));
+//	 int n = x.size();
+//	
+//	 double sum = 0;
+//	 double count = 0; // length of J
+//	 for (int j = 2; j < n; j += 2) {
+//	 double pow = 0.5 * (1.0 + (3 * (j - 2)) / (n + 2));
+//	 double term = Math.pow(x.get(j) - Math.pow(x.get(0), pow), 2);
+//	 sum += term;
+//	 count++;
+//	 }
+//	
+//	 return result + (2 / count) * sum;
+//	 }
+//	
+//	 public static double f1(double[] x) {
+//	 double result = x[0];
+//	 int n = x.length;
+//	
+//	 double sum = 0;
+//	 double count = 0; // length of J
+//	 for (int j = 3; j < n; j += 2) {
+//	 double pow = 0.5 * (1.0 + (3 * (j - 2)) / (n + 2));
+//	 double term = Math.pow(x[j] - Math.pow(x[0], pow), 2);
+//	 sum += term;
+//	 count++;
+//	 }
+//	
+//	 return result + (2 / count) * sum;
+//	 }
+//	
+//	 public static double f2(double[] x) {
+//	 double result = 1 - Math.sqrt(x[0]);
+//	 int n = x.length;
+//	
+//	 double sum = 0;
+//	 double count = 0; // length of J
+//	 for (int j = 2; j < n; j += 2) {
+//	 double pow = 0.5 * (1.0 + (3 * (j - 2)) / (n + 2));
+//	 double term = Math.pow(x[j] - Math.pow(x[0], pow), 2);
+//	 sum += term;
+//	 count++;
+//	 }
+//	
+//	 return result + (2 / count) * sum;
+//	 }
+//	
+//	 public static double f1Norm(double[] x, double min, double max) {
+//	 return f1(x) / (max - min);
+//	 }
+//	
+//	 public static double f2Norm(double[] x, double min, double max) {
+//	 return f2(x) / (max - min);
+//	 }
 }

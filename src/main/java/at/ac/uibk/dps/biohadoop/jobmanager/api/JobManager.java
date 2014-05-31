@@ -11,34 +11,32 @@ import at.ac.uibk.dps.biohadoop.jobmanager.Job;
 import at.ac.uibk.dps.biohadoop.jobmanager.JobId;
 import at.ac.uibk.dps.biohadoop.jobmanager.Task;
 import at.ac.uibk.dps.biohadoop.jobmanager.TaskId;
-import at.ac.uibk.dps.biohadoop.jobmanager.handler.SimpleJobHandler;
 import at.ac.uibk.dps.biohadoop.jobmanager.queue.TaskQueue;
 
-public class JobManager<T> extends SimpleJobHandler<T> {
+public class JobManager<T, S> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(JobManager.class);
 
 	@SuppressWarnings("rawtypes")
 	private static final JobManager JOB_MANAGER = new JobManager();
 
-	private Map<String, TaskQueue<T>> queues = new HashMap<>();
-	private Map<JobId, Job<T>> jobs = new ConcurrentHashMap<>();
+	private Map<String, TaskQueue<T, S>> queues = new HashMap<>();
+	private Map<JobId, Job<T, S>> jobs = new ConcurrentHashMap<>();
 
 	private JobManager() {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <S> JobManager<S> getInstance() {
+	public static <U, V> JobManager<U, V> getInstance() {
 		return JobManager.JOB_MANAGER;
 	}
 
 	public JobId submitJob(JobRequest<T> jobRequest, String queueName) {
 		JobId jobId = JobId.newInstance();
 		LOG.debug("Submitting Job {} to queue", jobId);
-		Job<T> job = new Job<T>(jobId, jobRequest);
-		job.addJobHandler(this);
+		Job<T, S> job = new Job<T, S>(jobId, jobRequest);
 
-		TaskQueue<T> queue = getTaskQueue(queueName);
+		TaskQueue<T, S> queue = getTaskQueue(queueName);
 		boolean hasAdded = queue.addJob(job);
 		if (hasAdded) {
 			jobs.put(jobId, job);
@@ -46,51 +44,64 @@ public class JobManager<T> extends SimpleJobHandler<T> {
 		}
 		return null;
 	}
+	
+	public boolean reschedule(Task<T> task, String queueName) {
+		LOG.info("Rescheduling task {}", task);
+		TaskQueue<T, S> queue = getTaskQueue(queueName);
+		return queue.reschedule(task.getTaskId());
+	}
+	
+	public Job<T, S> jobCleanup(JobId jobId) {
+		LOG.debug("Removing Job with Id {} from internal map", jobId);
+		return jobs.remove(jobId);
+	}
 
 	public JobReport getReport(JobId jobId) {
-		Job<T> job = jobs.get(jobId);
+		Job<T, S> job = jobs.get(jobId);
 		JobReport jobReport = new JobReport(job.getState());
 		return jobReport;
 	}
 
 	public Task<T> getTask(String queueName) {
-		TaskQueue<T> queue = getTaskQueue(queueName);
+		TaskQueue<T, S> queue = getTaskQueue(queueName);
 		Task<T> task = queue.next();
 		LOG.debug("Getting Task {} for work", task);
 		return task;
 	}
 
-	public void putResult(Task<T> task, String queueName) {
+	public void putResult(Task<S> task, String queueName) {
 		LOG.debug("Returning result for Task {}", task);
 		TaskId taskId = task.getTaskId();
-		TaskQueue<T> queue = getTaskQueue(queueName);
-		Job<T> job = queue.getJobForTask(taskId);
+		TaskQueue<T, S> queue = getTaskQueue(queueName);
+		Job<T, S> job = queue.getJobForTask(taskId);
 		job.addResult(task);
 	}
 
-	@Override
-	public void onFinished(JobResponse<T> jobResponse) {
-		LOG.debug("Removing Job with Id {} from internal map",
-				jobResponse.getJobId());
-		jobs.remove(jobResponse.getJobId());
+	public JobResponse<S> getJobResponse(final JobId jobId) {
+		Job<T, S> job = jobs.get(jobId);
+		if (job == null) {
+			throw new IllegalArgumentException("Could not find job with id "
+					+ jobId);
+		}
+		return job.getResult();
 	}
 
 	public void shutdown() {
 		LOG.info("Shutting down JobManager");
 		for (String queueName : queues.keySet()) {
-			TaskQueue<T> taskQueue = queues.get(queueName);
+			TaskQueue<T, S> taskQueue = queues.get(queueName);
 			taskQueue.killWaitingTasks();
 		}
 	}
 
-	private TaskQueue<T> getTaskQueue(String queueName) {
-		TaskQueue<T> queue = queues.get(queueName);
+	private TaskQueue<T, S> getTaskQueue(String queueName) {
+		TaskQueue<T, S> queue = queues.get(queueName);
 		if (queue == null) {
 			synchronized (queues) {
 				queue = queues.get(queueName);
 				if (queue == null) {
 					LOG.info("Instanciated new queue for {}", queueName);
-					queue = new TaskQueue<T>(queueName);
+					queue = new TaskQueue<T, S>(queueName);
 					queues.put(queueName, queue);
 				}
 			}

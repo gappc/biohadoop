@@ -3,70 +3,54 @@ package at.ac.uibk.dps.biohadoop.ga.worker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.applicationmanager.ShutdownHandler;
 import at.ac.uibk.dps.biohadoop.ga.DistancesGlobal;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaFitness;
-import at.ac.uibk.dps.biohadoop.ga.algorithm.GaResult;
-import at.ac.uibk.dps.biohadoop.ga.algorithm.GaTask;
-import at.ac.uibk.dps.biohadoop.job.JobManager;
-import at.ac.uibk.dps.biohadoop.job.StopTask;
-import at.ac.uibk.dps.biohadoop.job.Task;
-import at.ac.uibk.dps.biohadoop.job.WorkObserver;
+import at.ac.uibk.dps.biohadoop.jobmanager.Task;
+import at.ac.uibk.dps.biohadoop.jobmanager.api.JobManager;
+import at.ac.uibk.dps.biohadoop.torename.PerformanceLogger;
 
-public class LocalGaWorker implements Runnable, WorkObserver {
+public class LocalGaWorker implements Runnable, ShutdownHandler {
 
-	private static final Logger LOGGER = LoggerFactory
+	private static final Logger LOG = LoggerFactory
 			.getLogger(LocalGaWorker.class);
 	private Boolean stop = false;
 	private int logSteps = 1000;
 
 	@Override
 	public void run() {
-		LOGGER.info("############# {} started ##############", LocalGaWorker.class.getSimpleName());
-		JobManager jobManager = JobManager.getInstance();
-		jobManager.addObserver(this);
-		
-		long startTime = System.currentTimeMillis();
-		int counter = 0;
+		LOG.info("############# {} started ##############",
+				LocalGaWorker.class.getSimpleName());
+		JobManager<int[], Double> jobManager = JobManager.getInstance();
+
+		PerformanceLogger performanceLogger = new PerformanceLogger(
+				System.currentTimeMillis(), 0, logSteps);
 		while (true) {
 			try {
-				counter++;
-				if (counter % logSteps == 0) {
-					long endTime = System.currentTimeMillis();
-					LOGGER.info("{}ms for last {} computations",
-							endTime - startTime, logSteps);
-					startTime = System.currentTimeMillis();
-					counter = 0;
-				}
-				
-				Task task = (Task) jobManager
-						.getTaskForExecution(Ga.GA_WORK_QUEUE);
+				performanceLogger.step(LOG);
 
-				synchronized (stop) {
-					if (stop) {
-						LOGGER.info("############# {} Worker stopped ###############", LocalGaWorker.class.getSimpleName());
-						break;
-					}
+				Task<int[]> task = jobManager.getTask(Ga.GA_QUEUE);
+				if (task == null) {
+					LOG.info(
+							"############# {} Worker stopped ###############",
+							LocalGaWorker.class.getSimpleName());
+					break;
 				}
-
-				if (!(task instanceof StopTask)) {
-					GaTask gaTask = (GaTask) task;
-
-					double fitness = GaFitness.computeFitness(
-							DistancesGlobal.getDistances(), gaTask.getGenome());
-					GaResult gaResult = new GaResult(gaTask.getSlot(), fitness);
-					gaResult.setId(task.getId());
-					jobManager.writeResult(Ga.GA_RESULT_STORE, gaResult);
-					Thread.sleep(1);
-				}
+				double fitness = GaFitness.computeFitness(
+						DistancesGlobal.getDistances(), task.getData());
+				Task<Double> result = new Task<Double>(task.getTaskId(),
+						fitness);
+				jobManager.putResult(result, Ga.GA_QUEUE);
+				Thread.sleep(0);
 			} catch (InterruptedException e) {
-				LOGGER.error("Error while running LocalGaWorker", e);
+				LOG.error("Error while running LocalGaWorker", e);
 			}
 		}
 	}
 
 	@Override
-	public void stop() {
+	public void shutdown() {
 		synchronized (stop) {
 			stop = true;
 		}

@@ -18,18 +18,17 @@ import at.ac.uibk.dps.biohadoop.jobmanager.Task;
 import at.ac.uibk.dps.biohadoop.jobmanager.TaskId;
 import at.ac.uibk.dps.biohadoop.jobmanager.TaskRequest;
 import at.ac.uibk.dps.biohadoop.jobmanager.TaskState;
-import at.ac.uibk.dps.biohadoop.jobmanager.api.JobResponse;
 import at.ac.uibk.dps.biohadoop.jobmanager.api.JobState;
 import at.ac.uibk.dps.biohadoop.jobmanager.handler.SimpleJobHandler;
 
-public class TaskQueue<T> extends SimpleJobHandler<T> {
+public class TaskQueue<T, S> extends SimpleJobHandler<T> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TaskQueue.class);
 
 	private final String queueName;
-	
-	private Map<TaskId, Job<T>> taskToJob = new ConcurrentHashMap<>();
-	private BlockingQueue<QueueEntry<T>> todo = new LinkedBlockingQueue<QueueEntry<T>>();
+
+	private Map<TaskId, Job<T, S>> taskToJob = new ConcurrentHashMap<>();
+	private BlockingQueue<QueueEntry<T, S>> todo = new LinkedBlockingQueue<QueueEntry<T, S>>();
 	private Map<Thread, Integer> threads = new ConcurrentHashMap<>();
 	private AtomicBoolean queueStopped = new AtomicBoolean(false);
 
@@ -37,7 +36,7 @@ public class TaskQueue<T> extends SimpleJobHandler<T> {
 		this.queueName = name;
 	}
 
-	public boolean addJob(Job<T> job) {
+	public boolean addJob(Job<T, S> job) {
 		if (queueStopped.compareAndSet(true, true)) {
 			return false;
 		}
@@ -46,9 +45,11 @@ public class TaskQueue<T> extends SimpleJobHandler<T> {
 		try {
 			for (TaskRequest<T> taskRequest : taskRequests) {
 				taskToJob.put(taskRequest.getTask().getTaskId(), job);
-				todo.put(new QueueEntry<T>(job, taskRequest));
+				todo.put(new QueueEntry<T, S>(job, taskRequest));
 			}
-			job.setJobState(JobState.SUBMITTED);
+			if (job.getState() == JobState.NEW) {
+				job.setJobState(JobState.SUBMITTED);
+			}
 			return true;
 		} catch (InterruptedException e) {
 			LOG.error("Could not add Job for JobRequest {}", job, e);
@@ -66,52 +67,58 @@ public class TaskQueue<T> extends SimpleJobHandler<T> {
 		if (queueStopped.compareAndSet(true, true)) {
 			return null;
 		}
-		
-		QueueEntry<T> nextEntry;
+
+		QueueEntry<T, S> nextEntry;
 		Thread thread = Thread.currentThread();
 		threads.put(thread, 0);
 		try {
 			nextEntry = todo.take();
-			Job<T> job = nextEntry.getJob();
+			Job<T, S> job = nextEntry.getJob();
 			TaskRequest<T> taskRequest = nextEntry.getTaskRequest();
 			TaskId taskId = taskRequest.getTask().getTaskId();
 			job.setTaskState(taskId, TaskState.RUNNING);
 			job.setJobState(JobState.RUNNING);
 			return taskRequest.getTask();
 		} catch (InterruptedException e) {
-			LOG.warn("Got InterruptedException on queue {} for thread {}, assuming to shut down", queueName, thread.getName());
+			LOG.info(
+					"Got InterruptedException on queue {} for thread {}, assuming to shut down",
+					queueName, thread.getName());
 			return null;
-		}
-		finally {
+		} finally {
 			threads.remove(thread);
 		}
 	}
 
-	public void reschedule(TaskId taskId) throws InterruptedException {
-		Job<T> job = taskToJob.get(taskId);
+	public boolean reschedule(TaskId taskId) {
+		Job<T, S> job = taskToJob.get(taskId);
 		TaskRequest<T> taskRequest = job.getTaskRequest(taskId);
 		job.setTaskState(taskId, TaskState.NEW);
-		todo.put(new QueueEntry<T>(job, taskRequest));
+		try {
+			todo.put(new QueueEntry<T, S>(job, taskRequest));
+			return true;
+		} catch (InterruptedException e) {
+			LOG.error("Could not reschedule task {}", taskId, e);
+			return false;
+		}
 	}
-	
-	public Job<T> getJobForTask(TaskId taskId) {
+
+	public Job<T, S> getJobForTask(TaskId taskId) {
 		return taskToJob.get(taskId);
 	}
-	
+
 	@Override
-	public void onFinished(JobResponse<T> jobResponse) {
+	public void onFinished(final JobId jobId) {
 		List<TaskId> taskIds = new ArrayList<>();
-		JobId jobId = jobResponse.getJobId();
-		for (Entry<TaskId, Job<T>> entry : taskToJob.entrySet()){
+		for (Entry<TaskId, Job<T, S>> entry : taskToJob.entrySet()) {
 			if (entry.getValue().getJobId().equals(jobId)) {
 				taskIds.add(entry.getKey());
 			}
 		}
 		for (TaskId taskId : taskIds) {
-			taskToJob.remove(taskId);		
+			taskToJob.remove(taskId);
 		}
 	}
-	
+
 	public void killWaitingTasks() {
 		LOG.info("Killing all waiting Tasks");
 		queueStopped.set(true);
