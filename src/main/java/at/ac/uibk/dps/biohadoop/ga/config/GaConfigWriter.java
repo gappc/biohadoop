@@ -36,10 +36,10 @@ public class GaConfigWriter {
 
 		System.out.println(System.getProperty("local"));
 
-		// List<String> endpoints =
-		// Arrays.asList(GaSocketServer.class.getName(),
-		// GaKryoResource.class.getName(), UndertowServer.class.getName(),
-		// GaLocalResource.class.getName());
+//		 List<String> endpoints =
+//		 Arrays.asList(GaSocketServer.class.getName(),
+//		 GaKryoResource.class.getName(), UndertowServer.class.getName(),
+//		 GaLocalResource.class.getName());
 		List<String> endpoints = Arrays.asList(GaSocketServer.class.getName(),
 				GaKryoResource.class.getName(), UndertowServer.class.getName());
 		Map<String, Integer> workers = new HashMap<String, Integer>();
@@ -71,7 +71,7 @@ public class GaConfigWriter {
 		} else {
 			config.setDataFile("/biohadoop/data/att48.tsp");
 		}
-		config.setMaxIterations(20000);
+		config.setMaxIterations(10000);
 		config.setPopulationSize(10);
 		return config;
 	}

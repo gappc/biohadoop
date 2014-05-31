@@ -6,34 +6,48 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.job.JobManager;
-import at.ac.uibk.dps.biohadoop.job.Task;
-import at.ac.uibk.dps.biohadoop.moead.algorithm.MoeadResult;
-import at.ac.uibk.dps.biohadoop.moead.algorithm.MoeadTask;
-import at.ac.uibk.dps.biohadoop.queue.Monitor;
+import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationId;
+import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
+import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationState;
+import at.ac.uibk.dps.biohadoop.jobmanager.JobId;
+import at.ac.uibk.dps.biohadoop.jobmanager.api.JobManager;
+import at.ac.uibk.dps.biohadoop.jobmanager.api.JobRequest;
+import at.ac.uibk.dps.biohadoop.jobmanager.api.JobRequestData;
+import at.ac.uibk.dps.biohadoop.jobmanager.api.JobResponse;
+import at.ac.uibk.dps.biohadoop.jobmanager.api.JobResponseData;
+import at.ac.uibk.dps.biohadoop.jobmanager.handler.SimpleJobHandler;
 
-public class NsgaII {
+public class NsgaII extends SimpleJobHandler<double[]> {
+
+	private static final Logger LOG = LoggerFactory.getLogger(NsgaII.class);
+	public static final String NSGAII_QUEUE = "NSGAII_QUEUE";
 
 	public static final String NSGAII_WORK_QUEUE = "NSGAII_WORK_QUEUE";
 	public static final String NSGAII_RESULT_STORE = "NSGAII_RESULT_STORE";
 
-	private static final Logger LOG = LoggerFactory.getLogger(NsgaII.class);
+	private final ApplicationId applicationId;
+	JobManager<double[], double[]> jobManager = JobManager.getInstance();
+	private CountDownLatch latch;
+
 	private int logSteps = 100;
 
-	private JobManager jobManager;
-	private Monitor monitor;
+	public NsgaII(ApplicationId applicationId) {
+		this.applicationId = applicationId;
+	}
 
 	public List<List<Double>> run(int maxIterations, int populationSize,
-			int genomeSize) {
-		long startTime = System.currentTimeMillis();
+			int genomeSize) throws InterruptedException {
+		ApplicationManager applicationManager = ApplicationManager
+				.getInstance();
+		applicationManager.setApplicationState(applicationId,
+				ApplicationState.RUNNING);
 
-		jobManager = JobManager.getInstance();
-		jobManager.setNewStoreSize(populationSize * 2);
-		monitor = jobManager.getResultStoreMonitor(NSGAII_RESULT_STORE);
+		long startTime = System.currentTimeMillis();
 
 		// Initialize population, where first half (of size populationSize) is
 		// filled with random numbers, and second half is initialized with
@@ -95,7 +109,8 @@ public class NsgaII {
 			computeObjectiveValues(population, objectiveValues, 0,
 					populationSize);
 
-			jobManager.setCompleted((float) counter / (float) maxIterations);
+			applicationManager.setProgress(applicationId, (float) counter
+					/ (float) maxIterations);
 
 			counter++;
 			if (counter % 100 == 0) {
@@ -136,7 +151,15 @@ public class NsgaII {
 			solution.add((objectiveValues[i][1] - minF2) / (maxF2 - minF2));
 			result.add(solution);
 		}
+		
+		jobManager.shutdown();
+		
 		return result;
+	}
+
+	@Override
+	public void onFinished(JobId jobId) {
+		latch.countDown();
 	}
 
 	private double[][] initializePopulation(int populationSize, int genomeSize) {
@@ -180,13 +203,13 @@ public class NsgaII {
 		}
 	}
 
-	private int[] parentSelectionRandom(int populationSize) {
-		Random rand = new Random();
-		int[] parents = new int[2];
-		parents[0] = rand.nextInt(populationSize);
-		parents[1] = rand.nextInt(populationSize);
-		return parents;
-	}
+//	private int[] parentSelectionRandom(int populationSize) {
+//		Random rand = new Random();
+//		int[] parents = new int[2];
+//		parents[0] = rand.nextInt(populationSize);
+//		parents[1] = rand.nextInt(populationSize);
+//		return parents;
+//	}
 
 	private int[] parentSelectionTournament(final int populationSize,
 			final NondominatedSortResult nondominatedSortedFront,
@@ -277,30 +300,50 @@ public class NsgaII {
 	}
 
 	private double[][] computeObjectiveValues(double[][] population,
-			double[][] objectiveValues, int start, int end) {
+			double[][] objectiveValues, int start, int end)
+			throws InterruptedException {
+		// for (int i = start; i < end; i++) {
+		// objectiveValues[i][0] = Functions.f1(population[i]);
+		// objectiveValues[i][1] = Functions.f2(population[i]);
+		// }
+
+		JobRequest<double[]> jobRequest = new JobRequest<>(this);
 		for (int i = start; i < end; i++) {
-			objectiveValues[i][0] = Functions.f1(population[i]);
-			objectiveValues[i][1] = Functions.f2(population[i]);
+			jobRequest.add(new JobRequestData<double[]>(population[i], i));
 		}
-//		try {
-//			for (int i = start; i < end; i++) {
-//				NsgaIITask task = new NsgaIITask(i, population[i]);
-//				jobManager.scheduleTask(NSGAII_WORK_QUEUE, task);
-//			}
-//			synchronized (monitor) {
-//				if (!monitor.isWasSignalled()) {
-//					monitor.wait();
-//				}
-//				monitor.setWasSignalled(false);
-//			}
-//
-//			Task[] results = jobManager.readResult(NSGAII_RESULT_STORE);
-//			for (int i = start; i < end; i++) {
-//				objectiveValues[i] = ((NsgaIIResult) results[i]).getResult();
-//			}
-//		} catch (InterruptedException e) {
-//			LOG.error("Error while schduling task", e);
-//		}
+
+		latch = new CountDownLatch(1);
+		JobId jobId = jobManager.submitJob(jobRequest, NSGAII_QUEUE);
+		latch.await();
+
+		JobResponse<double[]> jobResponse = jobManager.getJobResponse(jobId);
+		jobManager.jobCleanup(jobId);
+		List<JobResponseData<double[]>> results = jobResponse.getResponseData();
+
+		for (JobResponseData<double[]> jobResponseData : results) {
+			int slot = jobResponseData.getSlot();
+			objectiveValues[slot] = jobResponseData.getData();
+		}
+		
+		// try {
+		// for (int i = start; i < end; i++) {
+		// NsgaIITask task = new NsgaIITask(i, population[i]);
+		// jobManager.scheduleTask(NSGAII_WORK_QUEUE, task);
+		// }
+		// synchronized (monitor) {
+		// if (!monitor.isWasSignalled()) {
+		// monitor.wait();
+		// }
+		// monitor.setWasSignalled(false);
+		// }
+		//
+		// Task[] results = jobManager.readResult(NSGAII_RESULT_STORE);
+		// for (int i = start; i < end; i++) {
+		// objectiveValues[i] = ((NsgaIIResult) results[i]).getResult();
+		// }
+		// } catch (InterruptedException e) {
+		// LOG.error("Error while schduling task", e);
+		// }
 		return objectiveValues;
 	}
 
@@ -333,8 +376,8 @@ public class NsgaII {
 					result[sorted[0]] = Double.MAX_VALUE;
 					result[sorted[l - 1]] = Double.MAX_VALUE;
 
-					double fmin = objectiveValues[sorted[0]][m];
-					double fmax = objectiveValues[sorted[l - 1]][m];
+//					double fmin = objectiveValues[sorted[0]][m];
+//					double fmax = objectiveValues[sorted[l - 1]][m];
 
 					for (int i = 1; i < l - 1; i++) {
 						result[sorted[i]] += (objectiveValues[sorted[i + 1]][m] - objectiveValues[sorted[i - 1]][m]);

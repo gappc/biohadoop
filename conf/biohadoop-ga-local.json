@@ -10,6 +10,6 @@
     "dataFile" : "/sdb/studium/master-thesis/code/git/masterthesis/data/att48.tsp",
     "algorithm" : "at.ac.uibk.dps.biohadoop.ga.algorithm.Ga",
     "populationSize" : 10,
-    "maxIterations" : 20000
+    "maxIterations" : 10000
   }
 }

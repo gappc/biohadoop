@@ -11,12 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaFitness;
-import at.ac.uibk.dps.biohadoop.ga.algorithm.GaResult;
-import at.ac.uibk.dps.biohadoop.ga.algorithm.GaTask;
-import at.ac.uibk.dps.biohadoop.job.StopTask;
-import at.ac.uibk.dps.biohadoop.websocket.Message;
-import at.ac.uibk.dps.biohadoop.websocket.MessageDecoder;
-import at.ac.uibk.dps.biohadoop.websocket.MessageType;
+import at.ac.uibk.dps.biohadoop.jobmanager.Task;
+import at.ac.uibk.dps.biohadoop.jobmanager.TaskId;
+import at.ac.uibk.dps.biohadoop.jobmanager.remote.Message;
+import at.ac.uibk.dps.biohadoop.jobmanager.remote.MessageType;
+import at.ac.uibk.dps.biohadoop.websocket.WebSocketDecoder;
 import at.ac.uibk.dps.biohadoop.websocket.WebSocketEncoder;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -25,7 +24,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
 
-@ClientEndpoint(encoders = WebSocketEncoder.class, decoders = MessageDecoder.class)
+@ClientEndpoint(encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
 public class KryoGaWorker {
 
 	private static final Logger LOGGER = LoggerFactory
@@ -53,9 +52,6 @@ public class KryoGaWorker {
 		new KryoGaWorker(masterHostname, 30015);
 	}
 
-	public KryoGaWorker() {
-	}
-
 	public KryoGaWorker(String hostname, int port) throws DeploymentException,
 			IOException, InterruptedException, EncodeException,
 			ClassNotFoundException {
@@ -63,26 +59,27 @@ public class KryoGaWorker {
 		Log.set(Log.LEVEL_DEBUG);
 
 		final Client client = new Client(64 * 1024, 64 * 1024);
+		//Needed?
+//		new Thread(client).start();
 		client.start();
 		client.connect(15000, "localhost", 30015);
 
 		Kryo kryo = client.getKryo();
 		kryo.register(Message.class);
 		kryo.register(MessageType.class);
-		kryo.register(GaTask.class);
-		kryo.register(GaResult.class);
 		kryo.register(Object[].class);
 		kryo.register(double[][].class);
 		kryo.register(double[].class);
 		kryo.register(int[].class);
-		kryo.register(StopTask.class);
+		kryo.register(Task.class);
+		kryo.register(TaskId.class);
+		kryo.register(Double[][].class);
+		kryo.register(Double[].class);
 
 		client.addListener(new Listener() {
 			public void received(Connection connection, Object object) {
 				if (object instanceof Message) {
-					Message message = (Message) object;
-					MessageType messageType = MessageType.NONE;
-					GaResult response = null;
+					Message<?> inputMessage = (Message<?>) object;
 
 					counter++;
 					if (counter % logSteps == 0) {
@@ -93,37 +90,34 @@ public class KryoGaWorker {
 						counter = 0;
 					}
 
-					if (message.getType() == MessageType.REGISTRATION_RESPONSE) {
+					if (inputMessage.getType() == MessageType.REGISTRATION_RESPONSE) {
 						LOGGER.info("Registration successful");
-						messageType = MessageType.WORK_INIT_REQUEST;
-						response = null;
+						Double[][] inputDistances = (Double[][])inputMessage.getPayload().getData();
+						convertDistances(inputDistances);
+						Message<?> message = new Message<Object>(MessageType.WORK_INIT_REQUEST, null);
+						connection.sendTCP(message);
 					}
 
-					if (message.getType() == MessageType.WORK_INIT_RESPONSE) {
-						LOGGER.debug("WORK_INIT_RESPONSE");
-						Object[] data = (Object[]) message.getData();
-						distances = (double[][]) data[0];
-						GaTask task = (GaTask) data[1];
+					if (inputMessage.getType() == MessageType.WORK_INIT_RESPONSE || inputMessage.getType() == MessageType.WORK_RESPONSE) {
+						LOGGER.debug("WORK_INIT_RESPONSE | WORK_RESPONSE");
+						
+						Task<?> inputTask = inputMessage.getPayload();
+						
+						@SuppressWarnings({ "rawtypes", "unchecked" })
+						Task<Double> response = computeResult((Task)inputTask);
+						
+						Message<Double> message = new Message<Double>(
+								MessageType.WORK_REQUEST, response);
 
-						messageType = MessageType.WORK_REQUEST;
-						response = computeResult(task);
+						connection.sendTCP(message);
 					}
-					if (message.getType() == MessageType.WORK_RESPONSE) {
-						LOGGER.debug("WORK_RESPONSE");
-						GaTask task = (GaTask) message.getData();
-
-						messageType = MessageType.WORK_REQUEST;
-						response = computeResult(task);
-					}
-					if (message.getType() == MessageType.SHUTDOWN) {
+					if (inputMessage.getType() == MessageType.SHUTDOWN) {
 						LOGGER.info(
 								"############# {} Worker stopped ###############",
 								KryoGaWorker.class.getSimpleName());
 						client.close();
 						latch.countDown();
 					}
-
-					connection.sendTCP(new Message(messageType, response));
 				}
 			}
 		});
@@ -132,15 +126,25 @@ public class KryoGaWorker {
 	}
 
 	private void register(Client client) {
-		Message message = new Message(MessageType.REGISTRATION_REQUEST, null);
+		Message<?> message = new Message<Object>(MessageType.REGISTRATION_REQUEST, null);
 		client.sendTCP(message);
 	}
+	
+	private void convertDistances(Double[][] inputDistances) {
+		int length1 = inputDistances.length;
+		int length2 = length1 != 0 ? inputDistances[0].length : 0;
+		distances = new double[length1][length2];
+		for (int i = 0; i < length1; i++) {
+			for (int j = i; j < length2; j++) {
+				distances[i][j] = inputDistances[i][j];
+				distances[j][i] = inputDistances[j][i];
+			}
+		}
+	}
 
-	private GaResult computeResult(GaTask task) {
-		GaResult gaResult = new GaResult();
-		gaResult.setSlot(task.getSlot());
-		gaResult.setResult(GaFitness.computeFitness(distances, task.getGenome()));
-		gaResult.setId(task.getId());
-		return gaResult;
+	private Task<Double> computeResult(Task<int[]> task) {
+		double fitness = GaFitness.computeFitness(distances, task.getData());
+		Task<Double> response = new Task<Double>(task.getTaskId(), fitness);
+		return response;
 	}
 }

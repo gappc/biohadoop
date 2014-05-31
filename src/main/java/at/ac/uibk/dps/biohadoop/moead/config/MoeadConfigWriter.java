@@ -3,16 +3,13 @@ package at.ac.uibk.dps.biohadoop.moead.config;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import at.ac.uibk.dps.biohadoop.hadoop.Config;
 import at.ac.uibk.dps.biohadoop.moead.algorithm.Moead;
-import at.ac.uibk.dps.biohadoop.moead.master.local.MoeadLocalResource;
 import at.ac.uibk.dps.biohadoop.moead.master.socket.MoeadSocketServer;
-import at.ac.uibk.dps.biohadoop.moead.worker.LocalMoeadWorker;
 import at.ac.uibk.dps.biohadoop.moead.worker.SocketMoeadWorker;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -35,7 +32,8 @@ public class MoeadConfigWriter {
 			JsonMappingException, IOException, ClassNotFoundException,
 			InstantiationException, IllegalAccessException {
 
-		List<String> endpoints = Arrays.asList(MoeadLocalResource.class.getName(), MoeadSocketServer.class.getName());
+//		List<String> endpoints = Arrays.asList(MoeadLocalResource.class.getName(), MoeadSocketServer.class.getName());
+		List<String> endpoints = Arrays.asList(MoeadSocketServer.class.getName());
 //		Map<String, Integer> workers = Collections.EMPTY_MAP;
 		Map<String, Integer> workers = new HashMap<String, Integer>();
 		workers.put(SocketMoeadWorker.class.getName(), 3);

@@ -2,6 +2,7 @@ package at.ac.uibk.dps.biohadoop.moead.master.socket;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -9,24 +10,29 @@ import java.net.Socket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.job.JobManager;
-import at.ac.uibk.dps.biohadoop.job.StopTask;
-import at.ac.uibk.dps.biohadoop.job.Task;
-import at.ac.uibk.dps.biohadoop.job.WorkObserver;
+import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
+import at.ac.uibk.dps.biohadoop.endpoint.Master;
+import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
+import at.ac.uibk.dps.biohadoop.endpoint.SendException;
+import at.ac.uibk.dps.biohadoop.endpoint.ShutdownException;
+import at.ac.uibk.dps.biohadoop.jobmanager.Task;
+import at.ac.uibk.dps.biohadoop.jobmanager.api.JobManager;
+import at.ac.uibk.dps.biohadoop.jobmanager.remote.Message;
 import at.ac.uibk.dps.biohadoop.moead.algorithm.Moead;
-import at.ac.uibk.dps.biohadoop.moead.algorithm.MoeadResult;
-import at.ac.uibk.dps.biohadoop.websocket.Message;
-import at.ac.uibk.dps.biohadoop.websocket.MessageType;
+import at.ac.uibk.dps.biohadoop.moead.master.MoeadMasterImpl;
+import at.ac.uibk.dps.biohadoop.torename.Helper;
 
-public class MoeadSocketResource implements Runnable, WorkObserver {
+public class MoeadSocketResource implements Runnable, Endpoint {
 
-	private static final Logger LOGGER = LoggerFactory
+	private static final Logger LOG = LoggerFactory
 			.getLogger(MoeadSocketResource.class);
-	private String className = MoeadSocketResource.class.getName();
+	private String className = Helper.getClassname(MoeadSocketResource.class);
 
 	private Socket socket;
-	private JobManager jobManager = JobManager.getInstance();
-	private Task currentTask;
+	int counter = 0;
+	
+	private ObjectOutputStream os = null;
+	private ObjectInputStream is = null;
 
 	public MoeadSocketResource(Socket socket) {
 		this.socket = socket;
@@ -34,78 +40,77 @@ public class MoeadSocketResource implements Runnable, WorkObserver {
 	
 	@Override
 	public void run() {
-		jobManager.addObserver(this);
+		JobManager<double[], double[]> jobManager = JobManager.getInstance();
+		Master<double[]> master = null;
 		try {
-			LOGGER.info("{} opened Socket on server", className);
+			LOG.info("Opened Socket on server");
 
-			ObjectOutputStream os = new ObjectOutputStream(
-					new BufferedOutputStream(socket.getOutputStream()));
+			os = new ObjectOutputStream(new BufferedOutputStream(
+					socket.getOutputStream()));
 			os.flush();
-			ObjectInputStream is = new ObjectInputStream(
-					new BufferedInputStream(socket.getInputStream()));
+			is = new ObjectInputStream(new BufferedInputStream(
+					socket.getInputStream()));
 
-			MessageType messageType = MessageType.NONE;
-			Object response = null;
-
-			int counter = 0;
+			master = new MoeadMasterImpl<double[]>(this);
+			master.handleRegistration();
+			master.handleWorkInit();
 			while (true) {
-				counter++;
-				if (counter % 10000 == 0) {
-					counter = 0;
-					os.reset();
-				}
-				
-				Message message = (Message) is.readUnshared();
-
-				messageType = MessageType.NONE;
-				response = null;
-
-				if (message.getType() == MessageType.REGISTRATION_REQUEST) {
-					messageType = MessageType.REGISTRATION_RESPONSE;
-					response = null;
-				}
-				if (message.getType() == MessageType.WORK_INIT_REQUEST) {
-					currentTask = (Task) jobManager
-							.getTaskForExecution(Moead.MOEAD_WORK_QUEUE);
-					messageType = MessageType.WORK_INIT_RESPONSE;
-					response = currentTask;
-				}
-				if (message.getType() == MessageType.WORK_REQUEST) {
-					MoeadResult result = (MoeadResult)message.getData();
-					jobManager.writeResult(Moead.MOEAD_RESULT_STORE, result);
-					currentTask = (Task) jobManager
-							.getTaskForExecution(Moead.MOEAD_WORK_QUEUE);
-
-					if (currentTask instanceof StopTask) {
-						messageType = MessageType.SHUTDOWN;
-					} else {
-						messageType = MessageType.WORK_RESPONSE;
+				master.handleWork();
+			}
+		} catch (ShutdownException e) {
+			LOG.info("Got shutdown event");
+		} catch (Exception e) {
+			LOG.error("Error while running {}", className, e);
+			if (master != null) {
+				Task<double[]> currentTask = master.getCurrentTask();
+				if (currentTask != null) {
+					boolean hasRescheduled = jobManager.reschedule(currentTask,
+							Moead.MOEAD_QUEUE);
+					if (!hasRescheduled) {
+						LOG.error("Could not reschedule task at {}", currentTask);
 					}
-					response = currentTask;
-				}
-
-				os.writeUnshared(new Message(messageType, response));
-				os.flush();
-				
-				if (messageType == MessageType.SHUTDOWN) {
-					break;
 				}
 			}
-			os.close();
-			is.close();
-		} catch (Exception e) {
-			LOGGER.error("Error while running {} socket server", className, e);
-			try {
-				jobManager
-						.reScheduleTask(Moead.MOEAD_WORK_QUEUE, currentTask);
-			} catch (InterruptedException e1) {
-				LOGGER.error("Could not reschedule task at {}", className, e);
+		} finally {
+			if (os != null) {
+				try {
+					os.close();
+				} catch (IOException e) {
+					LOG.error("Error while closing OutputStream", e);
+				}
+			}
+			if (is != null) {
+				try {
+					is.close();
+				} catch (IOException e) {
+					LOG.error("Error while closing InputStream", e);
+				}
 			}
 		}
 	}
 	
-	@Override
-	public void stop() {
-		LOGGER.info("{} socket server shutting down", className);
+	@SuppressWarnings("unchecked")
+	public <T> Message<T> receive() throws ReceiveException {
+		try {
+			return (Message<T>) is.readUnshared();
+		} catch (ClassNotFoundException | IOException e) {
+			LOG.error("Error while receiving", e);
+			throw new ReceiveException(e);
+		}
+	}
+
+	public void send(Message<?> message) throws SendException {
+		try {
+			counter++;
+			if (counter % 10000 == 0) {
+				counter = 0;
+				os.reset();
+			}
+			os.writeUnshared(message);
+			os.flush();
+		} catch (IOException e) {
+			LOG.error("Error while sending", e);
+			throw new SendException(e);
+		}
 	}
 }

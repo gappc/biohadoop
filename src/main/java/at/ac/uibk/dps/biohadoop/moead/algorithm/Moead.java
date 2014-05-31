@@ -4,34 +4,51 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.job.JobManager;
-import at.ac.uibk.dps.biohadoop.job.Task;
-import at.ac.uibk.dps.biohadoop.queue.Monitor;
+import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationId;
+import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
+import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationState;
+import at.ac.uibk.dps.biohadoop.jobmanager.JobId;
+import at.ac.uibk.dps.biohadoop.jobmanager.api.JobManager;
+import at.ac.uibk.dps.biohadoop.jobmanager.api.JobRequest;
+import at.ac.uibk.dps.biohadoop.jobmanager.api.JobRequestData;
+import at.ac.uibk.dps.biohadoop.jobmanager.api.JobResponse;
+import at.ac.uibk.dps.biohadoop.jobmanager.api.JobResponseData;
+import at.ac.uibk.dps.biohadoop.jobmanager.handler.SimpleJobHandler;
 
-public class Moead {
-
-	public static final String MOEAD_WORK_QUEUE = "MOEAD_WORK_QUEUE";
-	public static final String MOEAD_RESULT_STORE = "MOEAD_RESULT_STORE";
+public class Moead extends SimpleJobHandler<double[]> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Moead.class);
+	public static final String MOEAD_QUEUE = "MOEAD_QUEUE";
+
+	private final ApplicationId applicationId;
+	private CountDownLatch latch;
+
 	private int logSteps = 100;
-	
+
 	private double minF1 = Double.MAX_VALUE;
 	private double maxF1 = -Double.MAX_VALUE;
 	private double minF2 = Double.MAX_VALUE;
 	private double maxF2 = -Double.MAX_VALUE;
 
+	public Moead(ApplicationId applicationId) {
+		this.applicationId = applicationId;
+	}
+
 	public List<List<Double>> moead(int maxIterations, int N, int neighborSize,
-			int genomeSize) {
+			int genomeSize) throws InterruptedException {
+		ApplicationManager applicationManager = ApplicationManager
+				.getInstance();
+		applicationManager.setApplicationState(applicationId,
+				ApplicationState.RUNNING);
+
+		JobManager<double[], double[]> jobManager = JobManager.getInstance();
+
 		long startTime = System.currentTimeMillis();
-		
-		JobManager jobManager = JobManager.getInstance();
-		jobManager.setNewStoreSize(N);
-		Monitor monitor = jobManager.getResultStoreMonitor(MOEAD_RESULT_STORE);
 
 		double[][] weightVectors = Initializer.generateWeightVectors(N);
 
@@ -49,9 +66,10 @@ public class Moead {
 		// 1.4
 		double[] z = Initializer.getReferencePoint(functionValues); // reference
 																	// point
-		LOG.info("Initialisation took {}ms", System.currentTimeMillis() - startTime);
+		LOG.info("Initialisation took {}ms", System.currentTimeMillis()
+				- startTime);
 		startTime = System.currentTimeMillis();
-		
+
 		int counter = 0;
 		boolean end = false;
 		while (!end) {
@@ -64,26 +82,23 @@ public class Moead {
 				y[i] = reproduce(population, B[i]);
 			}
 
-			try {
-				for (int i = 0; i < N; i++) {
-					MoeadTask task = new MoeadTask(i, y[i]);
-					jobManager.scheduleTask(MOEAD_WORK_QUEUE, task);
-				}
-
-				synchronized (monitor) {
-					if (!monitor.isWasSignalled()) {
-						monitor.wait();
-					}
-					monitor.setWasSignalled(false);
-				}
-			} catch (InterruptedException e) {
-				LOG.error("Error while schduling task", e);
+			JobRequest<double[]> jobRequest = new JobRequest<>(this);
+			for (int i = 0; i < N; i++) {
+				jobRequest.add(new JobRequestData<double[]>(y[i], i));
 			}
-			
-			Task[] results = jobManager.readResult(MOEAD_RESULT_STORE);
+
+			latch = new CountDownLatch(1);
+			JobId jobId = jobManager.submitJob(jobRequest, MOEAD_QUEUE);
+			latch.await();
+
+			JobResponse<double[]> jobResponse = jobManager
+					.getJobResponse(jobId);
+			jobManager.jobCleanup(jobId);
+			List<JobResponseData<double[]>> results = jobResponse
+					.getResponseData();
 
 			for (int i = 0; i < N; i++) {
-				double[] fValues = ((MoeadResult)results[i]).getResult();
+				double[] fValues = results.get(i).getData();
 				// 2.2 - no repair needed
 				// 2.3
 				updateReferencePoint(z, y[i]);
@@ -94,8 +109,9 @@ public class Moead {
 				// Dosen't work as expected, so was commented out
 				// updateEP(EP, y, weightVectors[i], z);
 			}
-			
-			jobManager.setCompleted((float)counter / (float)maxIterations);
+
+			applicationManager.setProgress(applicationId, (float) counter
+					/ (float) maxIterations);
 
 			counter++;
 			if (counter % 100 == 0) {
@@ -109,18 +125,23 @@ public class Moead {
 			}
 		}
 
+		updateMinMax(functionValues);
 		List<List<Double>> result = new ArrayList<List<Double>>();
 		for (int i = 0; i < functionValues.length; i++) {
 			List<Double> l = new ArrayList<Double>();
-			double val1 = (functionValues[i][0] - z[0]) / (maxF1 - minF1);
-			double val2 = (functionValues[i][1] - z[1]) / (maxF2 - minF2);
+//			TODO check if normalization should be done
+//			double val1 = (functionValues[i][0] - z[0]) / (maxF1 - minF1);
+//			double val2 = (functionValues[i][1] - z[1]) / (maxF2 - minF2);
+			double val1 = (functionValues[i][0] - z[0]);
+			double val2 = (functionValues[i][1] - z[1]);
 			l.add(val1);
 			l.add(val2);
 			result.add(l);
-//			System.out.println(functionValues[i][0] + " "
-//					+ functionValues[i][1]);
+			System.out.println(val1 + " " + val2);
 		}
 
+		jobManager.shutdown();
+		
 		return result;
 
 		// for (List<Double> l : EP) {
@@ -138,6 +159,11 @@ public class Moead {
 		// l.remove(2);
 		// }
 		// return EP;
+	}
+
+	@Override
+	public void onFinished(JobId jobId) {
+		latch.countDown();
 	}
 
 	private void updateMinMax(double[][] functionValues) {

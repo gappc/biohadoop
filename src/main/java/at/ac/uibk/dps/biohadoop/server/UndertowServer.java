@@ -14,14 +14,14 @@ import javax.servlet.ServletException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
+import at.ac.uibk.dps.biohadoop.applicationmanager.ShutdownHandler;
 import at.ac.uibk.dps.biohadoop.ga.master.GaRestResource;
-import at.ac.uibk.dps.biohadoop.job.JobManager;
-import at.ac.uibk.dps.biohadoop.job.WorkObserver;
 import at.ac.uibk.dps.biohadoop.server.deployment.ResteasyHandler;
 import at.ac.uibk.dps.biohadoop.server.deployment.WebSocketHandler;
 import at.ac.uibk.dps.biohadoop.torename.Hostname;
 
-public class UndertowServer implements WorkObserver {
+public class UndertowServer implements ShutdownHandler {
 
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(UndertowServer.class);
@@ -32,7 +32,7 @@ public class UndertowServer implements WorkObserver {
 	
 	public UndertowServer() {
 		try {
-			JobManager.getInstance().addObserver(this);
+			ApplicationManager.getInstance().registerShutdownHandler(this);
 			startServer();
 		} catch (IllegalArgumentException | IOException | ServletException e) {
 			LOGGER.error("Error while running Undertow", e);
@@ -86,7 +86,7 @@ public class UndertowServer implements WorkObserver {
 	}
 
 	@Override
-	public void stop() {
+	public void shutdown() {
 		stopServer();
 	}
 }

@@ -8,20 +8,19 @@ import java.net.SocketTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.job.JobManager;
-import at.ac.uibk.dps.biohadoop.job.WorkObserver;
+import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
+import at.ac.uibk.dps.biohadoop.applicationmanager.ShutdownHandler;
 
-public class MoeadSocketServerRunnable implements WorkObserver, Runnable {
+public class MoeadSocketServerRunnable implements ShutdownHandler, Runnable {
 
-	private static final Logger LOGGER = LoggerFactory
+	private static final Logger LOG = LoggerFactory
 			.getLogger(MoeadSocketServerRunnable.class);
 	
-	private JobManager jobManager = JobManager.getInstance();
 	private boolean stop;
 
 	@Override
 	public void run() {
-		jobManager.addObserver(this);
+		ApplicationManager.getInstance().registerShutdownHandler(this);
 		try {
 			int socketTimeout = 1000;
 			ServerSocket serverSocket = new ServerSocket(30001);
@@ -37,18 +36,18 @@ public class MoeadSocketServerRunnable implements WorkObserver, Runnable {
 					Thread child = new Thread(socketRunnable, resourceName + childThreadsCount++);
 					child.start();
 				} catch(SocketTimeoutException e) {
-					LOGGER.debug("Socket timeout after {} ms", socketTimeout);
+					LOG.debug("Socket timeout after {} ms", socketTimeout);
 				}
 			}
 			serverSocket.close();
 		} catch (IOException e) {
-			LOGGER.error("ServerSocket error", e);
+			LOG.error("ServerSocket error", e);
 		}
 	}
 	
 	@Override
-	public void stop() {
-		LOGGER.info("shutting down");
+	public void shutdown() {
+		LOG.info("shutting down");
 		stop = true;
 	}
 }
