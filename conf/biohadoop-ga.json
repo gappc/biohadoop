@@ -2,23 +2,49 @@
   "version" : "0.1",
   "includePaths" : [ "/biohadoop/lib/", "/biohadoop/conf/" ],
   "applicationConfigs" : [ {
-    "name" : "GA_DISTRIBUTED-1",
-    "algorithmConfig" : {
-      "@class" : "at.ac.uibk.dps.biohadoop.ga.config.GaAlgorithmConfig",
+    "name" : "GA-DISTRIBUTED-1",
+    "algorithmConfiguration" : {
+      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.ga.config.GaAlgorithmConfig",
       "dataFile" : "/biohadoop/data/att48.tsp",
       "populationSize" : 10,
       "maxIterations" : 10000
     },
-    "algorithm" : "at.ac.uibk.dps.biohadoop.ga.algorithm.Ga"
+    "algorithm" : "at.ac.uibk.dps.biohadoop.ga.algorithm.Ga",
+    "persistenceConfiguration" : {
+      "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FilePersistenceConfiguration",
+      "saveConfiguration" : {
+        "@persistenceSaveConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileSaveConfiguration",
+        "path" : "/biohadoop/persistence/ga",
+        "afterIterations" : 1000
+      },
+      "loadConfiguration" : {
+        "@persistenceLoadConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileLoadConfiguration",
+        "path" : "/biohadoop/persistence/ga",
+        "onStartup" : true
+      }
+    }
   }, {
-    "name" : "GA_DISTRIBUTED-1",
-    "algorithmConfig" : {
-      "@class" : "at.ac.uibk.dps.biohadoop.ga.config.GaAlgorithmConfig",
+    "name" : "GA-DISTRIBUTED-1",
+    "algorithmConfiguration" : {
+      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.ga.config.GaAlgorithmConfig",
       "dataFile" : "/biohadoop/data/att48.tsp",
       "populationSize" : 10,
       "maxIterations" : 10000
     },
-    "algorithm" : "at.ac.uibk.dps.biohadoop.ga.algorithm.Ga"
+    "algorithm" : "at.ac.uibk.dps.biohadoop.ga.algorithm.Ga",
+    "persistenceConfiguration" : {
+      "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FilePersistenceConfiguration",
+      "saveConfiguration" : {
+        "@persistenceSaveConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileSaveConfiguration",
+        "path" : "/biohadoop/persistence/ga",
+        "afterIterations" : 1000
+      },
+      "loadConfiguration" : {
+        "@persistenceLoadConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileLoadConfiguration",
+        "path" : "/biohadoop/persistence/ga",
+        "onStartup" : true
+      }
+    }
   } ],
   "workers" : {
     "at.ac.uibk.dps.biohadoop.ga.worker.SocketGaWorker" : 3

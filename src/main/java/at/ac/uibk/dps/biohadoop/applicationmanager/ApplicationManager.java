@@ -18,7 +18,7 @@ public class ApplicationManager {
 
 	private ApplicationManager() {
 	}
-	
+
 	public static ApplicationManager getInstance() {
 		return ApplicationManager.APPLICATION_MANAGER;
 	}
@@ -34,7 +34,7 @@ public class ApplicationManager {
 		Application application = applications.get(applicationId);
 		return application.getProgress();
 	}
-	
+
 	public float getOverallProgress() {
 		float progress = 0;
 		int applicationCount = applications.size();
@@ -61,11 +61,22 @@ public class ApplicationManager {
 			ApplicationState applicationState) {
 		Application application = applications.get(applicationId);
 		application.setApplicationState(applicationState);
-		if (applicationState == ApplicationState.FINISHED) {
+
+		switch (applicationState) {
+		case NEW:
+			for (ApplicationHandler applicationHandler : application
+					.getApplicationHandlers()) {
+				applicationHandler.onNew(applicationId);
+			}
+			break;
+		case FINISHED:
 			counter.decrementAndGet();
 			if (counter.compareAndSet(0, 0)) {
 				invokeShutdownHandlers();
 			}
+			break;
+		default:
+			break;
 		}
 	}
 
@@ -93,8 +104,12 @@ public class ApplicationManager {
 					ApplicationData.class);
 			application.setApplicationData(clone);
 		}
+		for (ApplicationHandler applicationHandler : application
+				.getApplicationHandlers()) {
+			applicationHandler.onDataUpdate(applicationId);
+		}
 	}
-	
+
 	public ApplicationData<?> getApplicationData(ApplicationId applicationId) {
 		Application application = applications.get(applicationId);
 		if (application == null) {
@@ -102,18 +117,18 @@ public class ApplicationManager {
 		}
 		return application.getApplicationData();
 	}
-	
-//	TODO remove if only needed for DistributionManager.getRemoteApplication()
+
+	// TODO remove if only needed for DistributionManager.getRemoteApplication()
 	public List<ApplicationId> getApplicationsList() {
 		return new ArrayList<>(applications.keySet());
 	}
-	
-	public ApplicationConfiguration getApplicationConfiguration(ApplicationId applicationId) {
+
+	public ApplicationConfiguration getApplicationConfiguration(
+			ApplicationId applicationId) {
 		Application application = applications.get(applicationId);
 		return application.getApplicationConfiguration();
 	}
-	
-	
+
 	private void invokeShutdownHandlers() {
 		for (ShutdownHandler shutdownHandler : shutdownHandlers) {
 			shutdownHandler.shutdown();

@@ -6,7 +6,6 @@ import at.ac.uibk.dps.biohadoop.config.BuildParameterException;
 public class MoeadAlgorithmConfig implements AlgorithmConfiguration {
 
 	private String outputFile;
-	private String algorithm;
 	private int populationSize;
 	private int neighborSize;
 	private int genomeSize;
@@ -18,14 +17,6 @@ public class MoeadAlgorithmConfig implements AlgorithmConfiguration {
 
 	public void setOutputFile(String outputFile) {
 		this.outputFile = outputFile;
-	}
-
-	public String getAlgorithm() {
-		return algorithm;
-	}
-
-	public void setAlgorithm(String algorithm) {
-		this.algorithm = algorithm;
 	}
 
 	public int getPopulationSize() {

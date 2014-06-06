@@ -26,7 +26,8 @@ import at.ac.uibk.dps.biohadoop.jobmanager.api.JobResponse;
 import at.ac.uibk.dps.biohadoop.jobmanager.api.JobResponseData;
 import at.ac.uibk.dps.biohadoop.jobmanager.handler.SimpleJobHandler;
 
-public class Ga extends SimpleJobHandler<int[]> implements Algorithm<int[], GaParameter> {
+public class Ga extends SimpleJobHandler<int[]> implements
+		Algorithm<int[], GaParameter> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Ga.class);
 	public static final String GA_QUEUE = "GA_QUEUE";
@@ -53,12 +54,21 @@ public class Ga extends SimpleJobHandler<int[]> implements Algorithm<int[], GaPa
 
 		int citySize = tsp.getCities().length;
 
+		// Init population
+		int[][] population = null;
+		int persitedIteration = 0;
+		ApplicationData<?> applicationData = applicationManager
+				.getApplicationData(applicationId);
+		if (applicationData != null) {
+			population = convertToArray(applicationData.getData());
+			persitedIteration = applicationData.getIteration();
+			LOG.info("Resuming from iteration {}", persitedIteration);
+		} else {
+			population = initPopulation(populationSize, citySize);
+		}
+
 		boolean end = false;
-		int counter = 0;
-
-		// Init: Generate random population
-		int[][] population = initPopulation(populationSize, citySize);
-
+		int iteration = 0;
 		long startTime = System.currentTimeMillis();
 
 		while (!end) {
@@ -145,20 +155,21 @@ public class Ga extends SimpleJobHandler<int[]> implements Algorithm<int[], GaPa
 				}
 			}
 
-			ApplicationData<int[][]> applicationData = new ApplicationData<int[][]>(
-					population);
+			iteration++;
+
+			applicationData = new ApplicationData<int[][]>(population,
+					values[0], iteration + persitedIteration);
 			applicationManager.setApplicationData(applicationId,
 					applicationData, true);
 
-			counter++;
-			if (counter == maxIterations) {
+			if (iteration == maxIterations) {
 				end = true;
 			}
-			if (counter % logSteps == 0 || counter < 10) {
+			if (iteration % logSteps == 0 || iteration < 10) {
 				long endTime = System.currentTimeMillis();
 				LOG.info(
 						"Counter: {} ({} worker computations) | last {} GA iterations took {} ms",
-						counter, 2 * counter * populationSize, logSteps,
+						iteration, 2 * iteration * populationSize, logSteps,
 						endTime - startTime);
 				startTime = endTime;
 				printGenome(tsp.getDistances(), population[0], citySize);
@@ -166,14 +177,30 @@ public class Ga extends SimpleJobHandler<int[]> implements Algorithm<int[], GaPa
 				// get remote data
 				ApplicationData<int[][]> remoteData = DistributionManager
 						.getInstance().getRemoteApplicationData();
-				System.out.println(remoteData);
+				LOG.info("Remote data: {}", remoteData);
 			}
-			
-			applicationManager.setProgress(applicationId, (float) counter
+
+			applicationManager.setProgress(applicationId, (float) iteration
 					/ (float) maxIterations);
 		}
 
 		return population[0];
+	}
+
+	private int[][] convertToArray(Object input) {
+		@SuppressWarnings("unchecked")
+		List<List<Integer>> data = (List<List<Integer>>) input;
+		int length1 = data.size();
+		int length2 = length1 == 0 ? 0 : data.get(0).size();
+		int[][] population = new int[length1][length2];
+
+		for (int i = 0; i < length1; i++) {
+			for (int j = 0; j < length2; j++) {
+				population[i][j] = data.get(i).get(j);
+			}
+		}
+
+		return population;
 	}
 
 	@Override

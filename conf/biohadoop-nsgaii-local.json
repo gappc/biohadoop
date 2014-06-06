@@ -2,27 +2,53 @@
   "version" : "0.1",
   "includePaths" : [ "/biohadoop/lib/", "/biohadoop/conf/" ],
   "applicationConfigs" : [ {
-    "name" : "MOEAD-LOCAL-1",
+    "name" : "NSGAII-LOCAL-1",
     "algorithmConfiguration" : {
-      "@class" : "at.ac.uibk.dps.biohadoop.nsgaii.config.NsgaIIAlgorithmConfig",
+      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.nsgaii.config.NsgaIIAlgorithmConfig",
       "outputFile" : "/tmp/nsgaii-sol.txt",
       "algorithm" : "at.ac.uibk.dps.biohadoop.nsgaii.algorithm.NsgaII",
       "populationSize" : 300,
       "genomeSize" : 100,
       "maxIterations" : 500
     },
-    "algorithm" : "at.ac.uibk.dps.biohadoop.nsgaii.algorithm.NsgaII"
+    "algorithm" : "at.ac.uibk.dps.biohadoop.nsgaii.algorithm.NsgaII",
+    "persistenceConfiguration" : {
+      "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FilePersistenceConfiguration",
+      "saveConfiguration" : {
+        "@persistenceSaveConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileSaveConfiguration",
+        "path" : "/tmp/biohadoop/nsgaii",
+        "afterIterations" : 100
+      },
+      "loadConfiguration" : {
+        "@persistenceLoadConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileLoadConfiguration",
+        "path" : "/tmp/biohadoop/nsgaii/NSGAII-LOCAL-1/1263479909",
+        "onStartup" : true
+      }
+    }
   }, {
-    "name" : "MOEAD-LOCAL-1",
+    "name" : "NSGAII-LOCAL-1",
     "algorithmConfiguration" : {
-      "@class" : "at.ac.uibk.dps.biohadoop.nsgaii.config.NsgaIIAlgorithmConfig",
+      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.nsgaii.config.NsgaIIAlgorithmConfig",
       "outputFile" : "/tmp/nsgaii-sol.txt",
       "algorithm" : "at.ac.uibk.dps.biohadoop.nsgaii.algorithm.NsgaII",
       "populationSize" : 300,
       "genomeSize" : 100,
       "maxIterations" : 500
     },
-    "algorithm" : "at.ac.uibk.dps.biohadoop.nsgaii.algorithm.NsgaII"
+    "algorithm" : "at.ac.uibk.dps.biohadoop.nsgaii.algorithm.NsgaII",
+    "persistenceConfiguration" : {
+      "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FilePersistenceConfiguration",
+      "saveConfiguration" : {
+        "@persistenceSaveConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileSaveConfiguration",
+        "path" : "/tmp/biohadoop/nsgaii",
+        "afterIterations" : 100
+      },
+      "loadConfiguration" : {
+        "@persistenceLoadConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileLoadConfiguration",
+        "path" : "/tmp/biohadoop/nsgaii/NSGAII-LOCAL-1/1263479909",
+        "onStartup" : true
+      }
+    }
   } ],
   "workers" : {
     "at.ac.uibk.dps.biohadoop.nsgaii.worker.SocketNsgaIIWorker" : 3

@@ -11,6 +11,7 @@ import java.util.concurrent.CountDownLatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationData;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationId;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationState;
@@ -53,16 +54,22 @@ public class NsgaII extends SimpleJobHandler<double[]> implements
 
 		long startTime = System.currentTimeMillis();
 
-		// Initialize population, where first half (of size populationSize) is
-		// filled with random numbers, and second half is initialized with
-		// zeros. second half contains offsprings
-		double[][] population = initializePopulation(populationSize * 2,
-				genomeSize);
+		double[][] population = null;
+		int persitedIteration = 0;
+		ApplicationData<?> applicationData = applicationManager
+				.getApplicationData(applicationId);
+		if (applicationData != null) {
+			population = convertToArray(applicationData.getData());
+			persitedIteration = applicationData.getIteration();
+			LOG.info("Resuming from iteration {}", persitedIteration);
+		} else {
+			population = initializePopulation(populationSize * 2, genomeSize);
+		}
 
 		double[][] objectiveValues = new double[populationSize * 2][2];
 		computeObjectiveValues(population, objectiveValues, 0, populationSize);
 
-		int counter = 0;
+		int iteration = 0;
 		boolean end = false;
 		while (!end) {
 			produceOffsprings(population, objectiveValues);
@@ -109,54 +116,51 @@ public class NsgaII extends SimpleJobHandler<double[]> implements
 			}
 
 			population = newPopulation;
-
+			
 			computeObjectiveValues(population, objectiveValues, 0,
 					populationSize);
 
-			applicationManager.setProgress(applicationId, (float) counter
-					/ (float) maxIterations);
+			iteration++;
 
-			counter++;
-			if (counter % 100 == 0) {
-				long endTime = System.currentTimeMillis();
-				LOG.info("Counter: {} | last {} NSGAII iterations took {} ms",
-						counter, logSteps, endTime - startTime);
-				startTime = endTime;
-			}
-			if (counter >= maxIterations) {
+			List<List<Double>> result = computeResult(populationSize, objectiveValues);
+
+			applicationData = new ApplicationData<List<List<Double>>>(
+					result, 0, iteration + persitedIteration);
+			applicationManager.setApplicationData(applicationId,
+					applicationData, true);
+
+			if (iteration >= maxIterations) {
 				end = true;
 			}
+			if (iteration % 100 == 0) {
+				long endTime = System.currentTimeMillis();
+				LOG.info("Counter: {} | last {} NSGAII iterations took {} ms",
+						iteration + persitedIteration, logSteps, endTime - startTime);
+				startTime = endTime;
+			}
+
+			applicationManager.setProgress(applicationId, (float) iteration
+					/ (float) maxIterations);
 		}
 
-		// normalize
-		double minF1 = Double.MAX_VALUE;
-		double maxF1 = -Double.MAX_VALUE;
-		double minF2 = Double.MAX_VALUE;
-		double maxF2 = -Double.MAX_VALUE;
-		for (int i = 0; i < populationSize; i++) {
-			if (objectiveValues[i][0] < minF1) {
-				minF1 = objectiveValues[i][0];
-			}
-			if (objectiveValues[i][0] > maxF1) {
-				maxF1 = objectiveValues[i][0];
-			}
-			if (objectiveValues[i][1] < minF2) {
-				minF2 = objectiveValues[i][1];
-			}
-			if (objectiveValues[i][1] > maxF2) {
-				maxF2 = objectiveValues[i][1];
-			}
-		}
-
-		List<List<Double>> result = new ArrayList<List<Double>>();
-		for (int i = 0; i < populationSize; i++) {
-			List<Double> solution = new ArrayList<Double>();
-			solution.add((objectiveValues[i][0] - minF1) / (maxF1 - minF1));
-			solution.add((objectiveValues[i][1] - minF2) / (maxF2 - minF2));
-			result.add(solution);
-		}
-
+		List<List<Double>> result = computeResult(populationSize, objectiveValues);
 		return result;
+	}
+
+	private double[][] convertToArray(Object input) {
+		@SuppressWarnings("unchecked")
+		List<List<Double>> data = (List<List<Double>>) input;
+		int length1 = data.size();
+		int length2 = length1 == 0 ? 0 : data.get(0).size();
+		double[][] population = new double[length1 * 2][length2];
+
+		for (int i = 0; i < length1; i++) {
+			for (int j = 0; j < length2; j++) {
+				population[i][j] = data.get(i).get(j);
+			}
+		}
+
+		return population;
 	}
 
 	@Override
@@ -164,6 +168,9 @@ public class NsgaII extends SimpleJobHandler<double[]> implements
 		latch.countDown();
 	}
 
+	// Initialize population, where first half (of size populationSize) is
+	// filled with random numbers, and second half is initialized with
+	// zeros. second half contains offsprings
 	private double[][] initializePopulation(int populationSize, int genomeSize) {
 		Random rand = new Random();
 		double[][] population = new double[populationSize][genomeSize];
@@ -417,6 +424,39 @@ public class NsgaII extends SimpleJobHandler<double[]> implements
 		return result;
 	}
 
+	private List<List<Double>> computeResult(int populationSize,
+			double[][] objectiveValues) {
+		// normalize
+		double minF1 = Double.MAX_VALUE;
+		double maxF1 = -Double.MAX_VALUE;
+		double minF2 = Double.MAX_VALUE;
+		double maxF2 = -Double.MAX_VALUE;
+		for (int i = 0; i < populationSize; i++) {
+			if (objectiveValues[i][0] < minF1) {
+				minF1 = objectiveValues[i][0];
+			}
+			if (objectiveValues[i][0] > maxF1) {
+				maxF1 = objectiveValues[i][0];
+			}
+			if (objectiveValues[i][1] < minF2) {
+				minF2 = objectiveValues[i][1];
+			}
+			if (objectiveValues[i][1] > maxF2) {
+				maxF2 = objectiveValues[i][1];
+			}
+		}
+
+		List<List<Double>> result = new ArrayList<List<Double>>();
+		for (int i = 0; i < populationSize; i++) {
+			List<Double> solution = new ArrayList<Double>();
+			solution.add((objectiveValues[i][0] - minF1) / (maxF1 - minF1));
+			solution.add((objectiveValues[i][1] - minF2) / (maxF2 - minF2));
+			result.add(solution);
+		}
+		
+		return result;
+	}
+
 	private class TupleSort implements Comparable<TupleSort> {
 		double value;
 		int pos;
@@ -447,10 +487,9 @@ public class NsgaII extends SimpleJobHandler<double[]> implements
 				return false;
 			}
 			TupleSort tupleSort = (TupleSort) obj;
-			return this.value == tupleSort.value
-					&& this.pos == tupleSort.pos;
+			return this.value == tupleSort.value && this.pos == tupleSort.pos;
 		}
-		
+
 		@Override
 		public String toString() {
 			return pos + "|" + value;

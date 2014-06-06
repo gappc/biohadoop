@@ -8,7 +8,6 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +18,7 @@ import at.ac.uibk.dps.biohadoop.jobmanager.remote.MessageType;
 import at.ac.uibk.dps.biohadoop.torename.Helper;
 import at.ac.uibk.dps.biohadoop.torename.PerformanceLogger;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.primitives.Ints;
 
 public class RestGaWorker {

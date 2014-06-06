@@ -62,8 +62,19 @@ public class Moead extends SimpleJobHandler<double[]> implements Algorithm<List<
 		// population
 		// 1.2
 		int[][] B = Initializer.getNeighbors(weightVectors, neighborSize); // neighbors
+		
 		// 1.3
-		double[][] population = Initializer.getRandomPopulation(N, genomeSize);
+		double[][] population = null;
+		int persitedIteration = 0;
+		ApplicationData<?> applicationData = applicationManager
+				.getApplicationData(applicationId);
+		if (applicationData != null) {
+			population = convertToArray(applicationData.getData());
+			persitedIteration = applicationData.getIteration();
+			LOG.info("Resuming from iteration {}", persitedIteration);
+		} else {
+			population = Initializer.getRandomPopulation(N, genomeSize);
+		}
 		double[][] functionValues = Initializer
 				.computeFunctionValues(population);
 		// 1.4
@@ -73,7 +84,7 @@ public class Moead extends SimpleJobHandler<double[]> implements Algorithm<List<
 				- startTime);
 		startTime = System.currentTimeMillis();
 
-		int counter = 0;
+		int iteration = 0;
 		boolean end = false;
 		while (!end) {
 			updateMinMax(functionValues);
@@ -117,24 +128,26 @@ public class Moead extends SimpleJobHandler<double[]> implements Algorithm<List<
 				// updateEP(EP, y, weightVectors[i], z);
 			}
 
+			iteration++;
+			
 			List<List<Double>> result = computeResult(functionValues, z);
-			ApplicationData<List<List<Double>>> applicationData = new ApplicationData<List<List<Double>>>(
-					result);
+			
+			applicationData = new ApplicationData<List<List<Double>>>(
+					result, 0, iteration + persitedIteration);
 			applicationManager.setApplicationData(applicationId,
 					applicationData, true);
 			
-			counter++;
-			if (counter >= maxIterations) {
+			if (iteration >= maxIterations) {
 				end = true;
 			}
-			if (counter % 100 == 0) {
+			if (iteration % 100 == 0) {
 				long endTime = System.currentTimeMillis();
 				LOG.info("Counter: {} | last {} MOEAD iterations took {} ms",
-						counter, logSteps, endTime - startTime);
+						iteration + persitedIteration, logSteps, endTime - startTime);
 				startTime = endTime;
 			}
 			
-			applicationManager.setProgress(applicationId, (float) counter
+			applicationManager.setProgress(applicationId, (float) iteration
 					/ (float) maxIterations);
 		}
 
@@ -164,6 +177,22 @@ public class Moead extends SimpleJobHandler<double[]> implements Algorithm<List<
 		// return EP;
 	}
 
+	private double[][] convertToArray(Object input) {
+		@SuppressWarnings("unchecked")
+		List<List<Double>> data = (List<List<Double>>) input;
+		int length1 = data.size();
+		int length2 = length1 == 0 ? 0 : data.get(0).size();
+		double[][] population = new double[length1][length2];
+
+		for (int i = 0; i < length1; i++) {
+			for (int j = 0; j < length2; j++) {
+				population[i][j] = data.get(i).get(j);
+			}
+		}
+
+		return population;
+	}
+	
 	@Override
 	public void onFinished(JobId jobId) {
 		latch.countDown();

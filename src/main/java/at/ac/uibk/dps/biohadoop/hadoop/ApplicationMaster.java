@@ -66,7 +66,7 @@ public class ApplicationMaster {
 		if (!ArgumentChecker.isArgumentCountValid(args, 1)) {
 			return false;
 		}
-		if (!HdfsUtil.fileExists(yarnConfiguration, args[0])) {
+		if (!HdfsUtil.exists(yarnConfiguration, args[0])) {
 			return false;
 		}
 		return true;

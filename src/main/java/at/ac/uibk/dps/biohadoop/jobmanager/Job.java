@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import at.ac.uibk.dps.biohadoop.jobmanager.api.JobRequest;
 import at.ac.uibk.dps.biohadoop.jobmanager.api.JobRequestData;
 import at.ac.uibk.dps.biohadoop.jobmanager.api.JobResponse;
@@ -16,6 +19,8 @@ import at.ac.uibk.dps.biohadoop.jobmanager.api.JobState;
 import at.ac.uibk.dps.biohadoop.jobmanager.handler.JobHandler;
 
 public class Job<T, S> {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(Job.class);
 
 	private final JobId jobId;
 	private AtomicInteger openTasksCount = new AtomicInteger();
@@ -130,10 +135,10 @@ public class Job<T, S> {
 		if (jobState != JobState.FINISHED) {
 			for (TaskId taskId : taskRequests.keySet()) {
 				TaskRequest<T> taskRequest = taskRequests.get(taskId);
-				System.out.println(taskRequest);
+				LOG.error(taskRequest.toString());
 			}
-			System.out.println("openTasksCount: " + openTasksCount.get());
-			System.out.println("jobState: " + jobState);
+			LOG.error("openTasksCount: " + openTasksCount.get());
+			LOG.error("jobState: " + jobState);
 			return null;
 		}
 		if (jobResponse == null) {

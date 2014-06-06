@@ -68,7 +68,7 @@ public class Client {
 		if (!ArgumentChecker.isArgumentCountValid(args, 1)) {
 			return false;
 		}
-		if (!HdfsUtil.fileExists(yarnConfiguration, args[0])) {
+		if (!HdfsUtil.exists(yarnConfiguration, args[0])) {
 			return false;
 		}
 		try {
@@ -82,7 +82,7 @@ public class Client {
 				String includePath = o.toString();
 				
 				LOGGER.info("Including includePath {}", includePath);
-				if (!HdfsUtil.fileExists(yarnConfiguration, includePath)) {
+				if (!HdfsUtil.exists(yarnConfiguration, includePath)) {
 					LOGGER.error("Could not find includePath {}", includePath);
 					return false;
 				}
