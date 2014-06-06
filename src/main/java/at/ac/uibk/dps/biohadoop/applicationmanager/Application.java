@@ -1,19 +1,21 @@
 package at.ac.uibk.dps.biohadoop.applicationmanager;
 
+
 public class Application {
 
-	private String name;
+	private final ApplicationConfiguration applicationConfig;
 	private float progress;
 	private ApplicationState applicationState = ApplicationState.NEW;
+	private ApplicationData<?> applicationData;
 
-	public Application(String name) {
-		this.name = name;
+	public Application(ApplicationConfiguration applicationConfig) {
+		this.applicationConfig = applicationConfig;
 	}
 	
-	public String getName() {
-		return name;
+	public ApplicationConfiguration getApplicationConfiguration() {
+		return applicationConfig;
 	}
-
+	
 	public float getProgress() {
 		return progress;
 	}
@@ -29,4 +31,13 @@ public class Application {
 	public void setApplicationState(ApplicationState applicationState) {
 		this.applicationState = applicationState;
 	}
+
+	public ApplicationData<?> getApplicationData() {
+		return applicationData;
+	}
+
+	public <T>void setApplicationData(ApplicationData<T> applicationData) {
+		this.applicationData = applicationData;
+	}
+
 }

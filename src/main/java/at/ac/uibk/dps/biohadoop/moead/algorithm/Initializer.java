@@ -5,11 +5,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationId;
 
 public class Initializer {
-	
+
 	public static double[][] generateWeightVectors(int N) {
-		// fixed objective size to 2 
+		// fixed objective size to 2
 		double[][] weightVectors = new double[N][2];
 
 		double slice = 1.0 / (N - 1);
@@ -20,8 +21,9 @@ public class Initializer {
 
 		return weightVectors;
 	}
-	
-	public static int[][] getNeighbors(double[][] weightVectors, int neighborSize) {
+
+	public static int[][] getNeighbors(double[][] weightVectors,
+			int neighborSize) {
 		int N = weightVectors.length;
 		double[][] distances = getDistances(weightVectors);
 
@@ -31,7 +33,7 @@ public class Initializer {
 		}
 		return neighbors;
 	}
-	
+
 	public static double[][] getRandomPopulation(int N, int genomeSize) {
 		Random rand = new Random();
 		double[][] population = new double[N][genomeSize];
@@ -42,7 +44,7 @@ public class Initializer {
 		}
 		return population;
 	}
-	
+
 	public static double[][] computeFunctionValues(double[][] population) {
 		double[][] values = new double[population.length][2];
 		for (int i = 0; i < population.length; i++) {
@@ -51,7 +53,7 @@ public class Initializer {
 		}
 		return values;
 	}
-	
+
 	public static double[] getReferencePoint(double[][] functionValues) {
 		double[] referencePoint = new double[2];
 
@@ -61,12 +63,12 @@ public class Initializer {
 			f1Values.add(functionValues[i][0]);
 			f2Values.add(functionValues[i][1]);
 		}
-		
+
 		referencePoint[0] = Collections.min(f1Values);
 		referencePoint[1] = Collections.min(f2Values);
 		return referencePoint;
 	}
-	
+
 	private static double[][] getDistances(double[][] weightVectors) {
 		int N = weightVectors.length;
 		double[][] distances = new double[N][N];
@@ -84,7 +86,7 @@ public class Initializer {
 		}
 		return distances;
 	}
-	
+
 	private static int[] getSmallestValues(double[] distances, int neighborSize) {
 		List<NeighborHelper> sortingHelper = new ArrayList<NeighborHelper>();
 		Initializer initializer = new Initializer();
@@ -93,30 +95,38 @@ public class Initializer {
 			sortingHelper.add(n);
 		}
 		Collections.sort(sortingHelper);
-		
-		
+
 		int[] neighbors = new int[neighborSize];
 		for (int i = 0; i < neighborSize; i++) {
 			neighbors[i] = sortingHelper.get(i).index;
 		}
 		return neighbors;
 	}
-	
-	private class NeighborHelper implements Comparable<NeighborHelper>{
+
+	private class NeighborHelper implements Comparable<NeighborHelper> {
 		double distance;
 		int index;
+
 		public NeighborHelper(double distance, int index) {
 			this.distance = distance;
 			this.index = index;
 		}
+
 		@Override
 		public int compareTo(NeighborHelper o) {
 			double diff = this.distance - o.distance;
 			return diff == 0 ? 0 : (diff < 0 ? -1 : 1);
 		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (!(obj instanceof NeighborHelper)) {
+				return false;
+			}
+			NeighborHelper neighborHelper = (NeighborHelper) obj;
+			return this.distance == neighborHelper.distance
+					&& this.index == neighborHelper.index;
+		}
 	}
-
-
-
 
 }

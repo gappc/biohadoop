@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ShutdownHandler;
+import at.ac.uibk.dps.biohadoop.distributionmanager.ApplicationResource;
 import at.ac.uibk.dps.biohadoop.ga.master.GaRestResource;
 import at.ac.uibk.dps.biohadoop.server.deployment.ResteasyHandler;
 import at.ac.uibk.dps.biohadoop.server.deployment.WebSocketHandler;
@@ -58,6 +59,7 @@ public class UndertowServer implements ShutdownHandler {
 
 		List<Class<?>> resources = new ArrayList<Class<?>>();
 		resources.add(GaRestResource.class);
+		resources.add(ApplicationResource.class);
 
 		HttpHandler resteasyHandler = resteasy.getHandler(resteasyContextPath,
 				resources, null);

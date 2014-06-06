@@ -9,9 +9,12 @@ import java.util.concurrent.CountDownLatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationData;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationId;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationState;
+import at.ac.uibk.dps.biohadoop.config.Algorithm;
+import at.ac.uibk.dps.biohadoop.config.AlgorithmException;
 import at.ac.uibk.dps.biohadoop.jobmanager.JobId;
 import at.ac.uibk.dps.biohadoop.jobmanager.api.JobManager;
 import at.ac.uibk.dps.biohadoop.jobmanager.api.JobRequest;
@@ -19,13 +22,13 @@ import at.ac.uibk.dps.biohadoop.jobmanager.api.JobRequestData;
 import at.ac.uibk.dps.biohadoop.jobmanager.api.JobResponse;
 import at.ac.uibk.dps.biohadoop.jobmanager.api.JobResponseData;
 import at.ac.uibk.dps.biohadoop.jobmanager.handler.SimpleJobHandler;
+import at.ac.uibk.dps.biohadoop.moead.config.MoeadParameter;
 
-public class Moead extends SimpleJobHandler<double[]> {
+public class Moead extends SimpleJobHandler<double[]> implements Algorithm<List<List<Double>>, MoeadParameter> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Moead.class);
 	public static final String MOEAD_QUEUE = "MOEAD_QUEUE";
 
-	private final ApplicationId applicationId;
 	private CountDownLatch latch;
 
 	private int logSteps = 100;
@@ -35,12 +38,7 @@ public class Moead extends SimpleJobHandler<double[]> {
 	private double minF2 = Double.MAX_VALUE;
 	private double maxF2 = -Double.MAX_VALUE;
 
-	public Moead(ApplicationId applicationId) {
-		this.applicationId = applicationId;
-	}
-
-	public List<List<Double>> moead(int maxIterations, int N, int neighborSize,
-			int genomeSize) throws InterruptedException {
+	public List<List<Double>> compute(ApplicationId applicationId, MoeadParameter parameter) throws AlgorithmException {
 		ApplicationManager applicationManager = ApplicationManager
 				.getInstance();
 		applicationManager.setApplicationState(applicationId,
@@ -48,6 +46,11 @@ public class Moead extends SimpleJobHandler<double[]> {
 
 		JobManager<double[], double[]> jobManager = JobManager.getInstance();
 
+		int maxIterations = parameter.getMaxIterations();
+		int N = parameter.getN();
+		int neighborSize = parameter.getNeighborSize();
+		int genomeSize = parameter.getGenomeSize();
+		
 		long startTime = System.currentTimeMillis();
 
 		double[][] weightVectors = Initializer.generateWeightVectors(N);
@@ -89,7 +92,11 @@ public class Moead extends SimpleJobHandler<double[]> {
 
 			latch = new CountDownLatch(1);
 			JobId jobId = jobManager.submitJob(jobRequest, MOEAD_QUEUE);
-			latch.await();
+			try {
+				latch.await();
+			} catch (InterruptedException e) {
+				throw new AlgorithmException("Error while waiting for latch", e);
+			}
 
 			JobResponse<double[]> jobResponse = jobManager
 					.getJobResponse(jobId);
@@ -110,37 +117,33 @@ public class Moead extends SimpleJobHandler<double[]> {
 				// updateEP(EP, y, weightVectors[i], z);
 			}
 
-			applicationManager.setProgress(applicationId, (float) counter
-					/ (float) maxIterations);
-
+			List<List<Double>> result = computeResult(functionValues, z);
+			ApplicationData<List<List<Double>>> applicationData = new ApplicationData<List<List<Double>>>(
+					result);
+			applicationManager.setApplicationData(applicationId,
+					applicationData, true);
+			
 			counter++;
+			if (counter >= maxIterations) {
+				end = true;
+			}
 			if (counter % 100 == 0) {
 				long endTime = System.currentTimeMillis();
 				LOG.info("Counter: {} | last {} MOEAD iterations took {} ms",
 						counter, logSteps, endTime - startTime);
 				startTime = endTime;
 			}
-			if (counter >= maxIterations) {
-				end = true;
-			}
+			
+			applicationManager.setProgress(applicationId, (float) counter
+					/ (float) maxIterations);
 		}
 
 		updateMinMax(functionValues);
-		List<List<Double>> result = new ArrayList<List<Double>>();
-		for (int i = 0; i < functionValues.length; i++) {
-			List<Double> l = new ArrayList<Double>();
-//			TODO check if normalization should be done
-//			double val1 = (functionValues[i][0] - z[0]) / (maxF1 - minF1);
-//			double val2 = (functionValues[i][1] - z[1]) / (maxF2 - minF2);
-			double val1 = (functionValues[i][0] - z[0]);
-			double val2 = (functionValues[i][1] - z[1]);
-			l.add(val1);
-			l.add(val2);
-			result.add(l);
-			System.out.println(val1 + " " + val2);
+		
+		List<List<Double>> result = computeResult(functionValues, z);
+		for (List<Double> vals : result) {
+			LOG.info(vals.get(0) + " " + vals.get(1));
 		}
-
-		jobManager.shutdown();
 		
 		return result;
 
@@ -260,6 +263,23 @@ public class Moead extends SimpleJobHandler<double[]> {
 		// Second possibility: don't use max but instead addition
 		// return ((f1Val - z[0]) / (maxF1 - minF1) * weightVector[0]) + ((f2Val
 		// - z[1]) / (maxF2 - minF2) * weightVector[1]);
+	}
+	
+	private List<List<Double>> computeResult(double[][] functionValues, double[] z) {
+		List<List<Double>> result = new ArrayList<List<Double>>();
+		for (int i = 0; i < functionValues.length; i++) {
+			List<Double> l = new ArrayList<Double>();
+//			TODO check if normalization should be done
+//			double val1 = (functionValues[i][0] - z[0]) / (maxF1 - minF1);
+//			double val2 = (functionValues[i][1] - z[1]) / (maxF2 - minF2);
+			double val1 = (functionValues[i][0] - z[0]);
+			double val2 = (functionValues[i][1] - z[1]);
+			l.add(val1);
+			l.add(val2);
+			result.add(l);
+			LOG.debug(val1 + " " + val2);
+		}
+		return result;
 	}
 
 	// Dosen't work as expected, so was commented out

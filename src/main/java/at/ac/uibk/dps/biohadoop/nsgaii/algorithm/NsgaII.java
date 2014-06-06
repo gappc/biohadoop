@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationId;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationState;
+import at.ac.uibk.dps.biohadoop.config.Algorithm;
+import at.ac.uibk.dps.biohadoop.config.AlgorithmException;
 import at.ac.uibk.dps.biohadoop.jobmanager.JobId;
 import at.ac.uibk.dps.biohadoop.jobmanager.api.JobManager;
 import at.ac.uibk.dps.biohadoop.jobmanager.api.JobRequest;
@@ -21,8 +23,10 @@ import at.ac.uibk.dps.biohadoop.jobmanager.api.JobRequestData;
 import at.ac.uibk.dps.biohadoop.jobmanager.api.JobResponse;
 import at.ac.uibk.dps.biohadoop.jobmanager.api.JobResponseData;
 import at.ac.uibk.dps.biohadoop.jobmanager.handler.SimpleJobHandler;
+import at.ac.uibk.dps.biohadoop.nsgaii.config.NsgaIIParameter;
 
-public class NsgaII extends SimpleJobHandler<double[]> {
+public class NsgaII extends SimpleJobHandler<double[]> implements
+		Algorithm<List<List<Double>>, NsgaIIParameter> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(NsgaII.class);
 	public static final String NSGAII_QUEUE = "NSGAII_QUEUE";
@@ -30,22 +34,22 @@ public class NsgaII extends SimpleJobHandler<double[]> {
 	public static final String NSGAII_WORK_QUEUE = "NSGAII_WORK_QUEUE";
 	public static final String NSGAII_RESULT_STORE = "NSGAII_RESULT_STORE";
 
-	private final ApplicationId applicationId;
 	JobManager<double[], double[]> jobManager = JobManager.getInstance();
 	private CountDownLatch latch;
 
 	private int logSteps = 100;
 
-	public NsgaII(ApplicationId applicationId) {
-		this.applicationId = applicationId;
-	}
-
-	public List<List<Double>> run(int maxIterations, int populationSize,
-			int genomeSize) throws InterruptedException {
+	@Override
+	public List<List<Double>> compute(ApplicationId applicationId,
+			NsgaIIParameter parameter) throws AlgorithmException {
 		ApplicationManager applicationManager = ApplicationManager
 				.getInstance();
 		applicationManager.setApplicationState(applicationId,
 				ApplicationState.RUNNING);
+
+		int genomeSize = parameter.getGenomeSize();
+		int maxIterations = parameter.getMaxIterations();
+		int populationSize = parameter.getPopulationSize();
 
 		long startTime = System.currentTimeMillis();
 
@@ -151,9 +155,7 @@ public class NsgaII extends SimpleJobHandler<double[]> {
 			solution.add((objectiveValues[i][1] - minF2) / (maxF2 - minF2));
 			result.add(solution);
 		}
-		
-		jobManager.shutdown();
-		
+
 		return result;
 	}
 
@@ -203,13 +205,13 @@ public class NsgaII extends SimpleJobHandler<double[]> {
 		}
 	}
 
-//	private int[] parentSelectionRandom(int populationSize) {
-//		Random rand = new Random();
-//		int[] parents = new int[2];
-//		parents[0] = rand.nextInt(populationSize);
-//		parents[1] = rand.nextInt(populationSize);
-//		return parents;
-//	}
+	// private int[] parentSelectionRandom(int populationSize) {
+	// Random rand = new Random();
+	// int[] parents = new int[2];
+	// parents[0] = rand.nextInt(populationSize);
+	// parents[1] = rand.nextInt(populationSize);
+	// return parents;
+	// }
 
 	private int[] parentSelectionTournament(final int populationSize,
 			final NondominatedSortResult nondominatedSortedFront,
@@ -301,7 +303,7 @@ public class NsgaII extends SimpleJobHandler<double[]> {
 
 	private double[][] computeObjectiveValues(double[][] population,
 			double[][] objectiveValues, int start, int end)
-			throws InterruptedException {
+			throws AlgorithmException {
 		// for (int i = start; i < end; i++) {
 		// objectiveValues[i][0] = Functions.f1(population[i]);
 		// objectiveValues[i][1] = Functions.f2(population[i]);
@@ -314,7 +316,11 @@ public class NsgaII extends SimpleJobHandler<double[]> {
 
 		latch = new CountDownLatch(1);
 		JobId jobId = jobManager.submitJob(jobRequest, NSGAII_QUEUE);
-		latch.await();
+		try {
+			latch.await();
+		} catch (InterruptedException e) {
+			throw new AlgorithmException("Error while waiting for latch", e);
+		}
 
 		JobResponse<double[]> jobResponse = jobManager.getJobResponse(jobId);
 		jobManager.jobCleanup(jobId);
@@ -324,7 +330,7 @@ public class NsgaII extends SimpleJobHandler<double[]> {
 			int slot = jobResponseData.getSlot();
 			objectiveValues[slot] = jobResponseData.getData();
 		}
-		
+
 		// try {
 		// for (int i = start; i < end; i++) {
 		// NsgaIITask task = new NsgaIITask(i, population[i]);
@@ -376,8 +382,8 @@ public class NsgaII extends SimpleJobHandler<double[]> {
 					result[sorted[0]] = Double.MAX_VALUE;
 					result[sorted[l - 1]] = Double.MAX_VALUE;
 
-//					double fmin = objectiveValues[sorted[0]][m];
-//					double fmax = objectiveValues[sorted[l - 1]][m];
+					// double fmin = objectiveValues[sorted[0]][m];
+					// double fmax = objectiveValues[sorted[l - 1]][m];
 
 					for (int i = 1; i < l - 1; i++) {
 						result[sorted[i]] += (objectiveValues[sorted[i + 1]][m] - objectiveValues[sorted[i - 1]][m]);
@@ -435,6 +441,16 @@ public class NsgaII extends SimpleJobHandler<double[]> {
 			return value == o ? 0 : value < o ? -1 : 1;
 		}
 
+		@Override
+		public boolean equals(Object obj) {
+			if (!(obj instanceof TupleSort)) {
+				return false;
+			}
+			TupleSort tupleSort = (TupleSort) obj;
+			return this.value == tupleSort.value
+					&& this.pos == tupleSort.pos;
+		}
+		
 		@Override
 		public String toString() {
 			return pos + "|" + value;

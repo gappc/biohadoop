@@ -7,7 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import at.ac.uibk.dps.biohadoop.hadoop.Config;
+import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationConfiguration;
+import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.moead.algorithm.Moead;
 import at.ac.uibk.dps.biohadoop.moead.master.socket.MoeadSocketServer;
 import at.ac.uibk.dps.biohadoop.moead.worker.SocketMoeadWorker;
@@ -23,68 +24,75 @@ public class MoeadConfigWriter {
 
 	private static String CONF_OUTPUT_DIR = "/sdb/studium/master-thesis/code/git/masterthesis/conf";
 	private static String CONF_NAME = "biohadoop-moead";
-	private static String LOCAL_NAME = CONF_OUTPUT_DIR + "/" + CONF_NAME
+	private static String LOCAL_OUTPUT_NAME = CONF_OUTPUT_DIR + "/" + CONF_NAME
 			+ "-local.json";
-	private static String REMOTE_NAME = CONF_OUTPUT_DIR + "/" + CONF_NAME
+	private static String REMOTE_OUTPUT_NAME = CONF_OUTPUT_DIR + "/" + CONF_NAME
 			+ ".json";
 
 	public static void main(String[] args) throws JsonGenerationException,
 			JsonMappingException, IOException, ClassNotFoundException,
 			InstantiationException, IllegalAccessException {
 
-//		List<String> endpoints = Arrays.asList(MoeadLocalResource.class.getName(), MoeadSocketServer.class.getName());
+		BiohadoopConfiguration biohadoopConfig = new BiohadoopConfiguration();
+
 		List<String> endpoints = Arrays.asList(MoeadSocketServer.class.getName());
-//		Map<String, Integer> workers = Collections.EMPTY_MAP;
+		biohadoopConfig.setEndPoints(endpoints);
+
+		biohadoopConfig.setIncludePaths(Arrays.asList("/biohadoop/lib/",
+				"/biohadoop/conf/"));
+
+		biohadoopConfig.setVersion("0.1");
+
 		Map<String, Integer> workers = new HashMap<String, Integer>();
 		workers.put(SocketMoeadWorker.class.getName(), 3);
-		MoeadConfig config = new MoeadConfig();
-		config.setVersion("0.1");
-		config.setMasterEndpoints(endpoints);
-		config.setWorkers(workers);
-		config.setLauncherClass(MoeadLauncher.class.getName());
-		config.setIncludePaths(Arrays.asList("/biohadoop/lib/",
-				"/biohadoop/conf/"));
+		biohadoopConfig.setWorkers(workers);
 
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
-		config.setAlgorithmConfig(buildAlgorithmConfig(true));
-		mapper.writeValue(new File(LOCAL_NAME), config);
-		
-		config.setAlgorithmConfig(buildAlgorithmConfig(false));
-		mapper.writeValue(new File(REMOTE_NAME), config);
+		ApplicationConfiguration applicationConfig = buildApplicationConfig("MOEAD-LOCAL-1", true);
+		biohadoopConfig.setApplicationConfigs(Arrays.asList(applicationConfig, applicationConfig));
+		mapper.writeValue(new File(LOCAL_OUTPUT_NAME), biohadoopConfig);
+
+		applicationConfig = buildApplicationConfig("MOEAD-DISTRIBUTED-1", false);
+		biohadoopConfig.setApplicationConfigs(Arrays.asList(applicationConfig, applicationConfig));
+		mapper.writeValue(new File(REMOTE_OUTPUT_NAME), biohadoopConfig);
+
 		readAlgorithmConfig();
 	}
 
-	private static MoeadAlgorithmConfig buildAlgorithmConfig(boolean local) {
-		MoeadAlgorithmConfig config = new MoeadAlgorithmConfig();
-		config.setAlgorithm(Moead.class.getName());
+	private static ApplicationConfiguration buildApplicationConfig(String name, boolean local) {
+		MoeadAlgorithmConfig moeadAlgorithmConfig = new MoeadAlgorithmConfig();
+		moeadAlgorithmConfig.setAlgorithm(Moead.class.getName());
 		if (local) {
-			config.setOutputFile("/tmp/moead-sol.txt");
+			moeadAlgorithmConfig.setOutputFile("/tmp/moead-sol.txt");
 		} else {
-			config.setOutputFile("/biohadoop/data/moead-sol.txt");
+			moeadAlgorithmConfig.setOutputFile("/biohadoop/data/moead-sol.txt");
 		}
 		
-		config.setMaxIterations(1000);
-		config.setPopulationSize(300);
-		config.setNeighborSize(290);
-		config.setGenomeSize(10);
-		return config;
+		moeadAlgorithmConfig.setMaxIterations(1000);
+		moeadAlgorithmConfig.setPopulationSize(300);
+		moeadAlgorithmConfig.setNeighborSize(290);
+		moeadAlgorithmConfig.setGenomeSize(10);
+		
+		ApplicationConfiguration applicationConfig = new ApplicationConfiguration(name,
+				moeadAlgorithmConfig, Moead.class);
+		
+		return applicationConfig;
 	}
 
 	private static void readAlgorithmConfig() throws JsonParseException,
 			JsonMappingException, IOException, ClassNotFoundException,
 			InstantiationException, IllegalAccessException {
-		Config config = (Config) Class.forName(MoeadConfig.class.getName())
-				.newInstance();
+		BiohadoopConfiguration config = null;
 
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
 				false);
-			config = mapper.readValue(new File(LOCAL_NAME), config.getClass());
-			config = mapper.readValue(new File(REMOTE_NAME), config.getClass());
-
+		config = mapper.readValue(new File(LOCAL_OUTPUT_NAME), BiohadoopConfiguration.class);
 		System.out.println(config);
-		System.out.println(config.getClass().getName());
+		
+		config = mapper.readValue(new File(REMOTE_OUTPUT_NAME), BiohadoopConfiguration.class);
+		System.out.println(config);
 	}
 }

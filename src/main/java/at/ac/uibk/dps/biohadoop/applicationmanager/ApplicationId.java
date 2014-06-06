@@ -1,14 +1,20 @@
 package at.ac.uibk.dps.biohadoop.applicationmanager;
 
+import java.io.Serializable;
 import java.util.Random;
 
-public class ApplicationId {
+public class ApplicationId implements Serializable {
 
+	private static final long serialVersionUID = 6640295799209385434L;
 	private static final Random rand = new Random();
 	private final int id;
 	
 	private ApplicationId() {
 		this.id = ApplicationId.rand.nextInt();
+	}
+	
+	private ApplicationId(int id) {
+		this.id = id;
 	}
 	
 	public static ApplicationId newInstance() {
@@ -17,6 +23,11 @@ public class ApplicationId {
 
 	public long getId() {
 		return id;
+	}
+	
+	public static ApplicationId valueOf(String input) {
+		int newId = Integer.valueOf(input);
+		return new ApplicationId(newId);
 	}
 	
 	@Override
@@ -33,4 +44,8 @@ public class ApplicationId {
 		return this.id;
 	}
 	
+	@Override
+	public String toString() {
+		return Integer.toString(id);
+	}
 }

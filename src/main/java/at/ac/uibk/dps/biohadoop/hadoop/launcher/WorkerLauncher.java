@@ -1,7 +1,6 @@
-package at.ac.uibk.dps.biohadoop.ga.config;
+package at.ac.uibk.dps.biohadoop.hadoop.launcher;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,133 +19,28 @@ import org.apache.hadoop.yarn.api.records.LocalResource;
 import org.apache.hadoop.yarn.api.records.Priority;
 import org.apache.hadoop.yarn.api.records.Resource;
 import org.apache.hadoop.yarn.client.api.AMRMClient;
-import org.apache.hadoop.yarn.client.api.AMRMClient.ContainerRequest;
 import org.apache.hadoop.yarn.client.api.NMClient;
+import org.apache.hadoop.yarn.client.api.AMRMClient.ContainerRequest;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.util.Apps;
 import org.apache.hadoop.yarn.util.Records;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.applicationmanager.Application;
-import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationId;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
-import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationState;
-import at.ac.uibk.dps.biohadoop.ga.DistancesGlobal;
-import at.ac.uibk.dps.biohadoop.ga.algorithm.FileInput;
-import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
-import at.ac.uibk.dps.biohadoop.ga.algorithm.Tsp;
-import at.ac.uibk.dps.biohadoop.hadoop.Config;
-import at.ac.uibk.dps.biohadoop.hadoop.LaunchException;
-import at.ac.uibk.dps.biohadoop.hadoop.Launcher;
-import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;
+import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.torename.Hostname;
 import at.ac.uibk.dps.biohadoop.torename.LaunchContainerRunnable;
 import at.ac.uibk.dps.biohadoop.torename.LocalResourceBuilder;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+public class WorkerLauncher {
 
-public class GaLauncher implements Launcher {
+	private static final Logger LOG = LoggerFactory
+			.getLogger(WorkerLauncher.class);
 
-	private static Logger LOGGER = LoggerFactory.getLogger(GaLauncher.class);
-
-	private YarnConfiguration yarnConfiguration = new YarnConfiguration();
-	private ObjectMapper mapper = new ObjectMapper();
-
-	private ApplicationId applicationId;
-
-	@Override
-	public Config getConfiguration(String configFilename) {
-		try {
-			return mapper.readValue(
-					HdfsUtil.openFile(yarnConfiguration, configFilename),
-					GaConfig.class);
-		} catch (IOException e) {
-			LOGGER.error("Could not read configuration {}", configFilename);
-			return null;
-		}
-	}
-
-	@Override
-	public boolean isConfigurationValid(String configFilename) {
-		GaConfig gaConfig = (GaConfig) getConfiguration(configFilename);
-		if (gaConfig == null) {
-			LOGGER.error("Could not read configuration {}", configFilename);
-			return false;
-		}
-		String dataFilename = gaConfig.getAlgorithmConfig().getDataFile();
-		if (!(HdfsUtil.fileExists(yarnConfiguration, configFilename))) {
-			LOGGER.error("Data file {} does not exist", dataFilename);
-			return false;
-		}
-		return true;
-	}
-
-	@Override
-	public void launch(String configFilename) throws LaunchException {
-		if (!isConfigurationValid(configFilename)) {
-			throw new LaunchException("Configuration " + configFilename
-					+ " is not valid");
-		}
-
-		try {
-			GaConfig gaConfig = (GaConfig) getConfiguration(configFilename);
-			launchAlgorithm(gaConfig);
-			launchMasterEndpoints(gaConfig);
-
-			if (System.getProperty("local") == null) {
-				launchWorkers(gaConfig, configFilename);
-			}
-		} catch (Exception e) {
-			throw new LaunchException("Error while launching program", e);
-		}
-	}
-
-	private void launchAlgorithm(GaConfig config) throws Exception {
-		final GaAlgorithmConfig ac = ((GaConfig) config).getAlgorithmConfig();
-		FileInput fileInput = new FileInput();
-		final Tsp tsp = fileInput.readFile(HdfsUtil.openFile(yarnConfiguration,
-				ac.getDataFile()));
-		LOGGER.debug("*********** SUCCESSFULLY READ DATA *************");
-		DistancesGlobal.setDistances(tsp.getDistances());
-
-		Application application = new Application("GA-"
-				+ Thread.currentThread().getName());
-		final ApplicationManager applicationManager = ApplicationManager
-				.getInstance();
-		final ApplicationId applicationId = applicationManager
-				.addApplication(application);
-		this.applicationId = applicationId;
-
-		Thread algorithmRunner = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				LOGGER.info("Now running GA main");
-				Ga ga = new Ga(applicationId);
-				try {
-					applicationManager.setApplicationState(applicationId,
-							ApplicationState.NEW);
-					ga.ga(tsp, ac.getPopulationSize(), ac.getMaxIterations());
-					applicationManager.setApplicationState(applicationId,
-							ApplicationState.FINISHED);
-				} catch (Exception e) {
-					LOGGER.error("Failure while running GA thread", e);
-				}
-			}
-		});
-		algorithmRunner.setName("GaRunner");
-		algorithmRunner.start();
-	}
-
-	private void launchMasterEndpoints(GaConfig config) throws Exception {
-		for (String masterEndpoint : ((GaConfig) config).getMasterEndpoints()) {
-			Class.forName(masterEndpoint).newInstance();
-		}
-	}
-
-	private void launchWorkers(GaConfig config, String configFilename)
-			throws Exception {
-		LOGGER.info("#### startWorker: ");
+	public static void launchWorkers(YarnConfiguration yarnConfiguration,
+			BiohadoopConfiguration biohadoopConfig, String configFilename) throws Exception {
+		LOG.info("#### startWorker: ");
 
 		// Initialize clients to ResourceManager and NodeManagers
 		// Configuration conf = new YarnConfiguration();
@@ -160,9 +54,9 @@ public class GaLauncher implements Launcher {
 		nmClient.start();
 
 		// Register with ResourceManager
-		LOGGER.info("registerApplicationMaster 0");
+		LOG.info("registerApplicationMaster 0");
 		rmClient.registerApplicationMaster("", 0, "");
-		LOGGER.info("registerApplicationMaster 1");
+		LOG.info("registerApplicationMaster 1");
 
 		// Priority for worker containers - priorities are intra-application
 		Priority priority = Records.newRecord(Priority.class);
@@ -173,25 +67,25 @@ public class GaLauncher implements Launcher {
 		capability.setMemory(128);
 		capability.setVirtualCores(1);
 
-		List<String> workerList = getWorkerList(config);
+		List<String> workerList = getWorkerList(biohadoopConfig);
 		int containerCount = workerList.size();
 
-		LOGGER.info("Make container requests to ResourceManager");
+		LOG.info("Make container requests to ResourceManager");
 		for (int i = 0; i < containerCount; ++i) {
 			ContainerRequest containerAsk = new ContainerRequest(capability,
 					null, null, priority);
-			LOGGER.info("Making res-req " + i);
+			LOG.info("Making res-req " + i);
 			rmClient.addContainerRequest(containerAsk);
 		}
 
-		LOGGER.info("Obtain allocated containers and launch");
+		LOG.info("Obtain allocated containers and launch");
 		int allocatedContainers = 0;
 		while (allocatedContainers < containerCount) {
 			AllocateResponse response = rmClient.allocate(0.0f);
 			for (Container container : response.getAllocatedContainers()) {
 				++allocatedContainers;
 
-				LOGGER.info("Launching shell command on a new container."
+				LOG.info("Launching shell command on a new container."
 						+ ", containerId=" + container.getId()
 						+ ", containerNode=" + container.getNodeId().getHost()
 						+ ":" + container.getNodeId().getPort()
@@ -214,7 +108,7 @@ public class GaLauncher implements Launcher {
 						+ ApplicationConstants.LOG_DIR_EXPANSION_VAR
 						+ "/stderr";
 				workerList.remove(0);
-				LOGGER.info("Client command: " + clientCommand);
+				LOG.info("Client command: " + clientCommand);
 				ctx.setCommands(Collections.singletonList(clientCommand));
 
 				String libPath = "hdfs://master:54310/biohadoop/lib/";
@@ -227,7 +121,7 @@ public class GaLauncher implements Launcher {
 				setupAppMasterEnv(appMasterEnv, yarnConfiguration);
 				ctx.setEnvironment(appMasterEnv);
 
-				LOGGER.info("Launching container " + allocatedContainers);
+				LOG.info("Launching container " + allocatedContainers);
 
 				// Launch and start the container on a separate thread to keep
 				// the main
@@ -242,46 +136,47 @@ public class GaLauncher implements Launcher {
 		}
 
 		try {
-			LOGGER.info("Waiting for " + containerCount
+			LOG.info("Waiting for " + containerCount
 					+ " containers to complete");
 
-			ApplicationManager applicationManager = ApplicationManager.getInstance();
-			
+			ApplicationManager applicationManager = ApplicationManager
+					.getInstance();
+
 			int completedContainers = 0;
 			while (completedContainers < containerCount) {
-				float progress = applicationManager.getProgress(applicationId);
+				float progress = applicationManager.getOverallProgress();
 				AllocateResponse response = rmClient.allocate(progress);
 				for (ContainerStatus status : response
 						.getCompletedContainersStatuses()) {
 					++completedContainers;
-					LOGGER.info("Completed container {} with status {}",
+					LOG.info("Completed container {} with status {}",
 							completedContainers, status);
 				}
 				Thread.sleep(100);
 			}
 			rmClient.allocate(1.0f);
 
-			LOGGER.info("All containers completed, unregister with ResourceManager");
+			LOG.info("All containers completed, unregister with ResourceManager");
 			rmClient.unregisterApplicationMaster(
 					FinalApplicationStatus.SUCCEEDED, "", "");
 		} catch (Exception e) {
-			LOGGER.error("******** Application error ***********", e);
+			LOG.error("******** Application error ***********", e);
 		}
 	}
 
-	private List<String> getWorkerList(GaConfig config) {
+	private static List<String> getWorkerList(BiohadoopConfiguration config) {
 		List<String> workerList = new ArrayList<String>();
 		for (String key : config.getWorkers().keySet()) {
 			int value = config.getWorkers().get(key);
 			for (int i = 0; i < value; i++) {
 				workerList.add(key);
-				LOGGER.info("Worker {} added", key);
+				LOG.info("Worker {} added", key);
 			}
 		}
 		return workerList;
 	}
 
-	private void setupAppMasterEnv(Map<String, String> appMasterEnv,
+	private static void setupAppMasterEnv(Map<String, String> appMasterEnv,
 			Configuration conf) {
 		Apps.addToEnvironment(appMasterEnv, Environment.CLASSPATH.name(),
 				Environment.PWD.$() + File.separator + "*");
@@ -292,5 +187,4 @@ public class GaLauncher implements Launcher {
 					c.trim());
 		}
 	}
-
 }

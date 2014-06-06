@@ -1,15 +1,27 @@
 {
   "version" : "0.1",
-  "launcherClass" : "at.ac.uibk.dps.biohadoop.ga.config.GaLauncher",
   "includePaths" : [ "/biohadoop/lib/", "/biohadoop/conf/" ],
-  "masterEndpoints" : [ "at.ac.uibk.dps.biohadoop.ga.master.socket.GaSocketServer", "at.ac.uibk.dps.biohadoop.ga.master.kryo.GaKryoResource", "at.ac.uibk.dps.biohadoop.server.UndertowServer" ],
+  "applicationConfigs" : [ {
+    "name" : "GA-LOCAL-1",
+    "algorithmConfig" : {
+      "@class" : "at.ac.uibk.dps.biohadoop.ga.config.GaAlgorithmConfig",
+      "dataFile" : "/sdb/studium/master-thesis/code/git/masterthesis/data/att48.tsp",
+      "populationSize" : 10,
+      "maxIterations" : 10000
+    },
+    "algorithm" : "at.ac.uibk.dps.biohadoop.ga.algorithm.Ga"
+  }, {
+    "name" : "GA-LOCAL-1",
+    "algorithmConfig" : {
+      "@class" : "at.ac.uibk.dps.biohadoop.ga.config.GaAlgorithmConfig",
+      "dataFile" : "/sdb/studium/master-thesis/code/git/masterthesis/data/att48.tsp",
+      "populationSize" : 10,
+      "maxIterations" : 10000
+    },
+    "algorithm" : "at.ac.uibk.dps.biohadoop.ga.algorithm.Ga"
+  } ],
   "workers" : {
     "at.ac.uibk.dps.biohadoop.ga.worker.SocketGaWorker" : 3
   },
-  "algorithmConfig" : {
-    "dataFile" : "/sdb/studium/master-thesis/code/git/masterthesis/data/att48.tsp",
-    "algorithm" : "at.ac.uibk.dps.biohadoop.ga.algorithm.Ga",
-    "populationSize" : 10,
-    "maxIterations" : 10000
-  }
+  "endPoints" : [ "at.ac.uibk.dps.biohadoop.ga.master.socket.GaSocketServer", "at.ac.uibk.dps.biohadoop.ga.master.kryo.GaKryoResource", "at.ac.uibk.dps.biohadoop.server.UndertowServer" ]
 }

@@ -9,9 +9,15 @@ import java.util.concurrent.CountDownLatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationData;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationId;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationState;
+import at.ac.uibk.dps.biohadoop.config.Algorithm;
+import at.ac.uibk.dps.biohadoop.config.AlgorithmException;
+import at.ac.uibk.dps.biohadoop.distributionmanager.DistributionManager;
+import at.ac.uibk.dps.biohadoop.ga.DistancesGlobal;
+import at.ac.uibk.dps.biohadoop.ga.config.GaParameter;
 import at.ac.uibk.dps.biohadoop.jobmanager.JobId;
 import at.ac.uibk.dps.biohadoop.jobmanager.api.JobManager;
 import at.ac.uibk.dps.biohadoop.jobmanager.api.JobRequest;
@@ -20,28 +26,31 @@ import at.ac.uibk.dps.biohadoop.jobmanager.api.JobResponse;
 import at.ac.uibk.dps.biohadoop.jobmanager.api.JobResponseData;
 import at.ac.uibk.dps.biohadoop.jobmanager.handler.SimpleJobHandler;
 
-public class Ga extends SimpleJobHandler<int[]> {
+public class Ga extends SimpleJobHandler<int[]> implements Algorithm<int[], GaParameter> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(Ga.class);
+	private static final Logger LOG = LoggerFactory.getLogger(Ga.class);
 	public static final String GA_QUEUE = "GA_QUEUE";
 
-	private final ApplicationId applicationId;
 	private CountDownLatch latch;
-	
+
 	private Random rand = new Random();
 	private int logSteps = 1000;
 
-	public Ga(ApplicationId applicationId) {
-		this.applicationId = applicationId;
-	}
+	@Override
+	public int[] compute(ApplicationId applicationId, GaParameter parameter)
+			throws AlgorithmException {
+		ApplicationManager applicationManager = ApplicationManager
+				.getInstance();
+		applicationManager.setApplicationState(applicationId,
+				ApplicationState.RUNNING);
 
-	public int[] ga(Tsp tsp, int populationSize, int maxIterations)
-			throws InterruptedException {
-		ApplicationManager applicationManager = ApplicationManager.getInstance();
-		applicationManager.setApplicationState(applicationId, ApplicationState.RUNNING);
-		
 		JobManager<int[], Double> jobManager = JobManager.getInstance();
-		
+
+		Tsp tsp = parameter.getTsp();
+		int populationSize = parameter.getPopulationSize();
+		int maxIterations = parameter.getMaxIterations();
+		DistancesGlobal.setDistances(tsp.getDistances());
+
 		int citySize = tsp.getCities().length;
 
 		boolean end = false;
@@ -75,23 +84,30 @@ public class Ga extends SimpleJobHandler<int[]> {
 				jobRequest.add(new JobRequestData<int[]>(population[i], i));
 			}
 			for (int i = 0; i < populationSize; i++) {
-				jobRequest.add(new JobRequestData<int[]>(mutated[i], i + populationSize));
+				jobRequest.add(new JobRequestData<int[]>(mutated[i], i
+						+ populationSize));
 			}
-			
+
 			latch = new CountDownLatch(1);
 			JobId jobId = jobManager.submitJob(jobRequest, GA_QUEUE);
-			latch.await();
-			
+			try {
+				latch.await();
+			} catch (InterruptedException e) {
+				throw new AlgorithmException("Error while waiting for latch", e);
+			}
+
 			JobResponse<Double> jobResponse = jobManager.getJobResponse(jobId);
 			jobManager.jobCleanup(jobId);
-			List<JobResponseData<Double>> results = jobResponse.getResponseData();
+			List<JobResponseData<Double>> results = jobResponse
+					.getResponseData();
 
 			double[] values = new double[populationSize * 2];
 			for (int i = 0; i < populationSize; i++) {
 				values[i] = results.get(i).getData();
 			}
 			for (int i = 0; i < populationSize; i++) {
-				values[i + populationSize] = results.get(i + populationSize).getData();
+				values[i + populationSize] = results.get(i + populationSize)
+						.getData();
 			}
 
 			// selection
@@ -121,27 +137,41 @@ public class Ga extends SimpleJobHandler<int[]> {
 						} else {
 							// i and j refer to mutated
 							tmpGenome = mutated[i - populationSize];
-							mutated[i - populationSize] = mutated[j - populationSize];
+							mutated[i - populationSize] = mutated[j
+									- populationSize];
 							mutated[j - populationSize] = tmpGenome;
 						}
 					}
 				}
 			}
+
+			ApplicationData<int[][]> applicationData = new ApplicationData<int[][]>(
+					population);
+			applicationManager.setApplicationData(applicationId,
+					applicationData, true);
+
 			counter++;
 			if (counter == maxIterations) {
 				end = true;
 			}
-
 			if (counter % logSteps == 0 || counter < 10) {
 				long endTime = System.currentTimeMillis();
-				LOGGER.info("Counter: {} ({} worker computations) | last {} GA iterations took {} ms",
-						counter, 2 * counter * populationSize, logSteps, endTime - startTime);
+				LOG.info(
+						"Counter: {} ({} worker computations) | last {} GA iterations took {} ms",
+						counter, 2 * counter * populationSize, logSteps,
+						endTime - startTime);
 				startTime = endTime;
 				printGenome(tsp.getDistances(), population[0], citySize);
+
+				// get remote data
+				ApplicationData<int[][]> remoteData = DistributionManager
+						.getInstance().getRemoteApplicationData();
+				System.out.println(remoteData);
 			}
-			applicationManager.setProgress(applicationId, (float)counter / (float)maxIterations);
+			
+			applicationManager.setProgress(applicationId, (float) counter
+					/ (float) maxIterations);
 		}
-		jobManager.shutdown();
 
 		return population[0];
 	}
@@ -150,7 +180,7 @@ public class Ga extends SimpleJobHandler<int[]> {
 	public void onFinished(JobId jobId) {
 		latch.countDown();
 	}
-	
+
 	private int[][] initPopulation(int genomeSize, int citieSize) {
 		int[][] population = new int[genomeSize][citieSize];
 
@@ -212,7 +242,7 @@ public class Ga extends SimpleJobHandler<int[]> {
 		for (int i = 0; i < citySize; i++) {
 			sb.append(solution[i] + " | ");
 		}
-		LOGGER.info("fitness: {} | {}",
+		LOG.info("fitness: {} | {}",
 				GaFitness.computeFitness(distances, solution), sb.toString());
 	}
 

@@ -1,27 +1,16 @@
 package at.ac.uibk.dps.biohadoop.ga.config;
 
+import java.io.IOException;
 
-public class GaAlgorithmConfig {
+import at.ac.uibk.dps.biohadoop.config.AlgorithmConfiguration;
+import at.ac.uibk.dps.biohadoop.config.BuildParameterException;
+import at.ac.uibk.dps.biohadoop.ga.algorithm.Tsp;
+import at.ac.uibk.dps.biohadoop.ga.algorithm.TspFileReader;
 
-	/**
-	 * Filename for input data
-	 */
+public class GaAlgorithmConfig implements AlgorithmConfiguration {
+
 	private String dataFile;
-	
-	/**
-	 * Classname for algorithm, that should be run
-	 */
-	private String algorithm;
-
-	/**
-	 * Number of genomes, that are used for computation
-	 */
 	private int populationSize;
-
-	/**
-	 * The algorithm terminates after this number of iterations, on matter if a
-	 * (good enough) result is found
-	 */
 	private int maxIterations;
 
 	public String getDataFile() {
@@ -48,12 +37,15 @@ public class GaAlgorithmConfig {
 		this.maxIterations = maxIterations;
 	}
 
-	public String getAlgorithm() {
-		return algorithm;
+	@Override
+	public Object buildParameters() throws BuildParameterException {
+		Tsp tsp;
+		try {
+			tsp = TspFileReader.readFile(dataFile);
+			return new GaParameter(tsp, populationSize, maxIterations);
+		} catch (IOException e) {
+			throw new BuildParameterException("Could not read file " + dataFile);
+		}
 	}
 
-	public void setAlgorithm(String algorithm) {
-		this.algorithm = algorithm;
-	}
-	
 }

@@ -2,9 +2,6 @@ package at.ac.uibk.dps.biohadoop.ga.algorithm;
 
 public class GaFitness {
 
-	private GaFitness() {
-	}
-
 	public static double computeFitness(double[][] distances, int[] ds) {
 		double pathLength = 0.0;
 		for (int i = 0; i < ds.length - 1; i++) {

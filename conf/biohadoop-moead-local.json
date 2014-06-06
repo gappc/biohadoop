@@ -1,17 +1,33 @@
 {
   "version" : "0.1",
-  "launcherClass" : "at.ac.uibk.dps.biohadoop.moead.config.MoeadLauncher",
   "includePaths" : [ "/biohadoop/lib/", "/biohadoop/conf/" ],
-  "masterEndpoints" : [ "at.ac.uibk.dps.biohadoop.moead.master.socket.MoeadSocketServer" ],
+  "applicationConfigs" : [ {
+    "name" : "MOEAD-LOCAL-1",
+    "algorithmConfiguration" : {
+      "@class" : "at.ac.uibk.dps.biohadoop.moead.config.MoeadAlgorithmConfig",
+      "outputFile" : "/tmp/moead-sol.txt",
+      "algorithm" : "at.ac.uibk.dps.biohadoop.moead.algorithm.Moead",
+      "populationSize" : 300,
+      "neighborSize" : 290,
+      "genomeSize" : 10,
+      "maxIterations" : 1000
+    },
+    "algorithm" : "at.ac.uibk.dps.biohadoop.moead.algorithm.Moead"
+  }, {
+    "name" : "MOEAD-LOCAL-1",
+    "algorithmConfiguration" : {
+      "@class" : "at.ac.uibk.dps.biohadoop.moead.config.MoeadAlgorithmConfig",
+      "outputFile" : "/tmp/moead-sol.txt",
+      "algorithm" : "at.ac.uibk.dps.biohadoop.moead.algorithm.Moead",
+      "populationSize" : 300,
+      "neighborSize" : 290,
+      "genomeSize" : 10,
+      "maxIterations" : 1000
+    },
+    "algorithm" : "at.ac.uibk.dps.biohadoop.moead.algorithm.Moead"
+  } ],
   "workers" : {
     "at.ac.uibk.dps.biohadoop.moead.worker.SocketMoeadWorker" : 3
   },
-  "algorithmConfig" : {
-    "outputFile" : "/tmp/moead-sol.txt",
-    "algorithm" : "at.ac.uibk.dps.biohadoop.moead.algorithm.Moead",
-    "populationSize" : 300,
-    "neighborSize" : 290,
-    "genomeSize" : 10,
-    "maxIterations" : 1000
-  }
+  "endPoints" : [ "at.ac.uibk.dps.biohadoop.moead.master.socket.MoeadSocketServer" ]
 }

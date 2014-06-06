@@ -21,6 +21,8 @@ public class JobManager<T, S> {
 	private static final JobManager JOB_MANAGER = new JobManager();
 
 	private Map<String, TaskQueue<T, S>> queues = new HashMap<>();
+	// TODO if jobs are not removed, than a memory leak may occur. check e.g.
+	// weakhashmap or guava mapmaker
 	private Map<JobId, Job<T, S>> jobs = new ConcurrentHashMap<>();
 
 	private JobManager() {
@@ -44,13 +46,13 @@ public class JobManager<T, S> {
 		}
 		return null;
 	}
-	
+
 	public boolean reschedule(Task<T> task, String queueName) {
 		LOG.info("Rescheduling task {}", task);
 		TaskQueue<T, S> queue = getTaskQueue(queueName);
 		return queue.reschedule(task.getTaskId());
 	}
-	
+
 	public Job<T, S> jobCleanup(JobId jobId) {
 		LOG.debug("Removing Job with Id {} from internal map", jobId);
 		return jobs.remove(jobId);

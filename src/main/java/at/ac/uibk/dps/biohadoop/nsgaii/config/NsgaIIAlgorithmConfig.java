@@ -1,26 +1,14 @@
 package at.ac.uibk.dps.biohadoop.nsgaii.config;
 
+import at.ac.uibk.dps.biohadoop.config.AlgorithmConfiguration;
+import at.ac.uibk.dps.biohadoop.config.BuildParameterException;
 
-public class NsgaIIAlgorithmConfig {
+public class NsgaIIAlgorithmConfig implements AlgorithmConfiguration {
 
-	/**
-	 * Filename for result
-	 */
 	private String outputFile;
-	
-	/**
-	 * Classname for algorithm, that should be run
-	 */
 	private String algorithm;
-
 	private int populationSize;
-	
 	private int genomeSize;
-
-	/**
-	 * The algorithm terminates after this number of iterations, on matter if a
-	 * (good enough) result is found
-	 */
 	private int maxIterations;
 
 	public String getOutputFile() {
@@ -61,6 +49,11 @@ public class NsgaIIAlgorithmConfig {
 
 	public void setMaxIterations(int maxIterations) {
 		this.maxIterations = maxIterations;
+	}
+
+	@Override
+	public Object buildParameters() throws BuildParameterException {
+		return new NsgaIIParameter(maxIterations, populationSize, genomeSize);
 	}
 
 }

@@ -1,28 +1,15 @@
 package at.ac.uibk.dps.biohadoop.moead.config;
 
+import at.ac.uibk.dps.biohadoop.config.AlgorithmConfiguration;
+import at.ac.uibk.dps.biohadoop.config.BuildParameterException;
 
-public class MoeadAlgorithmConfig {
+public class MoeadAlgorithmConfig implements AlgorithmConfiguration {
 
-	/**
-	 * Filename for result
-	 */
 	private String outputFile;
-	
-	/**
-	 * Classname for algorithm, that should be run
-	 */
 	private String algorithm;
-
 	private int populationSize;
-	
 	private int neighborSize;
-	
 	private int genomeSize;
-
-	/**
-	 * The algorithm terminates after this number of iterations, on matter if a
-	 * (good enough) result is found
-	 */
 	private int maxIterations;
 
 	public String getOutputFile() {
@@ -71,6 +58,12 @@ public class MoeadAlgorithmConfig {
 
 	public void setMaxIterations(int maxIterations) {
 		this.maxIterations = maxIterations;
+	}
+
+	@Override
+	public Object buildParameters() throws BuildParameterException {
+		return new MoeadParameter(maxIterations, populationSize, neighborSize,
+				genomeSize);
 	}
 
 }
