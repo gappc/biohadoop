@@ -35,7 +35,7 @@ public class NsgaII extends SimpleJobHandler<double[]> implements
 	public static final String NSGAII_WORK_QUEUE = "NSGAII_WORK_QUEUE";
 	public static final String NSGAII_RESULT_STORE = "NSGAII_RESULT_STORE";
 
-	JobManager<double[], double[]> jobManager = JobManager.getInstance();
+	private JobManager<double[], double[]> jobManager = JobManager.getInstance();
 	private CountDownLatch latch;
 
 	private int logSteps = 100;
@@ -488,6 +488,13 @@ public class NsgaII extends SimpleJobHandler<double[]> implements
 			}
 			TupleSort tupleSort = (TupleSort) obj;
 			return this.value == tupleSort.value && this.pos == tupleSort.pos;
+		}
+		
+		@Override
+		public int hashCode() {
+			long longTmp = Double.doubleToLongBits(value);
+			int intTmp = (int)(longTmp ^ (longTmp >>> 32));
+			return intTmp * 13 + pos * 17;
 		}
 
 		@Override

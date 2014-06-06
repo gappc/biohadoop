@@ -127,6 +127,13 @@ public class Initializer {
 			return this.distance == neighborHelper.distance
 					&& this.index == neighborHelper.index;
 		}
+		
+		@Override
+		public int hashCode() {
+			long longTmp = Double.doubleToLongBits(distance);
+			int intTmp = (int)(longTmp ^ (longTmp >>> 32));
+			return intTmp * 13 + index * 17;
+		}
 	}
 
 }
