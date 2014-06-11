@@ -27,6 +27,6 @@ public class Task<T> implements Serializable {
 
 	@Override
 	public String toString() {
-		return taskId.toString();
+		return taskId + " | " + data;
 	}
 }

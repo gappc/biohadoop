@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import at.ac.uibk.dps.biohadoop.jobmanager.api.JobManager;
@@ -13,7 +14,8 @@ public class ApplicationManager {
 
 	private static final ApplicationManager APPLICATION_MANAGER = new ApplicationManager();
 	private Map<ApplicationId, Application> applications = new ConcurrentHashMap<>();
-	private List<ShutdownHandler> shutdownHandlers = new ArrayList<>();
+	// TODO use on all handlers the CopyOnWriteArrayList like here
+	private List<ShutdownHandler> shutdownHandlers = new CopyOnWriteArrayList<>();
 	private AtomicInteger counter = new AtomicInteger();
 
 	private ApplicationManager() {
@@ -42,7 +44,7 @@ public class ApplicationManager {
 			Application application = applications.get(applicationId);
 			progress += application.getProgress() / applicationCount;
 		}
-		return progress > 0 ? 1 : progress;
+		return progress > 1 ? 1 : progress;
 	}
 
 	public void setProgress(final ApplicationId applicationId,

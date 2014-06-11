@@ -15,6 +15,7 @@ import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationState;
 import at.ac.uibk.dps.biohadoop.config.Algorithm;
 import at.ac.uibk.dps.biohadoop.config.AlgorithmException;
+import at.ac.uibk.dps.biohadoop.distributionmanager.DistributionException;
 import at.ac.uibk.dps.biohadoop.distributionmanager.DistributionManager;
 import at.ac.uibk.dps.biohadoop.ga.DistancesGlobal;
 import at.ac.uibk.dps.biohadoop.ga.config.GaParameter;
@@ -32,10 +33,11 @@ public class Ga extends SimpleJobHandler<int[]> implements
 	private static final Logger LOG = LoggerFactory.getLogger(Ga.class);
 	public static final String GA_QUEUE = "GA_QUEUE";
 
-	private CountDownLatch latch;
+	private final Random rand = new Random();
+	private final int logSteps = 1000;
+	private final int islandMergeSteps = 2000;
 
-	private Random rand = new Random();
-	private int logSteps = 1000;
+	private CountDownLatch latch;
 
 	@Override
 	public int[] compute(ApplicationId applicationId, GaParameter parameter)
@@ -173,11 +175,25 @@ public class Ga extends SimpleJobHandler<int[]> implements
 						endTime - startTime);
 				startTime = endTime;
 				printGenome(tsp.getDistances(), population[0], citySize);
+			}
 
-				// get remote data
-				ApplicationData<int[][]> remoteData = DistributionManager
-						.getInstance().getRemoteApplicationData();
-				LOG.info("Remote data: {}", remoteData);
+			if (iteration % islandMergeSteps == 0) {
+				try {
+					applicationManager.getOverallProgress();
+					ApplicationData<List<List<Integer>>> remoteData = DistributionManager
+							.getInstance().getRemoteApplicationData(
+									applicationId);
+					LOG.debug("{}: remoteData:        {}",
+							Thread.currentThread(), remoteData.getData());
+					LOG.debug("{}: population before: {}",
+							Thread.currentThread(), population);
+					population = islandMerge(population, remoteData.getData());
+					LOG.debug("{}: population after:  {}",
+							Thread.currentThread(), population);
+					LOG.info("{}: merge successful\n", Thread.currentThread());
+				} catch (DistributionException e) {
+					LOG.error("Could not get remote data for Island Model", e);
+				}
 			}
 
 			applicationManager.setProgress(applicationId, (float) iteration
@@ -262,6 +278,18 @@ public class Ga extends SimpleJobHandler<int[]> implements
 		ds[pos1] = tmp;
 
 		return ds;
+	}
+
+	private int[][] islandMerge(int[][] population,
+			List<List<Integer>> remotePopulation) {
+		int halfSize = population.length / 2;
+		for (int i = 0; i < halfSize; i++) {
+			// here we copy values so we prevent accidential memory leaks
+			for (int j = 0; j < remotePopulation.get(i).size(); j++) {
+				population[i + halfSize][j] = remotePopulation.get(i).get(j);
+			}
+		}
+		return population;
 	}
 
 	private void printGenome(double[][] distances, int[] solution, int citySize) {

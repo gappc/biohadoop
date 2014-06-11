@@ -11,9 +11,9 @@ import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationData;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationId;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
 
-@Path("/application")
+@Path("/distribution")
 @Produces(MediaType.APPLICATION_JSON)
-public class ApplicationResource {
+public class DistributionResource {
 
 	@GET
 	@Path("{applicationId}")

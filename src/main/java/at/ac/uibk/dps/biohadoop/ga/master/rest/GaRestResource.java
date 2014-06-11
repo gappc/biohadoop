@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.ga.master;
+package at.ac.uibk.dps.biohadoop.ga.master.rest;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -14,6 +14,7 @@ import at.ac.uibk.dps.biohadoop.endpoint.Master;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
 import at.ac.uibk.dps.biohadoop.endpoint.ShutdownException;
+import at.ac.uibk.dps.biohadoop.ga.master.GaMasterImpl;
 import at.ac.uibk.dps.biohadoop.jobmanager.remote.Message;
 
 @Path("/ga")

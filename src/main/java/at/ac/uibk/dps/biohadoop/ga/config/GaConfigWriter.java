@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationConfiguration;
 import at.ac.uibk.dps.biohadoop.config.AlgorithmConfiguration;
+import at.ac.uibk.dps.biohadoop.distributionmanager.DistributionConfiguration;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
 import at.ac.uibk.dps.biohadoop.ga.master.kryo.GaKryoResource;
 import at.ac.uibk.dps.biohadoop.ga.master.socket.GaSocketServer;
@@ -44,6 +45,11 @@ public class GaConfigWriter {
 	private static String LOCAL_PERSISTENCE_LOAD_PATH = "/tmp/biohadoop/ga/GA-LOCAL-1/481038014/";
 	private static String REMOTE_PERSISTENCE_LOAD_PATH = "/biohadoop/persistence/ga";
 
+	private static String LOCAL_DISTRIBUTION_INFO_HOST = "localhost";
+	private static int LOCAL_DISTRIBUTION_INFO_PORT = 2181;
+	private static String REMOTE_DISTRIBUTION_INFO_HOST = "master";
+	private static int REMOTE_DISTRIBUTION_INFO_PORT = 2181;
+
 	private GaConfigWriter() {
 	}
 
@@ -65,19 +71,21 @@ public class GaConfigWriter {
 		Map<String, Integer> workers = new HashMap<String, Integer>();
 		workers.put(SocketGaWorker.class.getName(), 3);
 		biohadoopConfig.setWorkers(workers);
-
+		
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
 		ApplicationConfiguration applicationConfig = buildApplicationConfig(
 				"GA-LOCAL-1", true);
 		biohadoopConfig.setApplicationConfigs(Arrays.asList(applicationConfig,
-				applicationConfig));
+				applicationConfig, applicationConfig, applicationConfig));
+		biohadoopConfig.setDistributionConfiguration(buildDistributionConfig(true));
 		mapper.writeValue(new File(LOCAL_OUTPUT_NAME), biohadoopConfig);
 
 		applicationConfig = buildApplicationConfig("GA-DISTRIBUTED-1", false);
 		biohadoopConfig.setApplicationConfigs(Arrays.asList(applicationConfig,
-				applicationConfig));
+				applicationConfig, applicationConfig, applicationConfig));
+		biohadoopConfig.setDistributionConfiguration(buildDistributionConfig(false));
 		mapper.writeValue(new File(REMOTE_OUTPUT_NAME), biohadoopConfig);
 
 		readAlgorithmConfig();
@@ -129,7 +137,15 @@ public class GaConfigWriter {
 
 		return filePersistenceConfiguration;
 	}
-
+	
+	private static DistributionConfiguration buildDistributionConfig(boolean local) {
+		if (local) {
+			return new DistributionConfiguration(LOCAL_DISTRIBUTION_INFO_HOST, LOCAL_DISTRIBUTION_INFO_PORT);
+		} else {
+			return new DistributionConfiguration(REMOTE_DISTRIBUTION_INFO_HOST, REMOTE_DISTRIBUTION_INFO_PORT);
+		}
+	}
+	
 	private static void readAlgorithmConfig() throws IOException,
 			ClassNotFoundException, InstantiationException,
 			IllegalAccessException {

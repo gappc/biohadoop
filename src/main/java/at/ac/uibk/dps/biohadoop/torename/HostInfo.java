@@ -7,11 +7,11 @@ import java.io.InputStreamReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Hostname {
+public class HostInfo {
 	
-	private static final Logger LOG = LoggerFactory.getLogger(Hostname.class);
+	private static final Logger LOG = LoggerFactory.getLogger(HostInfo.class);
 	
-	private Hostname() {
+	private HostInfo() {
 	}
 
 	public static String getHostname() {
@@ -25,5 +25,9 @@ public class Hostname {
 			LOG.error("Could not get hostname", e);
 			return null;
 		}
+	}
+	
+	public static int getPort(int preferredPort) {
+		return PortFinder.findFreePort(preferredPort);
 	}
 }

@@ -1,41 +1,61 @@
 package at.ac.uibk.dps.biohadoop.distributionmanager;
 
-import java.util.List;
-import java.util.Random;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationData;
+import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationHandler;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationId;
-import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
+import at.ac.uibk.dps.biohadoop.distributionmanager.zooKeeper.ZooKeeperController;
 
+public class DistributionManager implements ApplicationHandler {
 
-public class DistributionManager {
+	private static final Logger LOG = LoggerFactory
+			.getLogger(DistributionManager.class);
 
-	private static DistributionManager DISTRIBUTION_MANAGER = new DistributionManager();
-
-	private String baseUrl = "http://kleintroppl:30000/rs/application/";
-	
-	private DistributionManager() {
-	}
+	private static final DistributionManager DISTRIBUTION_MANAGER = new DistributionManager();
+	private DistributionConfiguration distributionConfiguration = null;
+	private Map<ApplicationId, ZooKeeperController> applicationIdToZooKeeper = new ConcurrentHashMap<ApplicationId, ZooKeeperController>();
 
 	public static DistributionManager getInstance() {
 		return DistributionManager.DISTRIBUTION_MANAGER;
 	}
-	
-	@SuppressWarnings("unchecked")
-	public <T>ApplicationData<T> getRemoteApplicationData() {
-//		TODO get remoteUrl from different source e.g. Apache ZooKeeper
-		List<ApplicationId> applicationIds = ApplicationManager.getInstance().getApplicationsList();
-		int pos = new Random().nextInt(applicationIds.size());
-		String remoteUrl = baseUrl +  applicationIds.get(pos);
-		
-		Client client = ClientBuilder.newClient();
-		Response response = client.target(remoteUrl)
-				.request(MediaType.APPLICATION_JSON).get();
-		return response.readEntity(ApplicationData.class);
+
+	// TODO avid doing this twice
+	public void setDistributionConfiguration(
+			DistributionConfiguration distributionConfiguration) {
+		this.distributionConfiguration = distributionConfiguration;
 	}
+
+	// TODO only method accessed by solvers. should maybe be put into separate
+	// class
+	public <T> ApplicationData<T> getRemoteApplicationData(
+			ApplicationId applicationId) throws DistributionException {
+		ZooKeeperController zooKeeperManager = applicationIdToZooKeeper
+				.get(applicationId);
+		return zooKeeperManager.getRemoteApplicationData();
+	}
+
+	@Override
+	public void onNew(ApplicationId applicationId) {
+		try {
+			LOG.info("Enabling DistributionManager for Application {}",
+					applicationId);
+			ZooKeeperController zooKeeperController = new ZooKeeperController(
+					distributionConfiguration, applicationId);
+			applicationIdToZooKeeper.put(applicationId, zooKeeperController);
+		} catch (DistributionException e) {
+			LOG.error(
+					"Error while registering Application {} for DistributionManager",
+					applicationId, e);
+		}
+	}
+
+	@Override
+	public void onDataUpdate(ApplicationId applicationId) {
+	}
+
 }

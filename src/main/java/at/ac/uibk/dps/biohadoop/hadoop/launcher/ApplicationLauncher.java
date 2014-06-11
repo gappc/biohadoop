@@ -16,6 +16,7 @@ import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationId;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationState;
 import at.ac.uibk.dps.biohadoop.config.Algorithm;
+import at.ac.uibk.dps.biohadoop.distributionmanager.DistributionManager;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.persistencemanager.PersistenceManager;
 
@@ -51,6 +52,7 @@ public class ApplicationLauncher {
 			final ApplicationConfiguration applicationConfig) {
 		final Application application = new Application(applicationConfig);
 		application.registerApplicationHandler(PersistenceManager.getInstance());
+		application.registerApplicationHandler(DistributionManager.getInstance());
 		
 		final ApplicationManager applicationManager = ApplicationManager
 				.getInstance();

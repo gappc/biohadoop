@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
@@ -19,17 +20,19 @@ import at.ac.uibk.dps.biohadoop.jobmanager.api.JobState;
 import at.ac.uibk.dps.biohadoop.jobmanager.handler.JobHandler;
 
 public class Job<T, S> {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(Job.class);
 
 	private final JobId jobId;
-	private AtomicInteger openTasksCount = new AtomicInteger();
-	private JobState jobState = JobState.NEW;
-	private Map<TaskId, TaskRequest<T>> taskRequests = new ConcurrentHashMap<>();
-	private Map<TaskId, TaskResponse<S>> taskResponses = new ConcurrentHashMap<>();
-	private List<JobHandler<T>> jobHandlers = new ArrayList<>();
-	private JobResponse<S> jobResponse;
-	
+	private final AtomicBoolean onFinishExecuted = new AtomicBoolean(false);
+	private final AtomicInteger openTasksCount = new AtomicInteger();
+	private final Map<TaskId, TaskRequest<T>> taskRequests = new ConcurrentHashMap<>();
+	private final Map<TaskId, TaskResponse<S>> taskResponses = new ConcurrentHashMap<>();
+	private final List<JobHandler<T>> jobHandlers = new ArrayList<>();
+
+	private volatile JobState jobState = JobState.NEW;
+	private volatile JobResponse<S> jobResponse;
+
 	public Job(JobId jobId, JobRequest<T> jobRequest) {
 		this.jobId = jobId;
 		addJobHandler(jobRequest.getHandler());
@@ -44,7 +47,7 @@ public class Job<T, S> {
 		}
 		setJobState(JobState.NEW);
 	}
-	
+
 	public void addJobHandler(JobHandler<T> jobHandler) {
 		if (!jobHandlers.contains(jobHandler)) {
 			jobHandlers.add(jobHandler);
@@ -72,10 +75,39 @@ public class Job<T, S> {
 		taskResponses.put(taskId, taskResponse);
 
 		taskRequest.setTaskState(TaskState.FINISHED);
+
 		openTasksCount.decrementAndGet();
 		if (openTasksCount.compareAndSet(0, 0)) {
+			LOG.debug(
+					"Setting Job {} to finished, openTaskCount = {}, thread= {}, data = {}",
+					jobId, openTasksCount, Thread.currentThread(), task);
+			createJobResponse();
 			setJobState(JobState.FINISHED);
 		}
+	}
+	
+	private void createJobResponse() {
+		List<JobResponseData<S>> jobResponseDatas = new ArrayList<>();
+
+		for (TaskId taskId : taskResponses.keySet()) {
+			TaskResponse<S> taskResponse = taskResponses.get(taskId);
+			S data = taskResponse.getData().getData();
+			int slot = taskResponse.getSlot();
+			JobResponseData<S> responseData = new JobResponseData<S>(data,
+					slot);
+			jobResponseDatas.add(responseData);
+		}
+
+		Collections.sort(jobResponseDatas,
+				new Comparator<JobResponseData<S>>() {
+					@Override
+					public int compare(JobResponseData<S> o1,
+							JobResponseData<S> o2) {
+						return o1.getSlot() - o2.getSlot();
+					}
+				});
+
+		jobResponse = new JobResponse<>(jobId, jobResponseDatas);
 	}
 
 	public boolean isFinished() {
@@ -86,7 +118,7 @@ public class Job<T, S> {
 		synchronized (jobState) {
 			this.jobState = jobState;
 		}
-		
+
 		switch (jobState) {
 		case NEW:
 			for (JobHandler<T> jobHandler : jobHandlers) {
@@ -104,8 +136,13 @@ public class Job<T, S> {
 			}
 			break;
 		case FINISHED:
-			for (JobHandler<T> jobHandler : jobHandlers) {
-				jobHandler.onFinished(jobId);
+			// here we need to check if we have already called the onFinish()
+			// handlers. by doing this with an AtomicBoolean, we don't have to
+			// synchronize the calling code in addResult()
+			if (!onFinishExecuted.getAndSet(true)) {
+				for (JobHandler<T> jobHandler : jobHandlers) {
+					jobHandler.onFinished(jobId);
+				}
 			}
 			break;
 		case ERROR:
@@ -133,33 +170,11 @@ public class Job<T, S> {
 
 	public JobResponse<S> getResult() {
 		if (jobState != JobState.FINISHED) {
-			for (TaskId taskId : taskRequests.keySet()) {
-				TaskRequest<T> taskRequest = taskRequests.get(taskId);
-				LOG.error(taskRequest.toString());
-			}
-			LOG.error("openTasksCount: " + openTasksCount.get());
-			LOG.error("jobState: " + jobState);
+			LOG.error("!!!! Job {} should already be finished !!!! {}", jobId,
+					Thread.currentThread());
+			LOG.error("openTasksCount: {}", openTasksCount.get());
+			LOG.error("jobState: {}", jobState);
 			return null;
-		}
-		if (jobResponse == null) {
-			List<JobResponseData<S>> jobResponseDatas = new ArrayList<>();
-			
-			for (TaskId taskId : taskResponses.keySet()) {
-				TaskResponse<S> taskResponse = taskResponses.get(taskId);
-				S data = taskResponse.getData().getData();
-				int slot = taskResponse.getSlot();
-				JobResponseData<S> responseData = new JobResponseData<S>(data, slot);
-				jobResponseDatas.add(responseData);
-			}
-			
-			Collections.sort(jobResponseDatas, new Comparator<JobResponseData<S>>() {
-				@Override
-				public int compare(JobResponseData<S> o1, JobResponseData<S> o2) {
-					return o1.getSlot() - o2.getSlot();
-				}
-			});
-			
-			jobResponse = new JobResponse<>(jobId, jobResponseDatas);
 		}
 		return jobResponse;
 	}

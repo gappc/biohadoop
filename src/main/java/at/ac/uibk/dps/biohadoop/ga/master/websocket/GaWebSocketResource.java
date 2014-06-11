@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.ga.master;
+package at.ac.uibk.dps.biohadoop.ga.master.websocket;
 
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -18,6 +18,7 @@ import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
 import at.ac.uibk.dps.biohadoop.endpoint.ShutdownException;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
+import at.ac.uibk.dps.biohadoop.ga.master.GaMasterImpl;
 import at.ac.uibk.dps.biohadoop.jobmanager.Task;
 import at.ac.uibk.dps.biohadoop.jobmanager.api.JobManager;
 import at.ac.uibk.dps.biohadoop.jobmanager.remote.Message;

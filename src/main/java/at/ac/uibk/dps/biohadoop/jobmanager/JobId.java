@@ -1,13 +1,12 @@
 package at.ac.uibk.dps.biohadoop.jobmanager;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class JobId {
-	private static final Random rand = new Random();
 	private final int id;
 
 	private JobId() {
-		this.id = JobId.rand.nextInt();
+		this.id = ThreadLocalRandom.current().nextInt();
 	}
 
 	public static JobId newInstance() {

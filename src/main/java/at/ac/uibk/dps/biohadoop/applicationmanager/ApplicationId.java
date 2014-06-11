@@ -1,16 +1,15 @@
 package at.ac.uibk.dps.biohadoop.applicationmanager;
 
 import java.io.Serializable;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class ApplicationId implements Serializable {
 
 	private static final long serialVersionUID = 6640295799209385434L;
-	private static final Random rand = new Random();
 	private final int id;
 	
 	private ApplicationId() {
-		this.id = ApplicationId.rand.nextInt();
+		this.id = ThreadLocalRandom.current().nextInt();
 	}
 	
 	private ApplicationId(int id) {

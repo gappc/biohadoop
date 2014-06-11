@@ -32,20 +32,20 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.torename.ArgumentChecker;
 import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;
-import at.ac.uibk.dps.biohadoop.torename.Hostname;
+import at.ac.uibk.dps.biohadoop.torename.HostInfo;
 import at.ac.uibk.dps.biohadoop.torename.LocalResourceBuilder;
 
-public class Client {
+public class BiohadoopClient {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(Client.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(BiohadoopClient.class);
 	
 	private List<String> includePaths = new ArrayList<String>();
 
 	public static void main(String[] args) {
-		LOGGER.info("Client started at " + Hostname.getHostname());
+		LOGGER.info("Client started at " + HostInfo.getHostname());
 		long start = System.currentTimeMillis();
 
-		Client c = new Client();
+		BiohadoopClient c = new BiohadoopClient();
 		c.run(new YarnConfiguration(), args);
 
 		long end = System.currentTimeMillis();
@@ -111,7 +111,7 @@ public class Client {
 				.newRecord(ContainerLaunchContext.class);
 
 		String launchCommand = "$JAVA_HOME/bin/java" + " -Xmx256M "
-				+ ApplicationMaster.class.getName() + " " + configFilename
+				+ BiohadoopApplicationMaster.class.getName() + " " + configFilename
 				+ " 1>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR
 				+ "/stdout" + " 2>"
 				+ ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stderr";

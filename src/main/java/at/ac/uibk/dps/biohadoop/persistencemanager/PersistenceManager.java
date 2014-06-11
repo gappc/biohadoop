@@ -1,9 +1,5 @@
 package at.ac.uibk.dps.biohadoop.persistencemanager;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
-import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,9 +8,6 @@ import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationData;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationHandler;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationId;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
-import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class PersistenceManager implements ApplicationHandler {
 
@@ -22,29 +15,12 @@ public class PersistenceManager implements ApplicationHandler {
 			.getLogger(PersistenceManager.class);
 
 	private static PersistenceManager PERSISTENCE_MANAGER = new PersistenceManager();
-	private ObjectMapper objectMapper;
 
 	private PersistenceManager() {
 	}
 
 	public static PersistenceManager getInstance() {
 		return PersistenceManager.PERSISTENCE_MANAGER;
-	}
-
-	public void persist(ApplicationId applicationId) {
-		String filename = "/tmp/ga.save";
-		try {
-
-			OutputStream os = HdfsUtil.createFile(new YarnConfiguration(),
-					filename);
-
-			ApplicationData<?> applicationData = ApplicationManager
-					.getInstance().getApplicationData(applicationId);
-			objectMapper.writeValue(os, applicationData);
-		} catch (IOException e) {
-			LOG.error("Could not save data for applicationId {} to file {}",
-					applicationId, filename, e);
-		}
 	}
 
 	public void onNew(ApplicationId applicationId) {
@@ -76,7 +52,7 @@ public class PersistenceManager implements ApplicationHandler {
 						applicationConfiguration.getName(), applicationId);
 			} catch (PersistenceLoadException e) {
 				LOG.error(
-						"Error while trying to load startup data for application {}",
+						"Error while trying to load startup data for application {}, message: {}",
 						applicationId, e);
 				// TODO decide what to do in case of load error
 				// a) abort

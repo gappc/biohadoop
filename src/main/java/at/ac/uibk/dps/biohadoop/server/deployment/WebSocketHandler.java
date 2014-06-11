@@ -17,7 +17,7 @@ import org.xnio.OptionMap;
 import org.xnio.Xnio;
 import org.xnio.XnioWorker;
 
-import at.ac.uibk.dps.biohadoop.ga.master.GaWebSocketResource;
+import at.ac.uibk.dps.biohadoop.ga.master.websocket.GaWebSocketResource;
 
 /**
  * @author Christian Gapp

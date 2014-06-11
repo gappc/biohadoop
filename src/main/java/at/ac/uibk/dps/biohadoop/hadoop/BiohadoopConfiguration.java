@@ -9,6 +9,7 @@ import java.util.Map;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationConfiguration;
+import at.ac.uibk.dps.biohadoop.distributionmanager.DistributionConfiguration;
 import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +21,7 @@ public class BiohadoopConfiguration {
 	private List<ApplicationConfiguration> applicationConfigs = new ArrayList<>();
 	private Map<String, Integer> workers = new HashMap<>();
 	private List<String> endPoints = new ArrayList<>();
+	private DistributionConfiguration distributionConfiguration;
 
 	public String getVersion() {
 		return version;
@@ -59,6 +61,14 @@ public class BiohadoopConfiguration {
 
 	public void setEndPoints(List<String> endPoints) {
 		this.endPoints = endPoints;
+	}
+
+	public DistributionConfiguration getDistributionConfiguration() {
+		return distributionConfiguration;
+	}
+
+	public void setDistributionConfiguration(DistributionConfiguration distributionConfiguration) {
+		this.distributionConfiguration = distributionConfiguration;
 	}
 
 	public static BiohadoopConfiguration getBiohadoopConfiguration(

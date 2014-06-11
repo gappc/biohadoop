@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
-import at.ac.uibk.dps.biohadoop.torename.Hostname;
+import at.ac.uibk.dps.biohadoop.torename.HostInfo;
 import at.ac.uibk.dps.biohadoop.torename.LaunchContainerRunnable;
 import at.ac.uibk.dps.biohadoop.torename.LocalResourceBuilder;
 
@@ -102,7 +102,7 @@ public class WorkerLauncher {
 
 				String clientCommand = "$JAVA_HOME/bin/java" + " -Xmx128M"
 						+ " " + workerList.get(0) + " "
-						+ Hostname.getHostname() + " " + configFilename + " 1>"
+						+ HostInfo.getHostname() + " " + configFilename + " 1>"
 						+ ApplicationConstants.LOG_DIR_EXPANSION_VAR
 						+ "/stdout" + " 2>"
 						+ ApplicationConstants.LOG_DIR_EXPANSION_VAR

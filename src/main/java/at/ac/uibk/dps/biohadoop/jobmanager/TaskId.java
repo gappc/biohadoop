@@ -1,17 +1,16 @@
 package at.ac.uibk.dps.biohadoop.jobmanager;
 
 import java.io.Serializable;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class TaskId implements Serializable {
 
 	private static final long serialVersionUID = -7342309576690203270L;
 	
-	private static final Random rand = new Random();
 	private final int id;
 	
 	private TaskId() {
-		this.id = TaskId.rand.nextInt();
+		this.id = ThreadLocalRandom.current().nextInt();
 	}
 	
 	public static TaskId newInstance() {
@@ -34,5 +33,10 @@ public class TaskId implements Serializable {
 	@Override
 	public int hashCode() {
 		return this.id;
+	}
+	
+	@Override
+	public String toString() {
+		return Integer.toString(id);
 	}
 }
