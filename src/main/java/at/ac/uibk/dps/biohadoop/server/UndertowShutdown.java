@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class UndertowShutdown {
 
 	private final static AtomicInteger count = new AtomicInteger();
-	private static CountDownLatch latch;
+	private static CountDownLatch latch = new CountDownLatch(0);
 	
 	public synchronized static void increaseShutdownCount() {
 		count.incrementAndGet();

@@ -62,9 +62,13 @@ public class WebSocketEndpoint implements Endpoint, ShutdownHandler, MasterConne
 
 	@OnMessage
 	public Message<?> onMessage(Message<Double> message, Session session) {
+		if (close) {
+			LOG.info("CLOSE");
+			return null;
+		}
 		inputMessage = message;
 		
-		try {
+//		try {
 			if (message.getType() == MessageType.REGISTRATION_REQUEST) {
 				masterEndpoint.handleRegistration();
 			}
@@ -74,9 +78,9 @@ public class WebSocketEndpoint implements Endpoint, ShutdownHandler, MasterConne
 			if (message.getType() == MessageType.WORK_REQUEST) {
 				masterEndpoint.handleWork();
 			}
-		} catch (ShutdownException e) {
-			LOG.info("Got shutdown event");
-		}
+//		} catch (ShutdownException e) {
+//			LOG.info("Got shutdown event");
+//		}
 		return outputMessage;
 	}
 
@@ -104,13 +108,13 @@ public class WebSocketEndpoint implements Endpoint, ShutdownHandler, MasterConne
 
 	@Override
 	public void shutdown() {
-		if (resourceSession != null && !close) {
-			LOG.info("WebSocket closing for URI {} and sessionId {}",
-					resourceSession.getRequestURI(), resourceSession.getId());
-		}
-		if (resourceSession == null) {
-			LOG.info("WebSocket was not opened");
-		}
+//		if (resourceSession != null && !close) {
+//			LOG.info("WebSocket closing for URI {} and sessionId {}",
+//					resourceSession.getRequestURI(), resourceSession.getId());
+//		}
+//		if (resourceSession == null) {
+//			LOG.info("WebSocket was not opened");
+//		}
 	}
 
 	

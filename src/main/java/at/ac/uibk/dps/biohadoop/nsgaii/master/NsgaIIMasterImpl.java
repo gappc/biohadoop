@@ -29,7 +29,7 @@ public class NsgaIIMasterImpl implements MasterEndpoint {
 		return endpoint;
 	}
 
-	public void handleRegistration() throws ShutdownException {
+	public void handleRegistration() {
 		endpoint.receive();
 		LOG.info("Got registration request");
 		Message<Double[][]> message = new Message<>(
@@ -37,7 +37,7 @@ public class NsgaIIMasterImpl implements MasterEndpoint {
 		endpoint.send(message);
 	}
 
-	public void handleWorkInit() throws ShutdownException {
+	public void handleWorkInit() {
 		endpoint.receive();
 		LOG.debug("Got work init request");
 		JobManager<?, ?> workInitManager = JobManager.getInstance();
@@ -50,13 +50,13 @@ public class NsgaIIMasterImpl implements MasterEndpoint {
 		}
 		Message<?> message = new Message<>(messageType, currentTask);
 		endpoint.send(message);
-		if (messageType == MessageType.SHUTDOWN) {
-			throw new ShutdownException();
-		}
+//		if (messageType == MessageType.SHUTDOWN) {
+//			throw new ShutdownException();
+//		}
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void handleWork() throws ShutdownException {
+	public void handleWork() {
 		Message<?> incomingMessage = endpoint.receive();
 		LOG.debug("Got work request");
 
@@ -72,9 +72,9 @@ public class NsgaIIMasterImpl implements MasterEndpoint {
 		}
 		Message<?> message = new Message<>(messageType, currentTask);
 		endpoint.send(message);
-		if (messageType == MessageType.SHUTDOWN) {
-			throw new ShutdownException();
-		}
+//		if (messageType == MessageType.SHUTDOWN) {
+//			throw new ShutdownException();
+//		}
 	}
 
 	@Override

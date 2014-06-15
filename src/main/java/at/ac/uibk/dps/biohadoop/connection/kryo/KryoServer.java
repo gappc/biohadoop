@@ -2,12 +2,12 @@ package at.ac.uibk.dps.biohadoop.connection.kryo;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.net.ServerSocket;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
@@ -18,7 +18,6 @@ import at.ac.uibk.dps.biohadoop.applicationmanager.ShutdownHandler;
 import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
-import at.ac.uibk.dps.biohadoop.endpoint.ShutdownException;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.jobmanager.Task;
@@ -63,13 +62,13 @@ public class KryoServer implements ShutdownHandler, MasterConnection {
 		try {
 			server = new Server(64 * 1024, 64 * 1024);
 			new Thread(server).start();
-			
+
 			String prefix = masterConfiguration.getPrefix();
 			String host = HostInfo.getHostname();
 			int port = HostInfo.getPort(30000);
-			
+
 			server.bind(port);
-			
+
 			Environment.setPrefixed(prefix, Environment.KRYO_SOCKET_HOST, host);
 			Environment.setPrefixed(prefix, Environment.KRYO_SOCKET_PORT,
 					Integer.toString(port));
@@ -96,8 +95,9 @@ public class KryoServer implements ShutdownHandler, MasterConnection {
 
 					MasterEndpoint masterEndpoint;
 					try {
-						masterEndpoint = buildMaster(masterConfiguration
-								.getMasterEndpoint(), kryoEndpoint);
+						masterEndpoint = buildMaster(
+								masterConfiguration.getMasterEndpoint(),
+								kryoEndpoint);
 						masters.put(connection, masterEndpoint);
 						if (workerLatch.getCount() == 0) {
 							workerLatch = new CountDownLatch(1);
@@ -137,19 +137,14 @@ public class KryoServer implements ShutdownHandler, MasterConnection {
 								endpoint.setConnection(connection);
 								endpoint.setInputMessage(inputMessage);
 
-								try {
-									if (inputMessage.getType() == MessageType.REGISTRATION_REQUEST) {
-										master.handleRegistration();
-									}
-									if (inputMessage.getType() == MessageType.WORK_INIT_REQUEST) {
-										master.handleWorkInit();
-									}
-									if (inputMessage.getType() == MessageType.WORK_REQUEST) {
-										master.handleWork();
-									}
-								} catch (ShutdownException e) {
-									LOG.info("Got shutdown event");
-									shutdownLatch.countDown();
+								if (inputMessage.getType() == MessageType.REGISTRATION_REQUEST) {
+									master.handleRegistration();
+								}
+								if (inputMessage.getType() == MessageType.WORK_INIT_REQUEST) {
+									master.handleWorkInit();
+								}
+								if (inputMessage.getType() == MessageType.WORK_REQUEST) {
+									master.handleWork();
 								}
 							}
 						});
@@ -167,26 +162,31 @@ public class KryoServer implements ShutdownHandler, MasterConnection {
 	@Override
 	public void shutdown() {
 		LOG.info("KryoServer waiting to shut down");
-		while (workerCount.intValue() != 0) {
-			try {
-				shutdownLatch.await();
-				workerLatch.await();
-			} catch (InterruptedException e) {
-				LOG.error("Got Exception while waiting for latch", e);
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				while (workerCount.intValue() != 0) {
+					try {
+						workerLatch.await(100, TimeUnit.MILLISECONDS);
+					} catch (InterruptedException e) {
+						LOG.error("Got Exception while waiting for latch", e);
+					}
+				}
+				LOG.info("KryoServer shutting down");
+				executorService.shutdown();
+				server.stop();
 			}
-		}
-		LOG.info("KryoServer shutting down");
-		executorService.shutdown();
-		server.stop();
+		}).start();
 	}
 
 	private MasterEndpoint buildMaster(
-			Class<? extends MasterEndpoint> masterEndpointClass, KryoEndpoint kryoEndpoint)
-			throws Exception {
+			Class<? extends MasterEndpoint> masterEndpointClass,
+			KryoEndpoint kryoEndpoint) throws Exception {
 		try {
 			Constructor<? extends MasterEndpoint> constructor = masterEndpointClass
 					.getDeclaredConstructor(Endpoint.class);
-			return constructor.newInstance(this);
+			return constructor.newInstance(kryoEndpoint);
 		} catch (NoSuchMethodException | SecurityException
 				| InstantiationException | IllegalAccessException
 				| IllegalArgumentException | InvocationTargetException e) {

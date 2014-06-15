@@ -64,11 +64,11 @@ public class RestResource implements Endpoint, MasterConnection {
 	public Message<?> work(Message<?> message) throws InterruptedException {
 		setMasterEndpoint();
 		inputMessage = message;
-		try {
+//		try {
 			masterEndpoint.handleWork();
-		} catch (ShutdownException e) {
-			LOG.info("Got shutdown event");
-		}
+//		} catch (ShutdownException e) {
+//			LOG.info("Got shutdown event");
+//		}
 		return outputMessage;
 	}
 

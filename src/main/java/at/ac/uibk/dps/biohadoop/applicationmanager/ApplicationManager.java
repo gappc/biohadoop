@@ -74,6 +74,12 @@ public class ApplicationManager {
 		case FINISHED:
 			counter.decrementAndGet();
 			if (counter.compareAndSet(0, 0)) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				invokeShutdownHandlers();
 			}
 			break;

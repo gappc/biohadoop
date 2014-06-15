@@ -33,7 +33,7 @@ public class GaMasterImpl implements MasterEndpoint {
 	}
 
 	@Override
-	public void handleRegistration() throws ShutdownException {
+	public void handleRegistration() {
 		endpoint.receive();
 		LOG.info("Got registration request");
 		Double[][] distances = DistancesGlobal.getDistancesAsObject();
@@ -45,7 +45,7 @@ public class GaMasterImpl implements MasterEndpoint {
 	}
 
 	@Override
-	public void handleWorkInit() throws ShutdownException {
+	public void handleWorkInit() {
 		endpoint.receive();
 		LOG.debug("Got work init request");
 		JobManager<?, ?> workInitManager = JobManager.getInstance();
@@ -58,14 +58,14 @@ public class GaMasterImpl implements MasterEndpoint {
 		}
 		Message<?> message = new Message<>(messageType, currentTask);
 		endpoint.send(message);
-		if (messageType == MessageType.SHUTDOWN) {
-			throw new ShutdownException();
-		}
+//		if (messageType == MessageType.SHUTDOWN) {
+//			throw new ShutdownException();
+//		}
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public void handleWork() throws ShutdownException {
+	public void handleWork() {
 		Message<?> incomingMessage = endpoint.receive();
 		LOG.debug("Got work request");
 
@@ -81,9 +81,9 @@ public class GaMasterImpl implements MasterEndpoint {
 		}
 		Message<?> message = new Message<>(messageType, currentTask);
 		endpoint.send(message);
-		if (messageType == MessageType.SHUTDOWN) {
-			throw new ShutdownException();
-		}
+//		if (messageType == MessageType.SHUTDOWN) {
+//			throw new ShutdownException();
+//		}
 	}
 
 	@Override

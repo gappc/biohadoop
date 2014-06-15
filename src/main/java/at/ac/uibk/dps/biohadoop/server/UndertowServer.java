@@ -7,6 +7,7 @@ import io.undertow.server.handlers.PathHandler;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletException;
 
@@ -80,17 +81,17 @@ public class UndertowServer implements ShutdownHandler {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
-//					try {
-						// TODO may not be a good idea, because forced shutdown
-						// is not possible
-//						UndertowShutdown.getLatch().await();
-						// Thread.sleep(1000);
+					try {
+						UndertowShutdown.getLatch().await(5000,
+								TimeUnit.MILLISECONDS);
+						// Is needed because of problems with WebSockets
+						Thread.sleep(1000);
 						LOG.info("Stopping Undertow");
 						webSocket.stop();
 						server.stop();
-//					} catch (InterruptedException e) {
-//						LOG.error("Error during server shutdown sleep", e);
-//					}
+					} catch (InterruptedException e) {
+						LOG.error("Error during server shutdown sleep", e);
+					}
 				}
 			}).start();
 		}

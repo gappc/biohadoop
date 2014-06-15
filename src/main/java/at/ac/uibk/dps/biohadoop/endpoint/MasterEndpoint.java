@@ -4,9 +4,9 @@ import at.ac.uibk.dps.biohadoop.jobmanager.Task;
 
 public interface MasterEndpoint {
 
-	public void handleRegistration() throws ShutdownException;
-	public void handleWorkInit() throws ShutdownException;
-	public void handleWork() throws ShutdownException;
+	public void handleRegistration();
+	public void handleWorkInit();
+	public void handleWork();
 	public Task<?> getCurrentTask();
 	public Endpoint getEndpoint();
 	
