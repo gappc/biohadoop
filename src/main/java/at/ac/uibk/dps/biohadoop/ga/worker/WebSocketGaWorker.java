@@ -20,7 +20,10 @@ import javax.websocket.WebSocketContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.connection.WorkerConnection;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaFitness;
+import at.ac.uibk.dps.biohadoop.ga.master.GaEndpointConfig;
+import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.jobmanager.Task;
 import at.ac.uibk.dps.biohadoop.jobmanager.remote.Message;
 import at.ac.uibk.dps.biohadoop.jobmanager.remote.MessageType;
@@ -31,10 +34,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.primitives.Ints;
 
 @ClientEndpoint(encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
-public class WebSocketWorker {
+public class WebSocketGaWorker implements WorkerConnection {
 
 	private static final Logger LOGGER = LoggerFactory
-			.getLogger(WebSocketWorker.class);
+			.getLogger(WebSocketGaWorker.class);
 
 	private CountDownLatch latch = new CountDownLatch(1);
 	private double[][] distances;
@@ -45,25 +48,33 @@ public class WebSocketWorker {
 
 	public static void main(String[] args) throws Exception {
 		LOGGER.info("############# {} started ##############",
-				WebSocketWorker.class.getSimpleName());
+				WebSocketGaWorker.class.getSimpleName());
 		LOGGER.debug("args.length: " + args.length);
 		for (String s : args) {
 			LOGGER.debug(s);
 		}
 
-		String masterHostname = args[0];
-		String url = "ws://" + masterHostname + ":30000/websocket/ga";
+		String host = args[0];
+		int port = Integer.valueOf(args[1]);
+		String url = "ws://" + host + ":" + port + "/websocket/ga";
 
 		LOGGER.info(
 				"############# WebSocket client calls url: {} #############",
 				url);
-		new WebSocketWorker(URI.create(url));
+		new WebSocketGaWorker(URI.create(url));
+	}
+	
+	public WebSocketGaWorker() {
 	}
 
-	public WebSocketWorker() {
+	@Override
+	public String getWorkerParameters() {
+		String hostname = Environment.get(Environment.HTTP_HOST);
+		String port = Environment.get(Environment.HTTP_PORT);
+		return hostname + " " + port;
 	}
-
-	public WebSocketWorker(URI uri) throws DeploymentException, IOException,
+	
+	public WebSocketGaWorker(URI uri) throws DeploymentException, IOException,
 			InterruptedException, EncodeException {
 		WebSocketContainer container = ContainerProvider
 				.getWebSocketContainer();
@@ -89,7 +100,7 @@ public class WebSocketWorker {
 		LOGGER.info("Closed connection to URI {}, sessionId={}",
 				session.getRequestURI(), session.getId());
 		LOGGER.info("############# {} stopped #############",
-				WebSocketWorker.class.getSimpleName());
+				WebSocketGaWorker.class.getSimpleName());
 	}
 
 	@OnMessage
@@ -139,7 +150,7 @@ public class WebSocketWorker {
 		if (message.getType() == MessageType.SHUTDOWN) {
 			LOGGER.info(
 					"############# {} Worker stopped ###############",
-					WebSocketWorker.class.getSimpleName());
+					WebSocketGaWorker.class.getSimpleName());
 			session.close();
 			latch.countDown();
 		}

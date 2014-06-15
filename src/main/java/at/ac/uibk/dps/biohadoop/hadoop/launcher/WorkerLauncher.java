@@ -19,8 +19,8 @@ import org.apache.hadoop.yarn.api.records.LocalResource;
 import org.apache.hadoop.yarn.api.records.Priority;
 import org.apache.hadoop.yarn.api.records.Resource;
 import org.apache.hadoop.yarn.client.api.AMRMClient;
-import org.apache.hadoop.yarn.client.api.NMClient;
 import org.apache.hadoop.yarn.client.api.AMRMClient.ContainerRequest;
+import org.apache.hadoop.yarn.client.api.NMClient;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.util.Apps;
 import org.apache.hadoop.yarn.util.Records;
@@ -28,8 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
+import at.ac.uibk.dps.biohadoop.connection.ConnectionConfiguration;
+import at.ac.uibk.dps.biohadoop.connection.WorkerConnection;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
-import at.ac.uibk.dps.biohadoop.torename.HostInfo;
 import at.ac.uibk.dps.biohadoop.torename.LaunchContainerRunnable;
 import at.ac.uibk.dps.biohadoop.torename.LocalResourceBuilder;
 
@@ -100,9 +101,11 @@ public class WorkerLauncher {
 				ContainerLaunchContext ctx = Records
 						.newRecord(ContainerLaunchContext.class);
 
+				WorkerConnection worker = (WorkerConnection)Class.forName(workerList.get(0)).newInstance();
+				String parameters = worker.getWorkerParameters();
+				
 				String clientCommand = "$JAVA_HOME/bin/java" + " -Xmx128M"
-						+ " " + workerList.get(0) + " "
-						+ HostInfo.getHostname() + " " + configFilename + " 1>"
+						+ " " + workerList.get(0) + " " + parameters + " " + configFilename + " 1>"
 						+ ApplicationConstants.LOG_DIR_EXPANSION_VAR
 						+ "/stdout" + " 2>"
 						+ ApplicationConstants.LOG_DIR_EXPANSION_VAR
@@ -165,9 +168,10 @@ public class WorkerLauncher {
 	}
 
 	private static List<String> getWorkerList(BiohadoopConfiguration config) {
-		List<String> workerList = new ArrayList<String>();
-		for (String key : config.getWorkers().keySet()) {
-			int value = config.getWorkers().get(key);
+		List<String> workerList = new ArrayList<>();
+		ConnectionConfiguration connectionConfiguration = config.getConnectionConfiguration();
+		for (String key : connectionConfiguration.getWorkers().keySet()) {
+			int value = connectionConfiguration.getWorkers().get(key);
 			for (int i = 0; i < value; i++) {
 				workerList.add(key);
 				LOG.info("Worker {} added", key);
@@ -186,5 +190,28 @@ public class WorkerLauncher {
 			Apps.addToEnvironment(appMasterEnv, Environment.CLASSPATH.name(),
 					c.trim());
 		}
+	}
+
+	public static void pretendToLaunchWorkers(
+			BiohadoopConfiguration biohadoopConfiguration) {
+		List<String> workerList = getWorkerList(biohadoopConfiguration);
+		for (String workerClass : workerList) {
+			try {
+				WorkerConnection worker = (WorkerConnection)Class.forName(workerClass).newInstance();
+				String parameters = worker.getWorkerParameters();
+				
+				String clientCommand = "$JAVA_HOME/bin/java" + " -Xmx128M"
+						+ " " + parameters + " configFilename 1>"
+						+ ApplicationConstants.LOG_DIR_EXPANSION_VAR
+						+ "/stdout" + " 2>"
+						+ ApplicationConstants.LOG_DIR_EXPANSION_VAR
+						+ "/stderr";
+				LOG.info("Launching worker {} with command: {}", workerClass, clientCommand);
+			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+				LOG.error("Error while pretending to run workers", e);
+			} 
+
+		}
+		
 	}
 }

@@ -8,11 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationId;
-import at.ac.uibk.dps.biohadoop.distributionmanager.DistributionManager;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.ApplicationLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLauncher;
 import at.ac.uibk.dps.biohadoop.torename.ArgumentChecker;
+import at.ac.uibk.dps.biohadoop.torename.BiohadoopConfigurationReader;
 import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;
 import at.ac.uibk.dps.biohadoop.torename.Helper;
 import at.ac.uibk.dps.biohadoop.torename.HostInfo;
@@ -43,11 +43,11 @@ public class BiohadoopApplicationMaster {
 			return;
 		}
 		try {
-			BiohadoopConfiguration biohadoopConfiguration = BiohadoopConfiguration
-					.getBiohadoopConfiguration(yarnConfiguration, args[0]);
-
-			configureExtensions(biohadoopConfiguration);
+			BiohadoopConfiguration biohadoopConfiguration = BiohadoopConfigurationReader
+					.readBiohadoopConfiguration(yarnConfiguration, args[0]);
 			
+			Environment.setBiohadoopConfiguration(biohadoopConfiguration);
+
 			EndpointLauncher.launchMasterEndpoints(biohadoopConfiguration);
 
 			List<Future<ApplicationId>> applications = ApplicationLauncher
@@ -57,6 +57,9 @@ public class BiohadoopApplicationMaster {
 				WorkerLauncher.launchWorkers(yarnConfiguration,
 						biohadoopConfiguration, args[0]);
 			}
+			else {
+				WorkerLauncher.pretendToLaunchWorkers(biohadoopConfiguration);
+			}
 
 			for (Future<ApplicationId> application : applications) {
 				ApplicationId applicationId = application.get();
@@ -65,13 +68,6 @@ public class BiohadoopApplicationMaster {
 		} catch (Exception e) {
 			LOG.error("Error while launching application", e);
 		}
-	}
-
-	private void configureExtensions(
-			BiohadoopConfiguration biohadoopConfiguration) {
-		// TODO check if PersistenceManager needs global configuration
-		DistributionManager.getInstance().setDistributionConfiguration(
-				biohadoopConfiguration.getDistributionConfiguration());
 	}
 
 	private boolean checkArguments(String[] args) {

@@ -17,6 +17,7 @@ import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.ApplicationLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointLauncher;
 import at.ac.uibk.dps.biohadoop.moead.config.MoeadAlgorithmConfig;
+import at.ac.uibk.dps.biohadoop.torename.BiohadoopConfigurationReader;
 
 public class MoeadMain {
 
@@ -25,8 +26,8 @@ public class MoeadMain {
 	public static void main(String[] args) {
 		try {
 			YarnConfiguration yarnConfiguration = new YarnConfiguration();
-			BiohadoopConfiguration biohadoopConfiguration = BiohadoopConfiguration
-					.getBiohadoopConfiguration(yarnConfiguration, args[0]);
+			BiohadoopConfiguration biohadoopConfiguration = BiohadoopConfigurationReader
+					.readBiohadoopConfiguration(yarnConfiguration, args[0]);
 
 			List<Future<ApplicationId>> algorithms = ApplicationLauncher
 					.launchApplication(biohadoopConfiguration);

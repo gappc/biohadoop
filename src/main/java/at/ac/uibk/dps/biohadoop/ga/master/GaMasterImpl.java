@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
-import at.ac.uibk.dps.biohadoop.endpoint.Master;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ShutdownException;
 import at.ac.uibk.dps.biohadoop.ga.DistancesGlobal;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
@@ -14,23 +14,25 @@ import at.ac.uibk.dps.biohadoop.jobmanager.api.JobManager;
 import at.ac.uibk.dps.biohadoop.jobmanager.remote.Message;
 import at.ac.uibk.dps.biohadoop.jobmanager.remote.MessageType;
 
-public class GaMasterImpl<T> implements Master<T> {
+public class GaMasterImpl implements MasterEndpoint {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(GaMasterImpl.class);
 
 	private final Endpoint endpoint;
-	private final JobManager<T, Double> jobManager = JobManager.getInstance();
-	private Task<T> currentTask = null;
+	private final JobManager<?, ?> jobManager = JobManager.getInstance();
+	private Task<?> currentTask = null;
 
 	public GaMasterImpl(Endpoint endpoint) {
 		this.endpoint = endpoint;
 	}
 	
+	@Override
 	public Endpoint getEndpoint() {
 		return endpoint;
 	}
 
+	@Override
 	public void handleRegistration() throws ShutdownException {
 		endpoint.receive();
 		LOG.info("Got registration request");
@@ -42,10 +44,11 @@ public class GaMasterImpl<T> implements Master<T> {
 		endpoint.send(message);
 	}
 
+	@Override
 	public void handleWorkInit() throws ShutdownException {
 		endpoint.receive();
 		LOG.debug("Got work init request");
-		JobManager<T, ?> workInitManager = JobManager.getInstance();
+		JobManager<?, ?> workInitManager = JobManager.getInstance();
 		currentTask = workInitManager.getTask(Ga.GA_QUEUE);
 		MessageType messageType = null;
 		if (currentTask == null) {
@@ -53,18 +56,20 @@ public class GaMasterImpl<T> implements Master<T> {
 		} else {
 			messageType = MessageType.WORK_INIT_RESPONSE;
 		}
-		Message<T> message = new Message<>(messageType, currentTask);
+		Message<?> message = new Message<>(messageType, currentTask);
 		endpoint.send(message);
 		if (messageType == MessageType.SHUTDOWN) {
 			throw new ShutdownException();
 		}
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
 	public void handleWork() throws ShutdownException {
-		Message<Double> incomingMessage = endpoint.receive();
+		Message<?> incomingMessage = endpoint.receive();
 		LOG.debug("Got work request");
 
-		Task<Double> result = incomingMessage.getPayload();
+		Task result = incomingMessage.getPayload();
 		jobManager.putResult(result, Ga.GA_QUEUE);
 
 		MessageType messageType = null;
@@ -74,7 +79,7 @@ public class GaMasterImpl<T> implements Master<T> {
 		} else {
 			messageType = MessageType.WORK_RESPONSE;
 		}
-		Message<T> message = new Message<>(messageType, currentTask);
+		Message<?> message = new Message<>(messageType, currentTask);
 		endpoint.send(message);
 		if (messageType == MessageType.SHUTDOWN) {
 			throw new ShutdownException();
@@ -82,7 +87,7 @@ public class GaMasterImpl<T> implements Master<T> {
 	}
 
 	@Override
-	public Task<T> getCurrentTask() {
+	public Task<?> getCurrentTask() {
 		return currentTask;
 	}
 

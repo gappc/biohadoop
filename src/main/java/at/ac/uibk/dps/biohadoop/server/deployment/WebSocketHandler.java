@@ -8,6 +8,7 @@ import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.ServletException;
 
@@ -16,8 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.xnio.OptionMap;
 import org.xnio.Xnio;
 import org.xnio.XnioWorker;
-
-import at.ac.uibk.dps.biohadoop.ga.master.websocket.GaWebSocketResource;
 
 /**
  * @author Christian Gapp
@@ -31,32 +30,35 @@ public class WebSocketHandler {
 			.getLogger(WebSocketHandler.class);
 
 	private XnioWorker xnioWorker;
-	
+
 	/**
 	 * Needs to be performed manually, else Undertow won't shut down
 	 */
 	public void stop() {
 		xnioWorker.shutdown();
 	}
-	
+
 	/**
 	 * Construct and get an Undertow handler for Resteasy
 	 * 
 	 * @param contextPath
 	 *            Path where the websockets are bound
+	 * @param webSocketClasses
+	 *            List of classes that implement WebSockets
 	 * @return {@link io.undertow.server.HttpHandler} that can be deployed on a
 	 *         server
 	 * @throws IllegalArgumentException
 	 * @throws IOException
 	 * @throws ServletException
 	 */
-	public HttpHandler getHandler(String contextPath)
-			throws IllegalArgumentException, IOException, ServletException {
+	public HttpHandler getHandler(String contextPath,
+			List<Class<?>> webSocketClasses) throws IllegalArgumentException,
+			IOException, ServletException {
 		if (contextPath == null || contextPath.length() == 0) {
 			contextPath = "/";
 		}
 
-		DeploymentInfo di = buildDeploymentInfo(contextPath);
+		DeploymentInfo di = buildDeploymentInfo(contextPath, webSocketClasses);
 
 		DeploymentManager deploymentManager = Servlets.defaultContainer()
 				.addDeployment(di);
@@ -64,17 +66,19 @@ public class WebSocketHandler {
 
 		return deploymentManager.start();
 	}
-	
-	private DeploymentInfo buildDeploymentInfo(String contextPath)
-			throws IllegalArgumentException, IOException {
+
+	private DeploymentInfo buildDeploymentInfo(String contextPath,
+			List<Class<?>> webSocketClasses) throws IllegalArgumentException,
+			IOException {
 		LOGGER.debug("Building WebSocket DeploymentInfo");
 		final Xnio xnio = Xnio.getInstance("nio",
 				Undertow.class.getClassLoader());
-		xnioWorker = xnio.createWorker(OptionMap.builder()
-				.getMap());
-		final WebSocketDeploymentInfo webSockets = new WebSocketDeploymentInfo()
-				.addEndpoint(GaWebSocketResource.class)
-				.setWorker(xnioWorker);
+		xnioWorker = xnio.createWorker(OptionMap.builder().getMap());
+		final WebSocketDeploymentInfo webSockets = new WebSocketDeploymentInfo();
+		for (Class<?> webSocketClass : webSocketClasses) {
+			webSockets.addEndpoint(webSocketClass);
+		}
+		webSockets.setWorker(xnioWorker);
 
 		return new DeploymentInfo()
 				.setClassLoader(Thread.currentThread().getContextClassLoader())

@@ -1,47 +1,51 @@
-package at.ac.uibk.dps.biohadoop.ga.master.socket;
+package at.ac.uibk.dps.biohadoop.connection.socket;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
-import at.ac.uibk.dps.biohadoop.endpoint.Master;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
 import at.ac.uibk.dps.biohadoop.endpoint.ShutdownException;
-import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
-import at.ac.uibk.dps.biohadoop.ga.master.GaMasterImpl;
 import at.ac.uibk.dps.biohadoop.jobmanager.Task;
 import at.ac.uibk.dps.biohadoop.jobmanager.api.JobManager;
 import at.ac.uibk.dps.biohadoop.jobmanager.remote.Message;
 import at.ac.uibk.dps.biohadoop.torename.Helper;
+import at.ac.uibk.dps.biohadoop.torename.MasterConfiguration;
 
-public class GaSocketResource implements Runnable, Endpoint {
+public class SocketEndpoint implements Runnable, Endpoint {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(GaSocketResource.class);
-	private String className = Helper.getClassname(GaSocketResource.class);
+			.getLogger(SocketEndpoint.class);
 
-	private Socket socket;
-	int counter = 0;
-	
+	private final String className = Helper.getClassname(SocketEndpoint.class);
+	private final Socket socket;
+	private final MasterConfiguration masterConfiguration;
+
 	private ObjectOutputStream os = null;
 	private ObjectInputStream is = null;
-
-	public GaSocketResource(Socket socket) {
+	private int counter = 0;
+	
+	public SocketEndpoint(Socket socket, MasterConfiguration masterConfiguration) {
 		this.socket = socket;
+		this.masterConfiguration = masterConfiguration;
 	}
 
 	@Override
 	public void run() {
-		JobManager<int[], Double> jobManager = JobManager.getInstance();
-		Master<int[]> master = null;
+		JobManager<?, ?> jobManager = JobManager.getInstance();
+		
+		MasterEndpoint endpoint = null;
 		try {
 			LOG.info("Opened Socket on server");
 
@@ -51,23 +55,25 @@ public class GaSocketResource implements Runnable, Endpoint {
 			is = new ObjectInputStream(new BufferedInputStream(
 					socket.getInputStream()));
 
-			master = new GaMasterImpl<int[]>(this);
-			master.handleRegistration();
-			master.handleWorkInit();
+			endpoint = buildMaster(masterConfiguration.getMasterEndpoint());
+			endpoint.handleRegistration();
+			endpoint.handleWorkInit();
 			while (true) {
-				master.handleWork();
+				endpoint.handleWork();
 			}
 		} catch (ShutdownException e) {
 			LOG.info("Got shutdown event");
 		} catch (Exception e) {
 			LOG.error("Error while running {}", className, e);
-			if (master != null) {
-				Task<int[]> currentTask = master.getCurrentTask();
+			if (endpoint != null) {
+				Task currentTask = endpoint.getCurrentTask();
 				if (currentTask != null) {
+					// TODO make queueName dynamic
 					boolean hasRescheduled = jobManager.reschedule(currentTask,
-							Ga.GA_QUEUE);
+							masterConfiguration.getQueueName());
 					if (!hasRescheduled) {
-						LOG.error("Could not reschedule task at {}", currentTask);
+						LOG.error("Could not reschedule task at {}",
+								currentTask);
 					}
 				}
 			}
@@ -86,6 +92,16 @@ public class GaSocketResource implements Runnable, Endpoint {
 					LOG.error("Error while closing InputStream", e);
 				}
 			}
+		}
+	}
+
+	private MasterEndpoint buildMaster(Class<? extends MasterEndpoint> masterEndpointClass) throws Exception {
+		try {
+			Constructor<? extends MasterEndpoint> constructor = masterEndpointClass.getDeclaredConstructor(Endpoint.class);
+			return constructor.newInstance(this);
+		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			LOG.error("Could not instanciate new {} with parameter {}", masterEndpointClass, this);
+			throw new Exception(e);
 		}
 	}
 

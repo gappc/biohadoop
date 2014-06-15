@@ -10,7 +10,10 @@ import javax.websocket.EncodeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.connection.WorkerConnection;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaFitness;
+import at.ac.uibk.dps.biohadoop.ga.master.GaEndpointConfig;
+import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.jobmanager.Task;
 import at.ac.uibk.dps.biohadoop.jobmanager.TaskId;
 import at.ac.uibk.dps.biohadoop.jobmanager.remote.Message;
@@ -25,7 +28,7 @@ import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
 
 @ClientEndpoint(encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
-public class KryoGaWorker {
+public class KryoGaWorker implements WorkerConnection {
 
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(KryoGaWorker.class);
@@ -45,13 +48,25 @@ public class KryoGaWorker {
 			LOGGER.info(s);
 		}
 
-		String masterHostname = args[0];
+		String host = args[0];
+		int port = Integer.valueOf(args[1]);
 
-		LOGGER.info("######### {} client calls master at: {}",
-				KryoGaWorker.class.getSimpleName(), masterHostname);
-		new KryoGaWorker(masterHostname, 30015);
+		LOGGER.info("######### {} client calls master at: {}:{}",
+				KryoGaWorker.class.getSimpleName(), host, port);
+		new KryoGaWorker(host, port);
+	}
+	
+	public KryoGaWorker() {
 	}
 
+	@Override
+	public String getWorkerParameters() {
+		GaEndpointConfig masterConfig = new GaEndpointConfig();
+		String hostname = Environment.getPrefixed(masterConfig.getPrefix(), Environment.KRYO_SOCKET_HOST);
+		String port = Environment.getPrefixed(masterConfig.getPrefix(), Environment.KRYO_SOCKET_PORT);
+		return hostname + " " + port;
+	}
+	
 	public KryoGaWorker(String hostname, int port) throws DeploymentException,
 			IOException, InterruptedException, EncodeException,
 			ClassNotFoundException {
@@ -62,7 +77,7 @@ public class KryoGaWorker {
 		//Needed?
 //		new Thread(client).start();
 		client.start();
-		client.connect(15000, "localhost", 30015);
+		client.connect(15000, hostname, port);
 
 		Kryo kryo = client.getKryo();
 		kryo.register(Message.class);

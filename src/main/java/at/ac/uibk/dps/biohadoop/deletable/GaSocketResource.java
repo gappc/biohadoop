@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.nsgaii.master.socket;
+package at.ac.uibk.dps.biohadoop.deletable;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -11,37 +11,37 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
-import at.ac.uibk.dps.biohadoop.endpoint.Master;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
 import at.ac.uibk.dps.biohadoop.endpoint.ShutdownException;
+import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
+import at.ac.uibk.dps.biohadoop.ga.master.GaMasterImpl;
 import at.ac.uibk.dps.biohadoop.jobmanager.Task;
 import at.ac.uibk.dps.biohadoop.jobmanager.api.JobManager;
 import at.ac.uibk.dps.biohadoop.jobmanager.remote.Message;
-import at.ac.uibk.dps.biohadoop.nsgaii.algorithm.NsgaII;
-import at.ac.uibk.dps.biohadoop.nsgaii.master.NsgaIIMasterImpl;
 import at.ac.uibk.dps.biohadoop.torename.Helper;
 
-public class NsgaIISocketResource implements Runnable, Endpoint {
+public class GaSocketResource implements Runnable, Endpoint {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(NsgaIISocketResource.class);
-	private String className =  Helper.getClassname(NsgaIISocketResource.class);
+			.getLogger(GaSocketResource.class);
+	private String className = Helper.getClassname(GaSocketResource.class);
 
 	private Socket socket;
 	int counter = 0;
 	
 	private ObjectOutputStream os = null;
 	private ObjectInputStream is = null;
-	
-	public NsgaIISocketResource(Socket socket) {
+
+	public GaSocketResource(Socket socket) {
 		this.socket = socket;
 	}
-	
+
 	@Override
 	public void run() {
-		JobManager<double[], double[]> jobManager = JobManager.getInstance();
-		Master<double[]> master = null;
+		JobManager<int[], Double> jobManager = JobManager.getInstance();
+		MasterEndpoint master = null;
 		try {
 			LOG.info("Opened Socket on server");
 
@@ -51,7 +51,7 @@ public class NsgaIISocketResource implements Runnable, Endpoint {
 			is = new ObjectInputStream(new BufferedInputStream(
 					socket.getInputStream()));
 
-			master = new NsgaIIMasterImpl<double[]>(this);
+			master = new GaMasterImpl(this);
 			master.handleRegistration();
 			master.handleWorkInit();
 			while (true) {
@@ -62,10 +62,10 @@ public class NsgaIISocketResource implements Runnable, Endpoint {
 		} catch (Exception e) {
 			LOG.error("Error while running {}", className, e);
 			if (master != null) {
-				Task<double[]> currentTask = master.getCurrentTask();
+				Task currentTask = master.getCurrentTask();
 				if (currentTask != null) {
 					boolean hasRescheduled = jobManager.reschedule(currentTask,
-							NsgaII.NSGAII_QUEUE);
+							Ga.GA_QUEUE);
 					if (!hasRescheduled) {
 						LOG.error("Could not reschedule task at {}", currentTask);
 					}
@@ -88,7 +88,7 @@ public class NsgaIISocketResource implements Runnable, Endpoint {
 			}
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public <T> Message<T> receive() throws ReceiveException {
 		try {

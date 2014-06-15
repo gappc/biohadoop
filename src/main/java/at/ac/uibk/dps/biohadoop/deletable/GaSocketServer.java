@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.ga.master.socket;
+package at.ac.uibk.dps.biohadoop.deletable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

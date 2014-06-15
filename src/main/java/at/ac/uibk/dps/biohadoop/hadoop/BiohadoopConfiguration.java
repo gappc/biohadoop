@@ -1,82 +1,64 @@
 package at.ac.uibk.dps.biohadoop.hadoop;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import org.apache.hadoop.yarn.conf.YarnConfiguration;
 
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationConfiguration;
+import at.ac.uibk.dps.biohadoop.connection.ConnectionConfiguration;
 import at.ac.uibk.dps.biohadoop.distributionmanager.DistributionConfiguration;
-import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class BiohadoopConfiguration {
 
-	private String version;
-	private List<String> includePaths = new ArrayList<>();
-	private List<ApplicationConfiguration> applicationConfigs = new ArrayList<>();
-	private Map<String, Integer> workers = new HashMap<>();
-	private List<String> endPoints = new ArrayList<>();
-	private DistributionConfiguration distributionConfiguration;
+	private final String version;
+	private final List<String> includePaths;
+	private final List<ApplicationConfiguration> applicationConfigs;
+	private final ConnectionConfiguration connectionConfiguration;
+	private final DistributionConfiguration distributionConfiguration;
+
+	public BiohadoopConfiguration(String version, List<String> includePaths,
+			List<ApplicationConfiguration> applicationConfigs,
+			ConnectionConfiguration connectionConfiguration,
+			DistributionConfiguration distributionConfiguration) {
+		super();
+		this.version = version;
+		this.includePaths = includePaths;
+		this.applicationConfigs = applicationConfigs;
+		this.connectionConfiguration = connectionConfiguration;
+		this.distributionConfiguration = distributionConfiguration;
+	}
+
+	@JsonCreator
+	public static BiohadoopConfiguration create(
+			@JsonProperty("version") String version,
+			@JsonProperty("includePaths") List<String> includePaths,
+			@JsonProperty("applicationConfigs") List<ApplicationConfiguration> applicationConfigs,
+			@JsonProperty("connectionConfiguration") ConnectionConfiguration connectionConfiguration,
+			@JsonProperty("distributionConfiguration") DistributionConfiguration distributionConfiguration) {
+		return new BiohadoopConfiguration(version, includePaths,
+				applicationConfigs, connectionConfiguration,
+				distributionConfiguration);
+	}
 
 	public String getVersion() {
 		return version;
-	}
-
-	public void setVersion(String version) {
-		this.version = version;
 	}
 
 	public List<String> getIncludePaths() {
 		return includePaths;
 	}
 
-	public void setIncludePaths(List<String> includePaths) {
-		this.includePaths = includePaths;
-	}
-
 	public List<ApplicationConfiguration> getApplicationConfigs() {
 		return applicationConfigs;
 	}
 
-	public void setApplicationConfigs(List<ApplicationConfiguration> applicationConfigs) {
-		this.applicationConfigs = applicationConfigs;
-	}
-
-	public Map<String, Integer> getWorkers() {
-		return workers;
-	}
-
-	public void setWorkers(Map<String, Integer> workers) {
-		this.workers = workers;
-	}
-
-	public List<String> getEndPoints() {
-		return endPoints;
-	}
-
-	public void setEndPoints(List<String> endPoints) {
-		this.endPoints = endPoints;
+	public ConnectionConfiguration getConnectionConfiguration() {
+		return connectionConfiguration;
 	}
 
 	public DistributionConfiguration getDistributionConfiguration() {
 		return distributionConfiguration;
 	}
 
-	public void setDistributionConfiguration(DistributionConfiguration distributionConfiguration) {
-		this.distributionConfiguration = distributionConfiguration;
-	}
-
-	public static BiohadoopConfiguration getBiohadoopConfiguration(
-			YarnConfiguration yarnConfiguration, String filename)
-			throws IOException {
-		ObjectMapper objectMapper = new ObjectMapper();
-		return objectMapper.readValue(
-				HdfsUtil.openFile(yarnConfiguration, filename),
-				BiohadoopConfiguration.class);
-	}
 }

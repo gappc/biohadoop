@@ -12,14 +12,17 @@ import javax.websocket.EncodeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.connection.WorkerConnection;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaFitness;
+import at.ac.uibk.dps.biohadoop.ga.master.GaEndpointConfig;
+import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.jobmanager.Task;
 import at.ac.uibk.dps.biohadoop.jobmanager.remote.Message;
 import at.ac.uibk.dps.biohadoop.jobmanager.remote.MessageType;
 import at.ac.uibk.dps.biohadoop.torename.Helper;
 import at.ac.uibk.dps.biohadoop.torename.PerformanceLogger;
 
-public class SocketGaWorker {
+public class SocketGaWorker implements WorkerConnection {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SocketGaWorker.class);
@@ -36,12 +39,24 @@ public class SocketGaWorker {
 			LOG.debug(s);
 		}
 
-		String masterHostname = args[0];
+		String host = args[0];
+		int port = Integer.valueOf(args[1]);
 
-		LOG.info("############# {} client calls master at: {} #############",
-				className, masterHostname);
-		new SocketGaWorker(masterHostname, 30001);
+		LOG.info("############# {} client calls master at: {}:{} #############",
+				className, host, port);
+		new SocketGaWorker(host, port);
 		LOG.info("############# {} stopped #############", className);
+	}
+
+	public SocketGaWorker() {
+	}
+	
+	@Override
+	public String getWorkerParameters() {
+		GaEndpointConfig masterConfig = new GaEndpointConfig();
+		String hostname = Environment.getPrefixed(masterConfig.getPrefix(), Environment.SOCKET_HOST);
+		String port = Environment.getPrefixed(masterConfig.getPrefix(), Environment.SOCKET_PORT);
+		return hostname + " " + port;
 	}
 
 	// TODO remove "throws" and add proper error handling
@@ -147,4 +162,5 @@ public class SocketGaWorker {
 		os.writeUnshared(message);
 		os.flush();
 	}
+
 }

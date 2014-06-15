@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.ga.master.kryo;
+package at.ac.uibk.dps.biohadoop.connection.kryo;
 
 import com.esotericsoftware.kryonet.Connection;
 
@@ -7,7 +7,7 @@ import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
 import at.ac.uibk.dps.biohadoop.jobmanager.remote.Message;
 
-public class GaKryoEndpoint implements Endpoint {
+public class KryoEndpoint implements Endpoint {
 
 	private Message<?> inputMessage;
 	private Connection connection;

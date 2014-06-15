@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.ga.master.rest;
+package at.ac.uibk.dps.biohadoop.deletable;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
-import at.ac.uibk.dps.biohadoop.endpoint.Master;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
 import at.ac.uibk.dps.biohadoop.endpoint.ShutdownException;
@@ -29,7 +29,7 @@ public class GaRestResource implements Endpoint {
 	@GET
 	@Path("registration")
 	public Message<?> registration() throws InterruptedException {
-		Master<?> master = new GaMasterImpl<>(this);
+		MasterEndpoint master = new GaMasterImpl(this);
 		master.handleRegistration();
 		return outputMessage;
 	}
@@ -37,7 +37,7 @@ public class GaRestResource implements Endpoint {
 	@GET
 	@Path("workinit")
 	public Message<?> workInit() throws InterruptedException {
-		Master<?> master = new GaMasterImpl<>(this);
+		MasterEndpoint master = new GaMasterImpl(this);
 		master.handleWorkInit();
 		return outputMessage;
 	}
@@ -46,7 +46,7 @@ public class GaRestResource implements Endpoint {
 	@Path("work")
 	public Message<?> work(Message<?> message) throws InterruptedException {
 		inputMessage = message;
-		Master<?> master = new GaMasterImpl<>(this);
+		MasterEndpoint master = new GaMasterImpl(this);
 		try {
 			master.handleWork();
 		} catch (ShutdownException e) {

@@ -10,6 +10,7 @@ import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationData;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationHandler;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationId;
 import at.ac.uibk.dps.biohadoop.distributionmanager.zooKeeper.ZooKeeperController;
+import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 
 public class DistributionManager implements ApplicationHandler {
 
@@ -17,17 +18,10 @@ public class DistributionManager implements ApplicationHandler {
 			.getLogger(DistributionManager.class);
 
 	private static final DistributionManager DISTRIBUTION_MANAGER = new DistributionManager();
-	private DistributionConfiguration distributionConfiguration = null;
 	private Map<ApplicationId, ZooKeeperController> applicationIdToZooKeeper = new ConcurrentHashMap<ApplicationId, ZooKeeperController>();
 
 	public static DistributionManager getInstance() {
 		return DistributionManager.DISTRIBUTION_MANAGER;
-	}
-
-	// TODO avid doing this twice
-	public void setDistributionConfiguration(
-			DistributionConfiguration distributionConfiguration) {
-		this.distributionConfiguration = distributionConfiguration;
 	}
 
 	// TODO only method accessed by solvers. should maybe be put into separate
@@ -44,6 +38,8 @@ public class DistributionManager implements ApplicationHandler {
 		try {
 			LOG.info("Enabling DistributionManager for Application {}",
 					applicationId);
+			DistributionConfiguration distributionConfiguration = Environment
+					.getBiohadoopConfiguration().getDistributionConfiguration();
 			ZooKeeperController zooKeeperController = new ZooKeeperController(
 					distributionConfiguration, applicationId);
 			applicationIdToZooKeeper.put(applicationId, zooKeeperController);

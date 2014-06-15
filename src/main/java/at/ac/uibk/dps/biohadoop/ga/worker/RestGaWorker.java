@@ -11,7 +11,10 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.connection.WorkerConnection;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.GaFitness;
+import at.ac.uibk.dps.biohadoop.ga.master.GaEndpointConfig;
+import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.jobmanager.Task;
 import at.ac.uibk.dps.biohadoop.jobmanager.remote.Message;
 import at.ac.uibk.dps.biohadoop.jobmanager.remote.MessageType;
@@ -21,7 +24,7 @@ import at.ac.uibk.dps.biohadoop.torename.PerformanceLogger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.primitives.Ints;
 
-public class RestGaWorker {
+public class RestGaWorker implements WorkerConnection {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(RestGaWorker.class);
@@ -37,12 +40,23 @@ public class RestGaWorker {
 			LOG.debug(s);
 		}
 
-		String masterHostname = args[0];
+		String host = args[0];
+		int port = Integer.valueOf(args[1]);
 
-		LOG.info("############# {} client calls master at: {} #############",
-				className, masterHostname);
-		new RestGaWorker(masterHostname, 30000);
+		LOG.info("############# {} client calls master at: {}:{} #############",
+				className, host, port);
+		new RestGaWorker(host, port);
 		LOG.info("############# {} stopped #############", className);
+	}
+	
+	public RestGaWorker() {
+	}
+	
+	@Override
+	public String getWorkerParameters() {
+		String hostname = Environment.get(Environment.HTTP_HOST);
+		String port = Environment.get(Environment.HTTP_PORT);
+		return hostname + " " + port;
 	}
 
 	public RestGaWorker(String masterHostname, int port) {

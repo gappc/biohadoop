@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.moead.master.socket;
+package at.ac.uibk.dps.biohadoop.deletable;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
-import at.ac.uibk.dps.biohadoop.endpoint.Master;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
 import at.ac.uibk.dps.biohadoop.endpoint.ShutdownException;
@@ -41,7 +41,7 @@ public class MoeadSocketResource implements Runnable, Endpoint {
 	@Override
 	public void run() {
 		JobManager<double[], double[]> jobManager = JobManager.getInstance();
-		Master<double[]> master = null;
+		MasterEndpoint master = null;
 		try {
 			LOG.info("Opened Socket on server");
 
@@ -51,7 +51,7 @@ public class MoeadSocketResource implements Runnable, Endpoint {
 			is = new ObjectInputStream(new BufferedInputStream(
 					socket.getInputStream()));
 
-			master = new MoeadMasterImpl<double[]>(this);
+			master = new MoeadMasterImpl(this);
 			master.handleRegistration();
 			master.handleWorkInit();
 			while (true) {
@@ -62,7 +62,7 @@ public class MoeadSocketResource implements Runnable, Endpoint {
 		} catch (Exception e) {
 			LOG.error("Error while running {}", className, e);
 			if (master != null) {
-				Task<double[]> currentTask = master.getCurrentTask();
+				Task currentTask = master.getCurrentTask();
 				if (currentTask != null) {
 					boolean hasRescheduled = jobManager.reschedule(currentTask,
 							Moead.MOEAD_QUEUE);

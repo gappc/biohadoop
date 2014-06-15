@@ -2,6 +2,7 @@ package at.ac.uibk.dps.biohadoop.moead.config;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -12,9 +13,13 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationConfiguration;
 import at.ac.uibk.dps.biohadoop.config.AlgorithmConfiguration;
+import at.ac.uibk.dps.biohadoop.connection.ConnectionConfiguration;
+import at.ac.uibk.dps.biohadoop.connection.FileMasterConfiguration;
+import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
+import at.ac.uibk.dps.biohadoop.distributionmanager.DistributionConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.moead.algorithm.Moead;
-import at.ac.uibk.dps.biohadoop.moead.master.socket.MoeadSocketServer;
+import at.ac.uibk.dps.biohadoop.moead.master.socket.MoeadSocket;
 import at.ac.uibk.dps.biohadoop.moead.worker.SocketMoeadWorker;
 import at.ac.uibk.dps.biohadoop.persistencemanager.PersistenceConfiguration;
 import at.ac.uibk.dps.biohadoop.persistencemanager.file.FileLoadConfiguration;
@@ -41,6 +46,11 @@ public class MoeadConfigWriter {
 	private static String REMOTE_PERSISTENCE_SAVE_PATH = "/biohadoop/persistence/moead";
 	private static String LOCAL_PERSISTENCE_LOAD_PATH = "/tmp/biohadoop/moead/MOEAD-LOCAL-1/2087724778";
 	private static String REMOTE_PERSISTENCE_LOAD_PATH = "/biohadoop/persistence/moead";
+	
+	private static String LOCAL_DISTRIBUTION_INFO_HOST = "localhost";
+	private static int LOCAL_DISTRIBUTION_INFO_PORT = 2181;
+	private static String REMOTE_DISTRIBUTION_INFO_HOST = "master";
+	private static int REMOTE_DISTRIBUTION_INFO_PORT = 2181;
 
 	private MoeadConfigWriter() {
 	}
@@ -49,38 +59,49 @@ public class MoeadConfigWriter {
 			ClassNotFoundException, InstantiationException,
 			IllegalAccessException {
 
-		BiohadoopConfiguration biohadoopConfig = new BiohadoopConfiguration();
-
-		List<String> endpoints = Arrays.asList(MoeadSocketServer.class
-				.getName());
-		biohadoopConfig.setEndPoints(endpoints);
-
-		biohadoopConfig.setIncludePaths(Arrays.asList("/biohadoop/lib/",
-				"/biohadoop/conf/"));
-
-		biohadoopConfig.setVersion("0.1");
-
-		Map<String, Integer> workers = new HashMap<String, Integer>();
-		workers.put(SocketMoeadWorker.class.getName(), 3);
-		biohadoopConfig.setWorkers(workers);
-
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
-		ApplicationConfiguration applicationConfig = buildApplicationConfig(
-				"MOEAD-LOCAL-1", true);
-		biohadoopConfig.setApplicationConfigs(Arrays.asList(applicationConfig,
-				applicationConfig));
+		BiohadoopConfiguration biohadoopConfig = buildBiohadoopConfiguration(true);
 		mapper.writeValue(new File(LOCAL_OUTPUT_NAME), biohadoopConfig);
 
-		applicationConfig = buildApplicationConfig("MOEAD-DISTRIBUTED-1", false);
-		biohadoopConfig.setApplicationConfigs(Arrays.asList(applicationConfig,
-				applicationConfig));
+		biohadoopConfig = buildBiohadoopConfiguration(false);
 		mapper.writeValue(new File(REMOTE_OUTPUT_NAME), biohadoopConfig);
 
 		readAlgorithmConfig();
 	}
 
+	private static BiohadoopConfiguration buildBiohadoopConfiguration(
+			boolean local) {
+		String version = "0.1";
+		List<String> includePaths = Arrays.asList("/biohadoop/lib/",
+				"/biohadoop/conf/");
+		ApplicationConfiguration applicationConfig = buildApplicationConfig(
+				"MOEAD-LOCAL-1", local);
+		ConnectionConfiguration connectionConfiguration = buildConnectionConfiguration();
+		DistributionConfiguration distributionConfiguration = buildDistributionConfig(local);
+
+		return new BiohadoopConfiguration(version, includePaths, Arrays.asList(
+				applicationConfig, applicationConfig, applicationConfig,
+				applicationConfig), connectionConfiguration,
+				distributionConfiguration);
+	}
+	
+	private static ConnectionConfiguration buildConnectionConfiguration() {
+		List<Class<? extends MasterConnection>> endpoints = new ArrayList<>();
+		endpoints.add(MoeadSocket.class);
+
+		FileMasterConfiguration mc = new FileMasterConfiguration(endpoints);
+
+		List<FileMasterConfiguration> masters = new ArrayList<>();
+		masters.add(mc);
+		
+		Map<String, Integer> workers = new HashMap<>();
+		workers.put(SocketMoeadWorker.class.getCanonicalName(), 3);
+		
+		return new ConnectionConfiguration(masters, workers);
+	}
+	
 	private static ApplicationConfiguration buildApplicationConfig(String name,
 			boolean local) {
 		AlgorithmConfiguration algorithmConfiguration = buildAlgorithmConfig(local);
@@ -118,7 +139,7 @@ public class MoeadConfigWriter {
 		}
 
 		FileSaveConfiguration saveFile = new FileSaveConfiguration(savePath,
-				100);
+				1000);
 		FileLoadConfiguration loadFile = new FileLoadConfiguration(loadPath,
 				true);
 
@@ -126,6 +147,17 @@ public class MoeadConfigWriter {
 				saveFile, loadFile);
 
 		return filePersistenceConfiguration;
+	}
+
+	private static DistributionConfiguration buildDistributionConfig(
+			boolean local) {
+		if (local) {
+			return new DistributionConfiguration(LOCAL_DISTRIBUTION_INFO_HOST,
+					LOCAL_DISTRIBUTION_INFO_PORT);
+		} else {
+			return new DistributionConfiguration(REMOTE_DISTRIBUTION_INFO_HOST,
+					REMOTE_DISTRIBUTION_INFO_PORT);
+		}
 	}
 
 	private static void readAlgorithmConfig() throws IOException,

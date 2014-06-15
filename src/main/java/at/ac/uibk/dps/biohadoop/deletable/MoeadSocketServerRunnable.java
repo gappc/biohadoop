@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.moead.master.socket;
+package at.ac.uibk.dps.biohadoop.deletable;
 
 import java.io.IOException;
 import java.net.ServerSocket;
