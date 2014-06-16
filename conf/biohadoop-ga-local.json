@@ -7,7 +7,73 @@
       "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.ga.config.GaAlgorithmConfig",
       "dataFile" : "/sdb/studium/master-thesis/code/git/masterthesis/data/att48.tsp",
       "populationSize" : 10,
-      "maxIterations" : 100
+      "maxIterations" : 10000
+    },
+    "algorithm" : "at.ac.uibk.dps.biohadoop.ga.algorithm.Ga",
+    "persistenceConfiguration" : {
+      "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FilePersistenceConfiguration",
+      "saveConfiguration" : {
+        "@persistenceSaveConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileSaveConfiguration",
+        "path" : "/tmp/biohadoop/ga",
+        "afterIterations" : 1000
+      },
+      "loadConfiguration" : {
+        "@persistenceLoadConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileLoadConfiguration",
+        "path" : "/tmp/biohadoop/ga/GA-LOCAL-1/481038014/",
+        "onStartup" : true
+      }
+    }
+  }, {
+    "name" : "GA-LOCAL-1",
+    "algorithmConfiguration" : {
+      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.ga.config.GaAlgorithmConfig",
+      "dataFile" : "/sdb/studium/master-thesis/code/git/masterthesis/data/att48.tsp",
+      "populationSize" : 10,
+      "maxIterations" : 10000
+    },
+    "algorithm" : "at.ac.uibk.dps.biohadoop.ga.algorithm.Ga",
+    "persistenceConfiguration" : {
+      "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FilePersistenceConfiguration",
+      "saveConfiguration" : {
+        "@persistenceSaveConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileSaveConfiguration",
+        "path" : "/tmp/biohadoop/ga",
+        "afterIterations" : 1000
+      },
+      "loadConfiguration" : {
+        "@persistenceLoadConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileLoadConfiguration",
+        "path" : "/tmp/biohadoop/ga/GA-LOCAL-1/481038014/",
+        "onStartup" : true
+      }
+    }
+  }, {
+    "name" : "GA-LOCAL-1",
+    "algorithmConfiguration" : {
+      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.ga.config.GaAlgorithmConfig",
+      "dataFile" : "/sdb/studium/master-thesis/code/git/masterthesis/data/att48.tsp",
+      "populationSize" : 10,
+      "maxIterations" : 10000
+    },
+    "algorithm" : "at.ac.uibk.dps.biohadoop.ga.algorithm.Ga",
+    "persistenceConfiguration" : {
+      "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FilePersistenceConfiguration",
+      "saveConfiguration" : {
+        "@persistenceSaveConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileSaveConfiguration",
+        "path" : "/tmp/biohadoop/ga",
+        "afterIterations" : 1000
+      },
+      "loadConfiguration" : {
+        "@persistenceLoadConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileLoadConfiguration",
+        "path" : "/tmp/biohadoop/ga/GA-LOCAL-1/481038014/",
+        "onStartup" : true
+      }
+    }
+  }, {
+    "name" : "GA-LOCAL-1",
+    "algorithmConfiguration" : {
+      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.ga.config.GaAlgorithmConfig",
+      "dataFile" : "/sdb/studium/master-thesis/code/git/masterthesis/data/att48.tsp",
+      "populationSize" : 10,
+      "maxIterations" : 10000
     },
     "algorithm" : "at.ac.uibk.dps.biohadoop.ga.algorithm.Ga",
     "persistenceConfiguration" : {

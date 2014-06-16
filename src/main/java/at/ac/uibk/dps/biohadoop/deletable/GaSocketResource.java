@@ -57,8 +57,8 @@ public class GaSocketResource implements Runnable, Endpoint {
 			while (true) {
 				master.handleWork();
 			}
-		} catch (ShutdownException e) {
-			LOG.info("Got shutdown event");
+//		} catch (ShutdownException e) {
+//			LOG.info("Got shutdown event");
 		} catch (Exception e) {
 			LOG.error("Error while running {}", className, e);
 			if (master != null) {

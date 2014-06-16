@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
-import at.ac.uibk.dps.biohadoop.endpoint.ShutdownException;
 import at.ac.uibk.dps.biohadoop.ga.DistancesGlobal;
 import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
 import at.ac.uibk.dps.biohadoop.jobmanager.Task;

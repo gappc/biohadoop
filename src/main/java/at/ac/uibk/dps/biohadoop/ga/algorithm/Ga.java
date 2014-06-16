@@ -183,14 +183,20 @@ public class Ga extends SimpleJobHandler<int[]> implements
 					ApplicationData<List<List<Integer>>> remoteData = DistributionManager
 							.getInstance().getRemoteApplicationData(
 									applicationId);
-					LOG.debug("{}: remoteData:        {}",
-							Thread.currentThread(), remoteData.getData());
-					LOG.debug("{}: population before: {}",
-							Thread.currentThread(), population);
-					population = islandMerge(population, remoteData.getData());
-					LOG.debug("{}: population after:  {}",
-							Thread.currentThread(), population);
-					LOG.info("{}: merge successful\n", Thread.currentThread());
+					if (remoteData == null) {
+						LOG.error("Could not merge data because remote data is empty");
+					} else {
+						LOG.debug("{}: remoteData:        {}",
+								Thread.currentThread(), remoteData.getData());
+						LOG.debug("{}: population before: {}",
+								Thread.currentThread(), population);
+						population = islandMerge(population,
+								remoteData.getData());
+						LOG.debug("{}: population after:  {}",
+								Thread.currentThread(), population);
+						LOG.info("{}: merge successful\n",
+								Thread.currentThread());
+					}
 				} catch (DistributionException e) {
 					LOG.error("Could not get remote data for Island Model", e);
 				}

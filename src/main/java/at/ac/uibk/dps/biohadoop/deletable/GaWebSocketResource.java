@@ -55,7 +55,7 @@ public class GaWebSocketResource implements Endpoint, ShutdownHandler {
 	public Message<?> onMessage(Message<Double> message, Session session) {
 		inputMessage = message;
 		
-		try {
+//		try {
 			if (message.getType() == MessageType.REGISTRATION_REQUEST) {
 				master.handleRegistration();
 			}
@@ -66,10 +66,10 @@ public class GaWebSocketResource implements Endpoint, ShutdownHandler {
 				master.handleWork();
 			}
 			return outputMessage;
-		} catch (ShutdownException e) {
-			LOG.info("Got shutdown event");
-			return outputMessage;
-		}
+//		} catch (ShutdownException e) {
+//			LOG.info("Got shutdown event");
+//			return outputMessage;
+//		}
 	}
 
 	@OnClose

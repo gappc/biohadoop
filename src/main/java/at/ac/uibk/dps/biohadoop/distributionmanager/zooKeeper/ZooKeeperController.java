@@ -84,10 +84,15 @@ public class ZooKeeperController {
 				nodeData.getApplicationId());
 		String path = nodeData.getUrl() + "/" + nodeData.getApplicationId();
 
-		Client client = ClientBuilder.newClient();
-		Response response = client.target(path)
-				.request(MediaType.APPLICATION_JSON).get();
-		return response.readEntity(ApplicationData.class);
+		try {
+			Client client = ClientBuilder.newClient();
+			Response response = client.target(path)
+					.request(MediaType.APPLICATION_JSON).get();
+			return response.readEntity(ApplicationData.class);
+		} catch(Exception e) {
+			LOG.error("Could not connect to {}", path, e);
+			return null;
+		}
 	}
 
 	private String getFullPath() {
@@ -110,7 +115,7 @@ public class ZooKeeperController {
 		NodeData self = null;
 		for (NodeData nodeData : remoteNodesData) {
 			if (applicationId.equals(nodeData.getApplicationId())) {
-				LOG.error("marking self aplicatoin {} for removal", applicationId);
+				LOG.debug("marking self aplicatoin {} for removal", applicationId);
 				self = nodeData;
 			}
 		}

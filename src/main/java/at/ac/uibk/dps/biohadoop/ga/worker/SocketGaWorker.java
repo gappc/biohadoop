@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.URL;
+import java.net.URLClassLoader;
 
 import javax.websocket.EncodeException;
 
@@ -32,6 +34,16 @@ public class SocketGaWorker implements WorkerConnection {
 	private int logSteps = 1000;
 
 	public static void main(String[] args) throws Exception {
+		ClassLoader cl = ClassLoader.getSystemClassLoader();
+		 
+        URL[] urls = ((URLClassLoader)cl).getURLs();
+ 
+        StringBuilder sb = new StringBuilder();
+        for(URL url: urls){
+        	sb.append(url.getFile()).append(":");
+        }
+        LOG.info(sb.toString());
+        
 		LOG.info("############# {} started ##############",
 				SocketGaWorker.class.getSimpleName());
 		LOG.debug("args.length: {}", args.length);

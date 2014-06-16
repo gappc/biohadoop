@@ -88,6 +88,7 @@ public class GaConfigWriter {
 		DistributionConfiguration distributionConfiguration = buildDistributionConfig(local);
 
 		return new BiohadoopConfiguration(version, includePaths, Arrays.asList(
+				applicationConfig, applicationConfig, applicationConfig,
 				applicationConfig), connectionConfiguration,
 				distributionConfiguration);
 	}
@@ -103,13 +104,13 @@ public class GaConfigWriter {
 
 		List<FileMasterConfiguration> masters = new ArrayList<>();
 		masters.add(mc);
-		
+
 		Map<String, Integer> workers = new HashMap<>();
 		workers.put(SocketGaWorker.class.getCanonicalName(), 3);
 		workers.put(KryoGaWorker.class.getCanonicalName(), 1);
 		workers.put(RestGaWorker.class.getCanonicalName(), 1);
 		workers.put(WebSocketGaWorker.class.getCanonicalName(), 1);
-		
+
 		return new ConnectionConfiguration(masters, workers);
 	}
 
@@ -132,7 +133,7 @@ public class GaConfigWriter {
 
 		GaAlgorithmConfig gaAlgorithmConfig = new GaAlgorithmConfig();
 		gaAlgorithmConfig.setDataFile(dataFile);
-		gaAlgorithmConfig.setMaxIterations(100);
+		gaAlgorithmConfig.setMaxIterations(10000);
 		gaAlgorithmConfig.setPopulationSize(10);
 
 		return gaAlgorithmConfig;

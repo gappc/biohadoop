@@ -16,10 +16,10 @@ import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
-import at.ac.uibk.dps.biohadoop.endpoint.ShutdownException;
 import at.ac.uibk.dps.biohadoop.jobmanager.Task;
 import at.ac.uibk.dps.biohadoop.jobmanager.api.JobManager;
 import at.ac.uibk.dps.biohadoop.jobmanager.remote.Message;
+import at.ac.uibk.dps.biohadoop.jobmanager.remote.MessageType;
 import at.ac.uibk.dps.biohadoop.torename.Helper;
 import at.ac.uibk.dps.biohadoop.torename.MasterConfiguration;
 
@@ -35,6 +35,7 @@ public class SocketEndpoint implements Runnable, Endpoint {
 	private ObjectOutputStream os = null;
 	private ObjectInputStream is = null;
 	private int counter = 0;
+	private boolean close = false;
 	
 	public SocketEndpoint(Socket socket, MasterConfiguration masterConfiguration) {
 		this.socket = socket;
@@ -58,7 +59,7 @@ public class SocketEndpoint implements Runnable, Endpoint {
 			endpoint = buildMaster(masterConfiguration.getMasterEndpoint());
 			endpoint.handleRegistration();
 			endpoint.handleWorkInit();
-			while (true) {
+			while (!close) {
 				endpoint.handleWork();
 			}
 //		} catch (ShutdownException e) {
@@ -124,6 +125,9 @@ public class SocketEndpoint implements Runnable, Endpoint {
 			}
 			os.writeUnshared(message);
 			os.flush();
+			if (message.getType() == MessageType.SHUTDOWN) {
+				close = true;
+			}
 		} catch (IOException e) {
 			LOG.error("Error while sending", e);
 			throw new SendException(e);

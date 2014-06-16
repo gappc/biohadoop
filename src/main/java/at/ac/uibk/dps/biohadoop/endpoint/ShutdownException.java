@@ -1,6 +1,7 @@
 package at.ac.uibk.dps.biohadoop.endpoint;
 
-public class ShutdownException extends RuntimeException {
+//TODO should be made checked
+public class ShutdownException extends Exception {
 
 	private static final long serialVersionUID = 2308781144934182306L;
 

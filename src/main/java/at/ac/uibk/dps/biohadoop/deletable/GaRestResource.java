@@ -47,11 +47,11 @@ public class GaRestResource implements Endpoint {
 	public Message<?> work(Message<?> message) throws InterruptedException {
 		inputMessage = message;
 		MasterEndpoint master = new GaMasterImpl(this);
-		try {
-			master.handleWork();
-		} catch (ShutdownException e) {
-			LOG.info("Got shutdown event");
-		}
+//		try {
+//			master.handleWork();
+//		} catch (ShutdownException e) {
+//			LOG.info("Got shutdown event");
+//		}
 		return outputMessage;
 	}
 
