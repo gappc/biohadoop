@@ -5,7 +5,7 @@ import com.esotericsoftware.kryonet.Connection;
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
-import at.ac.uibk.dps.biohadoop.jobmanager.remote.Message;
+import at.ac.uibk.dps.biohadoop.service.job.remote.Message;
 
 public class KryoEndpoint implements Endpoint {
 

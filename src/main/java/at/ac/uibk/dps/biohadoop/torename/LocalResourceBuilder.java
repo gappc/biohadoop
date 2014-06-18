@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 
 public class LocalResourceBuilder {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(LocalResourceBuilder.class);
+	private static final Logger LOG = LoggerFactory.getLogger(LocalResourceBuilder.class);
 	
 	private LocalResourceBuilder() {
 	}
@@ -58,7 +58,7 @@ public class LocalResourceBuilder {
 				resource.setType(LocalResourceType.FILE);
 				resource.setVisibility(LocalResourceVisibility.PUBLIC);
 				resources.put(filename, resource);
-				LOGGER.debug("Adding {} as file {}", file, filename);
+				LOG.debug("Adding {} as file {}", file, filename);
 			}
 			return resources;
 		}

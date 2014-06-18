@@ -7,10 +7,10 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationId;
-import at.ac.uibk.dps.biohadoop.hadoop.launcher.ApplicationLauncher;
+import at.ac.uibk.dps.biohadoop.hadoop.launcher.SolverLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLauncher;
+import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
 import at.ac.uibk.dps.biohadoop.torename.ArgumentChecker;
 import at.ac.uibk.dps.biohadoop.torename.BiohadoopConfigurationReader;
 import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;
@@ -50,8 +50,8 @@ public class BiohadoopApplicationMaster {
 
 			EndpointLauncher.launchMasterEndpoints(biohadoopConfiguration);
 
-			List<Future<ApplicationId>> applications = ApplicationLauncher
-					.launchApplication(biohadoopConfiguration);
+			List<Future<SolverId>> solvers = SolverLauncher
+					.launchSolver(biohadoopConfiguration);
 
 			if (System.getProperty("local") == null) {
 				WorkerLauncher.launchWorkers(yarnConfiguration,
@@ -61,12 +61,12 @@ public class BiohadoopApplicationMaster {
 				WorkerLauncher.pretendToLaunchWorkers(biohadoopConfiguration);
 			}
 
-			for (Future<ApplicationId> application : applications) {
-				ApplicationId applicationId = application.get();
-				LOG.debug("Finished application with id {}", applicationId);
+			for (Future<SolverId> solver : solvers) {
+				SolverId solverId = solver.get();
+				LOG.debug("Finished solver with id {}", solverId);
 			}
 		} catch (Exception e) {
-			LOG.error("Error while launching application", e);
+			LOG.error("Error while launching solver", e);
 		}
 	}
 

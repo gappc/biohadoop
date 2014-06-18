@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ResteasyHandler {
 
-	private static final Logger LOGGER = LoggerFactory
+	private static final Logger LOG = LoggerFactory
 			.getLogger(ResteasyHandler.class);
 
 	/**
@@ -68,7 +68,7 @@ public class ResteasyHandler {
 
 	private ResteasyDeployment buildDeployment(List<Class<?>> resourceClasses,
 			List<Class<?>> providerClasses) {
-		LOGGER.debug("Building Resteasy Deployment");
+		LOG.debug("Building Resteasy Deployment");
 		ResteasyDeployment deployment = new ResteasyDeployment();
 		deployment.getActualResourceClasses().addAll(resourceClasses);
 		deployment.getActualProviderClasses().addAll(providerClasses);
@@ -77,7 +77,7 @@ public class ResteasyHandler {
 
 	private DeploymentInfo buildDeploymentInfo(ResteasyDeployment deployment,
 			String contextPath) {
-		LOGGER.debug("Building Resteasy DeploymentInfo");
+		LOG.debug("Building Resteasy DeploymentInfo");
 		ServletInfo resteasyServlet = buildResteasyServlet();
 
 		return new DeploymentInfo()
@@ -89,7 +89,7 @@ public class ResteasyHandler {
 	}
 
 	private ServletInfo buildResteasyServlet() {
-		LOGGER.debug("Configuring Resteasy servlet");
+		LOG.debug("Configuring Resteasy servlet");
 		return servlet("ResteasyServlet", HttpServlet30Dispatcher.class)
 				.setAsyncSupported(true).setLoadOnStartup(1).addMapping("/");
 	}

@@ -26,7 +26,7 @@ import org.xnio.XnioWorker;
  */
 public class WebSocketHandler {
 
-	private static final Logger LOGGER = LoggerFactory
+	private static final Logger LOG = LoggerFactory
 			.getLogger(WebSocketHandler.class);
 
 	private XnioWorker xnioWorker;
@@ -70,7 +70,7 @@ public class WebSocketHandler {
 	private DeploymentInfo buildDeploymentInfo(String contextPath,
 			List<Class<?>> webSocketClasses) throws IllegalArgumentException,
 			IOException {
-		LOGGER.debug("Building WebSocket DeploymentInfo");
+		LOG.debug("Building WebSocket DeploymentInfo");
 		final Xnio xnio = Xnio.getInstance("nio",
 				Undertow.class.getClassLoader());
 		xnioWorker = xnio.createWorker(OptionMap.builder().getMap());

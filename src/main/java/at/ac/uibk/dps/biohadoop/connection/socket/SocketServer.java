@@ -8,7 +8,7 @@ import at.ac.uibk.dps.biohadoop.torename.MasterConfiguration;
 
 public class SocketServer implements MasterConnection {
 
-	private static final Logger LOGGER = LoggerFactory
+	private static final Logger LOG = LoggerFactory
 			.getLogger(SocketServer.class);
 
 	private final String className = SocketServer.class.getSimpleName();
@@ -20,7 +20,7 @@ public class SocketServer implements MasterConnection {
 
 	@Override
 	public void start() {
-		LOGGER.info("Starting {}", className);
+		LOG.info("Starting {}", className);
 		SocketServerConnection socketServerConnection = new SocketServerConnection(
 				masterConfiguration);
 		Thread thread = new Thread(socketServerConnection, className);

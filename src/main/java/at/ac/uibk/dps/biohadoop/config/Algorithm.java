@@ -1,9 +1,9 @@
 package at.ac.uibk.dps.biohadoop.config;
 
-import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationId;
+import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
 
 public interface Algorithm<T, S> {
 
-	public T compute(ApplicationId applicationId, S parameter) throws AlgorithmException;
+	public T compute(SolverId solverId, S parameter) throws AlgorithmException;
 	
 }

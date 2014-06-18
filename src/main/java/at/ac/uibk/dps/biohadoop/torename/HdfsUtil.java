@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 public class HdfsUtil {
 
-	private static final Logger LOGGER = LoggerFactory
+	private static final Logger LOG = LoggerFactory
 			.getLogger(HdfsUtil.class);
 
 	public static boolean exists(YarnConfiguration conf, String filename) {
@@ -24,12 +24,12 @@ public class HdfsUtil {
 			FileSystem fs = FileSystem.get(conf);
 			boolean exists = fs.exists(path);
 			if (!exists) {
-				LOGGER.debug("Could not find file, fs.defaultFS={}, path={}",
+				LOG.debug("Could not find file, fs.defaultFS={}, path={}",
 						defaultFs, filename);
 			}
 			return exists;
 		} catch (IOException e) {
-			LOGGER.error("Could not find file, fs.defaultFS={}, path={}",
+			LOG.error("Could not find file, fs.defaultFS={}, path={}",
 					defaultFs, filename);
 			return false;
 		}

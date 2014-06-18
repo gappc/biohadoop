@@ -3,12 +3,12 @@ package at.ac.uibk.dps.biohadoop.torename;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
-import at.ac.uibk.dps.biohadoop.applicationmanager.ShutdownHandler;
+import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
+import at.ac.uibk.dps.biohadoop.service.solver.ShutdownHandler;
 
 public class TaskSupervisor implements Runnable, ShutdownHandler {
 
-	private static final Logger LOGGER = LoggerFactory
+	private static final Logger LOG = LoggerFactory
 			.getLogger(TaskSupervisor.class);
 
 	private int sleep = 2000;
@@ -25,19 +25,19 @@ public class TaskSupervisor implements Runnable, ShutdownHandler {
 
 	@Override
 	public void run() {
-		ApplicationManager.getInstance().registerShutdownHandler(this);
+		SolverService.getInstance().registerShutdownHandler(this);
 		try {
 			while (true) {
 				synchronized (stop) {
 					if (stop) {
-						LOGGER.info("Stopping task supervisor");
+						LOG.info("Stopping task supervisor");
 						break;
 					}
 				}
 
 				int count = 0;
 //				Long now = System.currentTimeMillis();
-//				Map<Long, Job> tasks = jobManager.getTasks();
+//				Map<Long, Job> tasks = jobService.getTasks();
 //				for (Long l : tasks.keySet()) {
 //					Job job = tasks.get(l);
 //					if (job != null && now - job.getCreated() > sleep) {
@@ -47,11 +47,11 @@ public class TaskSupervisor implements Runnable, ShutdownHandler {
 //					}
 //				}
 
-				LOGGER.info("Hanging jobs: " + count);
+				LOG.info("Hanging jobs: " + count);
 				Thread.sleep(sleep);
 			}
 		} catch (Exception e) {
-			LOGGER.error("Error while scanning for hanging tasks", e);
+			LOG.error("Error while scanning for hanging tasks", e);
 		}
 	}
 

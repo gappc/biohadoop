@@ -14,13 +14,13 @@ import javax.servlet.ServletException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
-import at.ac.uibk.dps.biohadoop.applicationmanager.ShutdownHandler;
-import at.ac.uibk.dps.biohadoop.distributionmanager.DistributionResource;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.server.deployment.DeployingClasses;
 import at.ac.uibk.dps.biohadoop.server.deployment.ResteasyHandler;
 import at.ac.uibk.dps.biohadoop.server.deployment.WebSocketHandler;
+import at.ac.uibk.dps.biohadoop.service.distribution.DistributionResource;
+import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
+import at.ac.uibk.dps.biohadoop.service.solver.ShutdownHandler;
 import at.ac.uibk.dps.biohadoop.torename.HostInfo;
 
 public class UndertowServer implements ShutdownHandler {
@@ -32,7 +32,7 @@ public class UndertowServer implements ShutdownHandler {
 	private WebSocketHandler webSocket;
 
 	public UndertowServer() {
-		ApplicationManager.getInstance().registerShutdownHandler(this);
+		SolverService.getInstance().registerShutdownHandler(this);
 	}
 
 	public void startServer() {

@@ -13,18 +13,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
-import at.ac.uibk.dps.biohadoop.applicationmanager.ShutdownHandler;
 import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
-import at.ac.uibk.dps.biohadoop.ga.algorithm.Ga;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
-import at.ac.uibk.dps.biohadoop.jobmanager.Task;
-import at.ac.uibk.dps.biohadoop.jobmanager.TaskId;
-import at.ac.uibk.dps.biohadoop.jobmanager.api.JobManager;
-import at.ac.uibk.dps.biohadoop.jobmanager.remote.Message;
-import at.ac.uibk.dps.biohadoop.jobmanager.remote.MessageType;
+import at.ac.uibk.dps.biohadoop.service.job.Task;
+import at.ac.uibk.dps.biohadoop.service.job.TaskId;
+import at.ac.uibk.dps.biohadoop.service.job.api.JobService;
+import at.ac.uibk.dps.biohadoop.service.job.remote.Message;
+import at.ac.uibk.dps.biohadoop.service.job.remote.MessageType;
+import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
+import at.ac.uibk.dps.biohadoop.service.solver.ShutdownHandler;
+import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.Ga;
 import at.ac.uibk.dps.biohadoop.torename.HostInfo;
 import at.ac.uibk.dps.biohadoop.torename.MasterConfiguration;
 
@@ -55,7 +55,7 @@ public class KryoServer implements ShutdownHandler, MasterConnection {
 
 	@Override
 	public void start() {
-		ApplicationManager.getInstance().registerShutdownHandler(this);
+		SolverService.getInstance().registerShutdownHandler(this);
 		LOG.info("Starting Kryo server");
 
 		Log.set(Log.LEVEL_DEBUG);
@@ -116,7 +116,7 @@ public class KryoServer implements ShutdownHandler, MasterConnection {
 					masters.remove(master);
 					Task task = master.getCurrentTask();
 					if (task != null) {
-						JobManager.<int[], Object> getInstance().reschedule(
+						JobService.<int[], Object> getInstance().reschedule(
 								task, Ga.GA_QUEUE);
 					}
 				}

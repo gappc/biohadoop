@@ -8,9 +8,9 @@ import java.net.SocketTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
-import at.ac.uibk.dps.biohadoop.applicationmanager.ShutdownHandler;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
+import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
+import at.ac.uibk.dps.biohadoop.service.solver.ShutdownHandler;
 import at.ac.uibk.dps.biohadoop.torename.HostInfo;
 import at.ac.uibk.dps.biohadoop.torename.MasterConfiguration;
 
@@ -29,7 +29,7 @@ public class SocketServerConnection implements Runnable, ShutdownHandler {
 
 	@Override
 	public void run() {
-		ApplicationManager.getInstance().registerShutdownHandler(this);
+		SolverService.getInstance().registerShutdownHandler(this);
 		try {
 			String prefix = masterConfiguration.getPrefix();
 			String host = HostInfo.getHostname();

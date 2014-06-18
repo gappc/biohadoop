@@ -16,10 +16,10 @@ import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
-import at.ac.uibk.dps.biohadoop.jobmanager.Task;
-import at.ac.uibk.dps.biohadoop.jobmanager.api.JobManager;
-import at.ac.uibk.dps.biohadoop.jobmanager.remote.Message;
-import at.ac.uibk.dps.biohadoop.jobmanager.remote.MessageType;
+import at.ac.uibk.dps.biohadoop.service.job.Task;
+import at.ac.uibk.dps.biohadoop.service.job.api.JobService;
+import at.ac.uibk.dps.biohadoop.service.job.remote.Message;
+import at.ac.uibk.dps.biohadoop.service.job.remote.MessageType;
 import at.ac.uibk.dps.biohadoop.torename.Helper;
 import at.ac.uibk.dps.biohadoop.torename.MasterConfiguration;
 
@@ -44,7 +44,7 @@ public class SocketEndpoint implements Runnable, Endpoint {
 
 	@Override
 	public void run() {
-		JobManager<?, ?> jobManager = JobManager.getInstance();
+		JobService<?, ?> jobService = JobService.getInstance();
 		
 		MasterEndpoint endpoint = null;
 		try {
@@ -70,7 +70,7 @@ public class SocketEndpoint implements Runnable, Endpoint {
 				Task currentTask = endpoint.getCurrentTask();
 				if (currentTask != null) {
 					// TODO make queueName dynamic
-					boolean hasRescheduled = jobManager.reschedule(currentTask,
+					boolean hasRescheduled = jobService.reschedule(currentTask,
 							masterConfiguration.getQueueName());
 					if (!hasRescheduled) {
 						LOG.error("Could not reschedule task at {}",

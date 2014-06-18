@@ -37,19 +37,19 @@ import at.ac.uibk.dps.biohadoop.torename.LocalResourceBuilder;
 
 public class BiohadoopClient {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(BiohadoopClient.class);
+	private static final Logger LOG = LoggerFactory.getLogger(BiohadoopClient.class);
 	
 	private List<String> includePaths = new ArrayList<String>();
 
 	public static void main(String[] args) {
-		LOGGER.info("Client started at " + HostInfo.getHostname());
+		LOG.info("Client started at " + HostInfo.getHostname());
 		long start = System.currentTimeMillis();
 
 		BiohadoopClient c = new BiohadoopClient();
 		c.run(new YarnConfiguration(), args);
 
 		long end = System.currentTimeMillis();
-		LOGGER.info("Client stopped, time: {}ms", end - start);
+		LOG.info("Client stopped, time: {}ms", end - start);
 	}
 
 	public void run(YarnConfiguration conf, String[] args) {
@@ -59,12 +59,12 @@ public class BiohadoopClient {
 		try {
 			startApplicationMaster(conf, args[0]);
 		} catch (Exception e) {
-			LOGGER.error("Error while executing Client", e);
+			LOG.error("Error while executing Client", e);
 		}
 	}
 
 	private boolean checkArguments(YarnConfiguration yarnConfiguration, String[] args) {
-		LOGGER.info("Checking arguments");
+		LOG.info("Checking arguments");
 		if (!ArgumentChecker.isArgumentCountValid(args, 1)) {
 			return false;
 		}
@@ -81,22 +81,22 @@ public class BiohadoopClient {
 			for (Object o : (Object[])jsonConfigAsMap.get("includePaths")) {
 				String includePath = o.toString();
 				
-				LOGGER.info("Including includePath {}", includePath);
+				LOG.info("Including includePath {}", includePath);
 				if (!HdfsUtil.exists(yarnConfiguration, includePath)) {
-					LOGGER.error("Could not find includePath {}", includePath);
+					LOG.error("Could not find includePath {}", includePath);
 					return false;
 				}
 				includePaths.add(includePath);
 			}
 		} catch (Exception e) {
-			LOGGER.error("Error while checking if includePaths paths are available", e);
+			LOG.error("Error while checking if includePaths paths are available", e);
 		}
 		return true;
 	}
 
 	private void startApplicationMaster(YarnConfiguration yarnConfiguration,
 			String configFilename) throws Exception {
-		LOGGER.info("Launching Application Master");
+		LOG.info("Launching Application Master");
 
 		// Configure yarnClient
 		YarnClient yarnClient = YarnClient.createYarnClient();
@@ -115,7 +115,7 @@ public class BiohadoopClient {
 				+ " 1>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR
 				+ "/stdout" + " 2>"
 				+ ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stderr";
-		LOGGER.info("Launch command: {}", launchCommand);
+		LOG.info("Launch command: {}", launchCommand);
 
 		amContainer.setCommands(Collections.singletonList(launchCommand));
 
@@ -148,14 +148,14 @@ public class BiohadoopClient {
 
 		// Submit application
 		ApplicationId appId = appContext.getApplicationId();
-		LOGGER.info("Submitting application " + appId);
+		LOG.info("Submitting application " + appId);
 		yarnClient.submitApplication(appContext);
 
 		ApplicationReport appReport = yarnClient.getApplicationReport(appId);
 		YarnApplicationState appState = appReport.getYarnApplicationState();
 
-		LOGGER.info("Tracking URL: {}", appReport.getTrackingUrl());
-		LOGGER.info("Application Master running at: {}", appReport.getHost());
+		LOG.info("Tracking URL: {}", appReport.getTrackingUrl());
+		LOG.info("Application Master running at: {}", appReport.getHost());
 
 		int count = 0;
 		while (appState != YarnApplicationState.FINISHED
@@ -165,11 +165,11 @@ public class BiohadoopClient {
 			appReport = yarnClient.getApplicationReport(appId);
 			appState = appReport.getYarnApplicationState();
 			if (count++ % 20 == 0) {
-				LOGGER.info("Progress: {}", appReport.getProgress());
+				LOG.info("Progress: {}", appReport.getProgress());
 			}
 		}
 
-		LOGGER.info("Application {} finished with state {} at {}", appId,
+		LOG.info("Application {} finished with state {} at {}", appId,
 				appState, appReport.getFinishTime());
 	}
 

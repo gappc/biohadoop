@@ -18,8 +18,8 @@ import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
 import at.ac.uibk.dps.biohadoop.endpoint.ShutdownException;
-import at.ac.uibk.dps.biohadoop.jobmanager.remote.Message;
 import at.ac.uibk.dps.biohadoop.server.deployment.DeployingClasses;
+import at.ac.uibk.dps.biohadoop.service.job.remote.Message;
 import at.ac.uibk.dps.biohadoop.torename.MasterConfiguration;
 
 @Produces(MediaType.APPLICATION_JSON)

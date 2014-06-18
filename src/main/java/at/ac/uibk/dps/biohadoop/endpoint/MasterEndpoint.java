@@ -1,6 +1,6 @@
 package at.ac.uibk.dps.biohadoop.endpoint;
 
-import at.ac.uibk.dps.biohadoop.jobmanager.Task;
+import at.ac.uibk.dps.biohadoop.service.job.Task;
 
 public interface MasterEndpoint {
 

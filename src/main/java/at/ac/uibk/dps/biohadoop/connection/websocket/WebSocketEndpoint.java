@@ -9,20 +9,19 @@ import javax.websocket.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
-import at.ac.uibk.dps.biohadoop.applicationmanager.ShutdownHandler;
 import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
-import at.ac.uibk.dps.biohadoop.endpoint.ShutdownException;
-import at.ac.uibk.dps.biohadoop.jobmanager.Task;
-import at.ac.uibk.dps.biohadoop.jobmanager.api.JobManager;
-import at.ac.uibk.dps.biohadoop.jobmanager.remote.Message;
-import at.ac.uibk.dps.biohadoop.jobmanager.remote.MessageType;
 import at.ac.uibk.dps.biohadoop.server.UndertowShutdown;
 import at.ac.uibk.dps.biohadoop.server.deployment.DeployingClasses;
+import at.ac.uibk.dps.biohadoop.service.job.Task;
+import at.ac.uibk.dps.biohadoop.service.job.api.JobService;
+import at.ac.uibk.dps.biohadoop.service.job.remote.Message;
+import at.ac.uibk.dps.biohadoop.service.job.remote.MessageType;
+import at.ac.uibk.dps.biohadoop.service.solver.ShutdownHandler;
+import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
 import at.ac.uibk.dps.biohadoop.torename.MasterConfiguration;
 
 public class WebSocketEndpoint implements Endpoint, ShutdownHandler, MasterConnection {
@@ -30,9 +29,8 @@ public class WebSocketEndpoint implements Endpoint, ShutdownHandler, MasterConne
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WebSocketEndpoint.class);
 
-	private final JobManager<int[], Double> jobManager = JobManager.getInstance();
+	private final JobService<int[], Double> jobService = JobService.getInstance();
 	
-	private Session resourceSession;
 	private MasterConfiguration masterConfiguration;
 	private Message<?> inputMessage;
 	private Message<?> outputMessage;
@@ -56,8 +54,7 @@ public class WebSocketEndpoint implements Endpoint, ShutdownHandler, MasterConne
 				session.getRequestURI(), session.getId());
 		
 		UndertowShutdown.increaseShutdownCount();
-		ApplicationManager.getInstance().registerShutdownHandler(this);
-		resourceSession = session;
+		SolverService.getInstance().registerShutdownHandler(this);
 	}
 
 	@OnMessage
@@ -90,7 +87,7 @@ public class WebSocketEndpoint implements Endpoint, ShutdownHandler, MasterConne
 				session.getRequestURI(), session.getId());
 		Task currentTask = masterEndpoint.getCurrentTask();
 		if (currentTask != null) {
-			jobManager.reschedule(currentTask, masterConfiguration.getQueueName());
+			jobService.reschedule(currentTask, masterConfiguration.getQueueName());
 		}
 		close = true;
 		UndertowShutdown.decreaseLatch();
@@ -103,7 +100,7 @@ public class WebSocketEndpoint implements Endpoint, ShutdownHandler, MasterConne
 		LOG.error(
 				"Websocket error for URI {} and sessionId {}, affected task: {} ",
 				session.getRequestURI(), session.getId(), currentTask, t);
-		jobManager.reschedule(currentTask, masterConfiguration.getQueueName());
+		jobService.reschedule(currentTask, masterConfiguration.getQueueName());
 	}
 
 	@Override

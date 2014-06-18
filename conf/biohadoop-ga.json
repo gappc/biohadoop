@@ -1,27 +1,27 @@
 {
   "version" : "0.1",
   "includePaths" : [ "/biohadoop/lib/", "/biohadoop/conf/" ],
-  "applicationConfigs" : [ {
+  "solverConfigs" : [ {
     "name" : "GA-LOCAL-1",
     "algorithmConfiguration" : {
-      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.ga.config.GaAlgorithmConfig",
+      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.solver.ga.config.GaAlgorithmConfig",
       "dataFile" : "/biohadoop/data/att48.tsp",
       "populationSize" : 10,
       "maxIterations" : 10000
     },
-    "algorithm" : "at.ac.uibk.dps.biohadoop.ga.algorithm.Ga",
+    "algorithm" : "at.ac.uibk.dps.biohadoop.solver.ga.algorithm.Ga",
     "distributionConfiguration" : {
-      "dataMerger" : "at.ac.uibk.dps.biohadoop.ga.distribution.GaSimpleMerger"
+      "dataMerger" : "at.ac.uibk.dps.biohadoop.solver.ga.distribution.GaSimpleMerger"
     },
     "persistenceConfiguration" : {
-      "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FilePersistenceConfiguration",
+      "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FilePersistenceConfiguration",
       "saveConfiguration" : {
-        "@persistenceSaveConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileSaveConfiguration",
+        "@persistenceSaveConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FileSaveConfiguration",
         "path" : "/biohadoop/persistence/ga",
         "afterIterations" : 1000
       },
       "loadConfiguration" : {
-        "@persistenceLoadConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileLoadConfiguration",
+        "@persistenceLoadConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FileLoadConfiguration",
         "path" : "/biohadoop/persistence/ga",
         "onStartup" : true
       }
@@ -29,24 +29,24 @@
   }, {
     "name" : "GA-LOCAL-1",
     "algorithmConfiguration" : {
-      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.ga.config.GaAlgorithmConfig",
+      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.solver.ga.config.GaAlgorithmConfig",
       "dataFile" : "/biohadoop/data/att48.tsp",
       "populationSize" : 10,
       "maxIterations" : 10000
     },
-    "algorithm" : "at.ac.uibk.dps.biohadoop.ga.algorithm.Ga",
+    "algorithm" : "at.ac.uibk.dps.biohadoop.solver.ga.algorithm.Ga",
     "distributionConfiguration" : {
-      "dataMerger" : "at.ac.uibk.dps.biohadoop.ga.distribution.GaSimpleMerger"
+      "dataMerger" : "at.ac.uibk.dps.biohadoop.solver.ga.distribution.GaSimpleMerger"
     },
     "persistenceConfiguration" : {
-      "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FilePersistenceConfiguration",
+      "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FilePersistenceConfiguration",
       "saveConfiguration" : {
-        "@persistenceSaveConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileSaveConfiguration",
+        "@persistenceSaveConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FileSaveConfiguration",
         "path" : "/biohadoop/persistence/ga",
         "afterIterations" : 1000
       },
       "loadConfiguration" : {
-        "@persistenceLoadConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileLoadConfiguration",
+        "@persistenceLoadConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FileLoadConfiguration",
         "path" : "/biohadoop/persistence/ga",
         "onStartup" : true
       }
@@ -54,24 +54,24 @@
   }, {
     "name" : "GA-LOCAL-1",
     "algorithmConfiguration" : {
-      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.ga.config.GaAlgorithmConfig",
+      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.solver.ga.config.GaAlgorithmConfig",
       "dataFile" : "/biohadoop/data/att48.tsp",
       "populationSize" : 10,
       "maxIterations" : 10000
     },
-    "algorithm" : "at.ac.uibk.dps.biohadoop.ga.algorithm.Ga",
+    "algorithm" : "at.ac.uibk.dps.biohadoop.solver.ga.algorithm.Ga",
     "distributionConfiguration" : {
-      "dataMerger" : "at.ac.uibk.dps.biohadoop.ga.distribution.GaSimpleMerger"
+      "dataMerger" : "at.ac.uibk.dps.biohadoop.solver.ga.distribution.GaSimpleMerger"
     },
     "persistenceConfiguration" : {
-      "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FilePersistenceConfiguration",
+      "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FilePersistenceConfiguration",
       "saveConfiguration" : {
-        "@persistenceSaveConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileSaveConfiguration",
+        "@persistenceSaveConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FileSaveConfiguration",
         "path" : "/biohadoop/persistence/ga",
         "afterIterations" : 1000
       },
       "loadConfiguration" : {
-        "@persistenceLoadConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileLoadConfiguration",
+        "@persistenceLoadConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FileLoadConfiguration",
         "path" : "/biohadoop/persistence/ga",
         "onStartup" : true
       }
@@ -79,24 +79,24 @@
   }, {
     "name" : "GA-LOCAL-1",
     "algorithmConfiguration" : {
-      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.ga.config.GaAlgorithmConfig",
+      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.solver.ga.config.GaAlgorithmConfig",
       "dataFile" : "/biohadoop/data/att48.tsp",
       "populationSize" : 10,
       "maxIterations" : 10000
     },
-    "algorithm" : "at.ac.uibk.dps.biohadoop.ga.algorithm.Ga",
+    "algorithm" : "at.ac.uibk.dps.biohadoop.solver.ga.algorithm.Ga",
     "distributionConfiguration" : {
-      "dataMerger" : "at.ac.uibk.dps.biohadoop.ga.distribution.GaSimpleMerger"
+      "dataMerger" : "at.ac.uibk.dps.biohadoop.solver.ga.distribution.GaSimpleMerger"
     },
     "persistenceConfiguration" : {
-      "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FilePersistenceConfiguration",
+      "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FilePersistenceConfiguration",
       "saveConfiguration" : {
-        "@persistenceSaveConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileSaveConfiguration",
+        "@persistenceSaveConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FileSaveConfiguration",
         "path" : "/biohadoop/persistence/ga",
         "afterIterations" : 1000
       },
       "loadConfiguration" : {
-        "@persistenceLoadConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileLoadConfiguration",
+        "@persistenceLoadConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FileLoadConfiguration",
         "path" : "/biohadoop/persistence/ga",
         "onStartup" : true
       }
@@ -104,13 +104,13 @@
   } ],
   "connectionConfiguration" : {
     "masters" : [ {
-      "endpoints" : [ "at.ac.uibk.dps.biohadoop.ga.master.socket.GaSocket", "at.ac.uibk.dps.biohadoop.ga.master.kryo.GaKryo", "at.ac.uibk.dps.biohadoop.ga.master.rest.GaRest", "at.ac.uibk.dps.biohadoop.ga.master.websocket.GaWebSocket" ]
+      "endpoints" : [ "at.ac.uibk.dps.biohadoop.solver.ga.master.socket.GaSocket", "at.ac.uibk.dps.biohadoop.solver.ga.master.kryo.GaKryo", "at.ac.uibk.dps.biohadoop.solver.ga.master.rest.GaRest", "at.ac.uibk.dps.biohadoop.solver.ga.master.websocket.GaWebSocket" ]
     } ],
     "workers" : {
-      "at.ac.uibk.dps.biohadoop.ga.worker.SocketGaWorker" : 3,
-      "at.ac.uibk.dps.biohadoop.ga.worker.WebSocketGaWorker" : 1,
-      "at.ac.uibk.dps.biohadoop.ga.worker.RestGaWorker" : 1,
-      "at.ac.uibk.dps.biohadoop.ga.worker.KryoGaWorker" : 1
+      "at.ac.uibk.dps.biohadoop.solver.ga.worker.WebSocketGaWorker" : 1,
+      "at.ac.uibk.dps.biohadoop.solver.ga.worker.RestGaWorker" : 1,
+      "at.ac.uibk.dps.biohadoop.solver.ga.worker.SocketGaWorker" : 3,
+      "at.ac.uibk.dps.biohadoop.solver.ga.worker.KryoGaWorker" : 1
     }
   },
   "globalDistributionConfiguration" : {
