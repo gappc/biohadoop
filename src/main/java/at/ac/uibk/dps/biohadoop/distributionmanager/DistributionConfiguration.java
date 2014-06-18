@@ -5,26 +5,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class DistributionConfiguration {
 
-	private final String host;
-	private final int port;
+	private final Class<? extends DataMerger> dataMerger;
 
-	public DistributionConfiguration(String host, int port) {
-		this.host = host;
-		this.port = port;
+	public DistributionConfiguration(Class<? extends DataMerger> dataMerger) {
+		this.dataMerger = dataMerger;
 	}
 	
 	@JsonCreator
 	public static DistributionConfiguration create(
-			@JsonProperty("host") String host,
-			@JsonProperty("port") int port) {
-		return new DistributionConfiguration(host, port);
+			@JsonProperty("dataMerger") Class<? extends DataMerger> dataMerger) {
+		return new DistributionConfiguration(dataMerger);
 	}
 
-	public String getHost() {
-		return host;
+	public Class<? extends DataMerger> getDataMerger() {
+		return dataMerger;
 	}
-
-	public int getPort() {
-		return port;
-	}
+	
 }

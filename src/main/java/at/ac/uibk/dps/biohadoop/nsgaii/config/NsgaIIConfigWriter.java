@@ -17,6 +17,8 @@ import at.ac.uibk.dps.biohadoop.connection.ConnectionConfiguration;
 import at.ac.uibk.dps.biohadoop.connection.FileMasterConfiguration;
 import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
 import at.ac.uibk.dps.biohadoop.distributionmanager.DistributionConfiguration;
+import at.ac.uibk.dps.biohadoop.distributionmanager.GlobalDistributionConfiguration;
+import at.ac.uibk.dps.biohadoop.ga.distribution.GaSimpleMerger;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.moead.algorithm.Moead;
 import at.ac.uibk.dps.biohadoop.nsgaii.algorithm.NsgaII;
@@ -80,12 +82,12 @@ public class NsgaIIConfigWriter {
 		ApplicationConfiguration applicationConfig = buildApplicationConfig(
 				"MOEAD-LOCAL-1", local);
 		ConnectionConfiguration connectionConfiguration = buildConnectionConfiguration();
-		DistributionConfiguration distributionConfiguration = buildDistributionConfig(local);
+		GlobalDistributionConfiguration globalDistributionConfiguration = buildGlobalDistributionConfig(local);
 
 		return new BiohadoopConfiguration(version, includePaths, Arrays.asList(
 				applicationConfig, applicationConfig, applicationConfig,
 				applicationConfig), connectionConfiguration,
-				distributionConfiguration);
+				globalDistributionConfiguration);
 	}
 
 	private static ConnectionConfiguration buildConnectionConfiguration() {
@@ -107,9 +109,10 @@ public class NsgaIIConfigWriter {
 			boolean local) {
 		AlgorithmConfiguration algorithmConfiguration = buildAlgorithmConfig(local);
 		PersistenceConfiguration persistenceConfiguration = buildPersistenceConfig(local);
-
+		DistributionConfiguration distributionConfiguration = buildDistributionConfig();
+		
 		return new ApplicationConfiguration(name, algorithmConfiguration,
-				Moead.class, persistenceConfiguration);
+				Moead.class, persistenceConfiguration, distributionConfiguration);
 	}
 
 	private static AlgorithmConfiguration buildAlgorithmConfig(boolean local) {
@@ -150,13 +153,17 @@ public class NsgaIIConfigWriter {
 		return filePersistenceConfiguration;
 	}
 
-	private static DistributionConfiguration buildDistributionConfig(
+	private static DistributionConfiguration buildDistributionConfig() {
+		return new DistributionConfiguration(GaSimpleMerger.class);
+	}
+	
+	private static GlobalDistributionConfiguration buildGlobalDistributionConfig(
 			boolean local) {
 		if (local) {
-			return new DistributionConfiguration(LOCAL_DISTRIBUTION_INFO_HOST,
+			return new GlobalDistributionConfiguration(LOCAL_DISTRIBUTION_INFO_HOST,
 					LOCAL_DISTRIBUTION_INFO_PORT);
 		} else {
-			return new DistributionConfiguration(REMOTE_DISTRIBUTION_INFO_HOST,
+			return new GlobalDistributionConfiguration(REMOTE_DISTRIBUTION_INFO_HOST,
 					REMOTE_DISTRIBUTION_INFO_PORT);
 		}
 	}

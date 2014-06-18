@@ -2,6 +2,7 @@ package at.ac.uibk.dps.biohadoop.applicationmanager;
 
 import at.ac.uibk.dps.biohadoop.config.Algorithm;
 import at.ac.uibk.dps.biohadoop.config.AlgorithmConfiguration;
+import at.ac.uibk.dps.biohadoop.distributionmanager.DistributionConfiguration;
 import at.ac.uibk.dps.biohadoop.persistencemanager.PersistenceConfiguration;
 import at.ac.uibk.dps.biohadoop.persistencemanager.file.FilePersistenceConfiguration;
 
@@ -14,13 +15,19 @@ public class ApplicationConfiguration {
 	private final AlgorithmConfiguration algorithmConfiguration;
 	private final Class<? extends Algorithm<?, ?>> algorithm;
 	private final PersistenceConfiguration persistenceConfiguration;
-	
-	public ApplicationConfiguration(String name, AlgorithmConfiguration algorithmConfiguration,
-			Class<? extends Algorithm<?, ?>> algorithm, PersistenceConfiguration persistenceConfiguration) {
+	private final DistributionConfiguration distributionConfiguration;
+
+	// TODO check if builder pattern is better suited
+	public ApplicationConfiguration(String name,
+			AlgorithmConfiguration algorithmConfiguration,
+			Class<? extends Algorithm<?, ?>> algorithm,
+			PersistenceConfiguration persistenceConfiguration,
+			DistributionConfiguration distributionConfiguration) {
 		this.name = name;
 		this.algorithmConfiguration = algorithmConfiguration;
 		this.algorithm = algorithm;
 		this.persistenceConfiguration = persistenceConfiguration;
+		this.distributionConfiguration = distributionConfiguration;
 	}
 
 	@JsonCreator
@@ -28,14 +35,16 @@ public class ApplicationConfiguration {
 			@JsonProperty("name") String name,
 			@JsonProperty("algorithmConfiguration") AlgorithmConfiguration algorithmConfiguration,
 			@JsonProperty("algorithm") Class<? extends Algorithm<?, ?>> algorithm,
-			@JsonProperty("filePersistence") FilePersistenceConfiguration filePersistence) {
-		return new ApplicationConfiguration(name, algorithmConfiguration, algorithm, filePersistence);
+			@JsonProperty("filePersistence") FilePersistenceConfiguration filePersistence,
+			@JsonProperty("distributionConfiguration") DistributionConfiguration distributionConfiguration) {
+		return new ApplicationConfiguration(name, algorithmConfiguration,
+				algorithm, filePersistence, distributionConfiguration);
 	}
-	
+
 	public String getName() {
 		return name;
 	}
-	
+
 	public AlgorithmConfiguration getAlgorithmConfiguration() {
 		return algorithmConfiguration;
 	}
@@ -46,5 +55,9 @@ public class ApplicationConfiguration {
 
 	public PersistenceConfiguration getPersistenceConfiguration() {
 		return persistenceConfiguration;
+	}
+
+	public DistributionConfiguration getDistributionConfiguration() {
+		return distributionConfiguration;
 	}
 }
