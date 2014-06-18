@@ -16,16 +16,17 @@ public class ObjectCloner {
 	private static ObjectMapper objectMapper = new ObjectMapper();
 
 	public static <T>T deepCopy(Object data, Class<T> type) {
-		if (data == null) {
-			return null;
-		}
-
-		try (ByteArrayOutputStream os = new ByteArrayOutputStream(1024);
-				InputStream is = new ByteArrayInputStream(os.toByteArray());) {
-			objectMapper.writeValue(os, data);
-			return objectMapper.readValue(is, type);
-		} catch (IOException e) {
-			LOG.error("Error while cloning: object={} ", data, e);
+		if (data != null) {
+			try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+				objectMapper.writeValue(os, data);
+				try (InputStream is = new ByteArrayInputStream(os.toByteArray());) {
+					return objectMapper.readValue(is, type);
+				} catch (IOException e) {
+					LOG.error("Error while cloning: object={} ", data, e);
+				}
+			} catch (IOException e) {
+				LOG.error("Error while cloning: object={} ", data, e);
+			}
 		}
 		return null;
 	}
