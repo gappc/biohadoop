@@ -10,6 +10,9 @@
       "maxIterations" : 10000
     },
     "algorithm" : "at.ac.uibk.dps.biohadoop.ga.algorithm.Ga",
+    "distributionConfiguration" : {
+      "dataMerger" : "at.ac.uibk.dps.biohadoop.ga.distribution.GaSimpleMerger"
+    },
     "persistenceConfiguration" : {
       "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FilePersistenceConfiguration",
       "saveConfiguration" : {
@@ -32,6 +35,9 @@
       "maxIterations" : 10000
     },
     "algorithm" : "at.ac.uibk.dps.biohadoop.ga.algorithm.Ga",
+    "distributionConfiguration" : {
+      "dataMerger" : "at.ac.uibk.dps.biohadoop.ga.distribution.GaSimpleMerger"
+    },
     "persistenceConfiguration" : {
       "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FilePersistenceConfiguration",
       "saveConfiguration" : {
@@ -54,6 +60,9 @@
       "maxIterations" : 10000
     },
     "algorithm" : "at.ac.uibk.dps.biohadoop.ga.algorithm.Ga",
+    "distributionConfiguration" : {
+      "dataMerger" : "at.ac.uibk.dps.biohadoop.ga.distribution.GaSimpleMerger"
+    },
     "persistenceConfiguration" : {
       "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FilePersistenceConfiguration",
       "saveConfiguration" : {
@@ -76,6 +85,9 @@
       "maxIterations" : 10000
     },
     "algorithm" : "at.ac.uibk.dps.biohadoop.ga.algorithm.Ga",
+    "distributionConfiguration" : {
+      "dataMerger" : "at.ac.uibk.dps.biohadoop.ga.distribution.GaSimpleMerger"
+    },
     "persistenceConfiguration" : {
       "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FilePersistenceConfiguration",
       "saveConfiguration" : {
@@ -101,7 +113,7 @@
       "at.ac.uibk.dps.biohadoop.ga.worker.KryoGaWorker" : 1
     }
   },
-  "distributionConfiguration" : {
+  "globalDistributionConfiguration" : {
     "host" : "localhost",
     "port" : 2181
   }

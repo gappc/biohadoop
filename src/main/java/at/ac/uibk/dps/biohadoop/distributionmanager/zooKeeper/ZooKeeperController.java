@@ -22,7 +22,7 @@ import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationData;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationId;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
 import at.ac.uibk.dps.biohadoop.config.Algorithm;
-import at.ac.uibk.dps.biohadoop.distributionmanager.DistributionConfiguration;
+import at.ac.uibk.dps.biohadoop.distributionmanager.GlobalDistributionConfiguration;
 import at.ac.uibk.dps.biohadoop.distributionmanager.DistributionException;
 
 public class ZooKeeperController {
@@ -38,13 +38,13 @@ public class ZooKeeperController {
 	// TODO check if other design is better suited (because of large
 	// constructor)
 	public ZooKeeperController(
-			DistributionConfiguration distributionConfiguration,
+			GlobalDistributionConfiguration globalDistributionConfiguration,
 			ApplicationId applicationId) throws DistributionException {
 
 		this.applicationId = applicationId;
 		final CountDownLatch latch = new CountDownLatch(1);
-		final String url = distributionConfiguration.getHost() + ":"
-				+ distributionConfiguration.getPort();
+		final String url = globalDistributionConfiguration.getHost() + ":"
+				+ globalDistributionConfiguration.getPort();
 
 		// Connect to ZooKeeper
 		try {
@@ -73,8 +73,7 @@ public class ZooKeeperController {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> ApplicationData<T> getRemoteApplicationData()
+	public ApplicationData<?> getRemoteApplicationData()
 			throws DistributionException {
 		List<NodeData> remoteNodesData = getSuitableRemoteNodesData();
 
@@ -90,8 +89,7 @@ public class ZooKeeperController {
 					.request(MediaType.APPLICATION_JSON).get();
 			return response.readEntity(ApplicationData.class);
 		} catch(Exception e) {
-			LOG.error("Could not connect to {}", path, e);
-			return null;
+			throw new DistributionException("Could not connect to " + path, e);
 		}
 	}
 
