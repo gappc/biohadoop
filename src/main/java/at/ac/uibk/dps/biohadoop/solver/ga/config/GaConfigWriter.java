@@ -84,15 +84,14 @@ public class GaConfigWriter {
 		String version = "0.1";
 		List<String> includePaths = Arrays.asList("/biohadoop/lib/",
 				"/biohadoop/conf/");
-		SolverConfiguration solverConfig = buildSolverConfig(
-				"GA-LOCAL-1", local);
+		SolverConfiguration solverConfig = buildSolverConfig("GA-LOCAL-1",
+				local);
 		ConnectionConfiguration connectionConfiguration = buildConnectionConfiguration();
 		GlobalDistributionConfiguration globalDistributionConfiguration = buildGlobalDistributionConfig(local);
 
 		return new BiohadoopConfiguration(version, includePaths, Arrays.asList(
-				solverConfig, solverConfig, solverConfig,
-				solverConfig), connectionConfiguration,
-				globalDistributionConfiguration);
+				solverConfig, solverConfig, solverConfig, solverConfig),
+				connectionConfiguration, globalDistributionConfiguration);
 	}
 
 	private static ConnectionConfiguration buildConnectionConfiguration() {
@@ -121,9 +120,9 @@ public class GaConfigWriter {
 		AlgorithmConfiguration algorithmConfiguration = buildAlgorithmConfig(local);
 		PersistenceConfiguration persistenceConfiguration = buildPersistenceConfig(local);
 		DistributionConfiguration distributionConfiguration = buildDistributionConfig();
-		
-		return new SolverConfiguration(name, algorithmConfiguration,
-				Ga.class, persistenceConfiguration, distributionConfiguration);
+
+		return new SolverConfiguration(name, algorithmConfiguration, Ga.class,
+				persistenceConfiguration, distributionConfiguration);
 	}
 
 	private static AlgorithmConfiguration buildAlgorithmConfig(boolean local) {
@@ -163,22 +162,23 @@ public class GaConfigWriter {
 
 		return filePersistenceConfiguration;
 	}
-	
+
 	private static DistributionConfiguration buildDistributionConfig() {
-		return new DistributionConfiguration(GaSimpleMerger.class);
+		return new DistributionConfiguration(GaSimpleMerger.class, 2000);
 	}
 
 	private static GlobalDistributionConfiguration buildGlobalDistributionConfig(
 			boolean local) {
 		if (local) {
-			return new GlobalDistributionConfiguration(LOCAL_DISTRIBUTION_INFO_HOST,
-					LOCAL_DISTRIBUTION_INFO_PORT);
+			return new GlobalDistributionConfiguration(
+					LOCAL_DISTRIBUTION_INFO_HOST, LOCAL_DISTRIBUTION_INFO_PORT);
 		} else {
-			return new GlobalDistributionConfiguration(REMOTE_DISTRIBUTION_INFO_HOST,
+			return new GlobalDistributionConfiguration(
+					REMOTE_DISTRIBUTION_INFO_HOST,
 					REMOTE_DISTRIBUTION_INFO_PORT);
 		}
 	}
-	
+
 	private static void readAlgorithmConfig() throws IOException,
 			ClassNotFoundException, InstantiationException,
 			IllegalAccessException {

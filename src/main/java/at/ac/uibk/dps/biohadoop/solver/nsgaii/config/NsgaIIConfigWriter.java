@@ -54,7 +54,7 @@ public class NsgaIIConfigWriter {
 	private static int LOCAL_DISTRIBUTION_INFO_PORT = 2181;
 	private static String REMOTE_DISTRIBUTION_INFO_HOST = "master";
 	private static int REMOTE_DISTRIBUTION_INFO_PORT = 2181;
-	
+
 	private NsgaIIConfigWriter() {
 	}
 
@@ -79,15 +79,14 @@ public class NsgaIIConfigWriter {
 		String version = "0.1";
 		List<String> includePaths = Arrays.asList("/biohadoop/lib/",
 				"/biohadoop/conf/");
-		SolverConfiguration solverConfig = buildSolverConfig(
-				"MOEAD-LOCAL-1", local);
+		SolverConfiguration solverConfig = buildSolverConfig("MOEAD-LOCAL-1",
+				local);
 		ConnectionConfiguration connectionConfiguration = buildConnectionConfiguration();
 		GlobalDistributionConfiguration globalDistributionConfiguration = buildGlobalDistributionConfig(local);
 
 		return new BiohadoopConfiguration(version, includePaths, Arrays.asList(
-				solverConfig, solverConfig, solverConfig,
-				solverConfig), connectionConfiguration,
-				globalDistributionConfiguration);
+				solverConfig, solverConfig, solverConfig, solverConfig),
+				connectionConfiguration, globalDistributionConfiguration);
 	}
 
 	private static ConnectionConfiguration buildConnectionConfiguration() {
@@ -110,9 +109,10 @@ public class NsgaIIConfigWriter {
 		AlgorithmConfiguration algorithmConfiguration = buildAlgorithmConfig(local);
 		PersistenceConfiguration persistenceConfiguration = buildPersistenceConfig(local);
 		DistributionConfiguration distributionConfiguration = buildDistributionConfig();
-		
+
 		return new SolverConfiguration(name, algorithmConfiguration,
-				Moead.class, persistenceConfiguration, distributionConfiguration);
+				Moead.class, persistenceConfiguration,
+				distributionConfiguration);
 	}
 
 	private static AlgorithmConfiguration buildAlgorithmConfig(boolean local) {
@@ -154,16 +154,17 @@ public class NsgaIIConfigWriter {
 	}
 
 	private static DistributionConfiguration buildDistributionConfig() {
-		return new DistributionConfiguration(GaSimpleMerger.class);
+		return new DistributionConfiguration(GaSimpleMerger.class, 2000);
 	}
-	
+
 	private static GlobalDistributionConfiguration buildGlobalDistributionConfig(
 			boolean local) {
 		if (local) {
-			return new GlobalDistributionConfiguration(LOCAL_DISTRIBUTION_INFO_HOST,
-					LOCAL_DISTRIBUTION_INFO_PORT);
+			return new GlobalDistributionConfiguration(
+					LOCAL_DISTRIBUTION_INFO_HOST, LOCAL_DISTRIBUTION_INFO_PORT);
 		} else {
-			return new GlobalDistributionConfiguration(REMOTE_DISTRIBUTION_INFO_HOST,
+			return new GlobalDistributionConfiguration(
+					REMOTE_DISTRIBUTION_INFO_HOST,
 					REMOTE_DISTRIBUTION_INFO_PORT);
 		}
 	}

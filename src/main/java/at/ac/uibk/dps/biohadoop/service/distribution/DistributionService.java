@@ -29,8 +29,7 @@ public class DistributionService implements SolverHandler {
 	@Override
 	public void onNew(SolverId solverId) {
 		try {
-			LOG.info("Enabling DistributionService for solver {}",
-					solverId);
+			LOG.info("Enabling DistributionService for solver {}", solverId);
 			GlobalDistributionConfiguration globalDistributionConfiguration = Environment
 					.getBiohadoopConfiguration()
 					.getGlobalDistributionConfiguration();
@@ -48,18 +47,18 @@ public class DistributionService implements SolverHandler {
 	public void onDataUpdate(SolverId solverId) {
 		LOG.debug("onDataUpdate for applcation {}", solverId);
 
-		SolverService solverService = SolverService
-				.getInstance();
+		SolverService solverService = SolverService.getInstance();
 		SolverConfiguration solverConfiguration = solverService
 				.getSolverConfiguration(solverId);
-		SolverData<?> solverData = solverService
-				.getSolverData(solverId);
+		SolverData<?> solverData = solverService.getSolverData(solverId);
+		DistributionConfiguration distributionConfiguration = solverConfiguration
+				.getDistributionConfiguration();
 
-		int mergeAfterEveryIteration = 1000;
+		int mergeAfterEveryIteration = distributionConfiguration
+				.getMergeAfterIterations();
 
 		if (solverData.getIteration() % mergeAfterEveryIteration == 0) {
-			LOG.info(
-					"Merging data for solver with name {} and solverId {}",
+			LOG.info("Merging data for solver with name {} and solverId {}",
 					solverConfiguration.getName(), solverId);
 			Class<? extends DataMerger> mergerClass = solverConfiguration
 					.getDistributionConfiguration().getDataMerger();
@@ -70,27 +69,27 @@ public class DistributionService implements SolverHandler {
 				Object mergedData = merger.merge(solverData.getData(),
 						remoteSolverData.getData());
 				SolverData<?> mergedSolverData = new SolverData<Object>(
-						mergedData, -1, solverService.getSolverData(
-								solverId).getIteration());
-				solverService.updateSolverData(solverId,
-						mergedSolverData);
+						mergedData, -1, solverService.getSolverData(solverId)
+								.getIteration());
+				solverService.updateSolverData(solverId, mergedSolverData);
 
-				LOG.info("{}: remoteData:        {}", Thread.currentThread(),
+				LOG.debug("{}: remoteData:        {}", Thread.currentThread(),
 						remoteSolverData.getData());
-				LOG.info("{}: population before: {}", Thread.currentThread(),
+				LOG.debug("{}: population before: {}", Thread.currentThread(),
 						solverData.getData());
-				LOG.info("{}: population after:  {}", Thread.currentThread(),
+				LOG.debug("{}: population after:  {}", Thread.currentThread(),
 						mergedSolverData.getData());
 			} catch (DataMergeException | DistributionException e) {
 				LOG.error("Could not get and merge remote data");
 			} catch (InstantiationException | IllegalAccessException e) {
-				LOG.error("Could not instanciate merger from class {}", mergerClass.getCanonicalName(), e);
+				LOG.error("Could not instanciate merger from class {}",
+						mergerClass.getCanonicalName(), e);
 			}
 		}
 	}
 
-	private SolverData<?> getRemoteSolverData(
-			SolverId solverId) throws DistributionException {
+	private SolverData<?> getRemoteSolverData(SolverId solverId)
+			throws DistributionException {
 		ZooKeeperController zooKeeperManager = solverIdToZooKeeper
 				.get(solverId);
 		return zooKeeperManager.getRemoteSolverData();

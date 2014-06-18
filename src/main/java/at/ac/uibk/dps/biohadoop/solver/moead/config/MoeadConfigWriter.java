@@ -48,7 +48,7 @@ public class MoeadConfigWriter {
 	private static String REMOTE_PERSISTENCE_SAVE_PATH = "/biohadoop/persistence/moead";
 	private static String LOCAL_PERSISTENCE_LOAD_PATH = "/tmp/biohadoop/moead/MOEAD-LOCAL-1/2087724778";
 	private static String REMOTE_PERSISTENCE_LOAD_PATH = "/biohadoop/persistence/moead";
-	
+
 	private static String LOCAL_DISTRIBUTION_INFO_HOST = "localhost";
 	private static int LOCAL_DISTRIBUTION_INFO_PORT = 2181;
 	private static String REMOTE_DISTRIBUTION_INFO_HOST = "master";
@@ -78,17 +78,16 @@ public class MoeadConfigWriter {
 		String version = "0.1";
 		List<String> includePaths = Arrays.asList("/biohadoop/lib/",
 				"/biohadoop/conf/");
-		SolverConfiguration solverConfig = buildSolverConfig(
-				"MOEAD-LOCAL-1", local);
+		SolverConfiguration solverConfig = buildSolverConfig("MOEAD-LOCAL-1",
+				local);
 		ConnectionConfiguration connectionConfiguration = buildConnectionConfiguration();
 		GlobalDistributionConfiguration globalDistributionConfiguration = buildGlobalDistributionConfig(local);
 
 		return new BiohadoopConfiguration(version, includePaths, Arrays.asList(
-				solverConfig, solverConfig, solverConfig,
-				solverConfig), connectionConfiguration,
-				globalDistributionConfiguration);
+				solverConfig, solverConfig, solverConfig, solverConfig),
+				connectionConfiguration, globalDistributionConfiguration);
 	}
-	
+
 	private static ConnectionConfiguration buildConnectionConfiguration() {
 		List<Class<? extends MasterConnection>> endpoints = new ArrayList<>();
 		endpoints.add(MoeadSocket.class);
@@ -97,21 +96,22 @@ public class MoeadConfigWriter {
 
 		List<FileMasterConfiguration> masters = new ArrayList<>();
 		masters.add(mc);
-		
+
 		Map<String, Integer> workers = new HashMap<>();
 		workers.put(SocketMoeadWorker.class.getCanonicalName(), 3);
-		
+
 		return new ConnectionConfiguration(masters, workers);
 	}
-	
+
 	private static SolverConfiguration buildSolverConfig(String name,
 			boolean local) {
 		AlgorithmConfiguration algorithmConfiguration = buildAlgorithmConfig(local);
 		PersistenceConfiguration persistenceConfiguration = buildPersistenceConfig(local);
 		DistributionConfiguration distributionConfiguration = buildDistributionConfig();
-		
+
 		return new SolverConfiguration(name, algorithmConfiguration,
-				Moead.class, persistenceConfiguration, distributionConfiguration);
+				Moead.class, persistenceConfiguration,
+				distributionConfiguration);
 	}
 
 	private static AlgorithmConfiguration buildAlgorithmConfig(boolean local) {
@@ -151,18 +151,19 @@ public class MoeadConfigWriter {
 
 		return filePersistenceConfiguration;
 	}
-	
+
 	private static DistributionConfiguration buildDistributionConfig() {
-		return new DistributionConfiguration(GaSimpleMerger.class);
+		return new DistributionConfiguration(GaSimpleMerger.class, 2000);
 	}
 
 	private static GlobalDistributionConfiguration buildGlobalDistributionConfig(
 			boolean local) {
 		if (local) {
-			return new GlobalDistributionConfiguration(LOCAL_DISTRIBUTION_INFO_HOST,
-					LOCAL_DISTRIBUTION_INFO_PORT);
+			return new GlobalDistributionConfiguration(
+					LOCAL_DISTRIBUTION_INFO_HOST, LOCAL_DISTRIBUTION_INFO_PORT);
 		} else {
-			return new GlobalDistributionConfiguration(REMOTE_DISTRIBUTION_INFO_HOST,
+			return new GlobalDistributionConfiguration(
+					REMOTE_DISTRIBUTION_INFO_HOST,
 					REMOTE_DISTRIBUTION_INFO_PORT);
 		}
 	}
