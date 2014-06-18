@@ -15,8 +15,6 @@ import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationManager;
 import at.ac.uibk.dps.biohadoop.applicationmanager.ApplicationState;
 import at.ac.uibk.dps.biohadoop.config.Algorithm;
 import at.ac.uibk.dps.biohadoop.config.AlgorithmException;
-import at.ac.uibk.dps.biohadoop.distributionmanager.DistributionException;
-import at.ac.uibk.dps.biohadoop.distributionmanager.DistributionManager;
 import at.ac.uibk.dps.biohadoop.ga.DistancesGlobal;
 import at.ac.uibk.dps.biohadoop.ga.config.GaParameter;
 import at.ac.uibk.dps.biohadoop.jobmanager.JobId;
@@ -35,7 +33,6 @@ public class Ga extends SimpleJobHandler<int[]> implements
 
 	private final Random rand = new Random();
 	private final int logSteps = 1000;
-	private final int islandMergeSteps = 2000;
 
 	private CountDownLatch latch;
 
@@ -162,7 +159,7 @@ public class Ga extends SimpleJobHandler<int[]> implements
 			applicationData = new ApplicationData<int[][]>(population,
 					values[0], iteration + persitedIteration);
 			applicationManager.setApplicationData(applicationId,
-					applicationData, true);
+					applicationData);
 
 			if (iteration == maxIterations) {
 				end = true;
@@ -175,31 +172,6 @@ public class Ga extends SimpleJobHandler<int[]> implements
 						endTime - startTime);
 				startTime = endTime;
 				printGenome(tsp.getDistances(), population[0], citySize);
-			}
-
-			if (iteration % islandMergeSteps == 0) {
-				try {
-					applicationManager.getOverallProgress();
-					ApplicationData<List<List<Integer>>> remoteData = DistributionManager
-							.getInstance().getRemoteApplicationData(
-									applicationId);
-					if (remoteData == null) {
-						LOG.error("Could not merge data because remote data is empty");
-					} else {
-						LOG.debug("{}: remoteData:        {}",
-								Thread.currentThread(), remoteData.getData());
-						LOG.debug("{}: population before: {}",
-								Thread.currentThread(), population);
-						population = islandMerge(population,
-								remoteData.getData());
-						LOG.debug("{}: population after:  {}",
-								Thread.currentThread(), population);
-						LOG.info("{}: merge successful\n",
-								Thread.currentThread());
-					}
-				} catch (DistributionException e) {
-					LOG.error("Could not get remote data for Island Model", e);
-				}
 			}
 
 			applicationManager.setProgress(applicationId, (float) iteration

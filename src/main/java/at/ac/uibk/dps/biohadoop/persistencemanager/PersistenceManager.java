@@ -46,7 +46,7 @@ public class PersistenceManager implements ApplicationHandler {
 				ApplicationData<?> applicationData = persistenceController
 						.load(applicationId);
 				applicationManager.setApplicationData(applicationId,
-						applicationData, true);
+						applicationData);
 				LOG.info(
 						"Successful loading data for application with name {} and applicationId {}",
 						applicationConfiguration.getName(), applicationId);
@@ -77,7 +77,7 @@ public class PersistenceManager implements ApplicationHandler {
 				.getPersistenceConfiguration();
 		int saveAfterEveryIteration = persistenceConfiguration
 				.saveConfiguration().getAfterIterations();
-		
+
 		if (applicationData.getIteration() % saveAfterEveryIteration == 0) {
 			LOG.info(
 					"Persisting data for application with name {} and applicationId {}",

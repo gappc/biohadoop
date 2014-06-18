@@ -92,30 +92,24 @@ public class ApplicationManager {
 		shutdownHandlers.add(shutdownHandler);
 	}
 
-	/**
-	 * The provided applicationData should not be altered by the providing
-	 * application
-	 * 
-	 * @param applicationId
-	 * @param applicationData
-	 * @param deepCopy
-	 */
-	// TODO check if there shopuld be made a deep copy of
-	public <T> void setApplicationData(final ApplicationId applicationId,
-			final ApplicationData<T> applicationData, final boolean deepCopy) {
+	public void setApplicationData(final ApplicationId applicationId,
+			final ApplicationData<?> applicationData) {
 		Application application = applications.get(applicationId);
-		if (deepCopy) {
-			application.setApplicationData(applicationData);
-		} else {
-			@SuppressWarnings("unchecked")
-			ApplicationData<T> clone = ObjectCloner.deepCopy(applicationData,
-					ApplicationData.class);
-			application.setApplicationData(clone);
-		}
+		ApplicationData<?> clone = ObjectCloner.deepCopy(applicationData,
+				ApplicationData.class);
+		application.setApplicationData(clone);
 		for (ApplicationHandler applicationHandler : application
 				.getApplicationHandlers()) {
 			applicationHandler.onDataUpdate(applicationId);
 		}
+	}
+	
+	public void updateApplicationData(final ApplicationId applicationId,
+			final ApplicationData<?> applicationData) {
+		Application application = applications.get(applicationId);
+		ApplicationData<?> clone = ObjectCloner.deepCopy(applicationData,
+				ApplicationData.class);
+		application.setApplicationData(clone);
 	}
 
 	public ApplicationData<?> getApplicationData(ApplicationId applicationId) {

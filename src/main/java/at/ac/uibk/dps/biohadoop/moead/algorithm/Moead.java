@@ -135,7 +135,7 @@ public class Moead extends SimpleJobHandler<double[]> implements Algorithm<List<
 			applicationData = new ApplicationData<List<List<Double>>>(
 					result, 0, iteration + persitedIteration);
 			applicationManager.setApplicationData(applicationId,
-					applicationData, true);
+					applicationData);
 			
 			if (iteration >= maxIterations) {
 				end = true;
