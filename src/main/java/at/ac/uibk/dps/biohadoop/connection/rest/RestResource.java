@@ -1,8 +1,5 @@
 package at.ac.uibk.dps.biohadoop.connection.rest;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ws.rs.GET;
@@ -15,23 +12,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
+import at.ac.uibk.dps.biohadoop.connection.MasterEndpointImpl;
 import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
+import at.ac.uibk.dps.biohadoop.endpoint.Master;
 import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
 import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
 import at.ac.uibk.dps.biohadoop.server.deployment.DeployingClasses;
-import at.ac.uibk.dps.biohadoop.torename.MasterConfiguration;
 
 @Produces(MediaType.APPLICATION_JSON)
-public class RestResource implements Endpoint, MasterConnection {
+public abstract class RestResource implements Endpoint, MasterConnection, Master {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RestResource.class);
 	
-	protected MasterConfiguration masterConfiguration;
 	private MasterEndpoint masterEndpoint;
-	
 	private Message<?> inputMessage;
 	private Message<?> outputMessage;
 
@@ -62,7 +58,7 @@ public class RestResource implements Endpoint, MasterConnection {
 	@Path("registration")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Message<?> registration() throws InterruptedException {
-		setMasterEndpoint();
+		buildMasterEndpoint();
 		masterEndpoint.handleRegistration();
 		return outputMessage;
 	}
@@ -70,7 +66,7 @@ public class RestResource implements Endpoint, MasterConnection {
 	@GET
 	@Path("workinit")
 	public Message<?> workInit() throws InterruptedException {
-		setMasterEndpoint();
+		buildMasterEndpoint();
 		masterEndpoint.handleWorkInit();
 		return outputMessage;
 	}
@@ -78,7 +74,7 @@ public class RestResource implements Endpoint, MasterConnection {
 	@POST
 	@Path("work")
 	public Message<?> work(Message<?> message) throws InterruptedException {
-		setMasterEndpoint();
+		buildMasterEndpoint();
 		inputMessage = message;
 		masterEndpoint.handleWork();
 		return outputMessage;
@@ -95,14 +91,8 @@ public class RestResource implements Endpoint, MasterConnection {
 		outputMessage = message;
 	}
 	
-	private void setMasterEndpoint() {
-		Class<? extends MasterEndpoint> masterEnpointClass = masterConfiguration.getMasterEndpoint();
-		try {
-			Constructor<? extends MasterEndpoint> constructor = masterEnpointClass.getDeclaredConstructor(Endpoint.class);
-			masterEndpoint = constructor.newInstance(this);
-		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			LOG.error("Could not instanciate new {} with parameter {}", masterEnpointClass, this);
-		}
+	private void buildMasterEndpoint() {
+		masterEndpoint = MasterEndpointImpl.newInstance(this, getQueueName(), getRegistrationObject());
 	}
 
 }

@@ -6,15 +6,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
+import at.ac.uibk.dps.biohadoop.connection.MasterEndpointImpl;
+import at.ac.uibk.dps.biohadoop.endpoint.Master;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.torename.HostInfo;
-import at.ac.uibk.dps.biohadoop.torename.MasterConfiguration;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Server;
 import com.esotericsoftware.minlog.Log;
 
-public class KryoServer implements MasterConnection {
+public abstract class KryoServer implements MasterConnection, Master {
 
 	private static final Logger LOG = LoggerFactory.getLogger(KryoServer.class);
 
@@ -22,13 +23,10 @@ public class KryoServer implements MasterConnection {
 
 	private KryoServerListener kryoServerListener;
 
-	protected MasterConfiguration masterConfiguration;
-
 	@Override
 	public void configure() {
 		Log.set(Log.LEVEL_DEBUG);
-		kryoServerListener = new KryoServerListener(
-				masterConfiguration.getMasterEndpoint());
+		kryoServerListener = new KryoServerListener(this);
 	}
 
 	@Override
@@ -52,7 +50,7 @@ public class KryoServer implements MasterConnection {
 	private void startServer() throws IOException {
 		new Thread(server).start();
 
-		String prefix = masterConfiguration.getPrefix();
+		String prefix = getPrefix();
 		String host = HostInfo.getHostname();
 		int port = HostInfo.getPort(30000);
 

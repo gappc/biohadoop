@@ -7,9 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
+import at.ac.uibk.dps.biohadoop.endpoint.Master;
 import at.ac.uibk.dps.biohadoop.torename.MasterConfiguration;
 
-public class SocketServer implements MasterConnection {
+public abstract class SocketServer implements MasterConnection, Master {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SocketServer.class);
@@ -18,11 +19,9 @@ public class SocketServer implements MasterConnection {
 			.newFixedThreadPool(1);
 	private SocketServerConnection socketServerConnection;
 	
-	protected MasterConfiguration masterConfiguration;
-
 	@Override
 	public void configure() {
-		socketServerConnection = new SocketServerConnection(masterConfiguration);
+		socketServerConnection = new SocketServerConnection(this);
 	}
 
 	@Override

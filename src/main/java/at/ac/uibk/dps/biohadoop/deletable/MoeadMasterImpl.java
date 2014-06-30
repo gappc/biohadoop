@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.solver.ga.master;
+package at.ac.uibk.dps.biohadoop.deletable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,42 +10,34 @@ import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
-import at.ac.uibk.dps.biohadoop.queue.TaskId;
-import at.ac.uibk.dps.biohadoop.solver.ga.DistancesGlobal;
-import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.Ga;
+import at.ac.uibk.dps.biohadoop.solver.moead.algorithm.Moead;
 
-public class GaMasterImpl implements MasterEndpoint {
+public class MoeadMasterImpl implements MasterEndpoint {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(GaMasterImpl.class);
+			.getLogger(MoeadMasterImpl.class);
 
 	private final Endpoint endpoint;
-	private final TaskEndpoint<int[], Double> taskEndpoint = new TaskEndpointImpl<>(
-			Ga.GA_QUEUE);
-	private Task<int[]> currentTask = null;
+	private final TaskEndpoint<double[], double[]> taskEndpoint = new TaskEndpointImpl<>(
+			Moead.MOEAD_QUEUE);
+	private Task<double[]> currentTask = null;
 
-	public GaMasterImpl(Endpoint endpoint) {
+	public MoeadMasterImpl(Endpoint endpoint) {
 		this.endpoint = endpoint;
 	}
-
-	@Override
+	
 	public Endpoint getEndpoint() {
 		return endpoint;
 	}
 
-	@Override
 	public void handleRegistration() {
 		endpoint.receive();
 		LOG.info("Got registration request");
-		Double[][] distances = DistancesGlobal.getDistancesAsObject();
-		Task<Double[][]> task = new Task<Double[][]>(TaskId.newInstance(),
-				distances);
 		Message<Double[][]> message = new Message<>(
-				MessageType.REGISTRATION_RESPONSE, task);
+				MessageType.REGISTRATION_RESPONSE, null);
 		endpoint.send(message);
 	}
 
-	@Override
 	public void handleWorkInit() {
 		endpoint.receive();
 		LOG.debug("Got work init request");
@@ -60,13 +52,12 @@ public class GaMasterImpl implements MasterEndpoint {
 		endpoint.send(message);
 	}
 
-	@Override
 	public void handleWork() {
-		Message<Double> incomingMessage = endpoint.receive();
+		Message<double[]> incomingMessage = endpoint.receive();
 		LOG.debug("Got work request");
 
-		Message<?> message = null;
-		Task<Double> result = incomingMessage.getPayload();
+		Message<double[]> message = null;
+		Task<double[]> result = incomingMessage.getPayload();
 		try {
 			taskEndpoint.putResult(result.getTaskId(), result.getData());
 			currentTask = taskEndpoint.getTask();

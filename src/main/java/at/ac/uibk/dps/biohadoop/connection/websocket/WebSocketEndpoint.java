@@ -1,5 +1,8 @@
 package at.ac.uibk.dps.biohadoop.connection.websocket;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
@@ -10,9 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
+import at.ac.uibk.dps.biohadoop.connection.MasterEndpointImpl;
 import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.connection.MessageType;
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
+import at.ac.uibk.dps.biohadoop.endpoint.Master;
 import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
@@ -21,24 +26,19 @@ import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.server.deployment.DeployingClasses;
-import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.Ga;
 import at.ac.uibk.dps.biohadoop.torename.Helper;
-import at.ac.uibk.dps.biohadoop.torename.MasterConfiguration;
 
-public class WebSocketEndpoint implements Endpoint, MasterConnection {
+public abstract class WebSocketEndpoint implements Endpoint, MasterConnection, Master {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WebSocketEndpoint.class);
 
-	private final TaskEndpoint<?, ?> taskEndpoint = new TaskEndpointImpl<>(
-			Ga.GA_QUEUE);
-
-	private MasterConfiguration masterConfiguration;
+	private TaskEndpoint<?, ?> taskEndpoint;
+	
+	private MasterEndpoint masterEndpoint; 
 	private Message<?> inputMessage;
 	private Message<?> outputMessage;
 	private boolean close = false;
-
-	protected MasterEndpoint masterEndpoint;
 
 	@Override
 	public void configure() {
@@ -54,6 +54,8 @@ public class WebSocketEndpoint implements Endpoint, MasterConnection {
 		LOG.info("Opened Websocket connection to URI {}, sessionId={}",
 				session.getRequestURI(), session.getId());
 		ShutdownWaitingService.register();
+		buildMasterEndpoint();
+		taskEndpoint = new TaskEndpointImpl<>(getQueueName());
 	}
 
 	@OnMessage
@@ -115,6 +117,10 @@ public class WebSocketEndpoint implements Endpoint, MasterConnection {
 	@Override
 	public <T> void send(Message<T> message) throws SendException {
 		outputMessage = message;
+	}
+	
+	private void buildMasterEndpoint() {
+		masterEndpoint = MasterEndpointImpl.newInstance(this, getQueueName(), getRegistrationObject());
 	}
 
 }

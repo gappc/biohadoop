@@ -16,7 +16,7 @@ import at.ac.uibk.dps.biohadoop.connection.kryo.KryoObjectRegistration;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.GaFitness;
-import at.ac.uibk.dps.biohadoop.solver.ga.master.GaEndpointConfig;
+import at.ac.uibk.dps.biohadoop.solver.ga.master.kryo.GaKryo;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Client;
@@ -57,9 +57,9 @@ public class KryoGaWorker implements WorkerConnection {
 
 	@Override
 	public String getWorkerParameters() {
-		GaEndpointConfig masterConfig = new GaEndpointConfig();
-		String hostname = Environment.getPrefixed(masterConfig.getPrefix(), Environment.KRYO_SOCKET_HOST);
-		String port = Environment.getPrefixed(masterConfig.getPrefix(), Environment.KRYO_SOCKET_PORT);
+		String prefix = new GaKryo().getPrefix();
+		String hostname = Environment.getPrefixed(prefix, Environment.KRYO_SOCKET_HOST);
+		String port = Environment.getPrefixed(prefix, Environment.KRYO_SOCKET_PORT);
 		return hostname + " " + port;
 	}
 	

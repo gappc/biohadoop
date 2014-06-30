@@ -13,9 +13,11 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.connection.MasterEndpointImpl;
 import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.connection.MessageType;
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
+import at.ac.uibk.dps.biohadoop.endpoint.Master;
 import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
@@ -23,7 +25,6 @@ import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.torename.Helper;
-import at.ac.uibk.dps.biohadoop.torename.MasterConfiguration;
 
 public class SocketEndpoint implements Callable<Integer>, Endpoint {
 
@@ -32,22 +33,22 @@ public class SocketEndpoint implements Callable<Integer>, Endpoint {
 
 	private final String className = Helper.getClassname(SocketEndpoint.class);
 	private final Socket socket;
-	private final MasterConfiguration masterConfiguration;
+	private final Master master;
 
 	private ObjectOutputStream os = null;
 	private ObjectInputStream is = null;
 	private int counter = 0;
 	private boolean close = false;
 
-	public SocketEndpoint(Socket socket, MasterConfiguration masterConfiguration) {
+	public SocketEndpoint(Socket socket, Master master) {
 		this.socket = socket;
-		this.masterConfiguration = masterConfiguration;
+		this.master = master;
 	}
 
 	@Override
 	public Integer call() {
 		TaskEndpoint<?, ?> taskEndpoint = new TaskEndpointImpl<>(
-				masterConfiguration.getQueueName());
+				master.getQueueName());
 
 		MasterEndpoint endpoint = null;
 		try {
@@ -59,7 +60,7 @@ public class SocketEndpoint implements Callable<Integer>, Endpoint {
 			is = new ObjectInputStream(new BufferedInputStream(
 					socket.getInputStream()));
 
-			endpoint = buildMaster(masterConfiguration.getMasterEndpoint());
+			endpoint = buildMaster();
 			endpoint.handleRegistration();
 			endpoint.handleWorkInit();
 			while (!close) {
@@ -97,22 +98,6 @@ public class SocketEndpoint implements Callable<Integer>, Endpoint {
 		return 0;
 	}
 
-	private MasterEndpoint buildMaster(
-			Class<? extends MasterEndpoint> masterEndpointClass)
-			throws Exception {
-		try {
-			Constructor<? extends MasterEndpoint> constructor = masterEndpointClass
-					.getDeclaredConstructor(Endpoint.class);
-			return constructor.newInstance(this);
-		} catch (NoSuchMethodException | SecurityException
-				| InstantiationException | IllegalAccessException
-				| IllegalArgumentException | InvocationTargetException e) {
-			LOG.error("Could not instanciate new {} with parameter {}",
-					masterEndpointClass, this);
-			throw new Exception(e);
-		}
-	}
-
 	@SuppressWarnings("unchecked")
 	public <T> Message<T> receive() throws ReceiveException {
 		try {
@@ -139,5 +124,9 @@ public class SocketEndpoint implements Callable<Integer>, Endpoint {
 			LOG.error("Error while sending", e);
 			throw new SendException(e);
 		}
+	}
+	
+	private MasterEndpoint buildMaster() throws Exception {
+		return MasterEndpointImpl.newInstance(this, master.getQueueName(), master.getRegistrationObject());
 	}
 }

@@ -20,7 +20,7 @@ import at.ac.uibk.dps.biohadoop.connection.WorkerConnection;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.GaFitness;
-import at.ac.uibk.dps.biohadoop.solver.ga.master.GaEndpointConfig;
+import at.ac.uibk.dps.biohadoop.solver.ga.master.socket.GaSocket;
 import at.ac.uibk.dps.biohadoop.torename.Helper;
 import at.ac.uibk.dps.biohadoop.torename.PerformanceLogger;
 
@@ -65,9 +65,9 @@ public class SocketGaWorker implements WorkerConnection {
 	
 	@Override
 	public String getWorkerParameters() {
-		GaEndpointConfig masterConfig = new GaEndpointConfig();
-		String hostname = Environment.getPrefixed(masterConfig.getPrefix(), Environment.SOCKET_HOST);
-		String port = Environment.getPrefixed(masterConfig.getPrefix(), Environment.SOCKET_PORT);
+		String prefix = new GaSocket().getPrefix();
+		String hostname = Environment.getPrefixed(prefix, Environment.SOCKET_HOST);
+		String port = Environment.getPrefixed(prefix, Environment.SOCKET_PORT);
 		return hostname + " " + port;
 	}
 

@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.solver.moead.master;
+package at.ac.uibk.dps.biohadoop.deletable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,19 +10,19 @@ import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
-import at.ac.uibk.dps.biohadoop.solver.moead.algorithm.Moead;
+import at.ac.uibk.dps.biohadoop.solver.nsgaii.algorithm.NsgaII;
 
-public class MoeadMasterImpl implements MasterEndpoint {
+public class NsgaIIMasterImpl implements MasterEndpoint {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(MoeadMasterImpl.class);
+			.getLogger(NsgaIIMasterImpl.class);
 
 	private final Endpoint endpoint;
 	private final TaskEndpoint<double[], double[]> taskEndpoint = new TaskEndpointImpl<>(
-			Moead.MOEAD_QUEUE);
+			NsgaII.NSGAII_QUEUE);
 	private Task<double[]> currentTask = null;
 
-	public MoeadMasterImpl(Endpoint endpoint) {
+	public NsgaIIMasterImpl(Endpoint endpoint) {
 		this.endpoint = endpoint;
 	}
 	

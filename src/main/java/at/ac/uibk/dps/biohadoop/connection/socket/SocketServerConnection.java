@@ -13,30 +13,30 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.endpoint.Master;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.torename.HostInfo;
-import at.ac.uibk.dps.biohadoop.torename.MasterConfiguration;
 
 public class SocketServerConnection implements Runnable {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SocketServerConnection.class);
 
-	private final MasterConfiguration masterConfiguration;
+	private final Master master;
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();
 	private final List<Future<Integer>> futures = new ArrayList<>();
 
 	private volatile boolean stop;
 
-	public SocketServerConnection(MasterConfiguration masterConfiguration) {
-		this.masterConfiguration = masterConfiguration;
+	public SocketServerConnection(Master master) {
+		this.master = master;
 	}
 
 	@Override
 	public void run() {
 		try {
-			String prefix = masterConfiguration.getPrefix();
+			String prefix = master.getPrefix();
 			String host = HostInfo.getHostname();
 			int port = HostInfo.getPort(30000);
 			
@@ -54,7 +54,7 @@ public class SocketServerConnection implements Runnable {
 			while (!stop) {
 				try {
 					socket = serverSocket.accept();
-					SocketEndpoint socketRunnable = new SocketEndpoint(socket, masterConfiguration);
+					SocketEndpoint socketRunnable = new SocketEndpoint(socket, master);
 					Future<Integer> future = executorService.submit(socketRunnable);
 					futures.add(future);
 				} catch (SocketTimeoutException e) {

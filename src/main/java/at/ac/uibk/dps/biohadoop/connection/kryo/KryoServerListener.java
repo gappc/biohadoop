@@ -1,7 +1,5 @@
 package at.ac.uibk.dps.biohadoop.connection.kryo;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,13 +9,13 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.connection.MasterEndpointImpl;
 import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.connection.MessageType;
-import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
+import at.ac.uibk.dps.biohadoop.endpoint.Master;
 import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
-import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.Ga;
 import at.ac.uibk.dps.biohadoop.torename.ZeroLock;
 
 import com.esotericsoftware.kryonet.Connection;
@@ -32,11 +30,10 @@ public class KryoServerListener extends Listener {
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();
 	private final ZeroLock zeroLock = new ZeroLock();
-	private final Class<? extends MasterEndpoint> masterEndpointClass;
+	private final Master master;
 
-	public KryoServerListener(
-			Class<? extends MasterEndpoint> masterEndpointClass) {
-		this.masterEndpointClass = masterEndpointClass;
+	public KryoServerListener(Master master) {
+		this.master = master;
 	}
 
 	public void stop() {
@@ -54,8 +51,7 @@ public class KryoServerListener extends Listener {
 		kryoEndpoint.setConnection(connection);
 
 		try {
-			MasterEndpoint masterEndpoint = buildMaster(masterEndpointClass,
-					kryoEndpoint);
+			MasterEndpoint masterEndpoint = buildMaster(kryoEndpoint);
 			masters.put(connection, masterEndpoint);
 			zeroLock.increment();
 		} catch (Exception e) {
@@ -65,12 +61,12 @@ public class KryoServerListener extends Listener {
 
 	public void disconnected(Connection connection) {
 		zeroLock.decrement();
-		MasterEndpoint master = masters.get(connection);
-		masters.remove(master);
-		Task<?> task = master.getCurrentTask();
+		MasterEndpoint masterEndpoint = masters.get(connection);
+		masters.remove(masterEndpoint);
+		Task<?> task = masterEndpoint.getCurrentTask();
 		if (task != null) {
 			try {
-				new TaskEndpointImpl<>(Ga.GA_QUEUE)
+				new TaskEndpointImpl<>(master.getQueueName())
 						.reschedule(task.getTaskId());
 			} catch (InterruptedException e) {
 				LOG.error("Could not reschedule task at {}", task);
@@ -109,19 +105,7 @@ public class KryoServerListener extends Listener {
 		}
 	}
 
-	private MasterEndpoint buildMaster(
-			Class<? extends MasterEndpoint> masterEndpointClass,
-			KryoEndpoint kryoEndpoint) throws Exception {
-		try {
-			Constructor<? extends MasterEndpoint> constructor = masterEndpointClass
-					.getDeclaredConstructor(Endpoint.class);
-			return constructor.newInstance(kryoEndpoint);
-		} catch (NoSuchMethodException | SecurityException
-				| InstantiationException | IllegalAccessException
-				| IllegalArgumentException | InvocationTargetException e) {
-			LOG.error("Could not instanciate new {} with parameter {}",
-					masterEndpointClass, kryoEndpoint);
-			throw new Exception(e);
-		}
+	private MasterEndpoint buildMaster(KryoEndpoint kryoEndpoint) throws Exception {
+		return MasterEndpointImpl.newInstance(kryoEndpoint, master.getQueueName(), master.getRegistrationObject());
 	}
 }

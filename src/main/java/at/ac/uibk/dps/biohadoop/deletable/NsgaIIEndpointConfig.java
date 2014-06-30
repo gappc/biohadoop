@@ -1,15 +1,15 @@
-package at.ac.uibk.dps.biohadoop.solver.ga.master;
+package at.ac.uibk.dps.biohadoop.deletable;
 
 import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.torename.MasterConfiguration;
 
-public class GaEndpointConfig implements MasterConfiguration {
+public class NsgaIIEndpointConfig implements MasterConfiguration {
 
-	private final static String PREFIX = "GA";
+	private final static String PREFIX = "MOEAD";
 
 	@Override
 	public Class<? extends MasterEndpoint> getMasterEndpoint() {
-		return GaMasterImpl.class;
+		return NsgaIIMasterImpl.class;
 	}
 	
 	public String getPrefix() {
