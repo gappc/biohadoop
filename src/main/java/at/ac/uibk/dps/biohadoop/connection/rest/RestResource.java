@@ -3,6 +3,8 @@ package at.ac.uibk.dps.biohadoop.connection.rest;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -13,13 +15,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
+import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
-import at.ac.uibk.dps.biohadoop.endpoint.ShutdownException;
+import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
 import at.ac.uibk.dps.biohadoop.server.deployment.DeployingClasses;
-import at.ac.uibk.dps.biohadoop.service.job.remote.Message;
 import at.ac.uibk.dps.biohadoop.torename.MasterConfiguration;
 
 @Produces(MediaType.APPLICATION_JSON)
@@ -40,6 +42,20 @@ public class RestResource implements Endpoint, MasterConnection {
 
 	@Override
 	public void start() {
+	}
+	
+	@Override
+	public void stop() {
+	}
+	
+	@PostConstruct
+	public void init() {
+		ShutdownWaitingService.register();
+	}
+	
+	@PreDestroy
+	public void finish() {
+		ShutdownWaitingService.unregister();
 	}
 	
 	@GET
@@ -64,11 +80,7 @@ public class RestResource implements Endpoint, MasterConnection {
 	public Message<?> work(Message<?> message) throws InterruptedException {
 		setMasterEndpoint();
 		inputMessage = message;
-//		try {
-			masterEndpoint.handleWork();
-//		} catch (ShutdownException e) {
-//			LOG.info("Got shutdown event");
-//		}
+		masterEndpoint.handleWork();
 		return outputMessage;
 	}
 
@@ -79,7 +91,7 @@ public class RestResource implements Endpoint, MasterConnection {
 	}
 
 	@Override
-	public void send(Message<?> message) throws SendException {
+	public <T>void send(Message<T> message) throws SendException {
 		outputMessage = message;
 	}
 	

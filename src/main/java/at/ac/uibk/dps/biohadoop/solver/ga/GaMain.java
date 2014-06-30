@@ -26,7 +26,9 @@ public class GaMain {
 			List<Future<SolverId>> algorithms = SolverLauncher
 					.launchSolver(biohadoopConfiguration);
 			
-			EndpointLauncher.launchMasterEndpoints(biohadoopConfiguration);
+			EndpointLauncher endpointLauncher = new EndpointLauncher(
+					biohadoopConfiguration);
+			endpointLauncher.startMasterEndpoints();
 			
 			for (Future<SolverId> algorithm : algorithms) {
 				SolverId solverId = algorithm.get();

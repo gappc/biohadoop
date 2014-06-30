@@ -4,32 +4,25 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.CountDownLatch;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.config.Algorithm;
 import at.ac.uibk.dps.biohadoop.config.AlgorithmException;
-import at.ac.uibk.dps.biohadoop.service.job.JobId;
-import at.ac.uibk.dps.biohadoop.service.job.api.JobService;
-import at.ac.uibk.dps.biohadoop.service.job.api.JobRequest;
-import at.ac.uibk.dps.biohadoop.service.job.api.JobRequestData;
-import at.ac.uibk.dps.biohadoop.service.job.api.JobResponse;
-import at.ac.uibk.dps.biohadoop.service.job.api.JobResponseData;
-import at.ac.uibk.dps.biohadoop.service.job.handler.SimpleJobHandler;
+import at.ac.uibk.dps.biohadoop.queue.TaskClient;
+import at.ac.uibk.dps.biohadoop.queue.TaskClientImpl;
+import at.ac.uibk.dps.biohadoop.queue.TaskFuture;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverData;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverState;
 import at.ac.uibk.dps.biohadoop.solver.moead.config.MoeadParameter;
 
-public class Moead extends SimpleJobHandler<double[]> implements Algorithm<List<List<Double>>, MoeadParameter> {
+public class Moead implements Algorithm<List<List<Double>>, MoeadParameter> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Moead.class);
 	public static final String MOEAD_QUEUE = "MOEAD_QUEUE";
-
-	private CountDownLatch latch;
 
 	private int logSteps = 100;
 
@@ -38,19 +31,19 @@ public class Moead extends SimpleJobHandler<double[]> implements Algorithm<List<
 	private double minF2 = Double.MAX_VALUE;
 	private double maxF2 = -Double.MAX_VALUE;
 
-	public List<List<Double>> compute(SolverId solverId, MoeadParameter parameter) throws AlgorithmException {
-		SolverService solverService = SolverService
-				.getInstance();
-		solverService.setSolverState(solverId,
-				SolverState.RUNNING);
+	public List<List<Double>> compute(SolverId solverId,
+			MoeadParameter parameter) throws AlgorithmException {
+		SolverService solverService = SolverService.getInstance();
+		solverService.setSolverState(solverId, SolverState.RUNNING);
 
-		JobService<double[], double[]> jobService = JobService.getInstance();
+		TaskClient<double[], double[]> taskClient = new TaskClientImpl<>(
+				MOEAD_QUEUE);
 
 		int maxIterations = parameter.getMaxIterations();
 		int N = parameter.getN();
 		int neighborSize = parameter.getNeighborSize();
 		int genomeSize = parameter.getGenomeSize();
-		
+
 		long startTime = System.currentTimeMillis();
 
 		double[][] weightVectors = Initializer.generateWeightVectors(N);
@@ -62,12 +55,11 @@ public class Moead extends SimpleJobHandler<double[]> implements Algorithm<List<
 		// population
 		// 1.2
 		int[][] B = Initializer.getNeighbors(weightVectors, neighborSize); // neighbors
-		
+
 		// 1.3
 		double[][] population = null;
 		int persitedIteration = 0;
-		SolverData<?> solverData = solverService
-				.getSolverData(solverId);
+		SolverData<?> solverData = solverService.getSolverData(solverId);
 		if (solverData != null) {
 			population = convertToArray(solverData.getData());
 			persitedIteration = solverData.getIteration();
@@ -96,68 +88,56 @@ public class Moead extends SimpleJobHandler<double[]> implements Algorithm<List<
 				y[i] = reproduce(population, B[i]);
 			}
 
-			JobRequest<double[]> jobRequest = new JobRequest<>(this);
-			for (int i = 0; i < N; i++) {
-				jobRequest.add(new JobRequestData<double[]>(y[i], i));
-			}
-
-			latch = new CountDownLatch(1);
-			JobId jobId = jobService.submitJob(jobRequest, MOEAD_QUEUE);
+			List<TaskFuture<double[]>> futures;
 			try {
-				latch.await();
+				futures = taskClient.addAll(y);
+				for (int i = 0; i < N; i++) {
+					double[] fValues = futures.get(i).get();
+					// 2.2 - no repair needed
+					// 2.3
+					updateReferencePoint(z, y[i]);
+					// 2.4
+					updateNeighborhood(population, functionValues, B[i],
+							weightVectors, z, y[i], fValues);
+					// 2.5
+					// Dosen't work as expected, so was commented out
+					// updateEP(EP, y, weightVectors[i], z);
+				}
 			} catch (InterruptedException e) {
-				throw new AlgorithmException("Error while waiting for latch", e);
-			}
-
-			JobResponse<double[]> jobResponse = jobService
-					.getJobResponse(jobId);
-			jobService.jobCleanup(jobId);
-			List<JobResponseData<double[]>> results = jobResponse
-					.getResponseData();
-
-			for (int i = 0; i < N; i++) {
-				double[] fValues = results.get(i).getData();
-				// 2.2 - no repair needed
-				// 2.3
-				updateReferencePoint(z, y[i]);
-				// 2.4
-				updateNeighborhood(population, functionValues, B[i],
-						weightVectors, z, y[i], fValues);
-				// 2.5
-				// Dosen't work as expected, so was commented out
-				// updateEP(EP, y, weightVectors[i], z);
+				LOG.error("Error while remote task computation", e);
+				throw new AlgorithmException(e);
 			}
 
 			iteration++;
-			
+
 			List<List<Double>> result = computeResult(functionValues, z);
-			
-			solverData = new SolverData<List<List<Double>>>(
-					result, 0, iteration + persitedIteration);
-			solverService.setSolverData(solverId,
-					solverData);
-			
+
+			solverData = new SolverData<List<List<Double>>>(result, 0,
+					iteration + persitedIteration);
+			solverService.setSolverData(solverId, solverData);
+
 			if (iteration >= maxIterations) {
 				end = true;
 			}
 			if (iteration % 100 == 0) {
 				long endTime = System.currentTimeMillis();
 				LOG.info("Counter: {} | last {} MOEAD iterations took {} ms",
-						iteration + persitedIteration, logSteps, endTime - startTime);
+						iteration + persitedIteration, logSteps, endTime
+								- startTime);
 				startTime = endTime;
 			}
-			
+
 			solverService.setProgress(solverId, (float) iteration
 					/ (float) maxIterations);
 		}
 
 		updateMinMax(functionValues);
-		
+
 		List<List<Double>> result = computeResult(functionValues, z);
 		for (List<Double> vals : result) {
 			LOG.info(vals.get(0) + " " + vals.get(1));
 		}
-		
+
 		return result;
 
 		// for (List<Double> l : EP) {
@@ -191,11 +171,6 @@ public class Moead extends SimpleJobHandler<double[]> implements Algorithm<List<
 		}
 
 		return population;
-	}
-	
-	@Override
-	public void onFinished(JobId jobId) {
-		latch.countDown();
 	}
 
 	private void updateMinMax(double[][] functionValues) {
@@ -293,14 +268,15 @@ public class Moead extends SimpleJobHandler<double[]> implements Algorithm<List<
 		// return ((f1Val - z[0]) / (maxF1 - minF1) * weightVector[0]) + ((f2Val
 		// - z[1]) / (maxF2 - minF2) * weightVector[1]);
 	}
-	
-	private List<List<Double>> computeResult(double[][] functionValues, double[] z) {
+
+	private List<List<Double>> computeResult(double[][] functionValues,
+			double[] z) {
 		List<List<Double>> result = new ArrayList<List<Double>>();
 		for (int i = 0; i < functionValues.length; i++) {
 			List<Double> l = new ArrayList<Double>();
-//			TODO check if normalization should be done
-//			double val1 = (functionValues[i][0] - z[0]) / (maxF1 - minF1);
-//			double val2 = (functionValues[i][1] - z[1]) / (maxF2 - minF2);
+			// TODO check if normalization should be done
+			// double val1 = (functionValues[i][0] - z[0]) / (maxF1 - minF1);
+			// double val2 = (functionValues[i][1] - z[1]) / (maxF2 - minF2);
 			double val1 = (functionValues[i][0] - z[0]);
 			double val2 = (functionValues[i][1] - z[1]);
 			l.add(val1);

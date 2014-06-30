@@ -10,34 +10,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
+import at.ac.uibk.dps.biohadoop.connection.Message;
+import at.ac.uibk.dps.biohadoop.connection.MessageType;
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
-import at.ac.uibk.dps.biohadoop.server.UndertowShutdown;
+import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
+import at.ac.uibk.dps.biohadoop.queue.Task;
+import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
+import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.server.deployment.DeployingClasses;
-import at.ac.uibk.dps.biohadoop.service.job.Task;
-import at.ac.uibk.dps.biohadoop.service.job.api.JobService;
-import at.ac.uibk.dps.biohadoop.service.job.remote.Message;
-import at.ac.uibk.dps.biohadoop.service.job.remote.MessageType;
-import at.ac.uibk.dps.biohadoop.service.solver.ShutdownHandler;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
+import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.Ga;
+import at.ac.uibk.dps.biohadoop.torename.Helper;
 import at.ac.uibk.dps.biohadoop.torename.MasterConfiguration;
 
-public class WebSocketEndpoint implements Endpoint, ShutdownHandler, MasterConnection {
+public class WebSocketEndpoint implements Endpoint, MasterConnection {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WebSocketEndpoint.class);
 
-	private final JobService<int[], Double> jobService = JobService.getInstance();
-	
+	private final TaskEndpoint<?, ?> taskEndpoint = new TaskEndpointImpl<>(
+			Ga.GA_QUEUE);
+
 	private MasterConfiguration masterConfiguration;
 	private Message<?> inputMessage;
 	private Message<?> outputMessage;
 	private boolean close = false;
 
 	protected MasterEndpoint masterEndpoint;
-	
+
 	@Override
 	public void configure() {
 		DeployingClasses.addWebSocketClass(this.getClass());
@@ -45,39 +47,34 @@ public class WebSocketEndpoint implements Endpoint, ShutdownHandler, MasterConne
 
 	@Override
 	public void start() {
-		
 	}
 
 	@OnOpen
 	public void open(Session session) {
 		LOG.info("Opened Websocket connection to URI {}, sessionId={}",
 				session.getRequestURI(), session.getId());
-		
-		UndertowShutdown.increaseShutdownCount();
-		SolverService.getInstance().registerShutdownHandler(this);
+		ShutdownWaitingService.register();
 	}
 
 	@OnMessage
 	public Message<?> onMessage(Message<Double> message, Session session) {
 		if (close) {
 			LOG.info("CLOSE");
-			return null;
+			return new Message<>(MessageType.SHUTDOWN, null);
 		}
+
 		inputMessage = message;
-		
-//		try {
-			if (message.getType() == MessageType.REGISTRATION_REQUEST) {
-				masterEndpoint.handleRegistration();
-			}
-			if (message.getType() == MessageType.WORK_INIT_REQUEST) {
-				masterEndpoint.handleWorkInit();
-			}
-			if (message.getType() == MessageType.WORK_REQUEST) {
-				masterEndpoint.handleWork();
-			}
-//		} catch (ShutdownException e) {
-//			LOG.info("Got shutdown event");
-//		}
+
+		if (message.getType() == MessageType.REGISTRATION_REQUEST) {
+			masterEndpoint.handleRegistration();
+		}
+		if (message.getType() == MessageType.WORK_INIT_REQUEST) {
+			masterEndpoint.handleWorkInit();
+		}
+		if (message.getType() == MessageType.WORK_REQUEST) {
+			masterEndpoint.handleWork();
+		}
+
 		return outputMessage;
 	}
 
@@ -85,44 +82,38 @@ public class WebSocketEndpoint implements Endpoint, ShutdownHandler, MasterConne
 	public void onClose(Session session) throws InterruptedException {
 		LOG.info("Closed Websocket connection to URI {}, sessionId={}",
 				session.getRequestURI(), session.getId());
-		Task currentTask = masterEndpoint.getCurrentTask();
+		Task<?> currentTask = masterEndpoint.getCurrentTask();
 		if (currentTask != null) {
-			jobService.reschedule(currentTask, masterConfiguration.getQueueName());
+			taskEndpoint.reschedule(currentTask.getTaskId());
 		}
 		close = true;
-		UndertowShutdown.decreaseLatch();
+		ShutdownWaitingService.unregister();
 	}
-	
+
 	@OnError
 	public void onError(Session session, Throwable t)
 			throws InterruptedException {
-		Task currentTask = masterEndpoint.getCurrentTask();
+		Task<?> currentTask = masterEndpoint.getCurrentTask();
 		LOG.error(
 				"Websocket error for URI {} and sessionId {}, affected task: {} ",
 				session.getRequestURI(), session.getId(), currentTask, t);
-		jobService.reschedule(currentTask, masterConfiguration.getQueueName());
+		taskEndpoint.reschedule(currentTask.getTaskId());
+		ShutdownWaitingService.unregister();
 	}
 
 	@Override
-	public void shutdown() {
-//		if (resourceSession != null && !close) {
-//			LOG.info("WebSocket closing for URI {} and sessionId {}",
-//					resourceSession.getRequestURI(), resourceSession.getId());
-//		}
-//		if (resourceSession == null) {
-//			LOG.info("WebSocket was not opened");
-//		}
+	public void stop() {
+		LOG.info("Stopping {}", Helper.getClassname(WebSocketEndpoint.class));
 	}
 
-	
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> Message<T> receive() throws ReceiveException {
-		return (Message<T>)inputMessage;
+		return (Message<T>) inputMessage;
 	}
 
 	@Override
-	public void send(Message<?> message) throws SendException {
+	public <T> void send(Message<T> message) throws SendException {
 		outputMessage = message;
 	}
 

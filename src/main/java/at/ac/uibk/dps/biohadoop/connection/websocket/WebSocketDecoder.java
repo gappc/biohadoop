@@ -9,7 +9,7 @@ import javax.websocket.EndpointConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.service.job.remote.Message;
+import at.ac.uibk.dps.biohadoop.connection.Message;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

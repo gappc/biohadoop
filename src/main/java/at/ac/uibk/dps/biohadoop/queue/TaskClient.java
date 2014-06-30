@@ -9,5 +9,8 @@ public interface TaskClient<T, S> {
 
 	public List<TaskFuture<S>> addAll(List<T> taskRequests)
 			throws InterruptedException;
+	
+	public List<TaskFuture<S>> addAll(T[] taskRequests)
+			throws InterruptedException;
 
 }

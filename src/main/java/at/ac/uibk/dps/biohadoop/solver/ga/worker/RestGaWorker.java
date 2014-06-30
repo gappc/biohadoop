@@ -11,13 +11,12 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.connection.Message;
+import at.ac.uibk.dps.biohadoop.connection.MessageType;
 import at.ac.uibk.dps.biohadoop.connection.WorkerConnection;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
-import at.ac.uibk.dps.biohadoop.service.job.Task;
-import at.ac.uibk.dps.biohadoop.service.job.remote.Message;
-import at.ac.uibk.dps.biohadoop.service.job.remote.MessageType;
+import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.GaFitness;
-import at.ac.uibk.dps.biohadoop.solver.ga.master.GaEndpointConfig;
 import at.ac.uibk.dps.biohadoop.torename.Helper;
 import at.ac.uibk.dps.biohadoop.torename.PerformanceLogger;
 
@@ -79,6 +78,7 @@ public class RestGaWorker implements WorkerConnection {
 			LOG.debug("{} WORK_RESPONSE", className);
 
 			if (inputMessage.getType() == MessageType.SHUTDOWN) {
+				LOG.info("Got shutdown");
 				break;
 			}
 

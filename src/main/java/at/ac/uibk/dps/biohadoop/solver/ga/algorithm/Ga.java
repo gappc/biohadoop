@@ -4,20 +4,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.CountDownLatch;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.config.Algorithm;
 import at.ac.uibk.dps.biohadoop.config.AlgorithmException;
-import at.ac.uibk.dps.biohadoop.service.job.JobId;
-import at.ac.uibk.dps.biohadoop.service.job.api.JobService;
-import at.ac.uibk.dps.biohadoop.service.job.api.JobRequest;
-import at.ac.uibk.dps.biohadoop.service.job.api.JobRequestData;
-import at.ac.uibk.dps.biohadoop.service.job.api.JobResponse;
-import at.ac.uibk.dps.biohadoop.service.job.api.JobResponseData;
-import at.ac.uibk.dps.biohadoop.service.job.handler.SimpleJobHandler;
+import at.ac.uibk.dps.biohadoop.queue.TaskClient;
+import at.ac.uibk.dps.biohadoop.queue.TaskClientImpl;
+import at.ac.uibk.dps.biohadoop.queue.TaskFuture;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverData;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
@@ -25,8 +20,7 @@ import at.ac.uibk.dps.biohadoop.service.solver.SolverState;
 import at.ac.uibk.dps.biohadoop.solver.ga.DistancesGlobal;
 import at.ac.uibk.dps.biohadoop.solver.ga.config.GaParameter;
 
-public class Ga extends SimpleJobHandler<int[]> implements
-		Algorithm<int[], GaParameter> {
+public class Ga implements Algorithm<int[], GaParameter> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Ga.class);
 	public static final String GA_QUEUE = "GA_QUEUE";
@@ -34,17 +28,13 @@ public class Ga extends SimpleJobHandler<int[]> implements
 	private final Random rand = new Random();
 	private final int logSteps = 1000;
 
-	private CountDownLatch latch;
-
 	@Override
 	public int[] compute(SolverId solverId, GaParameter parameter)
 			throws AlgorithmException {
-		SolverService solverService = SolverService
-				.getInstance();
-		solverService.setSolverState(solverId,
-				SolverState.RUNNING);
+		SolverService solverService = SolverService.getInstance();
+		solverService.setSolverState(solverId, SolverState.RUNNING);
 
-		JobService<int[], Double> jobService = JobService.getInstance();
+		TaskClient<int[], Double> taskClient = new TaskClientImpl<>(GA_QUEUE);
 
 		Tsp tsp = parameter.getTsp();
 		int populationSize = parameter.getPopulationSize();
@@ -56,8 +46,7 @@ public class Ga extends SimpleJobHandler<int[]> implements
 		// Init population
 		int[][] population = null;
 		int persitedIteration = 0;
-		SolverData<?> solverData = solverService
-				.getSolverData(solverId);
+		SolverData<?> solverData = solverService.getSolverData(solverId);
 		if (solverData != null) {
 			population = convertToArray(solverData.getData());
 			persitedIteration = solverData.getIteration();
@@ -88,35 +77,21 @@ public class Ga extends SimpleJobHandler<int[]> implements
 			}
 
 			// evaluation
-			JobRequest<int[]> jobRequest = new JobRequest<>(this);
-			for (int i = 0; i < populationSize; i++) {
-				jobRequest.add(new JobRequestData<int[]>(population[i], i));
-			}
-			for (int i = 0; i < populationSize; i++) {
-				jobRequest.add(new JobRequestData<int[]>(mutated[i], i
-						+ populationSize));
-			}
-
-			latch = new CountDownLatch(1);
-			JobId jobId = jobService.submitJob(jobRequest, GA_QUEUE);
-			try {
-				latch.await();
-			} catch (InterruptedException e) {
-				throw new AlgorithmException("Error while waiting for latch", e);
-			}
-
-			JobResponse<Double> jobResponse = jobService.getJobResponse(jobId);
-			jobService.jobCleanup(jobId);
-			List<JobResponseData<Double>> results = jobResponse
-					.getResponseData();
-
 			double[] values = new double[populationSize * 2];
-			for (int i = 0; i < populationSize; i++) {
-				values[i] = results.get(i).getData();
-			}
-			for (int i = 0; i < populationSize; i++) {
-				values[i + populationSize] = results.get(i + populationSize)
-						.getData();
+			try {
+				List<TaskFuture<Double>> taskFutures = taskClient
+						.addAll(population);
+
+				for (int i = 0; i < populationSize; i++) {
+					taskFutures.add(taskClient.add(mutated[i]));
+				}
+
+				for (int i = 0; i < taskFutures.size(); i++) {
+					values[i] = taskFutures.get(i).get();
+				}
+			} catch (InterruptedException e) {
+				LOG.error("Error while remote task computation", e);
+				throw new AlgorithmException(e);
 			}
 
 			// selection
@@ -156,10 +131,9 @@ public class Ga extends SimpleJobHandler<int[]> implements
 
 			iteration++;
 
-			solverData = new SolverData<int[][]>(population,
-					values[0], iteration + persitedIteration);
-			solverService.setSolverData(solverId,
-					solverData);
+			solverData = new SolverData<int[][]>(population, values[0],
+					iteration + persitedIteration);
+			solverService.setSolverData(solverId, solverData);
 
 			if (iteration == maxIterations) {
 				end = true;
@@ -195,11 +169,6 @@ public class Ga extends SimpleJobHandler<int[]> implements
 		}
 
 		return population;
-	}
-
-	@Override
-	public void onFinished(JobId jobId) {
-		latch.countDown();
 	}
 
 	private int[][] initPopulation(int genomeSize, int citieSize) {
@@ -256,18 +225,6 @@ public class Ga extends SimpleJobHandler<int[]> implements
 		ds[pos1] = tmp;
 
 		return ds;
-	}
-
-	private int[][] islandMerge(int[][] population,
-			List<List<Integer>> remotePopulation) {
-		int halfSize = population.length / 2;
-		for (int i = 0; i < halfSize; i++) {
-			// here we copy values so we prevent accidential memory leaks
-			for (int j = 0; j < remotePopulation.get(i).size(); j++) {
-				population[i + halfSize][j] = remotePopulation.get(i).get(j);
-			}
-		}
-		return population;
 	}
 
 	private void printGenome(double[][] distances, int[] solution, int citySize) {

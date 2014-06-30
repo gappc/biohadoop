@@ -8,22 +8,24 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
+import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.connection.Message;
+import at.ac.uibk.dps.biohadoop.connection.MessageType;
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
-import at.ac.uibk.dps.biohadoop.service.job.Task;
-import at.ac.uibk.dps.biohadoop.service.job.api.JobService;
-import at.ac.uibk.dps.biohadoop.service.job.remote.Message;
-import at.ac.uibk.dps.biohadoop.service.job.remote.MessageType;
+import at.ac.uibk.dps.biohadoop.queue.Task;
+import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
+import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.torename.Helper;
 import at.ac.uibk.dps.biohadoop.torename.MasterConfiguration;
 
-public class SocketEndpoint implements Runnable, Endpoint {
+public class SocketEndpoint implements Callable<Integer>, Endpoint {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SocketEndpoint.class);
@@ -36,16 +38,17 @@ public class SocketEndpoint implements Runnable, Endpoint {
 	private ObjectInputStream is = null;
 	private int counter = 0;
 	private boolean close = false;
-	
+
 	public SocketEndpoint(Socket socket, MasterConfiguration masterConfiguration) {
 		this.socket = socket;
 		this.masterConfiguration = masterConfiguration;
 	}
 
 	@Override
-	public void run() {
-		JobService<?, ?> jobService = JobService.getInstance();
-		
+	public Integer call() {
+		TaskEndpoint<?, ?> taskEndpoint = new TaskEndpointImpl<>(
+				masterConfiguration.getQueueName());
+
 		MasterEndpoint endpoint = null;
 		try {
 			LOG.info("Opened Socket on server");
@@ -62,17 +65,14 @@ public class SocketEndpoint implements Runnable, Endpoint {
 			while (!close) {
 				endpoint.handleWork();
 			}
-//		} catch (ShutdownException e) {
-//			LOG.info("Got shutdown event");
 		} catch (Exception e) {
 			LOG.error("Error while running {}", className, e);
 			if (endpoint != null) {
-				Task currentTask = endpoint.getCurrentTask();
+				Task<?> currentTask = endpoint.getCurrentTask();
 				if (currentTask != null) {
-					// TODO make queueName dynamic
-					boolean hasRescheduled = jobService.reschedule(currentTask,
-							masterConfiguration.getQueueName());
-					if (!hasRescheduled) {
+					try {
+						taskEndpoint.reschedule(currentTask.getTaskId());
+					} catch (InterruptedException e1) {
 						LOG.error("Could not reschedule task at {}",
 								currentTask);
 					}
@@ -94,14 +94,21 @@ public class SocketEndpoint implements Runnable, Endpoint {
 				}
 			}
 		}
+		return 0;
 	}
 
-	private MasterEndpoint buildMaster(Class<? extends MasterEndpoint> masterEndpointClass) throws Exception {
+	private MasterEndpoint buildMaster(
+			Class<? extends MasterEndpoint> masterEndpointClass)
+			throws Exception {
 		try {
-			Constructor<? extends MasterEndpoint> constructor = masterEndpointClass.getDeclaredConstructor(Endpoint.class);
+			Constructor<? extends MasterEndpoint> constructor = masterEndpointClass
+					.getDeclaredConstructor(Endpoint.class);
 			return constructor.newInstance(this);
-		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			LOG.error("Could not instanciate new {} with parameter {}", masterEndpointClass, this);
+		} catch (NoSuchMethodException | SecurityException
+				| InstantiationException | IllegalAccessException
+				| IllegalArgumentException | InvocationTargetException e) {
+			LOG.error("Could not instanciate new {} with parameter {}",
+					masterEndpointClass, this);
 			throw new Exception(e);
 		}
 	}
@@ -116,7 +123,7 @@ public class SocketEndpoint implements Runnable, Endpoint {
 		}
 	}
 
-	public void send(Message<?> message) throws SendException {
+	public <T> void send(Message<T> message) throws SendException {
 		try {
 			counter++;
 			if (counter % 10000 == 0) {

@@ -15,6 +15,7 @@ import javax.servlet.ServletException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xnio.OptionMap;
+import org.xnio.Options;
 import org.xnio.Xnio;
 import org.xnio.XnioWorker;
 
@@ -29,17 +30,8 @@ public class WebSocketHandler {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WebSocketHandler.class);
 
-	private XnioWorker xnioWorker;
-
 	/**
-	 * Needs to be performed manually, else Undertow won't shut down
-	 */
-	public void stop() {
-		xnioWorker.shutdown();
-	}
-
-	/**
-	 * Construct and get an Undertow handler for Resteasy
+	 * Construct and get an Undertow handler for WebSocket
 	 * 
 	 * @param contextPath
 	 *            Path where the websockets are bound
@@ -73,7 +65,9 @@ public class WebSocketHandler {
 		LOG.debug("Building WebSocket DeploymentInfo");
 		final Xnio xnio = Xnio.getInstance("nio",
 				Undertow.class.getClassLoader());
-		xnioWorker = xnio.createWorker(OptionMap.builder().getMap());
+		final XnioWorker xnioWorker = xnio.createWorker(OptionMap.builder()
+				.set(Options.THREAD_DAEMON, true)
+				.set(Options.WORKER_NAME, "WEBSOCKET").getMap());
 		final WebSocketDeploymentInfo webSockets = new WebSocketDeploymentInfo();
 		for (Class<?> webSocketClass : webSocketClasses) {
 			webSockets.addEndpoint(webSocketClass);

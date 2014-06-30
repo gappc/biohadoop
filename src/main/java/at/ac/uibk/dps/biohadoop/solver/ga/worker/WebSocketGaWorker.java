@@ -20,13 +20,13 @@ import javax.websocket.WebSocketContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.connection.Message;
+import at.ac.uibk.dps.biohadoop.connection.MessageType;
 import at.ac.uibk.dps.biohadoop.connection.WorkerConnection;
 import at.ac.uibk.dps.biohadoop.connection.websocket.WebSocketDecoder;
 import at.ac.uibk.dps.biohadoop.connection.websocket.WebSocketEncoder;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
-import at.ac.uibk.dps.biohadoop.service.job.Task;
-import at.ac.uibk.dps.biohadoop.service.job.remote.Message;
-import at.ac.uibk.dps.biohadoop.service.job.remote.MessageType;
+import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.GaFitness;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -153,6 +153,7 @@ public class WebSocketGaWorker implements WorkerConnection {
 					"############# {} Worker stopped ###############",
 					WebSocketGaWorker.class.getSimpleName());
 			session.close();
+			return null;
 		}
 		LOG.error("SHOULD NOT BE HERE");
 		return null;

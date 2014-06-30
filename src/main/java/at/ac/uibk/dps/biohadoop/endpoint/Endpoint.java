@@ -1,8 +1,11 @@
 package at.ac.uibk.dps.biohadoop.endpoint;
 
-import at.ac.uibk.dps.biohadoop.service.job.remote.Message;
+import at.ac.uibk.dps.biohadoop.connection.Message;
 
 public interface Endpoint {
-	public <T> Message<T> receive() throws ReceiveException;
-	public void send(Message<?> message) throws SendException;
+
+	public <T>void send(Message<T> message) throws SendException;
+
+	public <T>Message<T> receive() throws ReceiveException;
+
 }

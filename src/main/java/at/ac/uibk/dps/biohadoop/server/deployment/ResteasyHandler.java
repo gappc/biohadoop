@@ -5,6 +5,7 @@ import io.undertow.server.HttpHandler;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
+import io.undertow.servlet.api.ListenerInfo;
 import io.undertow.servlet.api.ServletInfo;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.List;
 
 import javax.servlet.ServletException;
 
+import org.jboss.resteasy.cdi.CdiInjectorFactory;
 import org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher;
 import org.jboss.resteasy.spi.ResteasyDeployment;
 import org.slf4j.Logger;
@@ -72,20 +74,23 @@ public class ResteasyHandler {
 		ResteasyDeployment deployment = new ResteasyDeployment();
 		deployment.getActualResourceClasses().addAll(resourceClasses);
 		deployment.getActualProviderClasses().addAll(providerClasses);
+		deployment.setInjectorFactoryClass(CdiInjectorFactory.class.getName());
 		return deployment;
 	}
 
 	private DeploymentInfo buildDeploymentInfo(ResteasyDeployment deployment,
 			String contextPath) {
 		LOG.debug("Building Resteasy DeploymentInfo");
+		ListenerInfo listener = Servlets.listener(CDIListener.class);
 		ServletInfo resteasyServlet = buildResteasyServlet();
 
 		return new DeploymentInfo()
+				.addListener(listener)	
 				.setContextPath(contextPath)
 				.addServletContextAttribute(ResteasyDeployment.class.getName(),
 						deployment).addServlet(resteasyServlet)
 				.setDeploymentName("ResteasyUndertow")
-				.setClassLoader(Thread.currentThread().getContextClassLoader());
+				.setClassLoader(JaxRsActivator.class.getClassLoader());
 	}
 
 	private ServletInfo buildResteasyServlet() {

@@ -3,10 +3,7 @@ package at.ac.uibk.dps.biohadoop.torename;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
-import at.ac.uibk.dps.biohadoop.service.solver.ShutdownHandler;
-
-public class TaskSupervisor implements Runnable, ShutdownHandler {
+public class TaskSupervisor implements Runnable {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(TaskSupervisor.class);
@@ -25,7 +22,6 @@ public class TaskSupervisor implements Runnable, ShutdownHandler {
 
 	@Override
 	public void run() {
-		SolverService.getInstance().registerShutdownHandler(this);
 		try {
 			while (true) {
 				synchronized (stop) {
@@ -52,13 +48,6 @@ public class TaskSupervisor implements Runnable, ShutdownHandler {
 			}
 		} catch (Exception e) {
 			LOG.error("Error while scanning for hanging tasks", e);
-		}
-	}
-
-	@Override
-	public void shutdown() {
-		synchronized (stop) {
-			stop = true;
 		}
 	}
 

@@ -16,6 +16,7 @@ public class TaskQueue<T, S> implements TaskClient<T, S>, TaskEndpoint<T, S> {
 	
 	private final BlockingQueue<Task<T>> queue = new LinkedBlockingQueue<>();
 	private final Map<TaskId, TaskQueueEntry<T, S>> workingSet = new ConcurrentHashMap<>();
+	private final Map<Thread, Thread> waitingThreads = new ConcurrentHashMap<>();
 
 	@Override
 	public TaskFuture<S> add(T taskRequest)
@@ -44,8 +45,23 @@ public class TaskQueue<T, S> implements TaskClient<T, S>, TaskEndpoint<T, S> {
 	}
 
 	@Override
+	public List<TaskFuture<S>> addAll(T[] taskRequests)
+			throws InterruptedException {
+		LOG.debug("Adding list of task requests with size {}", taskRequests.length);
+		List<TaskFuture<S>> taskFutures = new ArrayList<>();
+		for (T taskRequest : taskRequests) {
+			TaskFuture<S> taskFutureImpl = add(taskRequest);
+			taskFutures.add(taskFutureImpl);
+		}
+		return taskFutures;
+	}
+	
+	@Override
 	public Task<T> getTask() throws InterruptedException {
-		return queue.take();
+		waitingThreads.put(Thread.currentThread(), Thread.currentThread());
+		Task<T> task = queue.take();
+		waitingThreads.remove(Thread.currentThread());
+		return task;
 	}
 
 	@Override
@@ -63,4 +79,11 @@ public class TaskQueue<T, S> implements TaskClient<T, S>, TaskEndpoint<T, S> {
 		queue.put(taskQueueEntry.getTask());
 	}
 	
+	public void stopQueue() {
+		LOG.info("Interrupting all waiting Threads");
+		for (Thread thread : waitingThreads.keySet()) {
+			LOG.debug("Interrupting {}", thread);
+			thread.interrupt();
+		}
+	}
 }

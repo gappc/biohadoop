@@ -7,10 +7,10 @@ import io.undertow.server.handlers.PathHandler;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletException;
 
+import org.jboss.weld.environment.se.Weld;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,23 +19,20 @@ import at.ac.uibk.dps.biohadoop.server.deployment.DeployingClasses;
 import at.ac.uibk.dps.biohadoop.server.deployment.ResteasyHandler;
 import at.ac.uibk.dps.biohadoop.server.deployment.WebSocketHandler;
 import at.ac.uibk.dps.biohadoop.service.distribution.DistributionResource;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
-import at.ac.uibk.dps.biohadoop.service.solver.ShutdownHandler;
 import at.ac.uibk.dps.biohadoop.torename.HostInfo;
 
-public class UndertowServer implements ShutdownHandler {
+public class UndertowServer {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(UndertowServer.class);
 
-	private Undertow server;
+	private Undertow undertow;
 	private WebSocketHandler webSocket;
+	private Weld weld;
 
-	public UndertowServer() {
-		SolverService.getInstance().registerShutdownHandler(this);
-	}
-
-	public void startServer() {
+	public void start() throws StartServerException {
+		weld = new Weld();
+		weld.initialize();
 		LOG.info("Starting Undertow");
 
 		final String host = HostInfo.getHostname();
@@ -43,16 +40,26 @@ public class UndertowServer implements ShutdownHandler {
 		Environment.set(Environment.HTTP_HOST, host);
 		Environment.set(Environment.HTTP_PORT, Integer.toString(port));
 
-		LOG.info("host: " + host + "  port: " + port);
-
 		try {
-			server = Undertow.builder().addHttpListener(port, host)
+			undertow = Undertow.builder().addHttpListener(port, host)
 					.setHandler(getPathHandler()).build();
-			server.start();
-			LOG.info("Undertow started at " + HostInfo.getHostname());
+			undertow.start();
+			LOG.info("Undertow started at " + host + ":" + port);
 		} catch (IllegalArgumentException | IOException | ServletException e) {
 			LOG.error("Could not start Undertow", e);
+			throw new StartServerException(e);
 		}
+	}
+
+	public void stop() throws StopServerException {
+		LOG.info("Stopping Undertow");
+//		try {
+//			Thread.sleep(2000);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		undertow.stop();
 	}
 
 	private PathHandler getPathHandler() throws IllegalArgumentException,
@@ -72,33 +79,7 @@ public class UndertowServer implements ShutdownHandler {
 		HttpHandler webSocketHandler = webSocket.getHandler(
 				webSocketContextPath, webSocketClasses);
 
-		return path().addPrefixPath(resteasyContextPath, httpHandler)
+		return new PathHandler().addPrefixPath(resteasyContextPath, httpHandler)
 				.addPrefixPath(webSocketContextPath, webSocketHandler);
-	}
-
-	public void stopServer() {
-		if (server != null) {
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						UndertowShutdown.getLatch().await(5000,
-								TimeUnit.MILLISECONDS);
-						// Is needed because of problems with WebSockets
-						Thread.sleep(1000);
-						LOG.info("Stopping Undertow");
-						webSocket.stop();
-						server.stop();
-					} catch (InterruptedException e) {
-						LOG.error("Error during server shutdown sleep", e);
-					}
-				}
-			}).start();
-		}
-	}
-
-	@Override
-	public void shutdown() {
-		stopServer();
 	}
 }

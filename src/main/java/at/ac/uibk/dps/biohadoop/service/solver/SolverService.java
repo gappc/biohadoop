@@ -4,18 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import at.ac.uibk.dps.biohadoop.service.job.api.JobService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import at.ac.uibk.dps.biohadoop.torename.ObjectCloner;
 
 public class SolverService {
 
+	private static final Logger LOG = LoggerFactory
+			.getLogger(SolverService.class);
+
 	private static final SolverService SOLVER_MANAGER = new SolverService();
 	private Map<SolverId, Solver> solvers = new ConcurrentHashMap<>();
-	// TODO use on all handlers the CopyOnWriteArrayList like here
-	private List<ShutdownHandler> shutdownHandlers = new CopyOnWriteArrayList<>();
 	private AtomicInteger counter = new AtomicInteger();
 
 	private SolverService() {
@@ -47,49 +49,35 @@ public class SolverService {
 		return progress > 1 ? 1 : progress;
 	}
 
-	public void setProgress(final SolverId solverId,
-			final float progress) {
+	public void setProgress(final SolverId solverId, final float progress) {
 		Solver solver = solvers.get(solverId);
 		solver.setProgress(progress);
 	}
 
-	public SolverState getSolverState(
-			final SolverId solverId) {
+	public SolverState getSolverState(final SolverId solverId) {
 		Solver solver = solvers.get(solverId);
 		return solver.getSolverState();
 	}
 
-	public void setSolverState(final SolverId solverId,
-			SolverState solverState) {
+	public void setSolverState(final SolverId solverId, SolverState solverState) {
 		Solver solver = solvers.get(solverId);
 		solver.setSolverState(solverState);
 
 		switch (solverState) {
 		case NEW:
-			for (SolverHandler solverHandler : solver
-					.getSolverHandlers()) {
+			for (SolverHandler solverHandler : solver.getSolverHandlers()) {
 				solverHandler.onNew(solverId);
 			}
 			break;
 		case FINISHED:
 			counter.decrementAndGet();
 			if (counter.compareAndSet(0, 0)) {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				invokeShutdownHandlers();
+				LOG.info("All algorithms terminated");
 			}
 			break;
 		default:
 			break;
 		}
-	}
-
-	public void registerShutdownHandler(final ShutdownHandler shutdownHandler) {
-		shutdownHandlers.add(shutdownHandler);
 	}
 
 	public void setSolverData(final SolverId solverId,
@@ -98,12 +86,11 @@ public class SolverService {
 		SolverData<?> clone = ObjectCloner.deepCopy(solverData,
 				SolverData.class);
 		solver.setSolverData(clone);
-		for (SolverHandler solverHandler : solver
-				.getSolverHandlers()) {
+		for (SolverHandler solverHandler : solver.getSolverHandlers()) {
 			solverHandler.onDataUpdate(solverId);
 		}
 	}
-	
+
 	public void updateSolverData(final SolverId solverId,
 			final SolverData<?> solverData) {
 		Solver solver = solvers.get(solverId);
@@ -125,17 +112,9 @@ public class SolverService {
 		return new ArrayList<>(solvers.keySet());
 	}
 
-	public SolverConfiguration getSolverConfiguration(
-			SolverId solverId) {
+	public SolverConfiguration getSolverConfiguration(SolverId solverId) {
 		Solver solver = solvers.get(solverId);
 		return solver.getSolverConfiguration();
-	}
-
-	private void invokeShutdownHandlers() {
-		for (ShutdownHandler shutdownHandler : shutdownHandlers) {
-			shutdownHandler.shutdown();
-		}
-		JobService.getInstance().shutdown();
 	}
 
 }

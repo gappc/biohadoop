@@ -8,32 +8,33 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ConnectionConfiguration {
 
-	private final List<FileMasterConfiguration> masters;
+	private final List<Class<? extends MasterConnection>> masterEndpoints;
 	// TODO: Check if can be improved; At the moment: key must be String because
 	// of Json exception
 	// com.fasterxml.jackson.databind.JsonMappingException: Can not find a (Map)
 	// Key deserializer for type [simple type, class
 	// java.lang.Class<at.ac.uibk.dps.biohadoop.connection.WorkerConnection>]
-	private final Map<String, Integer> workers;
+	private final Map<String, Integer> workerEndpoints;
 
-	public ConnectionConfiguration(List<FileMasterConfiguration> masters,
-			Map<String, Integer> workers) {
-		this.masters = masters;
-		this.workers = workers;
+	public ConnectionConfiguration(
+			List<Class<? extends MasterConnection>> masterEndpoints,
+			Map<String, Integer> workerEndpoints) {
+		this.masterEndpoints = masterEndpoints;
+		this.workerEndpoints = workerEndpoints;
 	}
 
 	@JsonCreator
 	public static ConnectionConfiguration create(
-			@JsonProperty("masters") List<FileMasterConfiguration> masters,
-			@JsonProperty("workers") Map<String, Integer> workers) {
-		return new ConnectionConfiguration(masters, workers);
+			@JsonProperty("masterEndpoints") List<Class<? extends MasterConnection>> masterEndpoints,
+			@JsonProperty("workerEndpoints") Map<String, Integer> workerEndpoints) {
+		return new ConnectionConfiguration(masterEndpoints, workerEndpoints);
 	}
 
-	public List<FileMasterConfiguration> getMasters() {
-		return masters;
+	public List<Class<? extends MasterConnection>> getMasterEndpoints() {
+		return masterEndpoints;
 	}
 
-	public Map<String, Integer> getWorkers() {
-		return workers;
+	public Map<String, Integer> getWorkerEndpoints() {
+		return workerEndpoints;
 	}
 }

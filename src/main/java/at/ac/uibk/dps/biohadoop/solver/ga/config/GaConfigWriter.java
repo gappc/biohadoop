@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.config.AlgorithmConfiguration;
 import at.ac.uibk.dps.biohadoop.connection.ConnectionConfiguration;
-import at.ac.uibk.dps.biohadoop.connection.FileMasterConfiguration;
 import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.service.distribution.DistributionConfiguration;
@@ -95,24 +94,19 @@ public class GaConfigWriter {
 	}
 
 	private static ConnectionConfiguration buildConnectionConfiguration() {
-		List<Class<? extends MasterConnection>> endpoints = new ArrayList<>();
-		endpoints.add(GaSocket.class);
-		endpoints.add(GaKryo.class);
-		endpoints.add(GaRest.class);
-		endpoints.add(GaWebSocket.class);
+		List<Class<? extends MasterConnection>> masterEndpoints = new ArrayList<>();
+		masterEndpoints.add(GaSocket.class);
+		masterEndpoints.add(GaKryo.class);
+		masterEndpoints.add(GaRest.class);
+		masterEndpoints.add(GaWebSocket.class);
 
-		FileMasterConfiguration mc = new FileMasterConfiguration(endpoints);
+		Map<String, Integer> workerEndpoints = new HashMap<>();
+		workerEndpoints.put(SocketGaWorker.class.getCanonicalName(), 3);
+		workerEndpoints.put(KryoGaWorker.class.getCanonicalName(), 1);
+		workerEndpoints.put(RestGaWorker.class.getCanonicalName(), 1);
+		workerEndpoints.put(WebSocketGaWorker.class.getCanonicalName(), 1);
 
-		List<FileMasterConfiguration> masters = new ArrayList<>();
-		masters.add(mc);
-
-		Map<String, Integer> workers = new HashMap<>();
-		workers.put(SocketGaWorker.class.getCanonicalName(), 3);
-		workers.put(KryoGaWorker.class.getCanonicalName(), 1);
-		workers.put(RestGaWorker.class.getCanonicalName(), 1);
-		workers.put(WebSocketGaWorker.class.getCanonicalName(), 1);
-
-		return new ConnectionConfiguration(masters, workers);
+		return new ConnectionConfiguration(masterEndpoints, workerEndpoints);
 	}
 
 	private static SolverConfiguration buildSolverConfig(String name,
@@ -135,7 +129,7 @@ public class GaConfigWriter {
 
 		GaAlgorithmConfig gaAlgorithmConfig = new GaAlgorithmConfig();
 		gaAlgorithmConfig.setDataFile(dataFile);
-		gaAlgorithmConfig.setMaxIterations(10000);
+		gaAlgorithmConfig.setMaxIterations(1000);
 		gaAlgorithmConfig.setPopulationSize(10);
 
 		return gaAlgorithmConfig;

@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.config.AlgorithmConfiguration;
 import at.ac.uibk.dps.biohadoop.connection.ConnectionConfiguration;
-import at.ac.uibk.dps.biohadoop.connection.FileMasterConfiguration;
 import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.service.distribution.DistributionConfiguration;
@@ -89,18 +88,13 @@ public class MoeadConfigWriter {
 	}
 
 	private static ConnectionConfiguration buildConnectionConfiguration() {
-		List<Class<? extends MasterConnection>> endpoints = new ArrayList<>();
-		endpoints.add(MoeadSocket.class);
+		List<Class<? extends MasterConnection>> masterEndpoints = new ArrayList<>();
+		masterEndpoints.add(MoeadSocket.class);
 
-		FileMasterConfiguration mc = new FileMasterConfiguration(endpoints);
+		Map<String, Integer> workerEndpoints = new HashMap<>();
+		workerEndpoints.put(SocketMoeadWorker.class.getCanonicalName(), 3);
 
-		List<FileMasterConfiguration> masters = new ArrayList<>();
-		masters.add(mc);
-
-		Map<String, Integer> workers = new HashMap<>();
-		workers.put(SocketMoeadWorker.class.getCanonicalName(), 3);
-
-		return new ConnectionConfiguration(masters, workers);
+		return new ConnectionConfiguration(masterEndpoints, workerEndpoints);
 	}
 
 	private static SolverConfiguration buildSolverConfig(String name,

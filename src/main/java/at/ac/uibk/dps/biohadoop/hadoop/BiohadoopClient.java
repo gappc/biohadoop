@@ -30,68 +30,86 @@ import org.mortbay.util.ajax.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.torename.ArgumentChecker;
 import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;
+import at.ac.uibk.dps.biohadoop.torename.Helper;
 import at.ac.uibk.dps.biohadoop.torename.HostInfo;
 import at.ac.uibk.dps.biohadoop.torename.LocalResourceBuilder;
 
+/**
+ * @author Christian Gapp
+ *
+ */
 public class BiohadoopClient {
 
-	private static final Logger LOG = LoggerFactory.getLogger(BiohadoopClient.class);
-	
-	private List<String> includePaths = new ArrayList<String>();
+	private static final Logger LOG = LoggerFactory
+			.getLogger(BiohadoopClient.class);
+
+	private final static String className = Helper
+			.getClassname(BiohadoopClient.class);
+
+	private final List<String> includePaths = new ArrayList<String>();
 
 	public static void main(String[] args) {
-		LOG.info("Client started at " + HostInfo.getHostname());
-		long start = System.currentTimeMillis();
-
-		BiohadoopClient c = new BiohadoopClient();
-		c.run(new YarnConfiguration(), args);
-
-		long end = System.currentTimeMillis();
-		LOG.info("Client stopped, time: {}ms", end - start);
-	}
-
-	public void run(YarnConfiguration conf, String[] args) {
-		if (!checkArguments(conf, args)) {
-			return;
-		}
 		try {
-			startApplicationMaster(conf, args[0]);
+			LOG.info("Client started at " + HostInfo.getHostname());
+			long start = System.currentTimeMillis();
+
+			BiohadoopClient client = new BiohadoopClient();
+			client.checkArguments(new YarnConfiguration(), args);
+			client.run(new YarnConfiguration(), args[0]);
+
+			long end = System.currentTimeMillis();
+			LOG.info("Client stopped, time: {}ms", end - start);
 		} catch (Exception e) {
-			LOG.error("Error while executing Client", e);
+			LOG.error("Error while running {}", className, e);
+			System.exit(1);
 		}
 	}
 
-	private boolean checkArguments(YarnConfiguration yarnConfiguration, String[] args) {
+	/**
+	 * Invocation point for Oozie 
+	 * @param yarnConfiguration
+	 * @param configFilename
+	 * @throws Exception
+	 */
+	public void run(YarnConfiguration yarnConfiguration,
+			String configFilename) throws Exception {
+		startApplicationMaster(yarnConfiguration, configFilename);
+	}
+
+	private void checkArguments(YarnConfiguration yarnConfiguration,
+			String[] args) {
 		LOG.info("Checking arguments");
-		if (!ArgumentChecker.isArgumentCountValid(args, 1)) {
-			return false;
+		if (args.length != 1) {
+			LOG.error("Wrong number of arguments, got {}, expected {}",
+					args.length, 1);
+			throw new IllegalArgumentException();
 		}
 		if (!HdfsUtil.exists(yarnConfiguration, args[0])) {
-			return false;
+			throw new IllegalArgumentException();
 		}
 		try {
-			InputStream is = HdfsUtil
-					.openFile(yarnConfiguration, args[0]);
+			InputStream is = HdfsUtil.openFile(yarnConfiguration, args[0]);
 			Reader reader = new BufferedReader(new InputStreamReader(is));
-			
+
 			@SuppressWarnings("rawtypes")
 			Map jsonConfigAsMap = (Map) JSON.parse(reader);
-			for (Object o : (Object[])jsonConfigAsMap.get("includePaths")) {
+			for (Object o : (Object[]) jsonConfigAsMap.get("includePaths")) {
 				String includePath = o.toString();
-				
+
 				LOG.info("Including includePath {}", includePath);
 				if (!HdfsUtil.exists(yarnConfiguration, includePath)) {
 					LOG.error("Could not find includePath {}", includePath);
-					return false;
+					throw new IllegalArgumentException();
 				}
 				includePaths.add(includePath);
 			}
 		} catch (Exception e) {
-			LOG.error("Error while checking if includePaths paths are available", e);
+			LOG.error(
+					"Error while checking if includePaths paths are available",
+					e);
+			throw new IllegalArgumentException();
 		}
-		return true;
 	}
 
 	private void startApplicationMaster(YarnConfiguration yarnConfiguration,
@@ -111,10 +129,11 @@ public class BiohadoopClient {
 				.newRecord(ContainerLaunchContext.class);
 
 		String launchCommand = "$JAVA_HOME/bin/java" + " -Xmx256M "
-				+ BiohadoopApplicationMaster.class.getName() + " " + configFilename
-				+ " 1>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR
-				+ "/stdout" + " 2>"
-				+ ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stderr";
+				+ BiohadoopApplicationMaster.class.getName() + " "
+				+ configFilename + " 1>"
+				+ ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stdout"
+				+ " 2>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR
+				+ "/stderr";
 		LOG.info("Launch command: {}", launchCommand);
 
 		amContainer.setCommands(Collections.singletonList(launchCommand));
@@ -123,7 +142,8 @@ public class BiohadoopClient {
 		String defaultFs = yarnConfiguration.get("fs.defaultFS");
 		for (String includePath : includePaths) {
 			Map<String, LocalResource> includes = LocalResourceBuilder
-					.getStandardResources(defaultFs + includePath, yarnConfiguration);
+					.getStandardResources(defaultFs + includePath,
+							yarnConfiguration);
 			combinedFiles.putAll(includes);
 		}
 		amContainer.setLocalResources(combinedFiles);

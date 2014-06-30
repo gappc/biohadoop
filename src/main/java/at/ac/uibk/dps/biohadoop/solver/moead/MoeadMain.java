@@ -32,7 +32,9 @@ public class MoeadMain {
 			List<Future<SolverId>> algorithms = SolverLauncher
 					.launchSolver(biohadoopConfiguration);
 
-			EndpointLauncher.launchMasterEndpoints(biohadoopConfiguration);
+			EndpointLauncher endpointLauncher = new EndpointLauncher(
+					biohadoopConfiguration);
+			endpointLauncher.startMasterEndpoints();
 
 			SolverService solverService = SolverService
 					.getInstance();

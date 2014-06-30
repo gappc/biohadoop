@@ -1,12 +1,16 @@
 package at.ac.uibk.dps.biohadoop.hadoop.launcher;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.connection.ConnectionConfiguration;
-import at.ac.uibk.dps.biohadoop.connection.FileMasterConfiguration;
 import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
+import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
+import at.ac.uibk.dps.biohadoop.server.StartServerException;
 import at.ac.uibk.dps.biohadoop.server.UndertowServer;
 
 public class EndpointLauncher {
@@ -14,35 +18,48 @@ public class EndpointLauncher {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(EndpointLauncher.class);
 
-	public static void launchMasterEndpoints(final BiohadoopConfiguration config)
-			throws Exception {
-		ConnectionConfiguration connectionConfiguration = config
-				.getConnectionConfiguration();
+	private final ConnectionConfiguration connectionConfiguration;
+	private List<MasterConnection> masterConnections = new ArrayList<>();
+	private UndertowServer undertowServer;
 
-		for (FileMasterConfiguration master : connectionConfiguration
-				.getMasters()) {
-			LOG.info("Configuring endpoint {}", master);
+	public EndpointLauncher(BiohadoopConfiguration config) {
+		connectionConfiguration = config.getConnectionConfiguration();
+	}
 
-			for (Class<? extends MasterConnection> endpointClass : master
-					.getEndpoints()) {
-				MasterConnection endpoint = endpointClass.newInstance();
-				endpoint.configure();
+	public void startMasterEndpoints() throws EndpointLaunchException {
+		try {
+			LOG.info("Configuring master endpoints");
+			for (Class<? extends MasterConnection> endpointClass : connectionConfiguration
+					.getMasterEndpoints()) {
+				LOG.debug("Configuring master endpoint {}", endpointClass);
+				MasterConnection masterConnection = endpointClass.newInstance();
+				masterConnection.configure();
+				masterConnections.add(masterConnection);
 			}
-		}
 
-		UndertowServer undertowServer = new UndertowServer();
-		undertowServer.startServer();
+			undertowServer = new UndertowServer();
+			undertowServer.start();
 
-		for (FileMasterConfiguration master : connectionConfiguration
-				.getMasters()) {
-			LOG.info("Starting endpoint {}", master);
-
-			for (Class<? extends MasterConnection> endpointClass : master
-					.getEndpoints()) {
-				MasterConnection endpoint = endpointClass.newInstance();
-				endpoint.start();
+			LOG.info("Starting master endpoints");
+			for (MasterConnection masterConnection : masterConnections) {
+				LOG.debug("Starting master endpoint {}", masterConnection.getClass().getCanonicalName());
+				masterConnection.start();
 			}
+		} catch (InstantiationException | IllegalAccessException
+				| StartServerException e) {
+			LOG.error("Could not start endpoints", e);
+			throw new EndpointLaunchException(e);
 		}
+	}
 
+	public void stopMasterEndpoints() throws Exception {
+		LOG.info("Stopping master endpoints");
+		ShutdownWaitingService.setFinished();
+		for (MasterConnection masterConnection : masterConnections) {
+			LOG.debug("Stopping master endpoint {}", masterConnection.getClass().getCanonicalName());
+			masterConnection.stop();
+		}
+		ShutdownWaitingService.await();
+		undertowServer.stop();
 	}
 }

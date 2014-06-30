@@ -3,21 +3,18 @@ package at.ac.uibk.dps.biohadoop.solver.ga.worker;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
-import javax.websocket.ClientEndpoint;
 import javax.websocket.DeploymentException;
 import javax.websocket.EncodeException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.connection.Message;
+import at.ac.uibk.dps.biohadoop.connection.MessageType;
 import at.ac.uibk.dps.biohadoop.connection.WorkerConnection;
-import at.ac.uibk.dps.biohadoop.connection.websocket.WebSocketDecoder;
-import at.ac.uibk.dps.biohadoop.connection.websocket.WebSocketEncoder;
+import at.ac.uibk.dps.biohadoop.connection.kryo.KryoObjectRegistration;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
-import at.ac.uibk.dps.biohadoop.service.job.Task;
-import at.ac.uibk.dps.biohadoop.service.job.TaskId;
-import at.ac.uibk.dps.biohadoop.service.job.remote.Message;
-import at.ac.uibk.dps.biohadoop.service.job.remote.MessageType;
+import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.GaFitness;
 import at.ac.uibk.dps.biohadoop.solver.ga.master.GaEndpointConfig;
 
@@ -27,7 +24,6 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
 
-@ClientEndpoint(encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
 public class KryoGaWorker implements WorkerConnection {
 
 	private static final Logger LOG = LoggerFactory
@@ -74,22 +70,11 @@ public class KryoGaWorker implements WorkerConnection {
 		Log.set(Log.LEVEL_DEBUG);
 
 		final Client client = new Client(64 * 1024, 64 * 1024);
-		//Needed?
-//		new Thread(client).start();
 		client.start();
-		client.connect(15000, hostname, port);
+		client.connect(10000, hostname, port);
 
 		Kryo kryo = client.getKryo();
-		kryo.register(Message.class);
-		kryo.register(MessageType.class);
-		kryo.register(Object[].class);
-		kryo.register(double[][].class);
-		kryo.register(double[].class);
-		kryo.register(int[].class);
-		kryo.register(Task.class);
-		kryo.register(TaskId.class);
-		kryo.register(Double[][].class);
-		kryo.register(Double[].class);
+		KryoObjectRegistration.register(kryo);
 
 		client.addListener(new Listener() {
 			public void received(Connection connection, Object object) {

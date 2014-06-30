@@ -170,8 +170,8 @@ public class WorkerLauncher {
 	private static List<String> getWorkerList(BiohadoopConfiguration config) {
 		List<String> workerList = new ArrayList<>();
 		ConnectionConfiguration connectionConfiguration = config.getConnectionConfiguration();
-		for (String key : connectionConfiguration.getWorkers().keySet()) {
-			int value = connectionConfiguration.getWorkers().get(key);
+		for (String key : connectionConfiguration.getWorkerEndpoints().keySet()) {
+			int value = connectionConfiguration.getWorkerEndpoints().get(key);
 			for (int i = 0; i < value; i++) {
 				workerList.add(key);
 				LOG.info("Worker {} added", key);

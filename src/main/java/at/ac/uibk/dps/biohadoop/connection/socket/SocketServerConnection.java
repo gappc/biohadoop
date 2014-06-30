@@ -4,22 +4,28 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
-import at.ac.uibk.dps.biohadoop.service.solver.ShutdownHandler;
 import at.ac.uibk.dps.biohadoop.torename.HostInfo;
 import at.ac.uibk.dps.biohadoop.torename.MasterConfiguration;
 
-public class SocketServerConnection implements Runnable, ShutdownHandler {
+public class SocketServerConnection implements Runnable {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SocketServerConnection.class);
 
 	private final MasterConfiguration masterConfiguration;
+	private final ExecutorService executorService = Executors
+			.newCachedThreadPool();
+	private final List<Future<Integer>> futures = new ArrayList<>();
 
 	private volatile boolean stop;
 
@@ -29,7 +35,6 @@ public class SocketServerConnection implements Runnable, ShutdownHandler {
 
 	@Override
 	public void run() {
-		SolverService.getInstance().registerShutdownHandler(this);
 		try {
 			String prefix = masterConfiguration.getPrefix();
 			String host = HostInfo.getHostname();
@@ -46,15 +51,12 @@ public class SocketServerConnection implements Runnable, ShutdownHandler {
 			serverSocket.setSoTimeout(socketTimeout);
 
 			Socket socket = null;
-			int childThreadsCount = 0;
-			String threadName = "Socket-" + masterConfiguration.getPrefix() + "-";
 			while (!stop) {
 				try {
 					socket = serverSocket.accept();
 					SocketEndpoint socketRunnable = new SocketEndpoint(socket, masterConfiguration);
-					Thread child = new Thread(socketRunnable, threadName
-							+ childThreadsCount++);
-					child.start();
+					Future<Integer> future = executorService.submit(socketRunnable);
+					futures.add(future);
 				} catch (SocketTimeoutException e) {
 					LOG.debug("Socket timeout after {} ms", socketTimeout);
 				}
@@ -65,9 +67,12 @@ public class SocketServerConnection implements Runnable, ShutdownHandler {
 		}
 	}
 
-	@Override
-	public void shutdown() {
-		LOG.info("shutting down");
+	public void stop() {
+		LOG.info("Shutting down");
 		stop = true;
+		for (Future<Integer> future : futures) {
+			future.cancel(true);
+		}
+		executorService.shutdown();
 	}
 }

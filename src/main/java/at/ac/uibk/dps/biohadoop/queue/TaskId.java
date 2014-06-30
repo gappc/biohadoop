@@ -17,13 +17,17 @@ public class TaskId implements Serializable {
 		return new TaskId();
 	}
 	
+	public UUID getId() {
+		return id;
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof TaskId)) {
 			return false;
 		}
-		TaskId jobId = (TaskId) obj;
-		return this.id.equals(jobId.id);
+		TaskId taskId = (TaskId) obj;
+		return this.id.equals(taskId.id);
 	}
 	
 	@Override

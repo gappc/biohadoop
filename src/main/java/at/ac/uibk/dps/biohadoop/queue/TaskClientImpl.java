@@ -21,6 +21,13 @@ public class TaskClientImpl<T, S> implements TaskClient<T, S> {
 			throws InterruptedException {
 		return getTaskQueue().addAll(taskRequests);
 	}
+	
+	@Override
+	public List<TaskFuture<S>> addAll(T[] taskRequests)
+			throws InterruptedException {
+		// TODO Auto-generated method stub
+		return getTaskQueue().addAll(taskRequests);
+	}
 
 	@SuppressWarnings("unchecked")
 	private TaskQueue<T, S> getTaskQueue() {

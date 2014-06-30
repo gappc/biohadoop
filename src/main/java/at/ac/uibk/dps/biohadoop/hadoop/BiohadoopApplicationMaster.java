@@ -7,11 +7,11 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.hadoop.launcher.SolverLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointLauncher;
+import at.ac.uibk.dps.biohadoop.hadoop.launcher.SolverLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLauncher;
+import at.ac.uibk.dps.biohadoop.queue.TaskQueueService;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
-import at.ac.uibk.dps.biohadoop.torename.ArgumentChecker;
 import at.ac.uibk.dps.biohadoop.torename.BiohadoopConfigurationReader;
 import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;
 import at.ac.uibk.dps.biohadoop.torename.Helper;
@@ -28,58 +28,61 @@ public class BiohadoopApplicationMaster {
 	private YarnConfiguration yarnConfiguration = new YarnConfiguration();
 
 	public static void main(String[] args) {
-		LOG.info("{} started at {}", className, HostInfo.getHostname());
-		long start = System.currentTimeMillis();
-
-		BiohadoopApplicationMaster master = new BiohadoopApplicationMaster();
-		master.run(args);
-
-		long end = System.currentTimeMillis();
-		LOG.info("{} stopped, time: {}ms", className, end - start);
-	}
-
-	public void run(String[] args) {
-		if (!checkArguments(args)) {
-			return;
-		}
 		try {
-			BiohadoopConfiguration biohadoopConfiguration = BiohadoopConfigurationReader
-					.readBiohadoopConfiguration(yarnConfiguration, args[0]);
-			
-			Environment.setBiohadoopConfiguration(biohadoopConfiguration);
+			LOG.info("{} started at {}", className, HostInfo.getHostname());
+			long start = System.currentTimeMillis();
 
-			EndpointLauncher.launchMasterEndpoints(biohadoopConfiguration);
+			BiohadoopApplicationMaster master = new BiohadoopApplicationMaster();
+			master.checkArguments(args);
+			master.run(args);
 
-			List<Future<SolverId>> solvers = SolverLauncher
-					.launchSolver(biohadoopConfiguration);
-
-			if (System.getProperty("local") == null) {
-				WorkerLauncher.launchWorkers(yarnConfiguration,
-						biohadoopConfiguration, args[0]);
-			}
-			else {
-				WorkerLauncher.pretendToLaunchWorkers(biohadoopConfiguration);
-			}
-
-			for (Future<SolverId> solver : solvers) {
-				SolverId solverId = solver.get();
-				LOG.debug("Finished solver with id {}", solverId);
-			}
+			long end = System.currentTimeMillis();
+			LOG.info("{} stopped, time: {}ms", className, end - start);
 		} catch (Exception e) {
-			LOG.error("Error while launching solver", e);
+			LOG.error("Error while running {}", className, e);
+			System.exit(1);
 		}
 	}
 
-	private boolean checkArguments(String[] args) {
+	public void run(String[] args) throws Exception {
+		BiohadoopConfiguration biohadoopConfiguration = BiohadoopConfigurationReader
+				.readBiohadoopConfiguration(yarnConfiguration, args[0]);
+		Environment.setBiohadoopConfiguration(biohadoopConfiguration);
+
+		EndpointLauncher endpointLauncher = new EndpointLauncher(
+				biohadoopConfiguration);
+		endpointLauncher.startMasterEndpoints();
+
+		List<Future<SolverId>> solvers = SolverLauncher
+				.launchSolver(biohadoopConfiguration);
+
+		if (System.getProperty("local") == null) {
+			WorkerLauncher.launchWorkers(yarnConfiguration,
+					biohadoopConfiguration, args[0]);
+		} else {
+			WorkerLauncher.pretendToLaunchWorkers(biohadoopConfiguration);
+		}
+
+		for (Future<SolverId> solver : solvers) {
+			SolverId solverId = solver.get();
+			LOG.info("Finished solver with id {}", solverId);
+		}
+
+		TaskQueueService.getInstance().stopAllTaskQueues();
+		endpointLauncher.stopMasterEndpoints();
+	}
+
+	private void checkArguments(String[] args) {
 		LOG.info("Checking arguments");
 
-		if (!ArgumentChecker.isArgumentCountValid(args, 1)) {
-			return false;
+		if (args.length != 1) {
+			LOG.error("Wrong number of arguments, got {}, expected {}",
+					args.length, 1);
+			throw new IllegalArgumentException();
 		}
 		if (!HdfsUtil.exists(yarnConfiguration, args[0])) {
-			return false;
+			throw new IllegalArgumentException();
 		}
-		return true;
 	}
 
 }

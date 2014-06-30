@@ -26,9 +26,17 @@ public class TaskQueueTest {
 	}
 
 	@Test(expected = NullPointerException.class)
-	public void addAllPararmIsNull() throws InterruptedException {
+	public void addAllListPararmIsNull() throws InterruptedException {
 		TaskQueue<Integer, Integer> taskQueue = new TaskQueue<>();
-		taskQueue.addAll(null);
+		List<Integer> list = null;
+		taskQueue.addAll(list);
+	}
+	
+	@Test(expected = NullPointerException.class)
+	public void addAllArrayPararmIsNull() throws InterruptedException {
+		TaskQueue<Integer, Integer> taskQueue = new TaskQueue<>();
+		Integer[] list = null;
+		taskQueue.addAll(list);
 	}
 
 	@Test
