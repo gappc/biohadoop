@@ -90,7 +90,7 @@ public class ResteasyHandler {
 				.addServletContextAttribute(ResteasyDeployment.class.getName(),
 						deployment).addServlet(resteasyServlet)
 				.setDeploymentName("ResteasyUndertow")
-				.setClassLoader(JaxRsActivator.class.getClassLoader());
+				.setClassLoader(Thread.currentThread().getContextClassLoader());
 	}
 
 	private ServletInfo buildResteasyServlet() {

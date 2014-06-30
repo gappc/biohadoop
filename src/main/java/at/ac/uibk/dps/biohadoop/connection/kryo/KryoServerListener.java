@@ -9,11 +9,10 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.connection.MasterEndpointImpl;
+import at.ac.uibk.dps.biohadoop.connection.DefaultEndpointHandler;
 import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.connection.MessageType;
 import at.ac.uibk.dps.biohadoop.endpoint.Master;
-import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.torename.ZeroLock;
@@ -26,7 +25,7 @@ public class KryoServerListener extends Listener {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(KryoServerListener.class);
 
-	private final Map<Connection, MasterEndpoint> masters = new ConcurrentHashMap<>();
+	private final Map<Connection, DefaultEndpointHandler> masters = new ConcurrentHashMap<>();
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();
 	private final ZeroLock zeroLock = new ZeroLock();
@@ -51,7 +50,7 @@ public class KryoServerListener extends Listener {
 		kryoEndpoint.setConnection(connection);
 
 		try {
-			MasterEndpoint masterEndpoint = buildMaster(kryoEndpoint);
+			DefaultEndpointHandler masterEndpoint = buildMaster(kryoEndpoint);
 			masters.put(connection, masterEndpoint);
 			zeroLock.increment();
 		} catch (Exception e) {
@@ -61,7 +60,7 @@ public class KryoServerListener extends Listener {
 
 	public void disconnected(Connection connection) {
 		zeroLock.decrement();
-		MasterEndpoint masterEndpoint = masters.get(connection);
+		DefaultEndpointHandler masterEndpoint = masters.get(connection);
 		masters.remove(masterEndpoint);
 		Task<?> task = masterEndpoint.getCurrentTask();
 		if (task != null) {
@@ -81,7 +80,7 @@ public class KryoServerListener extends Listener {
 
 				@Override
 				public Integer call() {
-					MasterEndpoint master = masters.get(connection);
+					DefaultEndpointHandler master = masters.get(connection);
 
 					Message<?> inputMessage = (Message<?>) object;
 					KryoEndpoint endpoint = ((KryoEndpoint) master
@@ -105,7 +104,7 @@ public class KryoServerListener extends Listener {
 		}
 	}
 
-	private MasterEndpoint buildMaster(KryoEndpoint kryoEndpoint) throws Exception {
-		return MasterEndpointImpl.newInstance(kryoEndpoint, master.getQueueName(), master.getRegistrationObject());
+	private DefaultEndpointHandler buildMaster(KryoEndpoint kryoEndpoint) throws Exception {
+		return DefaultEndpointHandler.newInstance(kryoEndpoint, master.getQueueName(), master.getRegistrationObject());
 	}
 }

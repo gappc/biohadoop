@@ -7,44 +7,49 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
-import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.queue.TaskId;
 
-public class MasterEndpointImpl<T, S> implements MasterEndpoint {
+public class DefaultEndpointHandler {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(MasterEndpointImpl.class);
+			.getLogger(DefaultEndpointHandler.class);
 
 	private final Endpoint endpoint;
 	private final Object registrationObject;
-	private final TaskEndpoint<T, S> taskEndpoint;
-	private Task<T> currentTask = null;
+	private final TaskEndpoint<Object, Object> taskEndpoint;
+	private Task<?> currentTask = null;
 
-	public static MasterEndpoint newInstance(Endpoint endpoint, String queueName, Object registrationObject) {
+	public static DefaultEndpointHandler newInstance(Endpoint endpoint,
+			String queueName, Object registrationObject) {
 		try {
-			Constructor<MasterEndpointImpl> constructor = MasterEndpointImpl.class.getDeclaredConstructor(Endpoint.class, String.class, Object.class);
-			return constructor.newInstance(endpoint, queueName, registrationObject);
-		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			Constructor<DefaultEndpointHandler> constructor = DefaultEndpointHandler.class
+					.getDeclaredConstructor(Endpoint.class, String.class,
+							Object.class);
+			return constructor.newInstance(endpoint, queueName,
+					registrationObject);
+		} catch (NoSuchMethodException | SecurityException
+				| InstantiationException | IllegalAccessException
+				| IllegalArgumentException | InvocationTargetException e) {
 			LOG.error("Could not instanciate new MasterEndpointImpl", e);
-			throw new InstantiationError("Could not instanciate new MasterEndpointImpl");
+			throw new InstantiationError(
+					"Could not instanciate new MasterEndpointImpl");
 		}
 	}
-	
-	public MasterEndpointImpl(Endpoint endpoint, String queueName, Object registrationObject) {
+
+	private DefaultEndpointHandler(Endpoint endpoint, String queueName,
+			Object registrationObject) {
 		this.endpoint = endpoint;
 		this.registrationObject = registrationObject;
 		taskEndpoint = new TaskEndpointImpl<>(queueName);
 	}
-	
-	@Override
+
 	public Endpoint getEndpoint() {
 		return endpoint;
 	}
 
-	@Override
 	public void handleRegistration() {
 		endpoint.receive();
 		LOG.info("Got registration request");
@@ -54,7 +59,6 @@ public class MasterEndpointImpl<T, S> implements MasterEndpoint {
 		endpoint.send(message);
 	}
 
-	@Override
 	public void handleWorkInit() {
 		endpoint.receive();
 		LOG.debug("Got work init request");
@@ -69,13 +73,12 @@ public class MasterEndpointImpl<T, S> implements MasterEndpoint {
 		endpoint.send(message);
 	}
 
-	@Override
 	public void handleWork() {
-		Message<S> incomingMessage = endpoint.receive();
+		Message<?> incomingMessage = endpoint.receive();
 		LOG.debug("Got work request");
 
 		Message<?> message = null;
-		Task<S> result = incomingMessage.getPayload();
+		Task<?> result = incomingMessage.getPayload();
 		try {
 			taskEndpoint.putResult(result.getTaskId(), result.getData());
 			currentTask = taskEndpoint.getTask();
@@ -87,7 +90,6 @@ public class MasterEndpointImpl<T, S> implements MasterEndpoint {
 		endpoint.send(message);
 	}
 
-	@Override
 	public Task<?> getCurrentTask() {
 		return currentTask;
 	}

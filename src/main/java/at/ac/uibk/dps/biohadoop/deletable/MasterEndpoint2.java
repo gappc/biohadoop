@@ -1,8 +1,9 @@
-package at.ac.uibk.dps.biohadoop.endpoint;
+package at.ac.uibk.dps.biohadoop.deletable;
 
+import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 
-public interface MasterEndpoint {
+public interface MasterEndpoint2 {
 
 	public void handleRegistration();
 

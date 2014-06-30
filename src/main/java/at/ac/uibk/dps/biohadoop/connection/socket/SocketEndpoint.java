@@ -5,20 +5,17 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.connection.MasterEndpointImpl;
+import at.ac.uibk.dps.biohadoop.connection.DefaultEndpointHandler;
 import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.connection.MessageType;
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.Master;
-import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
 import at.ac.uibk.dps.biohadoop.queue.Task;
@@ -50,7 +47,7 @@ public class SocketEndpoint implements Callable<Integer>, Endpoint {
 		TaskEndpoint<?, ?> taskEndpoint = new TaskEndpointImpl<>(
 				master.getQueueName());
 
-		MasterEndpoint endpoint = null;
+		DefaultEndpointHandler endpoint = null;
 		try {
 			LOG.info("Opened Socket on server");
 
@@ -126,7 +123,7 @@ public class SocketEndpoint implements Callable<Integer>, Endpoint {
 		}
 	}
 	
-	private MasterEndpoint buildMaster() throws Exception {
-		return MasterEndpointImpl.newInstance(this, master.getQueueName(), master.getRegistrationObject());
+	private DefaultEndpointHandler buildMaster() throws Exception {
+		return DefaultEndpointHandler.newInstance(this, master.getQueueName(), master.getRegistrationObject());
 	}
 }

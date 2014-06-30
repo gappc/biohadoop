@@ -12,11 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
-import at.ac.uibk.dps.biohadoop.connection.MasterEndpointImpl;
+import at.ac.uibk.dps.biohadoop.connection.DefaultEndpointHandler;
 import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.Master;
-import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
 import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
@@ -27,7 +26,7 @@ public abstract class RestResource implements Endpoint, MasterConnection, Master
 
 	private static final Logger LOG = LoggerFactory.getLogger(RestResource.class);
 	
-	private MasterEndpoint masterEndpoint;
+	private DefaultEndpointHandler masterEndpoint;
 	private Message<?> inputMessage;
 	private Message<?> outputMessage;
 
@@ -92,7 +91,7 @@ public abstract class RestResource implements Endpoint, MasterConnection, Master
 	}
 	
 	private void buildMasterEndpoint() {
-		masterEndpoint = MasterEndpointImpl.newInstance(this, getQueueName(), getRegistrationObject());
+		masterEndpoint = DefaultEndpointHandler.newInstance(this, getQueueName(), getRegistrationObject());
 	}
 
 }
