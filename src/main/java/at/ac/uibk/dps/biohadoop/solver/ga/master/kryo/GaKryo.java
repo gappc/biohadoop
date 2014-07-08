@@ -12,11 +12,6 @@ public class GaKryo extends KryoServer {
 	}
 
 	@Override
-	public String getPrefix() {
-		return "GA";
-	}
-
-	@Override
 	public Object getRegistrationObject() {
 		return DistancesGlobal.getDistancesAsObject();
 	}

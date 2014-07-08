@@ -17,13 +17,8 @@ public class GaWebSocket extends WebSocketEndpoint {
 	}
 
 	@Override
-	public String getPrefix() {
-		return "GA";
-	}
-
-	@Override
 	public Object getRegistrationObject() {
-		return DistancesGlobal.getDistancesAsObject();
+		return DistancesGlobal.getDistances();
 	}
 
 }

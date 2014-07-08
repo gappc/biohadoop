@@ -1,15 +1,15 @@
 package at.ac.uibk.dps.biohadoop.solver.moead.worker;
 
-import at.ac.uibk.dps.biohadoop.connectionworker.SocketWorker;
+import at.ac.uibk.dps.biohadoop.connectionworker.RestWorker;
 import at.ac.uibk.dps.biohadoop.endpoint.Master;
 import at.ac.uibk.dps.biohadoop.solver.moead.algorithm.Functions;
-import at.ac.uibk.dps.biohadoop.solver.moead.master.socket.MoeadSocket;
+import at.ac.uibk.dps.biohadoop.solver.moead.master.MoeadRest;
 
-public class SocketMoeadWorker extends SocketWorker<double[], double[]> {
+public class RestMoeadWorker extends RestWorker<double[], double[]> {
 
 	@Override
 	public Class<? extends Master> getMasterEndpoint() {
-		return MoeadSocket.class;
+		return MoeadRest.class;
 	}
 	
 	@Override
@@ -23,4 +23,10 @@ public class SocketMoeadWorker extends SocketWorker<double[], double[]> {
 		result[1] = Functions.f2(data);
 		return result;
 	}
+
+	@Override
+	public String getPath() {
+		return "/moead";
+	}
+
 }

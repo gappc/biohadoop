@@ -36,7 +36,7 @@ public class SocketServerConnection implements Runnable {
 	@Override
 	public void run() {
 		try {
-			String prefix = master.getPrefix();
+			String prefix = master.getQueueName();
 			String host = HostInfo.getHostname();
 			int port = HostInfo.getPort(30000);
 			

@@ -1,9 +1,9 @@
-package at.ac.uibk.dps.biohadoop.solver.moead.master.socket;
+package at.ac.uibk.dps.biohadoop.solver.moead.master;
 
-import at.ac.uibk.dps.biohadoop.connection.socket.SocketServer;
+import at.ac.uibk.dps.biohadoop.connection.kryo.KryoServer;
 import at.ac.uibk.dps.biohadoop.solver.moead.algorithm.Moead;
 
-public class MoeadSocket extends SocketServer {
+public class MoeadKryo extends KryoServer {
 
 	@Override
 	public String getQueueName() {
@@ -14,4 +14,5 @@ public class MoeadSocket extends SocketServer {
 	public Object getRegistrationObject() {
 		return null;
 	}
+
 }

@@ -21,6 +21,7 @@ public class WebSocketDecoder implements Decoder.Text<Message<?>> {
 	@Override
 	public void init(EndpointConfig config) {
 		LOG.debug("MessageDecoder init");
+		om.enableDefaultTyping();
 	}
 
 	@Override

@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.connection.ConnectionConfiguration;
 import at.ac.uibk.dps.biohadoop.connection.WorkerConnection;
+import at.ac.uibk.dps.biohadoop.connectionworker.WorkerStarter;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.LaunchContainerRunnable;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
@@ -41,13 +42,15 @@ public class WorkerLauncher {
 			.getLogger(WorkerLauncher.class);
 
 	public static void launchWorkers(YarnConfiguration yarnConfiguration,
-			BiohadoopConfiguration biohadoopConfig, String configFilename) throws Exception {
+			BiohadoopConfiguration biohadoopConfig, String configFilename)
+			throws Exception {
 		LOG.info("#### startWorker: ");
 
 		// Initialize clients to ResourceManager and NodeManagers
 		// Configuration conf = new YarnConfiguration();
 
-		final AMRMClient<ContainerRequest> rmClient = AMRMClient.createAMRMClient();
+		final AMRMClient<ContainerRequest> rmClient = AMRMClient
+				.createAMRMClient();
 		rmClient.init(yarnConfiguration);
 		rmClient.start();
 
@@ -87,30 +90,29 @@ public class WorkerLauncher {
 			for (Container container : response.getAllocatedContainers()) {
 				++allocatedContainers;
 
-				LOG.info("Launching shell command on a new container."
-						+ ", containerId=" + container.getId()
-						+ ", containerNode=" + container.getNodeId().getHost()
-						+ ":" + container.getNodeId().getPort()
-						+ ", containerNodeURI="
-						+ container.getNodeHttpAddress()
-						+ ", containerResourceMemory"
-						+ container.getResource().getMemory()
-						+ ", containerResourceVirtualCores"
-						+ container.getResource().getVirtualCores());
+				LOG.info(
+						"Launching shell command on a new container, containerId={}, containerNode={}:{}, containerNodeURI={}, containerResourceMemory={}, containerResourceVirtualCores={}",
+						container.getId(), container.getNodeId().getHost(),
+						container.getNodeId().getPort(), container
+								.getNodeHttpAddress(), container.getResource()
+								.getMemory(), container.getResource()
+								.getVirtualCores());
 
 				// Launch container by create ContainerLaunchContext
 				ContainerLaunchContext ctx = Records
 						.newRecord(ContainerLaunchContext.class);
 
-				WorkerConnection worker = (WorkerConnection)Class.forName(workerList.get(0)).newInstance();
+				WorkerConnection worker = (WorkerConnection) Class.forName(
+						workerList.get(0)).newInstance();
 				String parameters = worker.getWorkerParameters();
-				
-				String clientCommand = "$JAVA_HOME/bin/java" + " -Xmx128M"
-						+ " " + workerList.get(0) + " " + parameters + " " + configFilename + " 1>"
-						+ ApplicationConstants.LOG_DIR_EXPANSION_VAR
-						+ "/stdout" + " 2>"
-						+ ApplicationConstants.LOG_DIR_EXPANSION_VAR
-						+ "/stderr";
+
+				String clientCommand = String
+						.format("$JAVA_HOME/bin/java -Xmx128M %s %s %s configFilename 1>%s/stdout 2>%s/stderr",
+								WorkerStarter.class.getCanonicalName(),
+								workerList.get(0), parameters,
+								ApplicationConstants.LOG_DIR_EXPANSION_VAR,
+								ApplicationConstants.LOG_DIR_EXPANSION_VAR);
+
 				workerList.remove(0);
 				LOG.info("Client command: " + clientCommand);
 				ctx.setCommands(Collections.singletonList(clientCommand));
@@ -140,15 +142,14 @@ public class WorkerLauncher {
 		}
 
 		new Thread(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				try {
 					LOG.info("Waiting for " + containerCount
 							+ " containers to complete");
 
-					SolverService solverService = SolverService
-							.getInstance();
+					SolverService solverService = SolverService.getInstance();
 
 					int completedContainers = 0;
 					while (completedContainers < containerCount) {
@@ -176,7 +177,8 @@ public class WorkerLauncher {
 
 	private static List<String> getWorkerList(BiohadoopConfiguration config) {
 		List<String> workerList = new ArrayList<>();
-		ConnectionConfiguration connectionConfiguration = config.getConnectionConfiguration();
+		ConnectionConfiguration connectionConfiguration = config
+				.getConnectionConfiguration();
 		for (String key : connectionConfiguration.getWorkerEndpoints().keySet()) {
 			int value = connectionConfiguration.getWorkerEndpoints().get(key);
 			for (int i = 0; i < value; i++) {
@@ -204,21 +206,23 @@ public class WorkerLauncher {
 		List<String> workerList = getWorkerList(biohadoopConfiguration);
 		for (String workerClass : workerList) {
 			try {
-				WorkerConnection worker = (WorkerConnection)Class.forName(workerClass).newInstance();
+				WorkerConnection worker = (WorkerConnection) Class.forName(
+						workerClass).newInstance();
 				String parameters = worker.getWorkerParameters();
-				
-				String clientCommand = "$JAVA_HOME/bin/java" + " -Xmx128M"
-						+ " " + parameters + " configFilename 1>"
-						+ ApplicationConstants.LOG_DIR_EXPANSION_VAR
-						+ "/stdout" + " 2>"
-						+ ApplicationConstants.LOG_DIR_EXPANSION_VAR
-						+ "/stderr";
-				LOG.info("Launching worker {} with command: {}", workerClass, clientCommand);
-			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+
+				String clientCommand = String
+						.format("$JAVA_HOME/bin/java -Xmx128M %s configFilename 1>%s/stdout 2>%s/stderr",
+								parameters,
+								ApplicationConstants.LOG_DIR_EXPANSION_VAR,
+								ApplicationConstants.LOG_DIR_EXPANSION_VAR);
+
+				LOG.info("Launching worker {} with command: {}", workerClass,
+						clientCommand);
+			} catch (Exception e) {
 				LOG.error("Error while pretending to run workers", e);
-			} 
+			}
 
 		}
-		
+
 	}
 }

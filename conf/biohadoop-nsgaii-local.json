@@ -111,7 +111,7 @@
     }
   } ],
   "connectionConfiguration" : {
-    "masterEndpoints" : [ "at.ac.uibk.dps.biohadoop.solver.nsgaii.master.socket.NsgaIISocket" ],
+    "masterEndpoints" : [ "at.ac.uibk.dps.biohadoop.solver.nsgaii.master.socket.NsgaIISocket", "at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIIWebSocket", "at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIIRest", "at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIIKryo" ],
     "workerEndpoints" : {
       "at.ac.uibk.dps.biohadoop.solver.nsgaii.worker.SocketNsgaIIWorker" : 3
     }

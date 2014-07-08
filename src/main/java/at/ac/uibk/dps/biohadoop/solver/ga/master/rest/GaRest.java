@@ -18,11 +18,6 @@ public class GaRest extends RestResource {
 	}
 
 	@Override
-	public String getPrefix() {
-		return "GA";
-	}
-
-	@Override
 	public Object getRegistrationObject() {
 		return DistancesGlobal.getDistancesAsObject();
 	}

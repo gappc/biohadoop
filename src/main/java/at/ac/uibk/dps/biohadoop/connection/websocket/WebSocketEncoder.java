@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class WebSocketEncoder<T> implements Encoder.Text<T> {
+public class WebSocketEncoder<Message> implements Encoder.Text<Message> {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(WebSocketEncoder.class);
 	private ObjectMapper om = new ObjectMapper();
@@ -18,6 +18,7 @@ public class WebSocketEncoder<T> implements Encoder.Text<T> {
 	@Override
 	public void init(EndpointConfig config) {
 		LOG.debug("WebSocketEncoder init");
+		om.enableDefaultTyping();
 	}
 
 	@Override
@@ -26,7 +27,7 @@ public class WebSocketEncoder<T> implements Encoder.Text<T> {
 	}
 
 	@Override
-	public String encode(T object) throws EncodeException {
+	public String encode(Message object) throws EncodeException {
 		try {
 			return om.writeValueAsString(object);
 		} catch (JsonProcessingException e) {

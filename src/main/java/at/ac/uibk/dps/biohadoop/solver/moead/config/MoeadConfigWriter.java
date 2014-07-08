@@ -24,8 +24,12 @@ import at.ac.uibk.dps.biohadoop.service.persistence.file.FileSaveConfiguration;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverConfiguration;
 import at.ac.uibk.dps.biohadoop.solver.ga.distribution.GaSimpleMerger;
 import at.ac.uibk.dps.biohadoop.solver.moead.algorithm.Moead;
+import at.ac.uibk.dps.biohadoop.solver.moead.master.MoeadKryo;
+import at.ac.uibk.dps.biohadoop.solver.moead.master.MoeadRest;
+import at.ac.uibk.dps.biohadoop.solver.moead.master.MoeadWebSocket;
 import at.ac.uibk.dps.biohadoop.solver.moead.master.socket.MoeadSocket;
 import at.ac.uibk.dps.biohadoop.solver.moead.worker.SocketMoeadWorker;
+import at.ac.uibk.dps.biohadoop.solver.moead.worker.WebSocketMoeadWorker;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -90,9 +94,13 @@ public class MoeadConfigWriter {
 	private static ConnectionConfiguration buildConnectionConfiguration() {
 		List<Class<? extends MasterConnection>> masterEndpoints = new ArrayList<>();
 		masterEndpoints.add(MoeadSocket.class);
+		masterEndpoints.add(MoeadWebSocket.class);
+		masterEndpoints.add(MoeadRest.class);
+		masterEndpoints.add(MoeadKryo.class);
 
 		Map<String, Integer> workerEndpoints = new HashMap<>();
 		workerEndpoints.put(SocketMoeadWorker.class.getCanonicalName(), 3);
+		workerEndpoints.put(WebSocketMoeadWorker.class.getCanonicalName(), 3);
 
 		return new ConnectionConfiguration(masterEndpoints, workerEndpoints);
 	}

@@ -49,7 +49,7 @@ public abstract class KryoServer implements MasterConnection, Master {
 	private void startServer() throws IOException {
 		new Thread(server).start();
 
-		String prefix = getPrefix();
+		String prefix = getQueueName();
 		String host = HostInfo.getHostname();
 		int port = HostInfo.getPort(30000);
 

@@ -5,6 +5,7 @@ import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.PathHandler;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.server.deployment.DeployingClasses;
+import at.ac.uibk.dps.biohadoop.server.deployment.JacksonContextResolver;
 import at.ac.uibk.dps.biohadoop.server.deployment.ResteasyHandler;
 import at.ac.uibk.dps.biohadoop.server.deployment.WebSocketHandler;
 import at.ac.uibk.dps.biohadoop.service.distribution.DistributionResource;
@@ -58,8 +60,12 @@ public class UndertowServer {
 		ResteasyHandler resteasyHandler = new ResteasyHandler();
 		List<Class<?>> restfulClasses = DeployingClasses.getRestfulClasses();
 		restfulClasses.add(DistributionResource.class);
+		
+		List<Class<?>> providerClasses = new ArrayList<Class<?>>();
+		providerClasses.add(JacksonContextResolver.class);
+		
 		HttpHandler httpHandler = resteasyHandler.getHandler(
-				resteasyContextPath, restfulClasses, null);
+				resteasyContextPath, restfulClasses, providerClasses);
 
 		List<Class<?>> webSocketClasses = DeployingClasses
 				.getWebSocketClasses();

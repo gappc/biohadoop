@@ -24,6 +24,9 @@ import at.ac.uibk.dps.biohadoop.service.persistence.file.FileSaveConfiguration;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverConfiguration;
 import at.ac.uibk.dps.biohadoop.solver.ga.distribution.GaSimpleMerger;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.algorithm.NsgaII;
+import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIIKryo;
+import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIIRest;
+import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIIWebSocket;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.socket.NsgaIISocket;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.worker.SocketNsgaIIWorker;
 
@@ -90,6 +93,9 @@ public class NsgaIIConfigWriter {
 	private static ConnectionConfiguration buildConnectionConfiguration() {
 		List<Class<? extends MasterConnection>> masterEndpoints = new ArrayList<>();
 		masterEndpoints.add(NsgaIISocket.class);
+		masterEndpoints.add(NsgaIIWebSocket.class);
+		masterEndpoints.add(NsgaIIRest.class);
+		masterEndpoints.add(NsgaIIKryo.class);
 
 		Map<String, Integer> workerEndpoints = new HashMap<>();
 		workerEndpoints.put(SocketNsgaIIWorker.class.getCanonicalName(), 3);

@@ -1,15 +1,15 @@
-package at.ac.uibk.dps.biohadoop.solver.nsgaii.worker;
+package at.ac.uibk.dps.biohadoop.solver.moead.worker;
 
-import at.ac.uibk.dps.biohadoop.connectionworker.SocketWorker;
+import at.ac.uibk.dps.biohadoop.connectionworker.KryoWorker;
 import at.ac.uibk.dps.biohadoop.endpoint.Master;
-import at.ac.uibk.dps.biohadoop.solver.nsgaii.algorithm.Functions;
-import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.socket.NsgaIISocket;
+import at.ac.uibk.dps.biohadoop.solver.moead.algorithm.Functions;
+import at.ac.uibk.dps.biohadoop.solver.moead.master.MoeadKryo;
 
-public class SocketNsgaIIWorker extends SocketWorker<double[], double[]> {
+public class KryoMoeadWorker extends KryoWorker<double[], double[]> {
 
 	@Override
 	public Class<? extends Master> getMasterEndpoint() {
-		return NsgaIISocket.class;
+		return MoeadKryo.class;
 	}
 	
 	@Override

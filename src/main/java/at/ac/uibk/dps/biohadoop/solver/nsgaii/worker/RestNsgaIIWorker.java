@@ -1,15 +1,15 @@
 package at.ac.uibk.dps.biohadoop.solver.nsgaii.worker;
 
-import at.ac.uibk.dps.biohadoop.connectionworker.SocketWorker;
+import at.ac.uibk.dps.biohadoop.connectionworker.RestWorker;
 import at.ac.uibk.dps.biohadoop.endpoint.Master;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.algorithm.Functions;
-import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.socket.NsgaIISocket;
+import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIIRest;
 
-public class SocketNsgaIIWorker extends SocketWorker<double[], double[]> {
+public class RestNsgaIIWorker extends RestWorker<double[], double[]> {
 
 	@Override
 	public Class<? extends Master> getMasterEndpoint() {
-		return NsgaIISocket.class;
+		return NsgaIIRest.class;
 	}
 	
 	@Override
@@ -23,4 +23,10 @@ public class SocketNsgaIIWorker extends SocketWorker<double[], double[]> {
 		result[1] = Functions.f2(data);
 		return result;
 	}
+
+	@Override
+	public String getPath() {
+		return "/nsgaii";
+	}
+
 }
