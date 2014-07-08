@@ -96,7 +96,6 @@ public class WebSocketGaWorker implements WorkerConnection {
 
 	@OnClose
 	public void onClose(Session session, CloseReason reason) throws IOException {
-		LOG.info("FUCK ONCLOSE ERROR HANDLING");
 		LOG.info("Closed connection to URI {}, sessionId={}",
 				session.getRequestURI(), session.getId());
 		LOG.info("############# {} stopped #############",
@@ -161,7 +160,6 @@ public class WebSocketGaWorker implements WorkerConnection {
 	
 	@OnError
 	public void onError(Session session, Throwable t) {
-		LOG.error("FUCK ERROR HANDLING");
 		LOG.error("Error for URI {}, sessionId={}", session.getRequestURI(),
 				session.getId(), t);
 		latch.countDown();

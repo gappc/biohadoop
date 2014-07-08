@@ -1,6 +1,5 @@
 package at.ac.uibk.dps.biohadoop.server;
 
-import static io.undertow.Handlers.path;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.PathHandler;
@@ -10,7 +9,6 @@ import java.util.List;
 
 import javax.servlet.ServletException;
 
-import org.jboss.weld.environment.se.Weld;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,11 +26,8 @@ public class UndertowServer {
 
 	private Undertow undertow;
 	private WebSocketHandler webSocket;
-	private Weld weld;
 
 	public void start() throws StartServerException {
-		weld = new Weld();
-		weld.initialize();
 		LOG.info("Starting Undertow");
 
 		final String host = HostInfo.getHostname();
@@ -53,12 +48,6 @@ public class UndertowServer {
 
 	public void stop() throws StopServerException {
 		LOG.info("Stopping Undertow");
-//		try {
-//			Thread.sleep(2000);
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 		undertow.stop();
 	}
 

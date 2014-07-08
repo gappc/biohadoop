@@ -55,8 +55,7 @@ public class BiohadoopClient {
 			long start = System.currentTimeMillis();
 
 			BiohadoopClient client = new BiohadoopClient();
-			client.checkArguments(new YarnConfiguration(), args);
-			client.run(new YarnConfiguration(), args[0]);
+			client.run(new YarnConfiguration(), args);
 
 			long end = System.currentTimeMillis();
 			LOG.info("Client stopped, time: {}ms", end - start);
@@ -67,13 +66,17 @@ public class BiohadoopClient {
 	}
 
 	/**
-	 * Invocation point for Oozie 
+	 * Invocation point for Oozie
+	 * 
 	 * @param yarnConfiguration
 	 * @param configFilename
 	 * @throws Exception
 	 */
-	public void run(YarnConfiguration yarnConfiguration,
-			String configFilename) throws Exception {
+	public void run(YarnConfiguration yarnConfiguration, String[] args)
+			throws Exception {
+		checkArguments(new YarnConfiguration(), args);
+		String configFilename = args[0];
+		setIncludePaths(yarnConfiguration, configFilename);
 		startApplicationMaster(yarnConfiguration, configFilename);
 	}
 
@@ -83,13 +86,18 @@ public class BiohadoopClient {
 		if (args.length != 1) {
 			LOG.error("Wrong number of arguments, got {}, expected {}",
 					args.length, 1);
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Wrong number of arguments, got " + args.length + ", expected 1");
 		}
 		if (!HdfsUtil.exists(yarnConfiguration, args[0])) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Could not find config file " + args[0]);
 		}
+	}
+
+	private void setIncludePaths(YarnConfiguration yarnConfiguration,
+			String configFilename) {
 		try {
-			InputStream is = HdfsUtil.openFile(yarnConfiguration, args[0]);
+			InputStream is = HdfsUtil.openFile(yarnConfiguration,
+					configFilename);
 			Reader reader = new BufferedReader(new InputStreamReader(is));
 
 			@SuppressWarnings("rawtypes")
