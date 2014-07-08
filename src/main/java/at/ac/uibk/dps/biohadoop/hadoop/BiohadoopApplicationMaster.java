@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.SolverLauncher;
+import at.ac.uibk.dps.biohadoop.hadoop.launcher.WeldLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLauncher;
 import at.ac.uibk.dps.biohadoop.queue.TaskQueueService;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
@@ -49,6 +50,8 @@ public class BiohadoopApplicationMaster {
 				.readBiohadoopConfiguration(yarnConfiguration, args[0]);
 		Environment.setBiohadoopConfiguration(biohadoopConfiguration);
 
+		WeldLauncher.startWeld();
+		
 		EndpointLauncher endpointLauncher = new EndpointLauncher(
 				biohadoopConfiguration);
 		endpointLauncher.startMasterEndpoints();
@@ -62,7 +65,7 @@ public class BiohadoopApplicationMaster {
 		} else {
 			WorkerLauncher.pretendToLaunchWorkers(biohadoopConfiguration);
 		}
-
+		
 		for (Future<SolverId> solver : solvers) {
 			SolverId solverId = solver.get();
 			LOG.info("Finished solver with id {}", solverId);
@@ -70,6 +73,8 @@ public class BiohadoopApplicationMaster {
 
 		TaskQueueService.getInstance().stopAllTaskQueues();
 		endpointLauncher.stopMasterEndpoints();
+		
+		WeldLauncher.stopWeld();
 	}
 
 	private void checkArguments(String[] args) {
