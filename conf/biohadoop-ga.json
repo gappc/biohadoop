@@ -7,7 +7,7 @@
       "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.solver.ga.config.GaAlgorithmConfig",
       "dataFile" : "/biohadoop/data/att48.tsp",
       "populationSize" : 10,
-      "maxIterations" : 1000
+      "maxIterations" : 10000
     },
     "algorithm" : "at.ac.uibk.dps.biohadoop.solver.ga.algorithm.Ga",
     "distributionConfiguration" : {
@@ -33,7 +33,7 @@
       "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.solver.ga.config.GaAlgorithmConfig",
       "dataFile" : "/biohadoop/data/att48.tsp",
       "populationSize" : 10,
-      "maxIterations" : 1000
+      "maxIterations" : 10000
     },
     "algorithm" : "at.ac.uibk.dps.biohadoop.solver.ga.algorithm.Ga",
     "distributionConfiguration" : {
@@ -59,7 +59,7 @@
       "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.solver.ga.config.GaAlgorithmConfig",
       "dataFile" : "/biohadoop/data/att48.tsp",
       "populationSize" : 10,
-      "maxIterations" : 1000
+      "maxIterations" : 10000
     },
     "algorithm" : "at.ac.uibk.dps.biohadoop.solver.ga.algorithm.Ga",
     "distributionConfiguration" : {
@@ -85,7 +85,7 @@
       "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.solver.ga.config.GaAlgorithmConfig",
       "dataFile" : "/biohadoop/data/att48.tsp",
       "populationSize" : 10,
-      "maxIterations" : 1000
+      "maxIterations" : 10000
     },
     "algorithm" : "at.ac.uibk.dps.biohadoop.solver.ga.algorithm.Ga",
     "distributionConfiguration" : {

@@ -129,7 +129,7 @@ public class GaConfigWriter {
 
 		GaAlgorithmConfig gaAlgorithmConfig = new GaAlgorithmConfig();
 		gaAlgorithmConfig.setDataFile(dataFile);
-		gaAlgorithmConfig.setMaxIterations(1000);
+		gaAlgorithmConfig.setMaxIterations(10000);
 		gaAlgorithmConfig.setPopulationSize(10);
 
 		return gaAlgorithmConfig;

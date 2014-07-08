@@ -1,26 +1,30 @@
 {
   "version" : "0.1",
   "includePaths" : [ "/biohadoop/lib/", "/biohadoop/conf/" ],
-  "applicationConfigs" : [ {
+  "solverConfigs" : [ {
     "name" : "MOEAD-LOCAL-1",
     "algorithmConfiguration" : {
-      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.moead.config.MoeadAlgorithmConfig",
+      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.solver.moead.config.MoeadAlgorithmConfig",
       "outputFile" : "/tmp/moead-sol.txt",
       "populationSize" : 300,
       "neighborSize" : 290,
       "genomeSize" : 10,
       "maxIterations" : 1000
     },
-    "algorithm" : "at.ac.uibk.dps.biohadoop.moead.algorithm.Moead",
+    "algorithm" : "at.ac.uibk.dps.biohadoop.solver.moead.algorithm.Moead",
+    "distributionConfiguration" : {
+      "dataMerger" : "at.ac.uibk.dps.biohadoop.solver.ga.distribution.GaSimpleMerger",
+      "mergeAfterIterations" : 2000
+    },
     "persistenceConfiguration" : {
-      "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FilePersistenceConfiguration",
+      "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FilePersistenceConfiguration",
       "saveConfiguration" : {
-        "@persistenceSaveConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileSaveConfiguration",
+        "@persistenceSaveConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FileSaveConfiguration",
         "path" : "/tmp/biohadoop/moead",
         "afterIterations" : 1000
       },
       "loadConfiguration" : {
-        "@persistenceLoadConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileLoadConfiguration",
+        "@persistenceLoadConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FileLoadConfiguration",
         "path" : "/tmp/biohadoop/moead/MOEAD-LOCAL-1/2087724778",
         "onStartup" : true
       }
@@ -28,23 +32,27 @@
   }, {
     "name" : "MOEAD-LOCAL-1",
     "algorithmConfiguration" : {
-      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.moead.config.MoeadAlgorithmConfig",
+      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.solver.moead.config.MoeadAlgorithmConfig",
       "outputFile" : "/tmp/moead-sol.txt",
       "populationSize" : 300,
       "neighborSize" : 290,
       "genomeSize" : 10,
       "maxIterations" : 1000
     },
-    "algorithm" : "at.ac.uibk.dps.biohadoop.moead.algorithm.Moead",
+    "algorithm" : "at.ac.uibk.dps.biohadoop.solver.moead.algorithm.Moead",
+    "distributionConfiguration" : {
+      "dataMerger" : "at.ac.uibk.dps.biohadoop.solver.ga.distribution.GaSimpleMerger",
+      "mergeAfterIterations" : 2000
+    },
     "persistenceConfiguration" : {
-      "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FilePersistenceConfiguration",
+      "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FilePersistenceConfiguration",
       "saveConfiguration" : {
-        "@persistenceSaveConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileSaveConfiguration",
+        "@persistenceSaveConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FileSaveConfiguration",
         "path" : "/tmp/biohadoop/moead",
         "afterIterations" : 1000
       },
       "loadConfiguration" : {
-        "@persistenceLoadConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileLoadConfiguration",
+        "@persistenceLoadConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FileLoadConfiguration",
         "path" : "/tmp/biohadoop/moead/MOEAD-LOCAL-1/2087724778",
         "onStartup" : true
       }
@@ -52,23 +60,27 @@
   }, {
     "name" : "MOEAD-LOCAL-1",
     "algorithmConfiguration" : {
-      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.moead.config.MoeadAlgorithmConfig",
+      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.solver.moead.config.MoeadAlgorithmConfig",
       "outputFile" : "/tmp/moead-sol.txt",
       "populationSize" : 300,
       "neighborSize" : 290,
       "genomeSize" : 10,
       "maxIterations" : 1000
     },
-    "algorithm" : "at.ac.uibk.dps.biohadoop.moead.algorithm.Moead",
+    "algorithm" : "at.ac.uibk.dps.biohadoop.solver.moead.algorithm.Moead",
+    "distributionConfiguration" : {
+      "dataMerger" : "at.ac.uibk.dps.biohadoop.solver.ga.distribution.GaSimpleMerger",
+      "mergeAfterIterations" : 2000
+    },
     "persistenceConfiguration" : {
-      "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FilePersistenceConfiguration",
+      "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FilePersistenceConfiguration",
       "saveConfiguration" : {
-        "@persistenceSaveConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileSaveConfiguration",
+        "@persistenceSaveConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FileSaveConfiguration",
         "path" : "/tmp/biohadoop/moead",
         "afterIterations" : 1000
       },
       "loadConfiguration" : {
-        "@persistenceLoadConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileLoadConfiguration",
+        "@persistenceLoadConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FileLoadConfiguration",
         "path" : "/tmp/biohadoop/moead/MOEAD-LOCAL-1/2087724778",
         "onStartup" : true
       }
@@ -76,37 +88,39 @@
   }, {
     "name" : "MOEAD-LOCAL-1",
     "algorithmConfiguration" : {
-      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.moead.config.MoeadAlgorithmConfig",
+      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.solver.moead.config.MoeadAlgorithmConfig",
       "outputFile" : "/tmp/moead-sol.txt",
       "populationSize" : 300,
       "neighborSize" : 290,
       "genomeSize" : 10,
       "maxIterations" : 1000
     },
-    "algorithm" : "at.ac.uibk.dps.biohadoop.moead.algorithm.Moead",
+    "algorithm" : "at.ac.uibk.dps.biohadoop.solver.moead.algorithm.Moead",
+    "distributionConfiguration" : {
+      "dataMerger" : "at.ac.uibk.dps.biohadoop.solver.ga.distribution.GaSimpleMerger",
+      "mergeAfterIterations" : 2000
+    },
     "persistenceConfiguration" : {
-      "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FilePersistenceConfiguration",
+      "@persistenceConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FilePersistenceConfiguration",
       "saveConfiguration" : {
-        "@persistenceSaveConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileSaveConfiguration",
+        "@persistenceSaveConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FileSaveConfiguration",
         "path" : "/tmp/biohadoop/moead",
         "afterIterations" : 1000
       },
       "loadConfiguration" : {
-        "@persistenceLoadConfigurationClass" : "at.ac.uibk.dps.biohadoop.persistencemanager.file.FileLoadConfiguration",
+        "@persistenceLoadConfigurationClass" : "at.ac.uibk.dps.biohadoop.service.persistence.file.FileLoadConfiguration",
         "path" : "/tmp/biohadoop/moead/MOEAD-LOCAL-1/2087724778",
         "onStartup" : true
       }
     }
   } ],
   "connectionConfiguration" : {
-    "masters" : [ {
-      "endpoints" : [ "at.ac.uibk.dps.biohadoop.moead.master.socket.MoeadSocket" ]
-    } ],
-    "workers" : {
-      "at.ac.uibk.dps.biohadoop.moead.worker.SocketMoeadWorker" : 3
+    "masterEndpoints" : [ "at.ac.uibk.dps.biohadoop.solver.moead.master.socket.MoeadSocket" ],
+    "workerEndpoints" : {
+      "at.ac.uibk.dps.biohadoop.solver.moead.worker.SocketMoeadWorker" : 3
     }
   },
-  "distributionConfiguration" : {
+  "globalDistributionConfiguration" : {
     "host" : "localhost",
     "port" : 2181
   }
