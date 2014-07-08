@@ -134,6 +134,8 @@ public class Ga implements Algorithm<int[], GaParameter> {
 			solverData = new SolverData<int[][]>(population, values[0],
 					iteration + persitedIteration);
 			solverService.setSolverData(solverId, solverData);
+			// TODO read data back in, becaus possibly there is some change
+			// coming from islands
 
 			if (iteration == maxIterations) {
 				end = true;
