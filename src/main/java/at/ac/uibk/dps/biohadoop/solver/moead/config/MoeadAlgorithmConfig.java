@@ -1,7 +1,6 @@
 package at.ac.uibk.dps.biohadoop.solver.moead.config;
 
 import at.ac.uibk.dps.biohadoop.config.AlgorithmConfiguration;
-import at.ac.uibk.dps.biohadoop.config.BuildParameterException;
 
 public class MoeadAlgorithmConfig implements AlgorithmConfiguration {
 
@@ -51,10 +50,10 @@ public class MoeadAlgorithmConfig implements AlgorithmConfiguration {
 		this.maxIterations = maxIterations;
 	}
 
-	@Override
-	public Object buildParameters() throws BuildParameterException {
-		return new MoeadParameter(maxIterations, populationSize, neighborSize,
-				genomeSize);
-	}
+//	@Override
+//	public Object buildParameters() throws BuildParameterException {
+//		return new MoeadParameter(maxIterations, populationSize, neighborSize,
+//				genomeSize);
+//	}
 
 }

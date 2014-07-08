@@ -17,9 +17,9 @@ import at.ac.uibk.dps.biohadoop.service.solver.SolverData;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverState;
-import at.ac.uibk.dps.biohadoop.solver.moead.config.MoeadParameter;
+import at.ac.uibk.dps.biohadoop.solver.moead.config.MoeadAlgorithmConfig;
 
-public class Moead implements Algorithm<List<List<Double>>, MoeadParameter> {
+public class Moead implements Algorithm<List<List<Double>>, MoeadAlgorithmConfig> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Moead.class);
 	public static final String MOEAD_QUEUE = "MOEAD_QUEUE";
@@ -32,17 +32,17 @@ public class Moead implements Algorithm<List<List<Double>>, MoeadParameter> {
 	private double maxF2 = -Double.MAX_VALUE;
 
 	public List<List<Double>> compute(SolverId solverId,
-			MoeadParameter parameter) throws AlgorithmException {
+			MoeadAlgorithmConfig config) throws AlgorithmException {
 		SolverService solverService = SolverService.getInstance();
 		solverService.setSolverState(solverId, SolverState.RUNNING);
 
 		TaskClient<double[], double[]> taskClient = new TaskClientImpl<>(
 				MOEAD_QUEUE);
 
-		int maxIterations = parameter.getMaxIterations();
-		int N = parameter.getN();
-		int neighborSize = parameter.getNeighborSize();
-		int genomeSize = parameter.getGenomeSize();
+		int maxIterations = config.getMaxIterations();
+		int N = config.getPopulationSize();
+		int neighborSize = config.getNeighborSize();
+		int genomeSize = config.getGenomeSize();
 
 		long startTime = System.currentTimeMillis();
 

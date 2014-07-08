@@ -19,9 +19,9 @@ import at.ac.uibk.dps.biohadoop.service.solver.SolverData;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverState;
-import at.ac.uibk.dps.biohadoop.solver.nsgaii.config.NsgaIIParameter;
+import at.ac.uibk.dps.biohadoop.solver.nsgaii.config.NsgaIIAlgorithmConfig;
 
-public class NsgaII implements Algorithm<List<List<Double>>, NsgaIIParameter> {
+public class NsgaII implements Algorithm<List<List<Double>>, NsgaIIAlgorithmConfig> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(NsgaII.class);
 	public static final String NSGAII_QUEUE = "NSGAII_QUEUE";
@@ -33,13 +33,13 @@ public class NsgaII implements Algorithm<List<List<Double>>, NsgaIIParameter> {
 
 	@Override
 	public List<List<Double>> compute(SolverId solverId,
-			NsgaIIParameter parameter) throws AlgorithmException {
+			NsgaIIAlgorithmConfig config) throws AlgorithmException {
 		SolverService solverService = SolverService.getInstance();
 		solverService.setSolverState(solverId, SolverState.RUNNING);
 
-		int genomeSize = parameter.getGenomeSize();
-		int maxIterations = parameter.getMaxIterations();
-		int populationSize = parameter.getPopulationSize();
+		int genomeSize = config.getGenomeSize();
+		int maxIterations = config.getMaxIterations();
+		int populationSize = config.getPopulationSize();
 
 		long startTime = System.currentTimeMillis();
 

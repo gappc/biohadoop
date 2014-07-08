@@ -1,5 +1,6 @@
 package at.ac.uibk.dps.biohadoop.solver.ga.algorithm;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,9 +19,9 @@ import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverState;
 import at.ac.uibk.dps.biohadoop.solver.ga.DistancesGlobal;
-import at.ac.uibk.dps.biohadoop.solver.ga.config.GaParameter;
+import at.ac.uibk.dps.biohadoop.solver.ga.config.GaAlgorithmConfig;
 
-public class Ga implements Algorithm<int[], GaParameter> {
+public class Ga implements Algorithm<int[], GaAlgorithmConfig> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Ga.class);
 	public static final String GA_QUEUE = "GA_QUEUE";
@@ -29,16 +30,16 @@ public class Ga implements Algorithm<int[], GaParameter> {
 	private final int logSteps = 1000;
 
 	@Override
-	public int[] compute(SolverId solverId, GaParameter parameter)
+	public int[] compute(SolverId solverId, GaAlgorithmConfig config)
 			throws AlgorithmException {
 		SolverService solverService = SolverService.getInstance();
 		solverService.setSolverState(solverId, SolverState.RUNNING);
 
 		TaskClient<int[], Double> taskClient = new TaskClientImpl<>(GA_QUEUE);
 
-		Tsp tsp = parameter.getTsp();
-		int populationSize = parameter.getPopulationSize();
-		int maxIterations = parameter.getMaxIterations();
+		Tsp tsp = readTspData(config.getDataFile());
+		int populationSize = config.getPopulationSize();
+		int maxIterations = config.getMaxIterations();
 		DistancesGlobal.setDistances(tsp.getDistances());
 
 		int citySize = tsp.getCities().length;
@@ -155,6 +156,15 @@ public class Ga implements Algorithm<int[], GaParameter> {
 		}
 
 		return population[0];
+	}
+
+	private Tsp readTspData(String dataFile) throws AlgorithmException {
+		try {
+			return TspFileReader.readFile(dataFile);
+		} catch (IOException e) {
+			LOG.error("Could not read TSP input file {}", dataFile);
+			throw new AlgorithmException(e);
+		}
 	}
 
 	private int[][] convertToArray(Object input) {

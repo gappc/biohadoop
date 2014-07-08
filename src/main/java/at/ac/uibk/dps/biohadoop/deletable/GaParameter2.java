@@ -1,14 +1,14 @@
-package at.ac.uibk.dps.biohadoop.solver.ga.config;
+package at.ac.uibk.dps.biohadoop.deletable;
 
 import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.Tsp;
 
-public class GaParameter {
+public class GaParameter2 {
 
 	private final Tsp tsp;
 	private final int populationSize;
 	private final int maxIterations;
 
-	public GaParameter(Tsp tsp, int populationSize, int maxIterations) {
+	public GaParameter2(Tsp tsp, int populationSize, int maxIterations) {
 		this.tsp = tsp;
 		this.populationSize = populationSize;
 		this.maxIterations = maxIterations;

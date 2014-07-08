@@ -1,13 +1,13 @@
-package at.ac.uibk.dps.biohadoop.solver.moead.config;
+package at.ac.uibk.dps.biohadoop.deletable;
 
-public class MoeadParameter {
+public class MoeadParameter2 {
 
 	private final int maxIterations;
 	private final int N;
 	private final int neighborSize;
 	private final int genomeSize;
 
-	public MoeadParameter(int maxIterations, int n, int neighborSize,
+	public MoeadParameter2(int maxIterations, int n, int neighborSize,
 			int genomeSize) {
 		this.maxIterations = maxIterations;
 		N = n;

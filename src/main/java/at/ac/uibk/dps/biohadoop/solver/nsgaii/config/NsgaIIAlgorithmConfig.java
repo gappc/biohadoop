@@ -1,12 +1,10 @@
 package at.ac.uibk.dps.biohadoop.solver.nsgaii.config;
 
 import at.ac.uibk.dps.biohadoop.config.AlgorithmConfiguration;
-import at.ac.uibk.dps.biohadoop.config.BuildParameterException;
 
 public class NsgaIIAlgorithmConfig implements AlgorithmConfiguration {
 
 	private String outputFile;
-	private String algorithm;
 	private int populationSize;
 	private int genomeSize;
 	private int maxIterations;
@@ -17,14 +15,6 @@ public class NsgaIIAlgorithmConfig implements AlgorithmConfiguration {
 
 	public void setOutputFile(String outputFile) {
 		this.outputFile = outputFile;
-	}
-
-	public String getAlgorithm() {
-		return algorithm;
-	}
-
-	public void setAlgorithm(String algorithm) {
-		this.algorithm = algorithm;
 	}
 
 	public int getPopulationSize() {
@@ -51,9 +41,9 @@ public class NsgaIIAlgorithmConfig implements AlgorithmConfiguration {
 		this.maxIterations = maxIterations;
 	}
 
-	@Override
-	public Object buildParameters() throws BuildParameterException {
-		return new NsgaIIParameter(maxIterations, populationSize, genomeSize);
-	}
+//	@Override
+//	public Object buildParameters() throws BuildParameterException {
+//		return new NsgaIIParameter(maxIterations, populationSize, genomeSize);
+//	}
 
 }

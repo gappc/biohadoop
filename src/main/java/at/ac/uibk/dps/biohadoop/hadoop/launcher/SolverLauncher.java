@@ -77,7 +77,7 @@ public class SolverLauncher {
 						solverId, SolverState.NEW);
 
 				Object parameter = solverConfig
-						.getAlgorithmConfiguration().buildParameters();
+						.getAlgorithmConfiguration();
 				Algorithm<?, ?> algorithm = solverConfig.getAlgorithm()
 						.newInstance();
 				((Algorithm<?, Object>) algorithm).compute(solverId,

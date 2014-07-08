@@ -23,7 +23,6 @@ import at.ac.uibk.dps.biohadoop.service.persistence.file.FilePersistenceConfigur
 import at.ac.uibk.dps.biohadoop.service.persistence.file.FileSaveConfiguration;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverConfiguration;
 import at.ac.uibk.dps.biohadoop.solver.ga.distribution.GaSimpleMerger;
-import at.ac.uibk.dps.biohadoop.solver.moead.algorithm.Moead;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.algorithm.NsgaII;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.socket.NsgaIISocket;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.worker.SocketNsgaIIWorker;
@@ -105,13 +104,12 @@ public class NsgaIIConfigWriter {
 		DistributionConfiguration distributionConfiguration = buildDistributionConfig();
 
 		return new SolverConfiguration(name, algorithmConfiguration,
-				Moead.class, persistenceConfiguration,
+				NsgaII.class, persistenceConfiguration,
 				distributionConfiguration);
 	}
 
 	private static AlgorithmConfiguration buildAlgorithmConfig(boolean local) {
 		NsgaIIAlgorithmConfig nsgaIIConfig = new NsgaIIAlgorithmConfig();
-		nsgaIIConfig.setAlgorithm(NsgaII.class.getName());
 		if (local) {
 			nsgaIIConfig.setOutputFile("/tmp/nsgaii-sol.txt");
 		} else {
