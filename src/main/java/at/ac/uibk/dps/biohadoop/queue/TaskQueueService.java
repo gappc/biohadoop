@@ -45,9 +45,11 @@ public class TaskQueueService {
 	}
 
 	public void stopAllTaskQueues() {
+		LOG.info("Stopping all queues");
 		synchronized (monitor) {
 			isFinished.set(true);
 			for (String queueName : queues.keySet()) {
+				LOG.info("Stopping queue {}", queueName);
 				queues.get(queueName).stopQueue();
 			}
 		}
