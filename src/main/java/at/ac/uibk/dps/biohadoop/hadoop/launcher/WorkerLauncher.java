@@ -34,6 +34,7 @@ import at.ac.uibk.dps.biohadoop.hadoop.LaunchContainerRunnable;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
 import at.ac.uibk.dps.biohadoop.torename.LocalResourceBuilder;
 
+//TODO make more parallel and use Callable instead of Thread
 public class WorkerLauncher {
 
 	private static final Logger LOG = LoggerFactory
@@ -46,7 +47,7 @@ public class WorkerLauncher {
 		// Initialize clients to ResourceManager and NodeManagers
 		// Configuration conf = new YarnConfiguration();
 
-		AMRMClient<ContainerRequest> rmClient = AMRMClient.createAMRMClient();
+		final AMRMClient<ContainerRequest> rmClient = AMRMClient.createAMRMClient();
 		rmClient.init(yarnConfiguration);
 		rmClient.start();
 
@@ -69,7 +70,7 @@ public class WorkerLauncher {
 		capability.setVirtualCores(1);
 
 		List<String> workerList = getWorkerList(biohadoopConfig);
-		int containerCount = workerList.size();
+		final int containerCount = workerList.size();
 
 		LOG.info("Make container requests to ResourceManager");
 		for (int i = 0; i < containerCount; ++i) {
@@ -138,33 +139,39 @@ public class WorkerLauncher {
 			Thread.sleep(100);
 		}
 
-		try {
-			LOG.info("Waiting for " + containerCount
-					+ " containers to complete");
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					LOG.info("Waiting for " + containerCount
+							+ " containers to complete");
 
-			SolverService solverService = SolverService
-					.getInstance();
+					SolverService solverService = SolverService
+							.getInstance();
 
-			int completedContainers = 0;
-			while (completedContainers < containerCount) {
-				float progress = solverService.getOverallProgress();
-				AllocateResponse response = rmClient.allocate(progress);
-				for (ContainerStatus status : response
-						.getCompletedContainersStatuses()) {
-					++completedContainers;
-					LOG.info("Completed container {} with status {}",
-							completedContainers, status);
+					int completedContainers = 0;
+					while (completedContainers < containerCount) {
+						float progress = solverService.getOverallProgress();
+						AllocateResponse response = rmClient.allocate(progress);
+						for (ContainerStatus status : response
+								.getCompletedContainersStatuses()) {
+							++completedContainers;
+							LOG.info("Completed container {} with status {}",
+									completedContainers, status);
+						}
+						Thread.sleep(100);
+					}
+					rmClient.allocate(1.0f);
+
+					LOG.info("All containers completed, unregister with ResourceManager");
+					rmClient.unregisterApplicationMaster(
+							FinalApplicationStatus.SUCCEEDED, "", "");
+				} catch (Exception e) {
+					LOG.error("******** Application error ***********", e);
 				}
-				Thread.sleep(100);
 			}
-			rmClient.allocate(1.0f);
-
-			LOG.info("All containers completed, unregister with ResourceManager");
-			rmClient.unregisterApplicationMaster(
-					FinalApplicationStatus.SUCCEEDED, "", "");
-		} catch (Exception e) {
-			LOG.error("******** Application error ***********", e);
-		}
+		}).start();
 	}
 
 	private static List<String> getWorkerList(BiohadoopConfiguration config) {
