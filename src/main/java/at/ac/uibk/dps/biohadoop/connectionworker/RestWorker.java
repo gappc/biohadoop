@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.connection.MessageType;
 import at.ac.uibk.dps.biohadoop.connection.WorkerConnection;
-import at.ac.uibk.dps.biohadoop.deletable.JacksonContextResolver;
 import at.ac.uibk.dps.biohadoop.endpoint.WorkerEndpoint;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.queue.Task;
