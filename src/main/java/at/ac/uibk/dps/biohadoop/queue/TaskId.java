@@ -27,12 +27,12 @@ public class TaskId implements Serializable {
 			return false;
 		}
 		TaskId taskId = (TaskId) obj;
-		return this.id.equals(taskId.id);
+		return id.equals(taskId.id);
 	}
 	
 	@Override
 	public int hashCode() {
-		return this.id.hashCode();
+		return id.hashCode();
 	}
 	
 	@Override
