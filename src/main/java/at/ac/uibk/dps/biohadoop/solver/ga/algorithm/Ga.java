@@ -11,17 +11,19 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.config.Algorithm;
 import at.ac.uibk.dps.biohadoop.config.AlgorithmException;
+import at.ac.uibk.dps.biohadoop.datastore.DataClient;
+import at.ac.uibk.dps.biohadoop.datastore.DataClientImpl;
+import at.ac.uibk.dps.biohadoop.datastore.DataOptions;
+import at.ac.uibk.dps.biohadoop.handler.HandlerClient;
+import at.ac.uibk.dps.biohadoop.handler.HandlerClientImpl;
 import at.ac.uibk.dps.biohadoop.queue.TaskClient;
 import at.ac.uibk.dps.biohadoop.queue.TaskClientImpl;
 import at.ac.uibk.dps.biohadoop.queue.TaskFuture;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverData;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverState;
 import at.ac.uibk.dps.biohadoop.solver.ga.DistancesGlobal;
 import at.ac.uibk.dps.biohadoop.solver.ga.config.GaAlgorithmConfig;
 
-public class Ga implements Algorithm<int[], GaAlgorithmConfig> {
+public class Ga implements Algorithm<GaAlgorithmConfig, int[]> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Ga.class);
 	public static final String GA_QUEUE = "GA_QUEUE";
@@ -32,26 +34,28 @@ public class Ga implements Algorithm<int[], GaAlgorithmConfig> {
 	@Override
 	public int[] compute(SolverId solverId, GaAlgorithmConfig config)
 			throws AlgorithmException {
-		SolverService solverService = SolverService.getInstance();
-		solverService.setSolverState(solverId, SolverState.RUNNING);
-
+		// Initialize used Biohadoop components
 		TaskClient<int[], Double> taskClient = new TaskClientImpl<>(GA_QUEUE);
+		HandlerClient handlerClient = new HandlerClientImpl(solverId);
+		DataClient dataClient = new DataClientImpl(solverId);
 
+		// Set data from configuration
 		Tsp tsp = readTspData(config.getDataFile());
 		int populationSize = config.getPopulationSize();
 		int maxIterations = config.getMaxIterations();
 		DistancesGlobal.setDistances(tsp.getDistances());
-
 		int citySize = tsp.getCities().length;
 
-		// Init population
+		// Initialize population
 		int[][] population = null;
-		int persitedIteration = 0;
-		SolverData<?> solverData = solverService.getSolverData(solverId);
-		if (solverData != null) {
-			population = convertToArray(solverData.getData());
-			persitedIteration = solverData.getIteration();
-			LOG.info("Resuming from iteration {}", persitedIteration);
+		int iterationStart = 0;
+		
+		// If there is data from some where (e.g. loaded from handler), than use
+		// this
+		if (dataClient.getData(DataOptions.COMPUTATION_RESUMED, false)) {
+			population = convertToArray(dataClient.getData(DataOptions.DATA));
+			iterationStart = dataClient.getData(DataOptions.ITERATION_START);
+			LOG.info("Resuming from iteration {}", iterationStart);
 		} else {
 			population = initPopulation(populationSize, citySize);
 		}
@@ -132,10 +136,12 @@ public class Ga implements Algorithm<int[], GaAlgorithmConfig> {
 
 			iteration++;
 
-			solverData = new SolverData<int[][]>(population, values[0],
-					iteration + persitedIteration);
-			solverService.setSolverData(solverId, solverData);
-			// TODO read data back in, becaus possibly there is some change
+			dataClient.setDefaultData(population, values[0], maxIterations, iteration);
+			handlerClient.invokeDefaultHandlers();
+			population = (int[][])dataClient.getData(DataOptions.DATA, population);
+
+			// solverService.setSolverData(solverId, solverData);
+			// TODO read data back in, because possibly there is some change
 			// coming from islands
 
 			if (iteration == maxIterations) {
@@ -150,9 +156,6 @@ public class Ga implements Algorithm<int[], GaAlgorithmConfig> {
 				startTime = endTime;
 				printGenome(tsp.getDistances(), population[0], citySize);
 			}
-
-			solverService.setProgress(solverId, (float) iteration
-					/ (float) maxIterations);
 		}
 
 		return population[0];

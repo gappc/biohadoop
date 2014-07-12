@@ -10,6 +10,8 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.datastore.DataOptions;
+import at.ac.uibk.dps.biohadoop.datastore.DataService;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.SolverLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointLauncher;
@@ -43,8 +45,8 @@ public class NsgaIIMain {
 				LOG.info("{} finished", solverId);
 				
 				@SuppressWarnings("unchecked")
-				List<List<Double>> solution = (List<List<Double>>) solverService
-						.getSolverData(solverId);
+				List<List<Double>> solution = (List<List<Double>>) DataService
+						.getInstance().getData(solverId, DataOptions.DATA);
 				SolverConfiguration solverConfiguration = solverService
 						.getSolverConfiguration(solverId);
 				String outputFilename = ((NsgaIIAlgorithmConfig) solverConfiguration

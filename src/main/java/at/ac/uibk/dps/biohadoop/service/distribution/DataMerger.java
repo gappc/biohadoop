@@ -1,7 +1,7 @@
 package at.ac.uibk.dps.biohadoop.service.distribution;
 
-public interface DataMerger {
+public interface DataMerger<T> {
 
-	public Object merge(Object o1, Object o2) throws DataMergeException;
+	public T merge(T o1, T o2) throws DataMergeException;
 
 }

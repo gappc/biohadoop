@@ -1,19 +1,19 @@
 package at.ac.uibk.dps.biohadoop.service.solver;
 
 import java.io.Serializable;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.UUID;
 
 public class SolverId implements Serializable {
 
 	private static final long serialVersionUID = 8506626310953326430L;
 	
-	private final int id;
+	private final UUID id;
 	
 	private SolverId() {
-		this.id = ThreadLocalRandom.current().nextInt();
+		this.id = UUID.randomUUID();
 	}
 	
-	private SolverId(int id) {
+	private SolverId(UUID id) {
 		this.id = id;
 	}
 	
@@ -21,13 +21,13 @@ public class SolverId implements Serializable {
 		return new SolverId();
 	}
 
-	public long getId() {
-		return id;
+	public static SolverId valueOf(String input) {
+		UUID id = UUID.fromString(input);
+		return new SolverId(id);
 	}
 	
-	public static SolverId valueOf(String input) {
-		int newId = Integer.valueOf(input);
-		return new SolverId(newId);
+	public UUID getId() {
+		return id;
 	}
 	
 	@Override
@@ -35,17 +35,17 @@ public class SolverId implements Serializable {
 		if (!(obj instanceof SolverId)) {
 			return false;
 		}
-		SolverId jobId = (SolverId) obj;
-		return this.id == jobId.id;
+		SolverId solverId = (SolverId) obj;
+		return id.equals(solverId.id);
 	}
 	
 	@Override
 	public int hashCode() {
-		return this.id;
+		return id.hashCode();
 	}
 	
 	@Override
 	public String toString() {
-		return Integer.toString(id);
+		return id.toString();
 	}
 }

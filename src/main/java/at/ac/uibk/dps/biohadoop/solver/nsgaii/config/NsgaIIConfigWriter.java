@@ -15,15 +15,18 @@ import at.ac.uibk.dps.biohadoop.config.AlgorithmConfiguration;
 import at.ac.uibk.dps.biohadoop.connection.ConnectionConfiguration;
 import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
+import at.ac.uibk.dps.biohadoop.handler.HandlerConfiguration;
 import at.ac.uibk.dps.biohadoop.service.distribution.DistributionConfiguration;
-import at.ac.uibk.dps.biohadoop.service.distribution.GlobalDistributionConfiguration;
-import at.ac.uibk.dps.biohadoop.service.persistence.PersistenceConfiguration;
+import at.ac.uibk.dps.biohadoop.service.distribution.DistributionHandler;
+import at.ac.uibk.dps.biohadoop.service.distribution.ZooKeeperConfiguration;
 import at.ac.uibk.dps.biohadoop.service.persistence.file.FileLoadConfiguration;
-import at.ac.uibk.dps.biohadoop.service.persistence.file.FilePersistenceConfiguration;
+import at.ac.uibk.dps.biohadoop.service.persistence.file.FileLoadHandler;
 import at.ac.uibk.dps.biohadoop.service.persistence.file.FileSaveConfiguration;
+import at.ac.uibk.dps.biohadoop.service.persistence.file.FileSaveHandler;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverConfiguration;
-import at.ac.uibk.dps.biohadoop.solver.ga.distribution.GaSimpleMerger;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.algorithm.NsgaII;
+import at.ac.uibk.dps.biohadoop.solver.nsgaii.distribution.NsgaIIBestResultGetter;
+import at.ac.uibk.dps.biohadoop.solver.nsgaii.distribution.NsgaIISimpleMerger;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIIKryo;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIIRest;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIIWebSocket;
@@ -83,7 +86,7 @@ public class NsgaIIConfigWriter {
 		SolverConfiguration solverConfig = buildSolverConfig("MOEAD-LOCAL-1",
 				local);
 		ConnectionConfiguration connectionConfiguration = buildConnectionConfiguration();
-		GlobalDistributionConfiguration globalDistributionConfiguration = buildGlobalDistributionConfig(local);
+		ZooKeeperConfiguration globalDistributionConfiguration = buildGlobalDistributionConfig(local);
 
 		return new BiohadoopConfiguration(version, includePaths, Arrays.asList(
 				solverConfig, solverConfig, solverConfig, solverConfig),
@@ -106,12 +109,17 @@ public class NsgaIIConfigWriter {
 	private static SolverConfiguration buildSolverConfig(String name,
 			boolean local) {
 		AlgorithmConfiguration algorithmConfiguration = buildAlgorithmConfig(local);
-		PersistenceConfiguration persistenceConfiguration = buildPersistenceConfig(local);
+
+		FileSaveConfiguration fileSaveConfiguration = buildFileSaveConfig(local);
+		FileLoadConfiguration fileLoadConfiguration = buildFileLoadConfig(local);
 		DistributionConfiguration distributionConfiguration = buildDistributionConfig();
+		List<HandlerConfiguration> handlers = new ArrayList<>();
+		handlers.add(fileSaveConfiguration);
+		handlers.add(fileLoadConfiguration);
+		handlers.add(distributionConfiguration);
 
 		return new SolverConfiguration(name, algorithmConfiguration,
-				NsgaII.class, persistenceConfiguration,
-				distributionConfiguration);
+				NsgaII.class, handlers);
 	}
 
 	private static AlgorithmConfiguration buildAlgorithmConfig(boolean local) {
@@ -129,40 +137,46 @@ public class NsgaIIConfigWriter {
 		return nsgaIIConfig;
 	}
 
-	private static PersistenceConfiguration buildPersistenceConfig(boolean local) {
+	private static FileSaveConfiguration buildFileSaveConfig(boolean local) {
 		String savePath = null;
-		String loadPath = null;
 		if (local) {
 			savePath = LOCAL_PERSISTENCE_SAVE_PATH;
-			loadPath = LOCAL_PERSISTENCE_LOAD_PATH;
 		} else {
 			savePath = REMOTE_PERSISTENCE_SAVE_PATH;
+		}
+
+		FileSaveConfiguration fileSaveConfiguration = new FileSaveConfiguration(
+				FileSaveHandler.class, savePath, 100);
+
+		return fileSaveConfiguration;
+	}
+
+	private static FileLoadConfiguration buildFileLoadConfig(boolean local) {
+		String loadPath = null;
+		if (local) {
+			loadPath = LOCAL_PERSISTENCE_LOAD_PATH;
+		} else {
 			loadPath = REMOTE_PERSISTENCE_LOAD_PATH;
 		}
 
-		FileSaveConfiguration saveFile = new FileSaveConfiguration(savePath,
-				1000);
-		FileLoadConfiguration loadFile = new FileLoadConfiguration(loadPath,
-				true);
+		FileLoadConfiguration fileLoadConfiguration = new FileLoadConfiguration(
+				FileLoadHandler.class, loadPath, false);
 
-		PersistenceConfiguration filePersistenceConfiguration = new FilePersistenceConfiguration(
-				saveFile, loadFile);
-
-		return filePersistenceConfiguration;
+		return fileLoadConfiguration;
 	}
 
 	private static DistributionConfiguration buildDistributionConfig() {
-		return new DistributionConfiguration(GaSimpleMerger.class, 2000);
+		return new DistributionConfiguration(DistributionHandler.class,
+				NsgaIISimpleMerger.class, NsgaIIBestResultGetter.class, 2000);
 	}
 
-	private static GlobalDistributionConfiguration buildGlobalDistributionConfig(
+	private static ZooKeeperConfiguration buildGlobalDistributionConfig(
 			boolean local) {
 		if (local) {
-			return new GlobalDistributionConfiguration(
-					LOCAL_DISTRIBUTION_INFO_HOST, LOCAL_DISTRIBUTION_INFO_PORT);
+			return new ZooKeeperConfiguration(LOCAL_DISTRIBUTION_INFO_HOST,
+					LOCAL_DISTRIBUTION_INFO_PORT);
 		} else {
-			return new GlobalDistributionConfiguration(
-					REMOTE_DISTRIBUTION_INFO_HOST,
+			return new ZooKeeperConfiguration(REMOTE_DISTRIBUTION_INFO_HOST,
 					REMOTE_DISTRIBUTION_INFO_PORT);
 		}
 	}

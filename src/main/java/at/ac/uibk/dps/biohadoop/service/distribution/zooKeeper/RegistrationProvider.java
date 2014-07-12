@@ -11,7 +11,7 @@ import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
 public class RegistrationProvider {
 	
 	private final ZooKeeper zooKeeper;
-	private DataProvider dataProvider;
+	private AlgorithmWatcher algorithmWatcher;
 	
 	public RegistrationProvider(ZooKeeper zooKeeper) {
 		this.zooKeeper = zooKeeper;
@@ -19,10 +19,10 @@ public class RegistrationProvider {
 
 	public void registerNode(String path, SolverId solverId) throws KeeperException, InterruptedException, IOException {
 		NodePublisher nodePublisher = new NodePublisher(zooKeeper, solverId);
-		dataProvider = nodePublisher.publish(path);
+		algorithmWatcher = nodePublisher.publish(path);
 	}
 
 	public List<NodeData> getNodesData() {
-		return dataProvider.getNodesData();
+		return algorithmWatcher.getNodesData();
 	}
 }

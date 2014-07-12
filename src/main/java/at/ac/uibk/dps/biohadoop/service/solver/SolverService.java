@@ -1,15 +1,11 @@
 package at.ac.uibk.dps.biohadoop.service.solver;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import at.ac.uibk.dps.biohadoop.torename.ObjectCloner;
 
 public class SolverService {
 
@@ -39,6 +35,11 @@ public class SolverService {
 		return solver.getProgress();
 	}
 
+	public void setProgress(final SolverId solverId, final float progress) {
+		Solver solver = solvers.get(solverId);
+		solver.setProgress(progress);
+	}
+	
 	public float getOverallProgress() {
 		float progress = 0;
 		int solverCount = solvers.size();
@@ -47,11 +48,6 @@ public class SolverService {
 			progress += solver.getProgress() / solverCount;
 		}
 		return progress > 1 ? 1 : progress;
-	}
-
-	public void setProgress(final SolverId solverId, final float progress) {
-		Solver solver = solvers.get(solverId);
-		solver.setProgress(progress);
 	}
 
 	public SolverState getSolverState(final SolverId solverId) {
@@ -65,9 +61,8 @@ public class SolverService {
 
 		switch (solverState) {
 		case NEW:
-			for (SolverHandler solverHandler : solver.getSolverHandlers()) {
-				solverHandler.onNew(solverId);
-			}
+			break;
+		case RUNNING:
 			break;
 		case FINISHED:
 			counter.decrementAndGet();
@@ -78,38 +73,6 @@ public class SolverService {
 		default:
 			break;
 		}
-	}
-
-	public void setSolverData(final SolverId solverId,
-			final SolverData<?> solverData) {
-		Solver solver = solvers.get(solverId);
-		SolverData<?> clone = ObjectCloner.deepCopy(solverData,
-				SolverData.class);
-		solver.setSolverData(clone);
-		for (SolverHandler solverHandler : solver.getSolverHandlers()) {
-			solverHandler.onDataUpdate(solverId);
-		}
-	}
-
-	public void updateSolverData(final SolverId solverId,
-			final SolverData<?> solverData) {
-		Solver solver = solvers.get(solverId);
-		SolverData<?> clone = ObjectCloner.deepCopy(solverData,
-				SolverData.class);
-		solver.setSolverData(clone);
-	}
-
-	public SolverData<?> getSolverData(SolverId solverId) {
-		Solver solver = solvers.get(solverId);
-		if (solver == null) {
-			return null;
-		}
-		return solver.getSolverData();
-	}
-
-	// TODO remove if only needed for DistributionService.getRemoteSolver()
-	public List<SolverId> getSolversList() {
-		return new ArrayList<>(solvers.keySet());
 	}
 
 	public SolverConfiguration getSolverConfiguration(SolverId solverId) {

@@ -30,16 +30,16 @@ public class NodePublisher {
 		this.solverId = solverId;
 	}
 
-	public DataProvider publish(String fullPath) throws KeeperException, InterruptedException, IOException {
+	public AlgorithmWatcher publish(String fullPath) throws KeeperException, InterruptedException, IOException {
 		String parentPath = getParentPath(fullPath);
 		
-		DataProvider childrenWatcher = createParentNodes(parentPath);
+		AlgorithmWatcher algorithmWatcher = createParentNodes(parentPath);
 		createChildNode(fullPath);
 		
-		return childrenWatcher;
+		return algorithmWatcher;
 	}
 	
-	private DataProvider createParentNodes(String parentPath) throws KeeperException, InterruptedException {
+	private AlgorithmWatcher createParentNodes(String parentPath) throws KeeperException, InterruptedException {
 		String[] parentPathTokens = getPathTokens(parentPath);
 		StringBuilder sbPath = new StringBuilder("");
 		for (int i = 0; i < parentPathTokens.length; i++) {
@@ -63,7 +63,7 @@ public class NodePublisher {
 			}
 		}
 		
-		DataProvider dataProvider = new DataProvider(zooKeeper, parentPath);
+		AlgorithmWatcher dataProvider = new AlgorithmWatcher(zooKeeper, parentPath);
 		zooKeeper.getChildren(parentPath, dataProvider);
 		
 		return dataProvider;

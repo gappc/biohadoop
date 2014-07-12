@@ -3,12 +3,6 @@ package at.ac.uibk.dps.biohadoop.service.distribution.zooKeeper;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ThreadLocalRandom;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
@@ -19,9 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.config.Algorithm;
 import at.ac.uibk.dps.biohadoop.service.distribution.DistributionException;
-import at.ac.uibk.dps.biohadoop.service.distribution.GlobalDistributionConfiguration;
+import at.ac.uibk.dps.biohadoop.service.distribution.ZooKeeperConfiguration;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverConfiguration;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverData;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
 
@@ -38,7 +31,7 @@ public class ZooKeeperController {
 	// TODO check if other design is better suited (because of large
 	// constructor)
 	public ZooKeeperController(
-			GlobalDistributionConfiguration globalDistributionConfiguration,
+			ZooKeeperConfiguration globalDistributionConfiguration,
 			SolverId solverId) throws DistributionException {
 
 		this.solverId = solverId;
@@ -72,42 +65,60 @@ public class ZooKeeperController {
 					"Error while registering to ZooKeeper at " + url, e);
 		}
 	}
-
-	public SolverData<?> getRemoteSolverData()
-			throws DistributionException {
-		List<NodeData> remoteNodesData = getSuitableRemoteNodesData();
-
-		int index = ThreadLocalRandom.current().nextInt(remoteNodesData.size());
-		NodeData nodeData = remoteNodesData.get(index);
-		LOG.info("Solver {} gets remote data from Solver {}", solverId,
-				nodeData.getSolverId());
-		String path = nodeData.getUrl() + "/" + nodeData.getSolverId();
-
-		try {
-			Client client = ClientBuilder.newClient();
-			Response response = client.target(path)
-					.request(MediaType.APPLICATION_JSON).get();
-			return response.readEntity(SolverData.class);
-		} catch(Exception e) {
-			throw new DistributionException("Could not connect to " + path, e);
-		}
-	}
+	
+//	public SolverData<?> getRemoteSolverData() throws DistributionException {
+//		List<NodeData> remoteNodesData = getSuitableRemoteNodesData();
+//		int remoteNodesCount = remoteNodesData.size();
+//
+//		if (remoteNodesCount == 0) {
+//			LOG.error("No suitable node found");
+//			throw new DistributionException("No suitable node found");
+//		}
+//		
+//		int index = ThreadLocalRandom.current().nextInt(remoteNodesData.size());
+//		NodeData nodeData = remoteNodesData.get(index);
+//		LOG.info("Solver {} gets remote data from Solver {}", solverId,
+//				nodeData.getSolverId());
+//		String path = nodeData.getUrl() + "/" + nodeData.getSolverId() + "/typed";
+//
+//		Response response = null;
+//		try {
+//			Client client = ClientBuilder.newClient();
+//			response = client.target(path)
+//					.request(MediaType.APPLICATION_JSON).get();
+//		} catch (Exception e) {
+//			LOG.error("Could not get remote data from {}", path, e);
+//			throw new DistributionException(e);
+//		}
+//		
+//		try {
+//			String dataString = response.readEntity(String.class);
+//			SolverData<?> solverData = objectMapper.readValue(dataString, SolverData.class);
+//			if (solverData == null) {
+//				LOG.error("No remote data found at {}", path);
+//				throw new DistributionException("No remote data found");
+//			}
+//			return solverData;
+//		} catch (Exception e) {
+//			LOG.error("Error while deserialization of resource {}", path, e);
+//			throw new DistributionException(e);
+//		}
+//	}
 
 	private String getFullPath() {
-		SolverService solverService = SolverService
-				.getInstance();
+		SolverService solverService = SolverService.getInstance();
 		SolverConfiguration solverConfiguration = solverService
 				.getSolverConfiguration(solverId);
 		Class<? extends Algorithm<?, ?>> algorithmType = solverConfiguration
 				.getAlgorithm();
 
-		StringBuilder sb = new StringBuilder().append(SOLVER_PATH)
-				.append("/").append(algorithmType.getSimpleName()).append("/")
+		StringBuilder sb = new StringBuilder().append(SOLVER_PATH).append("/")
+				.append(algorithmType.getSimpleName()).append("/")
 				.append(solverId);
 		return sb.toString();
 	}
 
-	private List<NodeData> getSuitableRemoteNodesData() throws DistributionException {
+	public List<NodeData> getSuitableRemoteNodesData() {
 		List<NodeData> remoteNodesData = registrationProvider.getNodesData();
 		// remove self from list
 		NodeData self = null;

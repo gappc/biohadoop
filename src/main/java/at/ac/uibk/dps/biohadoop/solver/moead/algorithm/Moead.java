@@ -10,16 +10,18 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.config.Algorithm;
 import at.ac.uibk.dps.biohadoop.config.AlgorithmException;
+import at.ac.uibk.dps.biohadoop.datastore.DataClient;
+import at.ac.uibk.dps.biohadoop.datastore.DataClientImpl;
+import at.ac.uibk.dps.biohadoop.datastore.DataOptions;
+import at.ac.uibk.dps.biohadoop.handler.HandlerClient;
+import at.ac.uibk.dps.biohadoop.handler.HandlerClientImpl;
 import at.ac.uibk.dps.biohadoop.queue.TaskClient;
 import at.ac.uibk.dps.biohadoop.queue.TaskClientImpl;
 import at.ac.uibk.dps.biohadoop.queue.TaskFuture;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverData;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverState;
 import at.ac.uibk.dps.biohadoop.solver.moead.config.MoeadAlgorithmConfig;
 
-public class Moead implements Algorithm<List<List<Double>>, MoeadAlgorithmConfig> {
+public class Moead implements Algorithm<MoeadAlgorithmConfig, double[][]> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Moead.class);
 	public static final String MOEAD_QUEUE = "MOEAD_QUEUE";
@@ -31,13 +33,13 @@ public class Moead implements Algorithm<List<List<Double>>, MoeadAlgorithmConfig
 	private double minF2 = Double.MAX_VALUE;
 	private double maxF2 = -Double.MAX_VALUE;
 
-	public List<List<Double>> compute(SolverId solverId,
+	public double[][] compute(SolverId solverId,
 			MoeadAlgorithmConfig config) throws AlgorithmException {
-		SolverService solverService = SolverService.getInstance();
-		solverService.setSolverState(solverId, SolverState.RUNNING);
-
+		// Initialize used Biohadoop components
 		TaskClient<double[], double[]> taskClient = new TaskClientImpl<>(
 				MOEAD_QUEUE);
+		HandlerClient handlerClient = new HandlerClientImpl(solverId);
+		DataClient dataClient = new DataClientImpl(solverId);
 
 		int maxIterations = config.getMaxIterations();
 		int N = config.getPopulationSize();
@@ -59,10 +61,9 @@ public class Moead implements Algorithm<List<List<Double>>, MoeadAlgorithmConfig
 		// 1.3
 		double[][] population = null;
 		int persitedIteration = 0;
-		SolverData<?> solverData = solverService.getSolverData(solverId);
-		if (solverData != null) {
-			population = convertToArray(solverData.getData());
-			persitedIteration = solverData.getIteration();
+		if (dataClient.getData(DataOptions.COMPUTATION_RESUMED, false)) {
+			population = convertToArray(dataClient.getData(DataOptions.DATA));
+			persitedIteration = dataClient.getData(DataOptions.ITERATION_START);
 			LOG.info("Resuming from iteration {}", persitedIteration);
 		} else {
 			population = Initializer.getRandomPopulation(N, genomeSize);
@@ -88,9 +89,8 @@ public class Moead implements Algorithm<List<List<Double>>, MoeadAlgorithmConfig
 				y[i] = reproduce(population, B[i]);
 			}
 
-			List<TaskFuture<double[]>> futures;
 			try {
-				futures = taskClient.addAll(y);
+				List<TaskFuture<double[]>> futures = taskClient.addAll(y);
 				for (int i = 0; i < N; i++) {
 					double[] fValues = futures.get(i).get();
 					// 2.2 - no repair needed
@@ -110,11 +110,10 @@ public class Moead implements Algorithm<List<List<Double>>, MoeadAlgorithmConfig
 
 			iteration++;
 
-			List<List<Double>> result = computeResult(functionValues, z);
-
-			solverData = new SolverData<List<List<Double>>>(result, 0,
-					iteration + persitedIteration);
-			solverService.setSolverData(solverId, solverData);
+			double[][] result = computeResult(functionValues, z);
+			dataClient.setDefaultData(result, 0, maxIterations, iteration);
+			handlerClient.invokeDefaultHandlers();
+			functionValues = (double[][])dataClient.getData(DataOptions.DATA, functionValues);
 
 			if (iteration >= maxIterations) {
 				end = true;
@@ -126,16 +125,13 @@ public class Moead implements Algorithm<List<List<Double>>, MoeadAlgorithmConfig
 								- startTime);
 				startTime = endTime;
 			}
-
-			solverService.setProgress(solverId, (float) iteration
-					/ (float) maxIterations);
 		}
 
 		updateMinMax(functionValues);
 
-		List<List<Double>> result = computeResult(functionValues, z);
-		for (List<Double> vals : result) {
-			LOG.info(vals.get(0) + " " + vals.get(1));
+		double[][] result = computeResult(functionValues, z);
+		for (double[] vals : result) {
+			LOG.info(vals[0] + " " + vals[1]);
 		}
 
 		return result;
@@ -269,19 +265,17 @@ public class Moead implements Algorithm<List<List<Double>>, MoeadAlgorithmConfig
 		// - z[1]) / (maxF2 - minF2) * weightVector[1]);
 	}
 
-	private List<List<Double>> computeResult(double[][] functionValues,
+	private double[][] computeResult(double[][] functionValues,
 			double[] z) {
-		List<List<Double>> result = new ArrayList<List<Double>>();
+		double[][] result = new double[functionValues.length][functionValues[0].length];
 		for (int i = 0; i < functionValues.length; i++) {
-			List<Double> l = new ArrayList<Double>();
 			// TODO check if normalization should be done
 			// double val1 = (functionValues[i][0] - z[0]) / (maxF1 - minF1);
 			// double val2 = (functionValues[i][1] - z[1]) / (maxF2 - minF2);
 			double val1 = (functionValues[i][0] - z[0]);
 			double val2 = (functionValues[i][1] - z[1]);
-			l.add(val1);
-			l.add(val2);
-			result.add(l);
+			result[i][0] = val1;
+			result[i][1] = val2;
 			LOG.debug(val1 + " " + val2);
 		}
 		return result;

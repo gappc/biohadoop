@@ -12,16 +12,19 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.config.Algorithm;
 import at.ac.uibk.dps.biohadoop.config.AlgorithmException;
+import at.ac.uibk.dps.biohadoop.datastore.DataClient;
+import at.ac.uibk.dps.biohadoop.datastore.DataClientImpl;
+import at.ac.uibk.dps.biohadoop.datastore.DataOptions;
+import at.ac.uibk.dps.biohadoop.handler.HandlerClient;
+import at.ac.uibk.dps.biohadoop.handler.HandlerClientImpl;
 import at.ac.uibk.dps.biohadoop.queue.TaskClient;
 import at.ac.uibk.dps.biohadoop.queue.TaskClientImpl;
 import at.ac.uibk.dps.biohadoop.queue.TaskFuture;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverData;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverState;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.config.NsgaIIAlgorithmConfig;
 
-public class NsgaII implements Algorithm<List<List<Double>>, NsgaIIAlgorithmConfig> {
+public class NsgaII implements
+		Algorithm<NsgaIIAlgorithmConfig, double[][]> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(NsgaII.class);
 	public static final String NSGAII_QUEUE = "NSGAII_QUEUE";
@@ -32,10 +35,10 @@ public class NsgaII implements Algorithm<List<List<Double>>, NsgaIIAlgorithmConf
 	private int logSteps = 100;
 
 	@Override
-	public List<List<Double>> compute(SolverId solverId,
+	public double[][] compute(SolverId solverId,
 			NsgaIIAlgorithmConfig config) throws AlgorithmException {
-		SolverService solverService = SolverService.getInstance();
-		solverService.setSolverState(solverId, SolverState.RUNNING);
+		HandlerClient handlerClient = new HandlerClientImpl(solverId);
+		DataClient dataClient = new DataClientImpl(solverId);
 
 		int genomeSize = config.getGenomeSize();
 		int maxIterations = config.getMaxIterations();
@@ -45,10 +48,9 @@ public class NsgaII implements Algorithm<List<List<Double>>, NsgaIIAlgorithmConf
 
 		double[][] population = null;
 		int persitedIteration = 0;
-		SolverData<?> solverData = solverService.getSolverData(solverId);
-		if (solverData != null) {
-			population = convertToArray(solverData.getData());
-			persitedIteration = solverData.getIteration();
+		if (dataClient.getData(DataOptions.COMPUTATION_RESUMED, false)) {
+			population = convertToArray(dataClient.getData(DataOptions.DATA));
+			persitedIteration = dataClient.getData(DataOptions.ITERATION_START);
 			LOG.info("Resuming from iteration {}", persitedIteration);
 		} else {
 			population = initializePopulation(populationSize * 2, genomeSize);
@@ -110,12 +112,12 @@ public class NsgaII implements Algorithm<List<List<Double>>, NsgaIIAlgorithmConf
 
 			iteration++;
 
-			List<List<Double>> result = computeResult(populationSize,
+			double[][] result = computeResult(populationSize,
 					objectiveValues);
 
-			solverData = new SolverData<List<List<Double>>>(result, 0,
-					iteration + persitedIteration);
-			solverService.setSolverData(solverId, solverData);
+			dataClient.setDefaultData(result, 0, maxIterations, iteration);
+			handlerClient.invokeDefaultHandlers();
+			objectiveValues = (double[][])dataClient.getData(DataOptions.DATA, objectiveValues);
 
 			if (iteration >= maxIterations) {
 				end = true;
@@ -127,12 +129,9 @@ public class NsgaII implements Algorithm<List<List<Double>>, NsgaIIAlgorithmConf
 								- startTime);
 				startTime = endTime;
 			}
-
-			solverService.setProgress(solverId, (float) iteration
-					/ (float) maxIterations);
 		}
 
-		List<List<Double>> result = computeResult(populationSize,
+		double[][] result = computeResult(populationSize,
 				objectiveValues);
 		return result;
 	}
@@ -296,12 +295,9 @@ public class NsgaII implements Algorithm<List<List<Double>>, NsgaIIAlgorithmConf
 	private double[][] computeObjectiveValues(double[][] population,
 			double[][] objectiveValues, int start, int end)
 			throws AlgorithmException {
-		// for (int i = start; i < end; i++) {
-		// objectiveValues[i][0] = Functions.f1(population[i]);
-		// objectiveValues[i][1] = Functions.f2(population[i]);
-		// }
 		try {
-			List<TaskFuture<double[]>> taskFutures = taskClient.addAll(population);
+			List<TaskFuture<double[]>> taskFutures = taskClient
+					.addAll(population);
 			for (int i = 0; i < taskFutures.size(); i++) {
 				objectiveValues[i] = taskFutures.get(i).get();
 			}
@@ -376,7 +372,7 @@ public class NsgaII implements Algorithm<List<List<Double>>, NsgaIIAlgorithmConf
 		return result;
 	}
 
-	private List<List<Double>> computeResult(int populationSize,
+	private double[][] computeResult(int populationSize,
 			double[][] objectiveValues) {
 		// normalize
 		double minF1 = Double.MAX_VALUE;
@@ -398,14 +394,11 @@ public class NsgaII implements Algorithm<List<List<Double>>, NsgaIIAlgorithmConf
 			}
 		}
 
-		List<List<Double>> result = new ArrayList<List<Double>>();
+		double[][] result = new double[objectiveValues.length][objectiveValues[0].length];
 		for (int i = 0; i < populationSize; i++) {
-			List<Double> solution = new ArrayList<Double>();
-			solution.add((objectiveValues[i][0] - minF1) / (maxF1 - minF1));
-			solution.add((objectiveValues[i][1] - minF2) / (maxF2 - minF2));
-			result.add(solution);
+			result[i][0] = (objectiveValues[i][0] - minF1) / (maxF1 - minF1);
+			result[i][1] = (objectiveValues[i][1] - minF2) / (maxF2 - minF2);
 		}
-
 		return result;
 	}
 

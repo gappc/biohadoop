@@ -19,10 +19,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Christian Gapp
  *
  */
-public class DataProvider implements Watcher {
+public class AlgorithmWatcher implements Watcher {
 
 	private final static Logger LOG = LoggerFactory
-			.getLogger(DataProvider.class);
+			.getLogger(AlgorithmWatcher.class);
 
 	private final ZooKeeper zooKeeper;
 	private final String path;
@@ -30,7 +30,7 @@ public class DataProvider implements Watcher {
 	private final ObjectMapper objectMapper = new ObjectMapper();
 	private volatile List<NodeData> nodesData = new CopyOnWriteArrayList<NodeData>();
 
-	public DataProvider(ZooKeeper zooKeeper, String path) {
+	public AlgorithmWatcher(ZooKeeper zooKeeper, String path) {
 		this.zooKeeper = zooKeeper;
 		this.path = path;
 		updateNodesData();

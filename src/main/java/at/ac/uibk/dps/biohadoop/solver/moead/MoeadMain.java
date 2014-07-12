@@ -10,9 +10,11 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.datastore.DataOptions;
+import at.ac.uibk.dps.biohadoop.datastore.DataService;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
-import at.ac.uibk.dps.biohadoop.hadoop.launcher.SolverLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointLauncher;
+import at.ac.uibk.dps.biohadoop.hadoop.launcher.SolverLauncher;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverConfiguration;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
@@ -36,15 +38,13 @@ public class MoeadMain {
 					biohadoopConfiguration);
 			endpointLauncher.startMasterEndpoints();
 
-			SolverService solverService = SolverService
-					.getInstance();
+			SolverService solverService = SolverService.getInstance();
 			for (Future<SolverId> algorithm : algorithms) {
 				SolverId solverId = algorithm.get();
 				LOG.info("{} finished", solverId);
-				
-				@SuppressWarnings("unchecked")
-				List<List<Double>> solution = (List<List<Double>>) solverService
-						.getSolverData(solverId);
+
+				double[][] solution = (double[][]) DataService
+						.getInstance().getData(solverId, DataOptions.DATA);
 				SolverConfiguration solverConfiguration = solverService
 						.getSolverConfiguration(solverId);
 				String outputFilename = ((MoeadAlgorithmConfig) solverConfiguration
@@ -56,16 +56,17 @@ public class MoeadMain {
 		}
 	}
 
-	private static void saveToFile(String filename, List<List<Double>> solution) {
+	private static void saveToFile(String filename, double[][] solution) {
 		try {
 			BufferedWriter br = new BufferedWriter(new FileWriter(filename));
-			for (List<Double> l : solution) {
-				br.write(l.get(0) + " " + l.get(1) + "\n");
+			for (double[] l : solution) {
+				br.write(l[0] + " " + l[1] + "\n");
 			}
 			br.flush();
 			br.close();
 		} catch (IOException e) {
-			LOG.error("Exception while saving Moead data to file {}", filename, e);
+			LOG.error("Exception while saving Moead data to file {}", filename,
+					e);
 		}
 	}
 }

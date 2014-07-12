@@ -1,7 +1,6 @@
 package at.ac.uibk.dps.biohadoop.service.solver;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.TimeZone;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -21,12 +20,12 @@ public class SolverData<T> implements Serializable {
 		this.data = data;
 		this.fitness = fitness;
 		this.iteration = iteration;
-		this.timestamp = new Date().getTime();
+		this.timestamp = System.currentTimeMillis();
 		this.timezone = TimeZone.getDefault();
 	}
 
-	public SolverData(T data, double fitness, int iteration,
-			long timestamp, TimeZone timezone) {
+	public SolverData(T data, double fitness, int iteration, long timestamp,
+			TimeZone timezone) {
 		this.data = data;
 		this.fitness = fitness;
 		this.iteration = iteration;
@@ -40,8 +39,7 @@ public class SolverData<T> implements Serializable {
 			@JsonProperty("iteration") int iteration,
 			@JsonProperty("timestamp") long timestamp,
 			@JsonProperty("timezone") TimeZone timezone) {
-		return new SolverData<>(data, fitness, iteration, timestamp,
-				timezone);
+		return new SolverData<>(data, fitness, iteration, timestamp, timezone);
 	}
 
 	public T getData() {
@@ -55,7 +53,7 @@ public class SolverData<T> implements Serializable {
 	public long getTimestamp() {
 		return timestamp;
 	}
-
+	
 	public TimeZone getTimezone() {
 		return timezone;
 	}
