@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ObjectCloner {
 
 	private static Logger LOG = LoggerFactory.getLogger(ObjectCloner.class);
-	private static ObjectMapper objectMapper = new ObjectMapper();
+	private static ObjectMapper objectMapper = new ObjectMapper().enableDefaultTyping();
 
 	public static <T>T deepCopy(Object data, Class<T> type) {
 		if (data != null) {
