@@ -1,5 +1,8 @@
 package at.ac.uibk.dps.biohadoop.solver.moead.worker;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.connectionworker.RestWorker;
 import at.ac.uibk.dps.biohadoop.endpoint.Master;
 import at.ac.uibk.dps.biohadoop.solver.moead.algorithm.Functions;
@@ -29,4 +32,10 @@ public class RestMoeadWorker extends RestWorker<double[], double[]> {
 		return "/moead";
 	}
 
+	@Override
+	public TypeReference<Message<double[]>> getInputType() {
+		return new TypeReference<Message<double[]>>() {
+		};
+	}
+	
 }

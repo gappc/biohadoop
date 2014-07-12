@@ -1,5 +1,7 @@
 package at.ac.uibk.dps.biohadoop.connection.rest;
 
+import java.io.IOException;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ws.rs.GET;
@@ -11,8 +13,8 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
 import at.ac.uibk.dps.biohadoop.connection.DefaultEndpointHandler;
+import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
 import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.Master;
@@ -21,15 +23,20 @@ import at.ac.uibk.dps.biohadoop.endpoint.SendException;
 import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
 import at.ac.uibk.dps.biohadoop.server.deployment.DeployingClasses;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Produces(MediaType.APPLICATION_JSON)
-public abstract class RestResource implements Endpoint, MasterConnection, Master {
+public abstract class RestResource<T, S> implements Endpoint, MasterConnection, Master {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RestResource.class);
 	
 	private DefaultEndpointHandler masterEndpoint;
-	private Message<?> inputMessage;
-	private Message<?> outputMessage;
+	private Message<S> inputMessage;
+	private Message<T> outputMessage;
 
+	public abstract TypeReference<Message<S>> getInputType();
+	
 	@Override
 	public void configure() {
 		DeployingClasses.addRestfulClass(this.getClass());
@@ -61,33 +68,80 @@ public abstract class RestResource implements Endpoint, MasterConnection, Master
 		masterEndpoint.handleRegistration();
 		return outputMessage;
 	}
+//	
+//	@GET
+//	@Path("registration/typed")
+//	@Produces(MediaType.APPLICATION_JSON)
+//	public Response typedRegistration() throws InterruptedException {
+//		buildMasterEndpoint();
+//		masterEndpoint.handleRegistration();
+//		return getTypedResponse();
+//	}
 
 	@GET
 	@Path("workinit")
-	public Message<?> workInit() throws InterruptedException {
+	public Message<T> workInit() throws InterruptedException {
 		buildMasterEndpoint();
 		masterEndpoint.handleWorkInit();
 		return outputMessage;
 	}
+//	
+//	@GET
+//	@Path("workinit/typed")
+//	public Response typedWorkInit() throws InterruptedException {
+//		buildMasterEndpoint();
+//		masterEndpoint.handleWorkInit();
+//		return getTypedResponse();
+//	}
 
+//	@POST
+//	@Path("work")
+//	public Message<?> work(Message<?> message) throws InterruptedException {
+//		buildMasterEndpoint();
+//		inputMessage = message;
+//		masterEndpoint.handleWork();
+//		return outputMessage;
+//	}
+	
 	@POST
 	@Path("work")
-	public Message<?> work(Message<?> message) throws InterruptedException {
-		buildMasterEndpoint();
-		inputMessage = message;
-		masterEndpoint.handleWork();
+	public Message<T> work(String messageString) throws InterruptedException {
+		try {
+			Message<S> message = new ObjectMapper().readValue(messageString, getInputType());
+			buildMasterEndpoint();
+			inputMessage = message;
+			masterEndpoint.handleWork();
+		} catch (IOException e) {
+			LOG.error("Could not deserialize data {} to object {}", messageString, Message.class, e);
+		}
+		
 		return outputMessage;
 	}
 
+//	@POST
+//	@Path("work/typed")
+//	public Response typedWork(String dataString) throws InterruptedException {
+//		try {
+//			Message<?> message = typedObjectMapper.readValue(dataString, Message.class);
+//			buildMasterEndpoint();
+//			inputMessage = message;
+//			masterEndpoint.handleWork();
+//		} catch (IOException e) {
+//			LOG.error("Could not deserialize data {} to object {}", dataString, Message.class, e);
+//		}
+//		
+//		return getTypedResponse();
+//	}
+
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> Message<T> receive() throws ReceiveException {
-		return (Message<T>)inputMessage;
+	public <U>Message<U> receive() throws ReceiveException {
+		return (Message<U>)inputMessage;
 	}
 
 	@Override
-	public <T>void send(Message<T> message) throws SendException {
-		outputMessage = message;
+	public <U>void send(Message<U> message) throws SendException {
+		outputMessage = (Message<T>)message;
 	}
 	
 	private void buildMasterEndpoint() {

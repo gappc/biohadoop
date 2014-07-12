@@ -36,5 +36,4 @@ public class WebSocketEncoder<Message> implements Encoder.Text<Message> {
 		return "JSON ERROR";
 	}
 
-
 }

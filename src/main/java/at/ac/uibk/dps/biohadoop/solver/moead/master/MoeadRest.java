@@ -4,12 +4,15 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.connection.rest.RestResource;
 import at.ac.uibk.dps.biohadoop.solver.moead.algorithm.Moead;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 @Path("/moead")
 @Produces(MediaType.APPLICATION_JSON)
-public class MoeadRest extends RestResource {
+public class MoeadRest extends RestResource<double[], double[]> {
 
 	@Override
 	public String getQueueName() {
@@ -19,6 +22,12 @@ public class MoeadRest extends RestResource {
 	@Override
 	public Object getRegistrationObject() {
 		return null;
+	}
+
+	@Override
+	public TypeReference<Message<double[]>> getInputType() {
+		return new TypeReference<Message<double[]>>() {
+		};
 	}
 
 }
