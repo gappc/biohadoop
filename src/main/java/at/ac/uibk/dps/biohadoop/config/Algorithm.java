@@ -4,6 +4,6 @@ import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
 
 public interface Algorithm<T, S> {
 
-	public T compute(SolverId solverId, S parameter) throws AlgorithmException;
+	public S compute(SolverId solverId, T parameter) throws AlgorithmException;
 	
 }
