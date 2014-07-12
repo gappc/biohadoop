@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.server.deployment.DeployingClasses;
-import at.ac.uibk.dps.biohadoop.server.deployment.JacksonContextResolver;
 import at.ac.uibk.dps.biohadoop.server.deployment.ResteasyHandler;
 import at.ac.uibk.dps.biohadoop.server.deployment.WebSocketHandler;
 import at.ac.uibk.dps.biohadoop.service.distribution.DistributionResource;
@@ -62,7 +61,7 @@ public class UndertowServer {
 		restfulClasses.add(DistributionResource.class);
 		
 		List<Class<?>> providerClasses = new ArrayList<Class<?>>();
-		providerClasses.add(JacksonContextResolver.class);
+//		providerClasses.add(JacksonContextResolver.class);
 		
 		HttpHandler httpHandler = resteasyHandler.getHandler(
 				resteasyContextPath, restfulClasses, providerClasses);
