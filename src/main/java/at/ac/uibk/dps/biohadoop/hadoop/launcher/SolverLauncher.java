@@ -12,8 +12,12 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.config.Algorithm;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
-import at.ac.uibk.dps.biohadoop.service.distribution.DistributionService;
-import at.ac.uibk.dps.biohadoop.service.persistence.PersistenceService;
+import at.ac.uibk.dps.biohadoop.handler.Handler;
+import at.ac.uibk.dps.biohadoop.handler.HandlerClientImpl;
+import at.ac.uibk.dps.biohadoop.handler.HandlerConfiguration;
+import at.ac.uibk.dps.biohadoop.handler.HandlerConstants;
+import at.ac.uibk.dps.biohadoop.handler.HandlerService;
+import at.ac.uibk.dps.biohadoop.service.solver.ProgressHandler;
 import at.ac.uibk.dps.biohadoop.service.solver.Solver;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverConfiguration;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
@@ -29,15 +33,16 @@ public class SolverLauncher {
 	}
 
 	public static List<Future<SolverId>> launchSolver(
-			BiohadoopConfiguration biohadoopConfig) {
+			BiohadoopConfiguration biohadoopConfig)
+			throws SolverLaunchException {
 		ExecutorService cachedPoolExecutor = Executors.newCachedThreadPool();
 
 		List<Future<SolverId>> solvers = new ArrayList<>();
+
 		for (SolverConfiguration solverConfig : biohadoopConfig
-				.getSolverConfigs()) {
+				.getSolverConfiguration()) {
 			Callable<SolverId> callable = prepareSolver(solverConfig);
-			Future<SolverId> solver = cachedPoolExecutor
-					.submit(callable);
+			Future<SolverId> solver = cachedPoolExecutor.submit(callable);
 			solvers.add(solver);
 		}
 
@@ -49,23 +54,44 @@ public class SolverLauncher {
 	}
 
 	private static Callable<SolverId> prepareSolver(
-			final SolverConfiguration solverConfig) {
+			final SolverConfiguration solverConfig)
+			throws SolverLaunchException {
 		final Solver solver = new Solver(solverConfig);
-		solver.registerSolverHandler(PersistenceService.getInstance());
-		solver.registerSolverHandler(DistributionService.getInstance());
-		
-		final SolverService solverService = SolverService
-				.getInstance();
-		final SolverId solverId = solverService
-				.addSolver(solver);
 
-		Callable<SolverId> callable = generateCallable(solverId,
-				solverConfig);
+		final SolverService solverService = SolverService.getInstance();
+		final SolverId solverId = solverService.addSolver(solver);
+
+		registerHandlers(solverId, solverConfig);
+
+		Callable<SolverId> callable = generateCallable(solverId, solverConfig);
 		return callable;
 	}
 
-	private static Callable<SolverId> generateCallable(
-			final SolverId solverId,
+	private static void registerHandlers(SolverId solverId,
+			SolverConfiguration solverConfig) throws SolverLaunchException {
+		HandlerService handlerService = HandlerService.getInstance();
+
+		// Register default handlers
+		handlerService.registerHandler(solverId, new ProgressHandler());
+
+		// Register dynamic handlers
+		try {
+			for (HandlerConfiguration handlerConfiguration : solverConfig
+					.getHandlerConfigurations()) {
+				Handler handler = handlerConfiguration.getHandler()
+						.newInstance();
+				handlerService.registerHandler(solverId, handler);
+			}
+			for (Handler handler : handlerService.getHandlers(solverId)) {
+				handler.init(solverId);
+			}
+		} catch (Exception e) {
+			LOG.error("Could not register handlers", e);
+			throw new SolverLaunchException(e);
+		}
+	}
+
+	private static Callable<SolverId> generateCallable(final SolverId solverId,
 			final SolverConfiguration solverConfig) {
 		return new Callable<SolverId>() {
 
@@ -73,20 +99,31 @@ public class SolverLauncher {
 			public SolverId call() throws Exception {
 				LOG.info("Initialising solver {} with solverId {}",
 						solverConfig.getName(), solverId);
-				SolverService.getInstance().setSolverState(
-						solverId, SolverState.NEW);
+				SolverService.getInstance().setSolverState(solverId,
+						SolverState.NEW);
+				
+				HandlerClientImpl handlerClientImpl = new HandlerClientImpl(
+						solverId);
+				handlerClientImpl.invokeHandlers(
+						HandlerConstants.ALGORITHM_START, null);
 
-				Object parameter = solverConfig
-						.getAlgorithmConfiguration();
+				Object parameter = solverConfig.getAlgorithmConfiguration();
 				Algorithm<?, ?> algorithm = solverConfig.getAlgorithm()
 						.newInstance();
-				((Algorithm<?, Object>) algorithm).compute(solverId,
-						parameter);
+
+				SolverService.getInstance().setSolverState(solverId,
+						SolverState.RUNNING);
+
+				((Algorithm<Object, ?>) algorithm).compute(solverId, parameter);
+				
+				handlerClientImpl.invokeHandlers(
+						HandlerConstants.ALGORITHM_STOP, null);
+
+				SolverService.getInstance().setSolverState(solverId,
+						SolverState.FINISHED);
 
 				LOG.info("Finished solver {} with solverId {}",
 						solverConfig.getName(), solverId);
-				SolverService.getInstance().setSolverState(
-						solverId, SolverState.FINISHED);
 				return solverId;
 			}
 		};
