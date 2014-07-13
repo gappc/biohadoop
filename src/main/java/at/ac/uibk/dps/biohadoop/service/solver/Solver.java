@@ -8,7 +8,6 @@ public class Solver {
 	private float progress;
 	private SolverState solverState = SolverState.NEW;
 	private SolverData<?> solverData;
-//	private List<SolverHandler> solverHandlers = new ArrayList<>();
 
 	public Solver(SolverConfiguration solverConfig) {
 		this.solverConfig = solverConfig;
@@ -49,14 +48,5 @@ public class Solver {
 	public <T> void setSolverData(SolverData<T> solverData) {
 		this.solverData = solverData;
 	}
-
-//	public void registerSolverHandler(
-//			final SolverHandler solverHandler) {
-//		solverHandlers.add(solverHandler);
-//	}
-//
-//	public List<SolverHandler> getSolverHandlers() {
-//		return solverHandlers;
-//	}
 
 }

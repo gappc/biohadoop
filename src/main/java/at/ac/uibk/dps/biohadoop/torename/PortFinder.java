@@ -4,12 +4,16 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * 
  * Finds an available port on localhost.
  */
 public class PortFinder {
 	
+	private static final Logger LOG = LoggerFactory.getLogger(PortFinder.class);
 	private static final int MAX_PORT_NUMBER = 49151;
 
 	public static int findFreePort(int start) {
@@ -39,6 +43,7 @@ public class PortFinder {
 			dataSocket.setReuseAddress(true);
 			return true;
 		} catch (final IOException e) {
+			LOG.debug("Port {} is not usable", port, e);
 			return false;
 		} finally {
 			if (dataSocket != null) {
@@ -48,7 +53,7 @@ public class PortFinder {
 				try {
 					serverSocket.close();
 				} catch (final IOException e) {
-					// can never happen
+					LOG.error("Error while checking for port {} availability", port, e);
 				}
 			}
 		}

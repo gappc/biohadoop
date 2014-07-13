@@ -193,8 +193,6 @@ public class GaConfigWriter {
 		BiohadoopConfiguration config = null;
 
 		ObjectMapper mapper = new ObjectMapper();
-		// mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
-		// false);
 		config = mapper.readValue(new File(LOCAL_OUTPUT_NAME),
 				BiohadoopConfiguration.class);
 		LOG.info(config.toString());

@@ -47,8 +47,6 @@ public class WorkerLauncher {
 		LOG.info("#### startWorker: ");
 
 		// Initialize clients to ResourceManager and NodeManagers
-		// Configuration conf = new YarnConfiguration();
-
 		final AMRMClient<ContainerRequest> rmClient = AMRMClient
 				.createAMRMClient();
 		rmClient.init(yarnConfiguration);

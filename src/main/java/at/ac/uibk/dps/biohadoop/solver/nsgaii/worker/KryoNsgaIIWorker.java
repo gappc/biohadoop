@@ -14,6 +14,7 @@ public class KryoNsgaIIWorker extends KryoWorker<double[], double[]> {
 
 	@Override
 	public void readRegistrationObject(Object data) {
+		// No registration object for NSGA-II
 	}
 
 	@Override

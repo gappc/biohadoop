@@ -50,10 +50,4 @@ public class MoeadAlgorithmConfig implements AlgorithmConfiguration {
 		this.maxIterations = maxIterations;
 	}
 
-//	@Override
-//	public Object buildParameters() throws BuildParameterException {
-//		return new MoeadParameter(maxIterations, populationSize, neighborSize,
-//				genomeSize);
-//	}
-
 }

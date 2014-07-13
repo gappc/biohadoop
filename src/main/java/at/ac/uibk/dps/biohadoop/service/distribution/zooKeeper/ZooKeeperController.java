@@ -66,45 +66,6 @@ public class ZooKeeperController {
 		}
 	}
 	
-//	public SolverData<?> getRemoteSolverData() throws DistributionException {
-//		List<NodeData> remoteNodesData = getSuitableRemoteNodesData();
-//		int remoteNodesCount = remoteNodesData.size();
-//
-//		if (remoteNodesCount == 0) {
-//			LOG.error("No suitable node found");
-//			throw new DistributionException("No suitable node found");
-//		}
-//		
-//		int index = ThreadLocalRandom.current().nextInt(remoteNodesData.size());
-//		NodeData nodeData = remoteNodesData.get(index);
-//		LOG.info("Solver {} gets remote data from Solver {}", solverId,
-//				nodeData.getSolverId());
-//		String path = nodeData.getUrl() + "/" + nodeData.getSolverId() + "/typed";
-//
-//		Response response = null;
-//		try {
-//			Client client = ClientBuilder.newClient();
-//			response = client.target(path)
-//					.request(MediaType.APPLICATION_JSON).get();
-//		} catch (Exception e) {
-//			LOG.error("Could not get remote data from {}", path, e);
-//			throw new DistributionException(e);
-//		}
-//		
-//		try {
-//			String dataString = response.readEntity(String.class);
-//			SolverData<?> solverData = objectMapper.readValue(dataString, SolverData.class);
-//			if (solverData == null) {
-//				LOG.error("No remote data found at {}", path);
-//				throw new DistributionException("No remote data found");
-//			}
-//			return solverData;
-//		} catch (Exception e) {
-//			LOG.error("Error while deserialization of resource {}", path, e);
-//			throw new DistributionException(e);
-//		}
-//	}
-
 	private String getFullPath() {
 		SolverService solverService = SolverService.getInstance();
 		SolverConfiguration solverConfiguration = solverService

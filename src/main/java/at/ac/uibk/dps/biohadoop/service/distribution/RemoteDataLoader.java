@@ -63,7 +63,7 @@ public class RemoteDataLoader {
 
 	public List<SolverData<?>> getSolverDatas(List<NodeData> nodesData)
 			throws DistributionException {
-		if (nodesData == null || nodesData.size() == 0) {
+		if (nodesData == null || nodesData.isEmpty()) {
 			LOG.error("No suitable node found");
 			throw new DistributionException("No suitable node found");
 		}

@@ -13,16 +13,16 @@ public class WeldLauncher {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(UndertowServer.class);
 	
-	private static final Weld weld = new Weld();
+	private static final Weld WELD = new Weld();
 	
 	public static void startWeld() {
 		LOG.info("Starting Weld");
 		System.setProperty(Context.INITIAL_CONTEXT_FACTORY, "org.apache.naming.java.javaURLContextFactory");
-		weld.initialize();
+		WELD.initialize();
 	}
 	
 	public static void stopWeld() {
 		LOG.info("Stopping Weld");
-		weld.shutdown();
+		WELD.shutdown();
 	}
 }

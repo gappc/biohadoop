@@ -14,9 +14,10 @@ public class RestNsgaIIWorker extends RestWorker<double[], double[]> {
 	public Class<? extends Master> getMasterEndpoint() {
 		return NsgaIIRest.class;
 	}
-	
+
 	@Override
 	public void readRegistrationObject(Object data) {
+		// No registration object for NSGA-II
 	}
 
 	@Override

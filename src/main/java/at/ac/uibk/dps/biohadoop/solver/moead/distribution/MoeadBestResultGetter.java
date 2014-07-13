@@ -15,7 +15,7 @@ public class MoeadBestResultGetter implements RemoteResultGetter {
 	
 	@Override
 	public Object getBestRemoteResult(List<NodeData> nodesData) throws DistributionException {
-		if (nodesData == null || nodesData.size() == 0) {
+		if (nodesData == null || nodesData.isEmpty()) {
 			return null;
 		}
 		int index = random.nextInt(nodesData.size());

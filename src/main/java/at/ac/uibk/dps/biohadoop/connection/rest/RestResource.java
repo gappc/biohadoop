@@ -27,16 +27,18 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Produces(MediaType.APPLICATION_JSON)
-public abstract class RestResource<T, S> implements Endpoint, MasterConnection, Master {
+public abstract class RestResource<T, S> implements Endpoint, MasterConnection,
+		Master {
 
-	private static final Logger LOG = LoggerFactory.getLogger(RestResource.class);
-	
+	private static final Logger LOG = LoggerFactory
+			.getLogger(RestResource.class);
+
 	private DefaultEndpointHandler masterEndpoint;
 	private Message<S> inputMessage;
 	private Message<T> outputMessage;
 
 	public abstract TypeReference<Message<S>> getInputType();
-	
+
 	@Override
 	public void configure() {
 		DeployingClasses.addRestfulClass(this.getClass());
@@ -45,21 +47,21 @@ public abstract class RestResource<T, S> implements Endpoint, MasterConnection, 
 	@Override
 	public void start() {
 	}
-	
+
 	@Override
 	public void stop() {
 	}
-	
+
 	@PostConstruct
 	public void init() {
 		ShutdownWaitingService.register();
 	}
-	
+
 	@PreDestroy
 	public void finish() {
 		ShutdownWaitingService.unregister();
 	}
-	
+
 	@GET
 	@Path("registration")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -68,15 +70,6 @@ public abstract class RestResource<T, S> implements Endpoint, MasterConnection, 
 		masterEndpoint.handleRegistration();
 		return outputMessage;
 	}
-//	
-//	@GET
-//	@Path("registration/typed")
-//	@Produces(MediaType.APPLICATION_JSON)
-//	public Response typedRegistration() throws InterruptedException {
-//		buildMasterEndpoint();
-//		masterEndpoint.handleRegistration();
-//		return getTypedResponse();
-//	}
 
 	@GET
 	@Path("workinit")
@@ -85,67 +78,38 @@ public abstract class RestResource<T, S> implements Endpoint, MasterConnection, 
 		masterEndpoint.handleWorkInit();
 		return outputMessage;
 	}
-//	
-//	@GET
-//	@Path("workinit/typed")
-//	public Response typedWorkInit() throws InterruptedException {
-//		buildMasterEndpoint();
-//		masterEndpoint.handleWorkInit();
-//		return getTypedResponse();
-//	}
 
-//	@POST
-//	@Path("work")
-//	public Message<?> work(Message<?> message) throws InterruptedException {
-//		buildMasterEndpoint();
-//		inputMessage = message;
-//		masterEndpoint.handleWork();
-//		return outputMessage;
-//	}
-	
 	@POST
 	@Path("work")
 	public Message<T> work(String messageString) throws InterruptedException {
 		try {
-			Message<S> message = new ObjectMapper().readValue(messageString, getInputType());
+			Message<S> message = new ObjectMapper().readValue(messageString,
+					getInputType());
 			buildMasterEndpoint();
 			inputMessage = message;
 			masterEndpoint.handleWork();
 		} catch (IOException e) {
-			LOG.error("Could not deserialize data {} to object {}", messageString, Message.class, e);
+			LOG.error("Could not deserialize data {} to object {}",
+					messageString, Message.class, e);
 		}
-		
+
 		return outputMessage;
 	}
 
-//	@POST
-//	@Path("work/typed")
-//	public Response typedWork(String dataString) throws InterruptedException {
-//		try {
-//			Message<?> message = typedObjectMapper.readValue(dataString, Message.class);
-//			buildMasterEndpoint();
-//			inputMessage = message;
-//			masterEndpoint.handleWork();
-//		} catch (IOException e) {
-//			LOG.error("Could not deserialize data {} to object {}", dataString, Message.class, e);
-//		}
-//		
-//		return getTypedResponse();
-//	}
-
 	@SuppressWarnings("unchecked")
 	@Override
-	public <U>Message<U> receive() throws ReceiveException {
-		return (Message<U>)inputMessage;
+	public <U> Message<U> receive() throws ReceiveException {
+		return (Message<U>) inputMessage;
 	}
 
 	@Override
-	public <U>void send(Message<U> message) throws SendException {
-		outputMessage = (Message<T>)message;
+	public <U> void send(Message<U> message) throws SendException {
+		outputMessage = (Message<T>) message;
 	}
-	
+
 	private void buildMasterEndpoint() {
-		masterEndpoint = DefaultEndpointHandler.newInstance(this, getQueueName(), getRegistrationObject());
+		masterEndpoint = DefaultEndpointHandler.newInstance(this,
+				getQueueName(), getRegistrationObject());
 	}
 
 }

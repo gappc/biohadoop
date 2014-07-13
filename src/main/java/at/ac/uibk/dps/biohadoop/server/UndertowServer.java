@@ -52,8 +52,7 @@ public class UndertowServer {
 		undertow.stop();
 	}
 
-	private PathHandler getPathHandler() throws IllegalArgumentException,
-			IOException, ServletException {
+	private PathHandler getPathHandler() throws IOException, ServletException {
 
 		String resteasyContextPath = "/rs";
 		ResteasyHandler resteasyHandler = new ResteasyHandler();
@@ -61,7 +60,6 @@ public class UndertowServer {
 		restfulClasses.add(DistributionResource.class);
 		
 		List<Class<?>> providerClasses = new ArrayList<Class<?>>();
-//		providerClasses.add(JacksonContextResolver.class);
 		
 		HttpHandler httpHandler = resteasyHandler.getHandler(
 				resteasyContextPath, restfulClasses, providerClasses);

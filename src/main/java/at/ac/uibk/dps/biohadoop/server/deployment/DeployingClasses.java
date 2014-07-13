@@ -10,12 +10,12 @@ import javax.ws.rs.Path;
 
 public class DeployingClasses {
 
-	private final static Map<Class<?>, Class<?>> restfulClasses = new ConcurrentHashMap<Class<?>, Class<?>>();
-	private final static Map<Class<?>, Class<?>> webSocketClasses = new ConcurrentHashMap<Class<?>, Class<?>>();
+	private final static Map<Class<?>, Class<?>> RESTFUL_CLASSES = new ConcurrentHashMap<Class<?>, Class<?>>();
+	private final static Map<Class<?>, Class<?>> WEBSOCKET_CLASSES = new ConcurrentHashMap<Class<?>, Class<?>>();
 	
 	public static boolean addRestfulClass(Class<?> restfulClass) {
 		if (isRestful(restfulClass)) {
-			restfulClasses.put(restfulClass, restfulClass);
+			RESTFUL_CLASSES.put(restfulClass, restfulClass);
 			return true;
 		}
 		return false;
@@ -23,7 +23,7 @@ public class DeployingClasses {
 	
 	public static boolean addWebSocketClass(Class<?> webSocketClass) {
 		if (isWebSocket(webSocketClass)) {
-			webSocketClasses.put(webSocketClass, webSocketClass);
+			WEBSOCKET_CLASSES.put(webSocketClass, webSocketClass);
 			return true;
 		}
 		return false;		
@@ -38,10 +38,10 @@ public class DeployingClasses {
 	}
 	
 	public static List<Class<?>> getRestfulClasses() {
-		return new CopyOnWriteArrayList<>(restfulClasses.keySet());
+		return new CopyOnWriteArrayList<>(RESTFUL_CLASSES.keySet());
 	}
 
 	public static List<Class<?>> getWebSocketClasses() {
-		return new CopyOnWriteArrayList<>(webSocketClasses.keySet());
+		return new CopyOnWriteArrayList<>(WEBSOCKET_CLASSES.keySet());
 	}
 }

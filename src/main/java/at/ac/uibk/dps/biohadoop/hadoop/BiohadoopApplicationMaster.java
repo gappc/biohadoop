@@ -23,14 +23,14 @@ public class BiohadoopApplicationMaster {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(BiohadoopApplicationMaster.class);
 
-	private final static String className = Helper
+	private final static String CLASSNAME = Helper
 			.getClassname(BiohadoopApplicationMaster.class);
 
 	private YarnConfiguration yarnConfiguration = new YarnConfiguration();
 
 	public static void main(String[] args) {
 		try {
-			LOG.info("{} started at {}", className, HostInfo.getHostname());
+			LOG.info("{} started at {}", CLASSNAME, HostInfo.getHostname());
 			long start = System.currentTimeMillis();
 
 			BiohadoopApplicationMaster master = new BiohadoopApplicationMaster();
@@ -38,9 +38,9 @@ public class BiohadoopApplicationMaster {
 			master.run(args);
 
 			long end = System.currentTimeMillis();
-			LOG.info("{} stopped, time: {}ms", className, end - start);
+			LOG.info("{} stopped, time: {}ms", CLASSNAME, end - start);
 		} catch (Exception e) {
-			LOG.error("Error while running {}", className, e);
+			LOG.error("Error while running {}", CLASSNAME, e);
 			System.exit(1);
 		}
 	}

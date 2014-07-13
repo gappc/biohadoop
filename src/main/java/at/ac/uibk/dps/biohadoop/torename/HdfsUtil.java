@@ -16,9 +16,11 @@ public class HdfsUtil {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(HdfsUtil.class);
+	
+	private static final String FS_KEY = "fs.defaultFS";
 
 	public static boolean exists(YarnConfiguration conf, String filename) {
-		String defaultFs = conf.get("fs.defaultFS");
+		String defaultFs = conf.get(FS_KEY);
 		Path path = new Path(defaultFs + filename);
 		try {
 			FileSystem fs = FileSystem.get(conf);
@@ -30,14 +32,14 @@ public class HdfsUtil {
 			return exists;
 		} catch (IOException e) {
 			LOG.error("Could not find file, fs.defaultFS={}, path={}",
-					defaultFs, filename);
+					defaultFs, filename, e);
 			return false;
 		}
 	}
 
 	public static InputStream openFile(YarnConfiguration conf, String filename)
 			throws IOException {
-		String defaultFs = conf.get("fs.defaultFS");
+		String defaultFs = conf.get(FS_KEY);
 		Path path = new Path(defaultFs + filename);
 		FileSystem fs = FileSystem.get(conf);
 		return fs.open(path);
@@ -45,7 +47,7 @@ public class HdfsUtil {
 
 	public static OutputStream createFile(YarnConfiguration conf,
 			String filename) throws IOException {
-		String defaultFs = conf.get("fs.defaultFS");
+		String defaultFs = conf.get(FS_KEY);
 		Path path = new Path(defaultFs + filename);
 		FileSystem fs = FileSystem.get(conf);
 		return fs.create(path);
@@ -53,21 +55,21 @@ public class HdfsUtil {
 
 	public static boolean isDirectory(YarnConfiguration conf, String filename)
 			throws IOException {
-		String defaultFs = conf.get("fs.defaultFS");
+		String defaultFs = conf.get(FS_KEY);
 		Path path = new Path(defaultFs + filename);
 		return FileSystem.get(conf).isDirectory(path);
 	}
 
 	public static boolean isFile(YarnConfiguration conf, String filename)
 			throws IOException {
-		String defaultFs = conf.get("fs.defaultFS");
+		String defaultFs = conf.get(FS_KEY);
 		Path path = new Path(defaultFs + filename);
 		return FileSystem.get(conf).isFile(path);
 	}
 
 	public static boolean mkDir(YarnConfiguration conf, String pathname)
 			throws IOException {
-		String defaultFs = conf.get("fs.defaultFS");
+		String defaultFs = conf.get(FS_KEY);
 		Path path = new Path(defaultFs + pathname);
 		FileSystem fs = FileSystem.get(conf);
 		return FileSystem.mkdirs(fs, path, FsPermission.getDirDefault());
@@ -75,7 +77,7 @@ public class HdfsUtil {
 
 	public static String getMostRecentFileInPath(YarnConfiguration conf,
 			String pathname) throws IOException {
-		String defaultFs = conf.get("fs.defaultFS");
+		String defaultFs = conf.get(FS_KEY);
 		Path path = new Path(defaultFs + pathname);
 
 		Path latestPath = null;

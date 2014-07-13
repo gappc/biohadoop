@@ -140,10 +140,6 @@ public class Ga implements Algorithm<GaAlgorithmConfig, int[]> {
 			handlerClient.invokeDefaultHandlers();
 			population = (int[][])dataClient.getData(DataOptions.DATA, population);
 
-			// solverService.setSolverData(solverId, solverData);
-			// TODO read data back in, because possibly there is some change
-			// coming from islands
-
 			if (iteration == maxIterations) {
 				end = true;
 			}

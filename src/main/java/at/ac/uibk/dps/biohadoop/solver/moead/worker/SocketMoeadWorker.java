@@ -14,6 +14,7 @@ public class SocketMoeadWorker extends SocketWorker<double[], double[]> {
 	
 	@Override
 	public void readRegistrationObject(Object data) {
+		// No registration object for MOEAD
 	}
 
 	@Override

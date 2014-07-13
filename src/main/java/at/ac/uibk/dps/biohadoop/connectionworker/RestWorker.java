@@ -29,7 +29,7 @@ public abstract class RestWorker<T, S> implements WorkerEndpoint<T, S>, WorkerCo
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(RestWorker.class);
-	private static final String className = Helper.getClassname(RestWorker.class);
+	private static final String CLASSNAME = Helper.getClassname(RestWorker.class);
 	
 	private final ObjectMapper objectMapper = new ObjectMapper();
 	
@@ -52,7 +52,7 @@ public abstract class RestWorker<T, S> implements WorkerEndpoint<T, S>, WorkerCo
 			path = "/" + path;
 		}
 		String url = "http://" + host + ":" + port + "/rs" + path;
-		Client client = ClientBuilder.newClient();//.register(new JacksonContextResolver());
+		Client client = ClientBuilder.newClient();
 
 		Message<?> registrationMessage = receiveRegistration(client, url + "/registration");
 		Object data = registrationMessage.getPayload().getData();
@@ -65,7 +65,7 @@ public abstract class RestWorker<T, S> implements WorkerEndpoint<T, S>, WorkerCo
 		while (true) {
 			performanceLogger.step(LOG);
 
-			LOG.debug("{} WORK_RESPONSE", className);
+			LOG.debug("{} WORK_RESPONSE", CLASSNAME);
 
 			if (inputMessage.getType() == MessageType.SHUTDOWN) {
 				LOG.info("Got shutdown");

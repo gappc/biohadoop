@@ -39,7 +39,7 @@ public class TspFileReader {
 				city[1] = Double.parseDouble(tokens[2]);
 				citiesList.add(city);
 			} catch (Exception e) {
-				LOG.debug("Line contains not a valid city: {}", line);
+				LOG.debug("Line contains not a valid city: {}", line, e);
 			}
 		}
 

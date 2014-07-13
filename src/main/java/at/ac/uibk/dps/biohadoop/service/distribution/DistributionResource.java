@@ -23,7 +23,7 @@ public class DistributionResource {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DistributionResource.class);
-	private static final ObjectMapper typedObjectMapper = new ObjectMapper()
+	private static final ObjectMapper TYPED_OBJECT_MAPPER = new ObjectMapper()
 			.enableDefaultTyping();
 
 	@GET
@@ -46,7 +46,7 @@ public class DistributionResource {
 		} else {
 			String result = null;
 			try {
-				result = typedObjectMapper.writeValueAsString(solverData);
+				result = TYPED_OBJECT_MAPPER.writeValueAsString(solverData);
 			} catch (JsonProcessingException e) {
 				LOG.error("Could not convert Object {}", solverData, e);
 			}

@@ -31,7 +31,7 @@ public class KryoEndpoint implements Endpoint {
 		try {
 			connection.sendTCP(message);
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new SendException("Could not send message", e);
 		}
 	}
 

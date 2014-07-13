@@ -1,5 +1,6 @@
 package at.ac.uibk.dps.biohadoop.solver.ga.distribution;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -16,7 +17,7 @@ public class GaBestResultGetter implements RemoteResultGetter {
 	
 	@Override
 	public Object getBestRemoteResult(List<NodeData> nodesData) throws DistributionException {
-		if (nodesData == null || nodesData.size() == 0) {
+		if (nodesData == null || nodesData.isEmpty()) {
 			return null;
 		}
 		List<SolverData<?>> solverDatas = remoteDataLoader.getSolverDatas(nodesData);

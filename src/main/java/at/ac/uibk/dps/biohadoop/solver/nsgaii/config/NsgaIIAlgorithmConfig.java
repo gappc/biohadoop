@@ -41,9 +41,4 @@ public class NsgaIIAlgorithmConfig implements AlgorithmConfiguration {
 		this.maxIterations = maxIterations;
 	}
 
-//	@Override
-//	public Object buildParameters() throws BuildParameterException {
-//		return new NsgaIIParameter(maxIterations, populationSize, genomeSize);
-//	}
-
 }

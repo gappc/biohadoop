@@ -39,32 +39,37 @@ public class SocketServerConnection implements Runnable {
 			String prefix = master.getQueueName();
 			String host = HostInfo.getHostname();
 			int port = HostInfo.getPort(30000);
-			
-			ServerSocket serverSocket = new ServerSocket(port);
+
 			Environment.setPrefixed(prefix, Environment.SOCKET_HOST, host);
 			Environment.setPrefixed(prefix, Environment.SOCKET_PORT,
 					Integer.toString(port));
 
 			LOG.info("host: " + HostInfo.getHostname() + "  port: " + port);
 
-			int socketTimeout = 2000;
-			serverSocket.setSoTimeout(socketTimeout);
-
-			Socket socket = null;
-			while (!stop) {
-				try {
-					socket = serverSocket.accept();
-					SocketEndpoint socketRunnable = new SocketEndpoint(socket, master);
-					Future<Integer> future = executorService.submit(socketRunnable);
-					futures.add(future);
-				} catch (SocketTimeoutException e) {
-					LOG.debug("Socket timeout after {} ms", socketTimeout);
-				}
-			}
-			serverSocket.close();
+			runSocket(port);
 		} catch (IOException e) {
 			LOG.error("ServerSocket error", e);
 		}
+	}
+
+	private void runSocket(int port)
+			throws IOException {
+		ServerSocket serverSocket = new ServerSocket(port);
+		int socketTimeout = 2000;
+		serverSocket.setSoTimeout(socketTimeout);
+		
+		while (!stop) {
+			try {
+				Socket socket = serverSocket.accept();
+				SocketEndpoint socketRunnable = new SocketEndpoint(socket,
+						master);
+				Future<Integer> future = executorService.submit(socketRunnable);
+				futures.add(future);
+			} catch (SocketTimeoutException e) {
+				LOG.debug("Socket timeout after {} ms", socketTimeout, e);
+			}
+		}
+		serverSocket.close();
 	}
 
 	public void stop() {

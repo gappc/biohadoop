@@ -19,6 +19,7 @@ public class WebSocketMoeadWorker extends WebSocketWorker<double[], double[]> {
 	
 	@Override
 	public void readRegistrationObject(Object data) {
+		// No registration object for MOEAD
 	}
 
 	@Override

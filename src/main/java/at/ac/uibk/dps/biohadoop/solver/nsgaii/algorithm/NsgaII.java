@@ -273,7 +273,7 @@ public class NsgaII implements
 		}
 
 		int i = 0;
-		while (frontRanking.get(i).size() > 0) {
+		while (!frontRanking.get(i).isEmpty()) {
 			List<Integer> H = new ArrayList<Integer>();
 			for (int memberP : frontRanking.get(i)) {
 				for (int memberQ : S.get(memberP)) {

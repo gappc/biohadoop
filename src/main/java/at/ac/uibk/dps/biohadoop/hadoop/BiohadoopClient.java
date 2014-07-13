@@ -44,7 +44,7 @@ public class BiohadoopClient {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(BiohadoopClient.class);
 
-	private final static String className = Helper
+	private final static String CLASSNAME = Helper
 			.getClassname(BiohadoopClient.class);
 
 	private final List<String> includePaths = new ArrayList<String>();
@@ -60,7 +60,7 @@ public class BiohadoopClient {
 			long end = System.currentTimeMillis();
 			LOG.info("Client stopped, time: {}ms", end - start);
 		} catch (Exception e) {
-			LOG.error("Error while running {}", className, e);
+			LOG.error("Error while running {}", CLASSNAME, e);
 			System.exit(1);
 		}
 	}

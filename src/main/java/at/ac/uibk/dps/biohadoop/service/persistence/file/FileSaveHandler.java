@@ -68,7 +68,8 @@ public class FileSaveHandler implements Handler {
 		YarnConfiguration yarnConfiguration = new YarnConfiguration();
 		try {
 			if (!HdfsUtil.isDirectory(yarnConfiguration, savePath)) {
-				if (!HdfsUtil.mkDir(yarnConfiguration, savePath)) {
+				boolean dirCreated = HdfsUtil.mkDir(yarnConfiguration, savePath);
+				if (!dirCreated) {
 					throw new PersistenceSaveException(
 							"Could not create directory with path " + savePath);
 				}

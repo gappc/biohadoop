@@ -7,7 +7,7 @@ import at.ac.uibk.dps.biohadoop.torename.ZeroLock;
 public class ShutdownWaitingService {
 
 	private static final ZeroLock ZERO_LOCK = new ZeroLock();
-	private static final AtomicBoolean isFinished = new AtomicBoolean(false);
+	private static final AtomicBoolean IS_FINISHED = new AtomicBoolean(false);
 
 	public static void register() {
 		ZERO_LOCK.increment();
@@ -22,10 +22,10 @@ public class ShutdownWaitingService {
 	}
 	
 	public static void setFinished() {
-		isFinished.set(true);
+		IS_FINISHED.set(true);
 	}
 	
 	public static boolean isFinished() {
-		return isFinished.get();
+		return IS_FINISHED.get();
 	}
 }

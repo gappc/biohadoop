@@ -54,8 +54,6 @@ public class DistributionHandler implements Handler {
 			if (iteration % mergeAfterEveryIteration == 0) {
 				LOG.info("Merging data for solver {}", solverId);
 				try {
-					// SolverData<?> remoteSolverData = zooKeeperController
-					// .getRemoteSolverData();
 					Object data = dataClient.getData(DataOptions.DATA);
 					List<NodeData> nodeDatas = zooKeeperController
 							.getSuitableRemoteNodesData();
@@ -71,7 +69,7 @@ public class DistributionHandler implements Handler {
 					LOG.debug("{}: population before: {}", solverId, data);
 					LOG.debug("{}: population after:  {}", solverId, mergedData);
 				} catch (DataMergeException | DistributionException e) {
-					LOG.error("Could not get and merge remote data");
+					LOG.error("Could not get and merge remote data", e);
 				}
 			}
 

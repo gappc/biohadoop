@@ -19,6 +19,7 @@ public class WebSocketNsgaIIWorker extends WebSocketWorker<double[], double[]> {
 	
 	@Override
 	public void readRegistrationObject(Object data) {
+		// No registration object for NSGA-II
 	}
 
 	@Override
