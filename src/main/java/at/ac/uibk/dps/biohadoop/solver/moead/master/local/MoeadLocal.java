@@ -17,7 +17,7 @@ import at.ac.uibk.dps.biohadoop.solver.moead.worker.LocalMoeadWorker;
 
 public class MoeadLocal implements MasterConnection {
 
-	private final static Logger LOG = LoggerFactory.getLogger(MoeadLocal.class);
+	private static final Logger LOG = LoggerFactory.getLogger(MoeadLocal.class);
 	
 	private final String workerClass = LocalMoeadWorker.class.getCanonicalName();
 	private final ExecutorService executorService = Executors

@@ -17,7 +17,7 @@ import at.ac.uibk.dps.biohadoop.solver.nsgaii.worker.LocalNsgaIIWorker;
 
 public class NsgaIILocal implements MasterConnection {
 
-	private final static Logger LOG = LoggerFactory.getLogger(NsgaIILocal.class);
+	private static final Logger LOG = LoggerFactory.getLogger(NsgaIILocal.class);
 	
 	private final String workerClass = LocalNsgaIIWorker.class.getCanonicalName();
 	private final ExecutorService executorService = Executors

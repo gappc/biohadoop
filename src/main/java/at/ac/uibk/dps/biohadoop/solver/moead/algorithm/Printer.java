@@ -2,51 +2,59 @@ package at.ac.uibk.dps.biohadoop.solver.moead.algorithm;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Printer {
 
+	private static final Logger LOG = LoggerFactory.getLogger(Printer.class);
+
+	private Printer() {
+	}
+
 	public static void printWeightVectors(double[][] weightVectors) {
-		System.out.println("-----Weight vectors-----");
+		LOG.info("-----Weight vectors-----");
 		printDoubles(weightVectors);
-		System.out.println("------------------------");
+		LOG.info("------------------------");
 	}
-	
+
 	public static void printNeighbors(int[][] neighbors) {
-		System.out.println("-----Neighbors-----");
+		LOG.info("-----Neighbors-----");
 		printInts(neighbors);
-		System.out.println("-------------------");
+		LOG.info("-------------------");
 	}
-	
+
 	public static void printPopulation(double[][] population) {
-		System.out.println("-----Population-----");
+		LOG.info("-----Population-----");
 		printDoubles(population);
-		System.out.println("--------------------");
+		LOG.info("--------------------");
 	}
-	
+
 	public static void printSolution(List<List<Double>> solution) {
-		System.out.println("-----Solution-----");
+		LOG.info("-----Solution-----");
 		for (List<Double> l : solution) {
-			System.out.println(l);
+			LOG.info("{}", l);
 		}
-		System.out.println("------------------");
+		LOG.info("------------------");
 	}
-	
+
 	private static void printDoubles(double[][] values) {
 		for (int i = 0; i < values.length; i++) {
 			StringBuilder sb = new StringBuilder();
 			for (int j = 0; j < values[i].length; j++) {
 				sb.append(values[i][j] + ", ");
 			}
-			System.out.println(sb);
+			LOG.info(sb.toString());
 		}
 	}
-	
+
 	private static void printInts(int[][] values) {
 		for (int i = 0; i < values.length; i++) {
 			StringBuilder sb = new StringBuilder();
 			for (int j = 0; j < values[i].length; j++) {
 				sb.append(values[i][j] + ", ");
 			}
-			System.out.println(sb);
+			LOG.info(sb.toString());
 		}
 	}
 }

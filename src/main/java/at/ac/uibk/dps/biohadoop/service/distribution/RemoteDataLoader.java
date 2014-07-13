@@ -20,19 +20,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class RemoteDataLoader {
 
-	private final static Logger LOG = LoggerFactory
+	private static final Logger LOG = LoggerFactory
 			.getLogger(RemoteDataLoader.class);
 
+	private static final String NO_SUITABLE_NODE = "No suitable node found";
+	
 	private final ObjectMapper objectMapper = new ObjectMapper()
 			.enableDefaultTyping();
 
 	private final Client client = ClientBuilder.newClient();
+	
+	
 
 	public SolverData<?> getSolverData(NodeData nodeData)
 			throws DistributionException {
 		if (nodeData == null) {
-			LOG.error("No suitable node found");
-			throw new DistributionException("No suitable node found");
+			LOG.error(NO_SUITABLE_NODE);
+			throw new DistributionException(NO_SUITABLE_NODE);
 		}
 
 		String path = nodeData.getUrl() + "/" + nodeData.getSolverId()
@@ -64,8 +68,8 @@ public class RemoteDataLoader {
 	public List<SolverData<?>> getSolverDatas(List<NodeData> nodesData)
 			throws DistributionException {
 		if (nodesData == null || nodesData.isEmpty()) {
-			LOG.error("No suitable node found");
-			throw new DistributionException("No suitable node found");
+			LOG.error(NO_SUITABLE_NODE);
+			throw new DistributionException(NO_SUITABLE_NODE);
 		}
 
 		List<SolverData<?>> solverDatas = new ArrayList<>();

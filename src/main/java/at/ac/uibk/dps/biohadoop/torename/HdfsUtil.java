@@ -19,6 +19,9 @@ public class HdfsUtil {
 	
 	private static final String FS_KEY = "fs.defaultFS";
 
+	private HdfsUtil() {
+	}
+	
 	public static boolean exists(YarnConfiguration conf, String filename) {
 		String defaultFs = conf.get(FS_KEY);
 		Path path = new Path(defaultFs + filename);

@@ -5,6 +5,9 @@ import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
 
 public class DataProvider {
 
+	private DataProvider() {
+	}
+
 	public static SolverData<?> getSolverData(SolverId solverId) {
 		DataClient dataClient = new DataClientImpl(solverId);
 		Object data = dataClient.getData(DataOptions.DATA);

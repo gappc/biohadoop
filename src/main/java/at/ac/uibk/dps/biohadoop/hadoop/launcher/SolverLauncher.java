@@ -63,8 +63,7 @@ public class SolverLauncher {
 
 		registerHandlers(solverId, solverConfig);
 
-		Callable<SolverId> callable = generateCallable(solverId, solverConfig);
-		return callable;
+		return generateCallable(solverId, solverConfig);
 	}
 
 	private static void registerHandlers(SolverId solverId,

@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class NodePublisher {
 
-	private final static Logger LOG = LoggerFactory
+	private static final Logger LOG = LoggerFactory
 			.getLogger(NodePublisher.class);
 
 	private final ZooKeeper zooKeeper;
@@ -30,16 +30,18 @@ public class NodePublisher {
 		this.solverId = solverId;
 	}
 
-	public AlgorithmWatcher publish(String fullPath) throws KeeperException, InterruptedException, IOException {
+	public AlgorithmWatcher publish(String fullPath) throws KeeperException,
+			InterruptedException, IOException {
 		String parentPath = getParentPath(fullPath);
-		
+
 		AlgorithmWatcher algorithmWatcher = createParentNodes(parentPath);
 		createChildNode(fullPath);
-		
+
 		return algorithmWatcher;
 	}
-	
-	private AlgorithmWatcher createParentNodes(String parentPath) throws KeeperException, InterruptedException {
+
+	private AlgorithmWatcher createParentNodes(String parentPath)
+			throws KeeperException, InterruptedException {
 		String[] parentPathTokens = getPathTokens(parentPath);
 		StringBuilder sbPath = new StringBuilder("");
 		for (int i = 0; i < parentPathTokens.length; i++) {
@@ -52,25 +54,23 @@ public class NodePublisher {
 				try {
 					zooKeeper.create(sbPath.toString(), "".getBytes(),
 							Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-				} catch (KeeperException | InterruptedException e) {
-					if (e instanceof KeeperException.NodeExistsException) {
-						LOG.info("Node {} already exists", sbPath.toString());
-					}
-					else {
-						throw e;
-					}
+				} catch (KeeperException.NodeExistsException e) {
+					LOG.debug("Node {} already exists", sbPath.toString(), e);
+				} catch (InterruptedException e) {
+					throw e;
 				}
 			}
 		}
-		
-		AlgorithmWatcher dataProvider = new AlgorithmWatcher(zooKeeper, parentPath);
+
+		AlgorithmWatcher dataProvider = new AlgorithmWatcher(zooKeeper,
+				parentPath);
 		zooKeeper.getChildren(parentPath, dataProvider);
-		
+
 		return dataProvider;
 	}
 
-	private void createChildNode(String fullPath) throws IOException, KeeperException,
-			InterruptedException {
+	private void createChildNode(String fullPath) throws IOException,
+			KeeperException, InterruptedException {
 		NodeData nodeData = getNodeData();
 
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -89,16 +89,17 @@ public class NodePublisher {
 					+ "\" has no parent element");
 		}
 	}
-	
+
 	private String[] getPathTokens(String path) {
+		String cleanPath = null;
 		if (path.charAt(0) == '/') {
-			path = path.substring(1);
+			cleanPath = path.substring(1);
 		}
 		if (path.charAt(path.length() - 1) == '/') {
-			path = path.substring(0, path.length() - 1);
+			cleanPath = path.substring(0, path.length() - 1);
 		}
-		
-		return path.split("/");
+
+		return cleanPath.split("/");
 	}
 
 	private NodeData getNodeData() {
@@ -110,9 +111,7 @@ public class NodePublisher {
 		distributionResourceUrl.append("http://").append(host).append(":")
 				.append(port).append("/rs/distribution");
 
-		NodeData nodeData = new NodeData(solverId,
-				distributionResourceUrl.toString());
-		return nodeData;
+		return new NodeData(solverId, distributionResourceUrl.toString());
 	}
 
 }

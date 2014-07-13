@@ -4,6 +4,9 @@ package at.ac.uibk.dps.biohadoop.solver.moead.algorithm;
 //Look at http://en.wikipedia.org/wiki/Test_functions_for_optimization for optimizations
 public class Functions {
 
+	private Functions() {
+	}
+	
 //	ZDT6
 //	public static double f1(double[] x) {
 //		return x[0];

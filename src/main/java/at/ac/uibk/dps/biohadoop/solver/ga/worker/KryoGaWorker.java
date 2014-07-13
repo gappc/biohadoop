@@ -26,7 +26,7 @@ public class KryoGaWorker extends KryoWorker<int[], Double> {
 				distances[j][i] = inputDistances[j][i];
 			}
 		}
-	};
+	}
 
 	@Override
 	public Double compute(int[] data) {

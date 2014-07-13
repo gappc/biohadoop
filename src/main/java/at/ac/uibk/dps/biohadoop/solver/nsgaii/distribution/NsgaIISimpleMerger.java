@@ -8,7 +8,7 @@ import at.ac.uibk.dps.biohadoop.service.distribution.DataMerger;
 
 public class NsgaIISimpleMerger implements DataMerger<double[]> {
 
-	private final static Logger LOG = LoggerFactory.getLogger(NsgaIISimpleMerger.class);
+	private static final Logger LOG = LoggerFactory.getLogger(NsgaIISimpleMerger.class);
 	
 	@Override
 	public double[] merge(double[] o1, double[] o2) throws DataMergeException {

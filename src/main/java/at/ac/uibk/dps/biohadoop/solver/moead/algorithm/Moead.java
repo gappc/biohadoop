@@ -23,10 +23,10 @@ import at.ac.uibk.dps.biohadoop.solver.moead.config.MoeadAlgorithmConfig;
 
 public class Moead implements Algorithm<MoeadAlgorithmConfig, double[][]> {
 
-	private static final Logger LOG = LoggerFactory.getLogger(Moead.class);
 	public static final String MOEAD_QUEUE = "MOEAD_QUEUE";
 
-	private int logSteps = 100;
+	private static final Logger LOG = LoggerFactory.getLogger(Moead.class);
+	private static final int LOG_STEPS = 100;
 
 	private double minF1 = Double.MAX_VALUE;
 	private double maxF1 = -Double.MAX_VALUE;
@@ -121,7 +121,7 @@ public class Moead implements Algorithm<MoeadAlgorithmConfig, double[][]> {
 			if (iteration % 100 == 0) {
 				long endTime = System.currentTimeMillis();
 				LOG.info("Counter: {} | last {} MOEAD iterations took {} ms",
-						iteration + persitedIteration, logSteps, endTime
+						iteration + persitedIteration, LOG_STEPS, endTime
 								- startTime);
 				startTime = endTime;
 			}
@@ -272,8 +272,8 @@ public class Moead implements Algorithm<MoeadAlgorithmConfig, double[][]> {
 			// TODO check if normalization should be done
 			// double val1 = (functionValues[i][0] - z[0]) / (maxF1 - minF1);
 			// double val2 = (functionValues[i][1] - z[1]) / (maxF2 - minF2);
-			double val1 = (functionValues[i][0] - z[0]);
-			double val2 = (functionValues[i][1] - z[1]);
+			double val1 = functionValues[i][0] - z[0];
+			double val2 = functionValues[i][1] - z[1];
 			result[i][0] = val1;
 			result[i][1] = val2;
 			LOG.debug(val1 + " " + val2);

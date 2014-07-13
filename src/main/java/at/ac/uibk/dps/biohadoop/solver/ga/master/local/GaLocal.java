@@ -17,7 +17,7 @@ import at.ac.uibk.dps.biohadoop.solver.ga.worker.LocalGaWorker;
 
 public class GaLocal implements MasterConnection {
 
-	private final static Logger LOG = LoggerFactory.getLogger(GaLocal.class);
+	private static final Logger LOG = LoggerFactory.getLogger(GaLocal.class);
 	
 	private final String workerClass = LocalGaWorker.class.getCanonicalName();
 	private final ExecutorService executorService = Executors

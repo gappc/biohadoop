@@ -5,16 +5,20 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Environment {
 
-	public final static String HTTP_HOST = "HTTP_HOST";
-	public final static String HTTP_PORT = "HTTP_PORT";
-	public final static String SOCKET_HOST = "SOCKET_HOST";
-	public final static String SOCKET_PORT = "SOCKET_PORT";
-	public final static String KRYO_SOCKET_HOST = "KRYO_SOCKET_HOST";
-	public final static String KRYO_SOCKET_PORT = "KRYO_SOCKET_PORT";
+	public static final String HTTP_HOST = "HTTP_HOST";
+	public static final String HTTP_PORT = "HTTP_PORT";
+	public static final String SOCKET_HOST = "SOCKET_HOST";
+	public static final String SOCKET_PORT = "SOCKET_PORT";
+	public static final String KRYO_SOCKET_HOST = "KRYO_SOCKET_HOST";
+	public static final String KRYO_SOCKET_PORT = "KRYO_SOCKET_PORT";
+
+	private static final Map<String, String> environment = new ConcurrentHashMap<>();
 	
-	private static Map<String, String> environment = new ConcurrentHashMap<>();
 	private static BiohadoopConfiguration biohadoopConfiguration;
-	
+
+	private Environment() {
+	}
+
 	public static String get(String key) {
 		return environment.get(key);
 	}
@@ -22,11 +26,11 @@ public class Environment {
 	public static String set(String key, String value) {
 		return environment.put(key, value);
 	}
-	
+
 	public static String getPrefixed(String prefix, String key) {
 		return environment.get(prefix + "_" + key);
 	}
-	
+
 	public static String setPrefixed(String prefix, String key, String value) {
 		return environment.put(prefix + "_" + key, value);
 	}

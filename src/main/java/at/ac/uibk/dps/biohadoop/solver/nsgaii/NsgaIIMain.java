@@ -25,6 +25,9 @@ public class NsgaIIMain {
 
 	private static final Logger LOG = LoggerFactory.getLogger(NsgaIIMain.class);
 
+	private NsgaIIMain() {
+	}
+
 	public static void main(String[] args) {
 		try {
 			YarnConfiguration yarnConfiguration = new YarnConfiguration();
@@ -38,12 +41,11 @@ public class NsgaIIMain {
 					biohadoopConfiguration);
 			endpointLauncher.startMasterEndpoints();
 
-			SolverService solverService = SolverService
-					.getInstance();
+			SolverService solverService = SolverService.getInstance();
 			for (Future<SolverId> algorithm : algorithms) {
 				SolverId solverId = algorithm.get();
 				LOG.info("{} finished", solverId);
-				
+
 				@SuppressWarnings("unchecked")
 				List<List<Double>> solution = (List<List<Double>>) DataService
 						.getInstance().getData(solverId, DataOptions.DATA);
@@ -67,7 +69,8 @@ public class NsgaIIMain {
 			br.flush();
 			br.close();
 		} catch (IOException e) {
-			LOG.error("Exception while saving NsgaII data to file {}", filename, e);
+			LOG.error("Exception while saving NsgaII data to file {}",
+					filename, e);
 		}
 	}
 }

@@ -41,6 +41,9 @@ public class WorkerLauncher {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WorkerLauncher.class);
 
+	private WorkerLauncher() {
+	}
+	
 	public static void launchWorkers(YarnConfiguration yarnConfiguration,
 			BiohadoopConfiguration biohadoopConfig, String configFilename)
 			throws Exception {

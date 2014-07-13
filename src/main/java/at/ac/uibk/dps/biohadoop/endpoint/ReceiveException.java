@@ -1,6 +1,6 @@
 package at.ac.uibk.dps.biohadoop.endpoint;
 
-public class ReceiveException extends RuntimeException {
+public class ReceiveException extends Exception {
 
 	private static final long serialVersionUID = -6258224073663825785L;
 

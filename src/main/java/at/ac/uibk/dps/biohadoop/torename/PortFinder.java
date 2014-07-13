@@ -16,6 +16,9 @@ public class PortFinder {
 	private static final Logger LOG = LoggerFactory.getLogger(PortFinder.class);
 	private static final int MAX_PORT_NUMBER = 49151;
 
+	private PortFinder() {
+	}
+	
 	public static int findFreePort(int start) {
 		for (int i = start; i <= MAX_PORT_NUMBER; i++) {
 			if (available(i)) {

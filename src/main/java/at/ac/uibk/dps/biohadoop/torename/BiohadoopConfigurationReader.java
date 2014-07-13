@@ -10,8 +10,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class BiohadoopConfigurationReader {
 	
-	private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+	private BiohadoopConfigurationReader() {
+	}
+	
 	public static BiohadoopConfiguration readBiohadoopConfiguration(
 			YarnConfiguration yarnConfiguration, String filename)
 			throws IOException {

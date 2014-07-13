@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class AlgorithmWatcher implements Watcher {
 
-	private final static Logger LOG = LoggerFactory
+	private static final Logger LOG = LoggerFactory
 			.getLogger(AlgorithmWatcher.class);
 
 	private final ZooKeeper zooKeeper;

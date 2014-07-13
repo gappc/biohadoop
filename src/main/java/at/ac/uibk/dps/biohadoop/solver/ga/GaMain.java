@@ -17,19 +17,22 @@ public class GaMain {
 
 	private static final Logger LOG = LoggerFactory.getLogger(GaMain.class);
 
+	private GaMain() {
+	}
+
 	public static void main(String[] args) {
 		try {
 			YarnConfiguration yarnConfiguration = new YarnConfiguration();
 			BiohadoopConfiguration biohadoopConfiguration = BiohadoopConfigurationReader
 					.readBiohadoopConfiguration(yarnConfiguration, args[0]);
-			
+
 			List<Future<SolverId>> algorithms = SolverLauncher
 					.launchSolver(biohadoopConfiguration);
-			
+
 			EndpointLauncher endpointLauncher = new EndpointLauncher(
 					biohadoopConfiguration);
 			endpointLauncher.startMasterEndpoints();
-			
+
 			for (Future<SolverId> algorithm : algorithms) {
 				SolverId solverId = algorithm.get();
 				LOG.info("{} finished", solverId);

@@ -25,11 +25,12 @@ import at.ac.uibk.dps.biohadoop.solver.ga.config.GaAlgorithmConfig;
 
 public class Ga implements Algorithm<GaAlgorithmConfig, int[]> {
 
-	private static final Logger LOG = LoggerFactory.getLogger(Ga.class);
 	public static final String GA_QUEUE = "GA_QUEUE";
 
+	private static final Logger LOG = LoggerFactory.getLogger(Ga.class);
+	private static final int LOG_STEPS = 1000;
+
 	private final Random rand = new Random();
-	private final int logSteps = 1000;
 
 	@Override
 	public int[] compute(SolverId solverId, GaAlgorithmConfig config)
@@ -143,11 +144,11 @@ public class Ga implements Algorithm<GaAlgorithmConfig, int[]> {
 			if (iteration == maxIterations) {
 				end = true;
 			}
-			if (iteration % logSteps == 0 || iteration < 10) {
+			if (iteration % LOG_STEPS == 0 || iteration < 10) {
 				long endTime = System.currentTimeMillis();
 				LOG.info(
 						"Counter: {} ({} worker computations) | last {} GA iterations took {} ms",
-						iteration, 2 * iteration * populationSize, logSteps,
+						iteration, 2 * iteration * populationSize, LOG_STEPS,
 						endTime - startTime);
 				startTime = endTime;
 				printGenome(tsp.getDistances(), population[0], citySize);

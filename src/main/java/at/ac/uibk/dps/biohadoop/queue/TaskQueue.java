@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 public class TaskQueue<T, S> implements TaskClient<T, S>, TaskEndpoint<T, S> {
 
-	private final static Logger LOG = LoggerFactory.getLogger(TaskQueue.class);
+	private static final Logger LOG = LoggerFactory.getLogger(TaskQueue.class);
 	
 	private final BlockingQueue<Task<T>> queue = new LinkedBlockingQueue<>();
 	private final Map<TaskId, TaskQueueEntry<T, S>> workingSet = new ConcurrentHashMap<>();

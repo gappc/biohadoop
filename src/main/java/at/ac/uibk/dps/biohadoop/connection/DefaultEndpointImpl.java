@@ -6,26 +6,36 @@ import java.lang.reflect.InvocationTargetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.endpoint.CommunicationException;
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
+import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
+import at.ac.uibk.dps.biohadoop.endpoint.SendException;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.queue.TaskId;
 
-public class DefaultEndpointHandler {
+public class DefaultEndpointImpl {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(DefaultEndpointHandler.class);
+			.getLogger(DefaultEndpointImpl.class);
 
 	private final Endpoint endpoint;
 	private final Object registrationObject;
 	private final TaskEndpoint<Object, Object> taskEndpoint;
 	private Task<?> currentTask = null;
 
-	public static DefaultEndpointHandler newInstance(Endpoint endpoint,
+	private DefaultEndpointImpl(Endpoint endpoint, String queueName,
+			Object registrationObject) {
+		this.endpoint = endpoint;
+		this.registrationObject = registrationObject;
+		taskEndpoint = new TaskEndpointImpl<>(queueName);
+	}
+
+	public static DefaultEndpointImpl newInstance(Endpoint endpoint,
 			String queueName, Object registrationObject) {
 		try {
-			Constructor<DefaultEndpointHandler> constructor = DefaultEndpointHandler.class
+			Constructor<DefaultEndpointImpl> constructor = DefaultEndpointImpl.class
 					.getDeclaredConstructor(Endpoint.class, String.class,
 							Object.class);
 			return constructor.newInstance(endpoint, queueName,
@@ -33,34 +43,29 @@ public class DefaultEndpointHandler {
 		} catch (NoSuchMethodException | SecurityException
 				| InstantiationException | IllegalAccessException
 				| IllegalArgumentException | InvocationTargetException e) {
-			LOG.error("Could not instanciate new MasterEndpointImpl", e);
-			throw new InstantiationError(
-					"Could not instanciate new MasterEndpointImpl");
+			String errMsg = "Could not instanciate new "
+					+ DefaultEndpointImpl.class.getCanonicalName();
+			LOG.error(errMsg, e);
+			throw new InstantiationError(errMsg);
 		}
-	}
-
-	private DefaultEndpointHandler(Endpoint endpoint, String queueName,
-			Object registrationObject) {
-		this.endpoint = endpoint;
-		this.registrationObject = registrationObject;
-		taskEndpoint = new TaskEndpointImpl<>(queueName);
 	}
 
 	public Endpoint getEndpoint() {
 		return endpoint;
 	}
 
-	public void handleRegistration() {
-		endpoint.receive();
+	public void handleRegistration() throws CommunicationException {
+		receive();
 		LOG.info("Got registration request");
 		Task<?> task = new Task<>(TaskId.newInstance(), registrationObject);
 		Message<?> message = new Message<>(MessageType.REGISTRATION_RESPONSE,
 				task);
-		endpoint.send(message);
+		currentTask = null;
+		send(message);
 	}
 
-	public void handleWorkInit() {
-		endpoint.receive();
+	public void handleWorkInit() throws CommunicationException {
+		receive();
 		LOG.debug("Got work init request");
 		Message<?> message = null;
 		try {
@@ -70,11 +75,11 @@ public class DefaultEndpointHandler {
 			currentTask = null;
 			message = new Message<>(MessageType.SHUTDOWN, null);
 		}
-		endpoint.send(message);
+		send(message);
 	}
 
-	public void handleWork() {
-		Message<?> incomingMessage = endpoint.receive();
+	public void handleWork() throws CommunicationException {
+		Message<?> incomingMessage = receive();
 		LOG.debug("Got work request");
 
 		Message<?> message = null;
@@ -87,10 +92,36 @@ public class DefaultEndpointHandler {
 			currentTask = null;
 			message = new Message<>(MessageType.SHUTDOWN, null);
 		}
-		endpoint.send(message);
+		send(message);
 	}
 
-	public Task<?> getCurrentTask() {
-		return currentTask;
+	@SuppressWarnings("unchecked")
+	public <T> Task<T> getCurrentTask() {
+		return (Task<T>) currentTask;
+	}
+
+	private <T> Message<T> receive() throws CommunicationException {
+		try {
+			return endpoint.receive();
+		} catch (ReceiveException e) {
+			LOG.error("Could not recevie message", e);
+			throw new CommunicationException(e);
+		}
+	}
+
+	private void send(Message<?> message) throws CommunicationException {
+		try {
+			endpoint.send(message);
+		} catch (SendException e) {
+			LOG.error("Could not send message {}", message, e);
+			if (currentTask != null) {
+				try {
+					taskEndpoint.reschedule(currentTask.getTaskId());
+				} catch (InterruptedException e1) {
+					LOG.error("Could not reschedule task at {}", currentTask, e);
+				}
+			}
+			throw new CommunicationException(e);
+		}
 	}
 }

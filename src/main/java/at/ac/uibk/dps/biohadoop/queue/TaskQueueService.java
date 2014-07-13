@@ -9,9 +9,9 @@ import org.slf4j.LoggerFactory;
 
 public class TaskQueueService {
 
-	private final static Logger LOG = LoggerFactory
+	private static final Logger LOG = LoggerFactory
 			.getLogger(TaskQueueService.class);
-	private final static TaskQueueService TASK_QUEUE_MANAGER = new TaskQueueService();
+	private static final TaskQueueService TASK_QUEUE_MANAGER = new TaskQueueService();
 
 	private final Map<String, TaskQueue<?, ?>> queues = new ConcurrentHashMap<>();
 	private final AtomicBoolean isFinished = new AtomicBoolean(false);

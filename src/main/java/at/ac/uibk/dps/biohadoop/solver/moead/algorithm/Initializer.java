@@ -5,8 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
-
 public class Initializer {
 
 	public static double[][] generateWeightVectors(int N) {

@@ -23,7 +23,7 @@ public class BiohadoopApplicationMaster {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(BiohadoopApplicationMaster.class);
 
-	private final static String CLASSNAME = Helper
+	private static final String CLASSNAME = Helper
 			.getClassname(BiohadoopApplicationMaster.class);
 
 	private YarnConfiguration yarnConfiguration = new YarnConfiguration();

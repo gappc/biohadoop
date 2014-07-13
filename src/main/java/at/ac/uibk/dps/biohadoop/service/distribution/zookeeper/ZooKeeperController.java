@@ -20,10 +20,10 @@ import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
 
 public class ZooKeeperController {
 
-	private final static Logger LOG = LoggerFactory
+	private static final Logger LOG = LoggerFactory
 			.getLogger(ZooKeeperController.class);
 
-	private final static String SOLVER_PATH = "/biohadoop/solvers";
+	private static final String SOLVER_PATH = "/biohadoop/solvers";
 	private final ZooKeeper zooKeeper;
 	private final RegistrationProvider registrationProvider;
 	private final SolverId solverId;

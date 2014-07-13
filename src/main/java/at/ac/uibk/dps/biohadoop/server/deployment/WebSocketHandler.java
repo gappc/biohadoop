@@ -44,8 +44,7 @@ public class WebSocketHandler {
 	 * @throws ServletException
 	 */
 	public HttpHandler getHandler(String contextPath,
-			List<Class<?>> webSocketClasses) throws IllegalArgumentException,
-			IOException, ServletException {
+			List<Class<?>> webSocketClasses) throws IOException, ServletException {
 		if (contextPath == null || contextPath.length() == 0) {
 			contextPath = "/";
 		}
@@ -60,8 +59,7 @@ public class WebSocketHandler {
 	}
 
 	private DeploymentInfo buildDeploymentInfo(String contextPath,
-			List<Class<?>> webSocketClasses) throws IllegalArgumentException,
-			IOException {
+			List<Class<?>> webSocketClasses) throws IOException {
 		LOG.debug("Building WebSocket DeploymentInfo");
 		final Xnio xnio = Xnio.getInstance("nio",
 				Undertow.class.getClassLoader());

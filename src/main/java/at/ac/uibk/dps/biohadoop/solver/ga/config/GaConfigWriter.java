@@ -150,11 +150,7 @@ public class GaConfigWriter {
 		} else {
 			savePath = REMOTE_PERSISTENCE_SAVE_PATH;
 		}
-
-		FileSaveConfiguration fileSaveConfiguration = new FileSaveConfiguration(
-				FileSaveHandler.class, savePath, 1000);
-
-		return fileSaveConfiguration;
+		return new FileSaveConfiguration(FileSaveHandler.class, savePath, 1000);
 	}
 
 	private static FileLoadConfiguration buildFileLoadConfig(boolean local) {
@@ -164,11 +160,7 @@ public class GaConfigWriter {
 		} else {
 			loadPath = REMOTE_PERSISTENCE_LOAD_PATH;
 		}
-
-		FileLoadConfiguration fileLoadConfiguration = new FileLoadConfiguration(
-				FileLoadHandler.class, loadPath, false);
-
-		return fileLoadConfiguration;
+		return new FileLoadConfiguration(FileLoadHandler.class, loadPath, false);
 	}
 
 	private static DistributionConfiguration buildDistributionConfig() {

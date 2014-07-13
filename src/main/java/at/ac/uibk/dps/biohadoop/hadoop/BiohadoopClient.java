@@ -44,7 +44,7 @@ public class BiohadoopClient {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(BiohadoopClient.class);
 
-	private final static String CLASSNAME = Helper
+	private static final String CLASSNAME = Helper
 			.getClassname(BiohadoopClient.class);
 
 	private final List<String> includePaths = new ArrayList<String>();
@@ -169,10 +169,10 @@ public class BiohadoopClient {
 		// Finally, set-up ApplicationSubmissionContext for the application
 		ApplicationSubmissionContext appContext = app
 				.getApplicationSubmissionContext();
-		appContext.setApplicationName("biohadoop"); // application name
+		appContext.setApplicationName("biohadoop");
 		appContext.setAMContainerSpec(amContainer);
 		appContext.setResource(capability);
-		appContext.setQueue("default"); // queue
+		appContext.setQueue("default");
 
 		// Submit application
 		ApplicationId appId = appContext.getApplicationId();

@@ -13,9 +13,10 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.connection.DefaultEndpointHandler;
+import at.ac.uibk.dps.biohadoop.connection.DefaultEndpointImpl;
 import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
 import at.ac.uibk.dps.biohadoop.connection.Message;
+import at.ac.uibk.dps.biohadoop.endpoint.CommunicationException;
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.Master;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
@@ -33,7 +34,7 @@ public abstract class RestResource<T, S> implements Endpoint, MasterConnection,
 	private static final Logger LOG = LoggerFactory
 			.getLogger(RestResource.class);
 
-	private DefaultEndpointHandler masterEndpoint;
+	private DefaultEndpointImpl masterEndpoint;
 	private Message<S> inputMessage;
 	private Message<T> outputMessage;
 
@@ -65,35 +66,47 @@ public abstract class RestResource<T, S> implements Endpoint, MasterConnection,
 	@GET
 	@Path("registration")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Message<?> registration() throws InterruptedException {
+	public Message<?> registration() {
 		buildMasterEndpoint();
-		masterEndpoint.handleRegistration();
-		return outputMessage;
+		try {
+			masterEndpoint.handleRegistration();
+			return outputMessage;
+		} catch (CommunicationException e) {
+			LOG.error("Error while communicating with worker, closing communication", e);
+		}
+		return null;
 	}
 
 	@GET
 	@Path("workinit")
-	public Message<T> workInit() throws InterruptedException {
+	public Message<T> workInit() {
 		buildMasterEndpoint();
-		masterEndpoint.handleWorkInit();
-		return outputMessage;
+		try {
+			masterEndpoint.handleWorkInit();
+			return outputMessage;			
+		} catch (CommunicationException e) {
+			LOG.error("Error while communicating with worker, closing communication", e);
+		}
+		return null;
 	}
 
 	@POST
 	@Path("work")
-	public Message<T> work(String messageString) throws InterruptedException {
+	public Message<T> work(String messageString) {
 		try {
 			Message<S> message = new ObjectMapper().readValue(messageString,
 					getInputType());
 			buildMasterEndpoint();
 			inputMessage = message;
 			masterEndpoint.handleWork();
+			return outputMessage;
 		} catch (IOException e) {
 			LOG.error("Could not deserialize data {} to object {}",
 					messageString, Message.class, e);
+		} catch (CommunicationException e) {
+			LOG.error("Error while communicating with worker, closing communication", e);
 		}
-
-		return outputMessage;
+		return null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -108,7 +121,7 @@ public abstract class RestResource<T, S> implements Endpoint, MasterConnection,
 	}
 
 	private void buildMasterEndpoint() {
-		masterEndpoint = DefaultEndpointHandler.newInstance(this,
+		masterEndpoint = DefaultEndpointImpl.newInstance(this,
 				getQueueName(), getRegistrationObject());
 	}
 

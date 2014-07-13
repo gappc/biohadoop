@@ -9,6 +9,9 @@ public class ShutdownWaitingService {
 	private static final ZeroLock ZERO_LOCK = new ZeroLock();
 	private static final AtomicBoolean IS_FINISHED = new AtomicBoolean(false);
 
+	private ShutdownWaitingService() {
+	}
+	
 	public static void register() {
 		ZERO_LOCK.increment();
 	}

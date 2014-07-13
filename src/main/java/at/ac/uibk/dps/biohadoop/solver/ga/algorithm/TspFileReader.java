@@ -18,6 +18,9 @@ public class TspFileReader {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(TspFileReader.class);
 
+	private TspFileReader() {
+	}
+	
 	public static Tsp readFile(final String datafile) throws IOException {
 		InputStream is = HdfsUtil.openFile(new YarnConfiguration(), datafile);
 		BufferedReader br = new BufferedReader(new InputStreamReader(is));

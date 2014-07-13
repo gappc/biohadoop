@@ -12,6 +12,9 @@ public class HandlerBuilder {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(HandlerBuilder.class);
 
+	private HandlerBuilder() {
+	}
+	
 	public static Handler getHandler(SolverId solverId,
 			Class<? extends HandlerConfiguration> handlerConfigurationType)
 			throws UnknownHandlerException {

@@ -1,6 +1,5 @@
 package at.ac.uibk.dps.biohadoop.solver.ga.distribution;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;

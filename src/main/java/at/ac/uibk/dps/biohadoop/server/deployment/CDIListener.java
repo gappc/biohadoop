@@ -10,12 +10,17 @@ import javax.servlet.ServletRequestListener;
 import org.jboss.weld.context.bound.BoundRequestContext;
 
 public class CDIListener implements ServletRequestListener {
+
+	private static final String CDI_REQUEST_CONTEXT = "cdiRequestContext";
+	private static final String CDI_REQUEST_MAP = "cdiRequestMap";
+
 	@Override
 	public void requestDestroyed(ServletRequestEvent servletRequestEvent) {
 		BoundRequestContext requestContext = (BoundRequestContext) servletRequestEvent
-				.getServletRequest().getAttribute("cdiRequestContext");
+				.getServletRequest().getAttribute(CDI_REQUEST_CONTEXT);
+		@SuppressWarnings("unchecked")
 		Map<String, Object> requestMap = (Map<String, Object>) servletRequestEvent
-				.getServletRequest().getAttribute("cdiRequestMap");
+				.getServletRequest().getAttribute(CDI_REQUEST_MAP);
 		requestContext.invalidate();
 		requestContext.deactivate();
 		requestContext.dissociate(requestMap);
@@ -29,8 +34,8 @@ public class CDIListener implements ServletRequestListener {
 		requestContext.associate(requestMap);
 		requestContext.activate();
 		servletRequestEvent.getServletRequest().setAttribute(
-				"cdiRequestContext", requestContext);
-		servletRequestEvent.getServletRequest().setAttribute("cdiRequestMap",
+				CDI_REQUEST_CONTEXT, requestContext);
+		servletRequestEvent.getServletRequest().setAttribute(CDI_REQUEST_MAP,
 				requestMap);
 	}
 }

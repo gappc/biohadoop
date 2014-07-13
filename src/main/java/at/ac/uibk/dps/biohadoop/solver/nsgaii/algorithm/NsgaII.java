@@ -23,20 +23,19 @@ import at.ac.uibk.dps.biohadoop.queue.TaskFuture;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.config.NsgaIIAlgorithmConfig;
 
-public class NsgaII implements
-		Algorithm<NsgaIIAlgorithmConfig, double[][]> {
+public class NsgaII implements Algorithm<NsgaIIAlgorithmConfig, double[][]> {
+
+	public static final String NSGAII_QUEUE = "NSGAII_QUEUE";
 
 	private static final Logger LOG = LoggerFactory.getLogger(NsgaII.class);
-	public static final String NSGAII_QUEUE = "NSGAII_QUEUE";
+	private static final int LOG_STEPS = 100;
 
 	private TaskClient<double[], double[]> taskClient = new TaskClientImpl<>(
 			NSGAII_QUEUE);
 
-	private int logSteps = 100;
-
 	@Override
-	public double[][] compute(SolverId solverId,
-			NsgaIIAlgorithmConfig config) throws AlgorithmException {
+	public double[][] compute(SolverId solverId, NsgaIIAlgorithmConfig config)
+			throws AlgorithmException {
 		HandlerClient handlerClient = new HandlerClientImpl(solverId);
 		DataClient dataClient = new DataClientImpl(solverId);
 
@@ -112,12 +111,12 @@ public class NsgaII implements
 
 			iteration++;
 
-			double[][] result = computeResult(populationSize,
-					objectiveValues);
+			double[][] result = computeResult(populationSize, objectiveValues);
 
 			dataClient.setDefaultData(result, 0, maxIterations, iteration);
 			handlerClient.invokeDefaultHandlers();
-			objectiveValues = (double[][])dataClient.getData(DataOptions.DATA, objectiveValues);
+			objectiveValues = (double[][]) dataClient.getData(DataOptions.DATA,
+					objectiveValues);
 
 			if (iteration >= maxIterations) {
 				end = true;
@@ -125,15 +124,13 @@ public class NsgaII implements
 			if (iteration % 100 == 0) {
 				long endTime = System.currentTimeMillis();
 				LOG.info("Counter: {} | last {} NSGAII iterations took {} ms",
-						iteration + persitedIteration, logSteps, endTime
+						iteration + persitedIteration, LOG_STEPS, endTime
 								- startTime);
 				startTime = endTime;
 			}
 		}
 
-		double[][] result = computeResult(populationSize,
-				objectiveValues);
-		return result;
+		return computeResult(populationSize, objectiveValues);
 	}
 
 	private double[][] convertToArray(Object input) {

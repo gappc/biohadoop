@@ -12,15 +12,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ObjectCloner {
 
-	private static Logger LOG = LoggerFactory.getLogger(ObjectCloner.class);
-	private static ObjectMapper objectMapper = new ObjectMapper().enableDefaultTyping();
+	private static final Logger LOG = LoggerFactory.getLogger(ObjectCloner.class);
+	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().enableDefaultTyping();
 
+	private ObjectCloner() {
+	}
+	
 	public static <T>T deepCopy(Object data, Class<T> type) {
 		if (data != null) {
 			try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-				objectMapper.writeValue(os, data);
+				OBJECT_MAPPER.writeValue(os, data);
 				try (InputStream is = new ByteArrayInputStream(os.toByteArray());) {
-					return objectMapper.readValue(is, type);
+					return OBJECT_MAPPER.readValue(is, type);
 				} catch (IOException e) {
 					LOG.error("Error while cloning: object={} ", data, e);
 				}

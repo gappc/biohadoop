@@ -7,4 +7,7 @@ public class HandlerConstants {
 	public static final String ALGORITHM_STOP = "ALGORITHM_STOP";
 	public static final String ITERATION_STEP = "ITERATION_STEP";
 	public static final String UPDATE_PROGRESS = "UPDATE_PROGRESS";
+	
+	private HandlerConstants() {
+	}
 }

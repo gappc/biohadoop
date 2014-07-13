@@ -27,7 +27,10 @@ public class KryoObjectRegistration {
 	static {
 		OBJECTS_WITH_SERIALIZER.put(UUID.class, new UUIDSerializer());
 	}
-	
+
+	private KryoObjectRegistration() {
+	}
+
 	public static void register(Kryo kryo) {
 		for (Class<?> type : OBJECTS) {
 			kryo.register(type);

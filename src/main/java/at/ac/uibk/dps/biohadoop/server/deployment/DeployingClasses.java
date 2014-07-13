@@ -10,8 +10,11 @@ import javax.ws.rs.Path;
 
 public class DeployingClasses {
 
-	private final static Map<Class<?>, Class<?>> RESTFUL_CLASSES = new ConcurrentHashMap<Class<?>, Class<?>>();
-	private final static Map<Class<?>, Class<?>> WEBSOCKET_CLASSES = new ConcurrentHashMap<Class<?>, Class<?>>();
+	private static final Map<Class<?>, Class<?>> RESTFUL_CLASSES = new ConcurrentHashMap<Class<?>, Class<?>>();
+	private static final Map<Class<?>, Class<?>> WEBSOCKET_CLASSES = new ConcurrentHashMap<Class<?>, Class<?>>();
+	
+	private DeployingClasses() {
+	}
 	
 	public static boolean addRestfulClass(Class<?> restfulClass) {
 		if (isRestful(restfulClass)) {

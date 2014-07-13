@@ -25,6 +25,9 @@ public class MoeadMain {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MoeadMain.class);
 
+	private MoeadMain() {
+	}
+
 	public static void main(String[] args) {
 		try {
 			YarnConfiguration yarnConfiguration = new YarnConfiguration();
@@ -43,8 +46,8 @@ public class MoeadMain {
 				SolverId solverId = algorithm.get();
 				LOG.info("{} finished", solverId);
 
-				double[][] solution = (double[][]) DataService
-						.getInstance().getData(solverId, DataOptions.DATA);
+				double[][] solution = (double[][]) DataService.getInstance()
+						.getData(solverId, DataOptions.DATA);
 				SolverConfiguration solverConfiguration = solverService
 						.getSolverConfiguration(solverId);
 				String outputFilename = ((MoeadAlgorithmConfig) solverConfiguration

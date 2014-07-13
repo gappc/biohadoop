@@ -1,5 +1,8 @@
 package at.ac.uibk.dps.biohadoop.connection.websocket;
 
+import java.io.IOException;
+
+import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
@@ -10,9 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
-import at.ac.uibk.dps.biohadoop.connection.DefaultEndpointHandler;
+import at.ac.uibk.dps.biohadoop.connection.DefaultEndpointImpl;
 import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.connection.MessageType;
+import at.ac.uibk.dps.biohadoop.endpoint.CommunicationException;
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.Master;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
@@ -24,14 +28,15 @@ import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.server.deployment.DeployingClasses;
 import at.ac.uibk.dps.biohadoop.torename.Helper;
 
-public abstract class WebSocketEndpoint implements Endpoint, MasterConnection, Master {
+public abstract class WebSocketEndpoint implements Endpoint, MasterConnection,
+		Master {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WebSocketEndpoint.class);
 
 	private TaskEndpoint<?, ?> taskEndpoint;
-	
-	private DefaultEndpointHandler masterEndpoint; 
+
+	private DefaultEndpointImpl masterEndpoint;
 	private Message<?> inputMessage;
 	private Message<?> outputMessage;
 	private boolean close = false;
@@ -62,17 +67,26 @@ public abstract class WebSocketEndpoint implements Endpoint, MasterConnection, M
 		}
 
 		inputMessage = message;
-
-		if (message.getType() == MessageType.REGISTRATION_REQUEST) {
-			masterEndpoint.handleRegistration();
+		try {
+			if (message.getType() == MessageType.REGISTRATION_REQUEST) {
+				masterEndpoint.handleRegistration();
+			}
+			if (message.getType() == MessageType.WORK_INIT_REQUEST) {
+				masterEndpoint.handleWorkInit();
+			}
+			if (message.getType() == MessageType.WORK_REQUEST) {
+				masterEndpoint.handleWork();
+			}
+		} catch (CommunicationException e) {
+			String errMsg = "Error while communicating with worker, closing communication";
+			LOG.error(errMsg, e);
+			try {
+				session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, errMsg));
+			} catch (IOException e1) {
+				LOG.error("Could not close connection", e1);
+			}
 		}
-		if (message.getType() == MessageType.WORK_INIT_REQUEST) {
-			masterEndpoint.handleWorkInit();
-		}
-		if (message.getType() == MessageType.WORK_REQUEST) {
-			masterEndpoint.handleWork();
-		}
-
+		
 		return outputMessage;
 	}
 
@@ -114,9 +128,10 @@ public abstract class WebSocketEndpoint implements Endpoint, MasterConnection, M
 	public <T> void send(Message<T> message) throws SendException {
 		outputMessage = message;
 	}
-	
+
 	private void buildMasterEndpoint() {
-		masterEndpoint = DefaultEndpointHandler.newInstance(this, getQueueName(), getRegistrationObject());
+		masterEndpoint = DefaultEndpointImpl.newInstance(this, getQueueName(),
+				getRegistrationObject());
 	}
 
 }

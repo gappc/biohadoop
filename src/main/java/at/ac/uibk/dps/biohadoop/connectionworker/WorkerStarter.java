@@ -10,12 +10,15 @@ public class WorkerStarter {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WorkerStarter.class);
 
-	private static int maxArgsSize = 3;
+	private static final int MAX_ARGS_SIZE = 3;
 
+	private WorkerStarter() {
+	}
+	
 	public static void main(String[] args) throws Exception {
-		if (args.length < maxArgsSize) {
+		if (args.length < MAX_ARGS_SIZE) {
 			String message = "Number of arguments to low, expected "
-					+ args.length + ", got " + maxArgsSize;
+					+ args.length + ", got " + MAX_ARGS_SIZE;
 			LOG.error(message);
 			throw new IllegalArgumentException(message);
 		}

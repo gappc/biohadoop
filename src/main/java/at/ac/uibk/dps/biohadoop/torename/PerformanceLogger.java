@@ -14,11 +14,11 @@ public class PerformanceLogger {
 		this.logSteps = logSteps;
 	}
 
-	public int step(Logger log) {
+	public int step(final Logger LOG) {
 		counter++;
 		if (counter % logSteps == 0) {
 			long endTime = System.currentTimeMillis();
-			log.info("{}ms for last {} computations", endTime - startTime,
+			LOG.info("{}ms for last {} computations", endTime - startTime,
 					logSteps);
 			counter = 0;
 			startTime = System.currentTimeMillis();

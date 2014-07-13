@@ -8,7 +8,7 @@ import at.ac.uibk.dps.biohadoop.service.distribution.DataMerger;
 
 public class MoeadSimpleMerger implements DataMerger<double[][]> {
 
-	private final static Logger LOG = LoggerFactory
+	private static final Logger LOG = LoggerFactory
 			.getLogger(MoeadSimpleMerger.class);
 
 	@Override

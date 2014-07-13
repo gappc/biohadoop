@@ -11,16 +11,14 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.connection.DefaultEndpointHandler;
+import at.ac.uibk.dps.biohadoop.connection.DefaultEndpointImpl;
 import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.connection.MessageType;
+import at.ac.uibk.dps.biohadoop.endpoint.CommunicationException;
 import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.Master;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
-import at.ac.uibk.dps.biohadoop.queue.Task;
-import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
-import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.torename.Helper;
 
 public class SocketEndpoint implements Callable<Integer>, Endpoint {
@@ -44,10 +42,7 @@ public class SocketEndpoint implements Callable<Integer>, Endpoint {
 
 	@Override
 	public Integer call() {
-		TaskEndpoint<?, ?> taskEndpoint = new TaskEndpointImpl<>(
-				master.getQueueName());
-
-		DefaultEndpointHandler endpoint = null;
+		DefaultEndpointImpl endpoint = null;
 		try {
 			LOG.info("Opened Socket on server");
 
@@ -63,19 +58,10 @@ public class SocketEndpoint implements Callable<Integer>, Endpoint {
 			while (!close) {
 				endpoint.handleWork();
 			}
-		} catch (Exception e) {
+		} catch (IOException e) {
 			LOG.error("Error while running {}", className, e);
-			if (endpoint != null) {
-				Task<?> currentTask = endpoint.getCurrentTask();
-				if (currentTask != null) {
-					try {
-						taskEndpoint.reschedule(currentTask.getTaskId());
-					} catch (InterruptedException e1) {
-						LOG.error("Could not reschedule task at {}",
-								currentTask);
-					}
-				}
-			}
+		} catch (CommunicationException e) {
+			LOG.error("Error while communicating with worker, closing communication", e);
 		} finally {
 			if (os != null) {
 				try {
@@ -123,7 +109,7 @@ public class SocketEndpoint implements Callable<Integer>, Endpoint {
 		}
 	}
 	
-	private DefaultEndpointHandler buildMaster() throws Exception {
-		return DefaultEndpointHandler.newInstance(this, master.getQueueName(), master.getRegistrationObject());
+	private DefaultEndpointImpl buildMaster() {
+		return DefaultEndpointImpl.newInstance(this, master.getQueueName(), master.getRegistrationObject());
 	}
 }
