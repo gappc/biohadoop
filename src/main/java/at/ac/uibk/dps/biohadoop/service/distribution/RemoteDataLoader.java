@@ -13,7 +13,7 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.service.distribution.zooKeeper.NodeData;
+import at.ac.uibk.dps.biohadoop.service.distribution.zookeeper.NodeData;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverData;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
