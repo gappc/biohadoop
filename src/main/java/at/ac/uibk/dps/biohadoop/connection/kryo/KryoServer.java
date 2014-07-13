@@ -5,8 +5,8 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
-import at.ac.uibk.dps.biohadoop.endpoint.Master;
+import at.ac.uibk.dps.biohadoop.connection.MasterLifecycle;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.torename.HostInfo;
 
@@ -14,7 +14,7 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Server;
 import com.esotericsoftware.minlog.Log;
 
-public abstract class KryoServer implements MasterConnection, Master {
+public abstract class KryoServer implements MasterLifecycle, MasterEndpoint {
 
 	private static final Logger LOG = LoggerFactory.getLogger(KryoServer.class);
 

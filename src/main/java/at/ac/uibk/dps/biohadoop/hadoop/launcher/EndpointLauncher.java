@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.connection.ConnectionConfiguration;
-import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
+import at.ac.uibk.dps.biohadoop.connection.MasterLifecycle;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
 import at.ac.uibk.dps.biohadoop.server.StartServerException;
@@ -19,7 +19,7 @@ public class EndpointLauncher {
 			.getLogger(EndpointLauncher.class);
 
 	private final ConnectionConfiguration connectionConfiguration;
-	private List<MasterConnection> masterConnections = new ArrayList<>();
+	private List<MasterLifecycle> masterConnections = new ArrayList<>();
 	private UndertowServer undertowServer;
 
 	public EndpointLauncher(BiohadoopConfiguration config) {
@@ -29,10 +29,10 @@ public class EndpointLauncher {
 	public void startMasterEndpoints() throws EndpointLaunchException {
 		try {
 			LOG.info("Configuring master endpoints");
-			for (Class<? extends MasterConnection> endpointClass : connectionConfiguration
+			for (Class<? extends MasterLifecycle> endpointClass : connectionConfiguration
 					.getMasterEndpoints()) {
 				LOG.debug("Configuring master endpoint {}", endpointClass);
-				MasterConnection masterConnection = endpointClass.newInstance();
+				MasterLifecycle masterConnection = endpointClass.newInstance();
 				masterConnection.configure();
 				masterConnections.add(masterConnection);
 			}
@@ -41,7 +41,7 @@ public class EndpointLauncher {
 			undertowServer.start();
 
 			LOG.info("Starting master endpoints");
-			for (MasterConnection masterConnection : masterConnections) {
+			for (MasterLifecycle masterConnection : masterConnections) {
 				LOG.debug("Starting master endpoint {}", masterConnection.getClass().getCanonicalName());
 				masterConnection.start();
 			}
@@ -55,7 +55,7 @@ public class EndpointLauncher {
 	public void stopMasterEndpoints() throws Exception {
 		LOG.info("Stopping master endpoints");
 		ShutdownWaitingService.setFinished();
-		for (MasterConnection masterConnection : masterConnections) {
+		for (MasterLifecycle masterConnection : masterConnections) {
 			LOG.debug("Stopping master endpoint {}", masterConnection.getClass().getCanonicalName());
 			masterConnection.stop();
 		}

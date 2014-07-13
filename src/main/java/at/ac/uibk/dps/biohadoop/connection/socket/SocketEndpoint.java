@@ -11,38 +11,38 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.connection.DefaultEndpointImpl;
+import at.ac.uibk.dps.biohadoop.connection.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.connection.MessageType;
 import at.ac.uibk.dps.biohadoop.endpoint.CommunicationException;
-import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
-import at.ac.uibk.dps.biohadoop.endpoint.Master;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterCommunication;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
 import at.ac.uibk.dps.biohadoop.torename.Helper;
 
-public class SocketEndpoint implements Callable<Integer>, Endpoint {
+public class SocketEndpoint implements Callable<Integer>, MasterCommunication {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SocketEndpoint.class);
 
 	private final String className = Helper.getClassname(SocketEndpoint.class);
 	private final Socket socket;
-	private final Master master;
+	private final MasterEndpoint master;
 
 	private ObjectOutputStream os = null;
 	private ObjectInputStream is = null;
 	private int counter = 0;
 	private boolean close = false;
 
-	public SocketEndpoint(Socket socket, Master master) {
+	public SocketEndpoint(Socket socket, MasterEndpoint master) {
 		this.socket = socket;
 		this.master = master;
 	}
 
 	@Override
 	public Integer call() {
-		DefaultEndpointImpl endpoint = null;
+		DefaultMasterImpl endpoint = null;
 		try {
 			LOG.info("Opened Socket on server");
 
@@ -109,7 +109,7 @@ public class SocketEndpoint implements Callable<Integer>, Endpoint {
 		}
 	}
 	
-	private DefaultEndpointImpl buildMaster() {
-		return DefaultEndpointImpl.newInstance(this, master.getQueueName(), master.getRegistrationObject());
+	private DefaultMasterImpl buildMaster() {
+		return DefaultMasterImpl.newInstance(this, master.getQueueName(), master.getRegistrationObject());
 	}
 }

@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.config.AlgorithmConfiguration;
 import at.ac.uibk.dps.biohadoop.connection.ConnectionConfiguration;
-import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
+import at.ac.uibk.dps.biohadoop.connection.MasterLifecycle;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.handler.HandlerConfiguration;
 import at.ac.uibk.dps.biohadoop.service.distribution.DistributionConfiguration;
@@ -94,7 +94,7 @@ public class NsgaIIConfigWriter {
 	}
 
 	private static ConnectionConfiguration buildConnectionConfiguration() {
-		List<Class<? extends MasterConnection>> masterEndpoints = new ArrayList<>();
+		List<Class<? extends MasterLifecycle>> masterEndpoints = new ArrayList<>();
 		masterEndpoints.add(NsgaIISocket.class);
 		masterEndpoints.add(NsgaIIWebSocket.class);
 		masterEndpoints.add(NsgaIIRest.class);

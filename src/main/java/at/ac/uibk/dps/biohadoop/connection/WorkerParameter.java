@@ -1,6 +1,6 @@
 package at.ac.uibk.dps.biohadoop.connection;
 
-public interface WorkerConnection {
+public interface WorkerParameter {
 
 	public String getWorkerParameters() throws Exception;
 

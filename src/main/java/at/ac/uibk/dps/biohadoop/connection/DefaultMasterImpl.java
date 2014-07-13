@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.endpoint.CommunicationException;
-import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterCommunication;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
 import at.ac.uibk.dps.biohadoop.queue.Task;
@@ -15,28 +15,28 @@ import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.queue.TaskId;
 
-public class DefaultEndpointImpl {
+public class DefaultMasterImpl {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(DefaultEndpointImpl.class);
+			.getLogger(DefaultMasterImpl.class);
 
-	private final Endpoint endpoint;
+	private final MasterCommunication endpoint;
 	private final Object registrationObject;
 	private final TaskEndpoint<Object, Object> taskEndpoint;
 	private Task<?> currentTask = null;
 
-	private DefaultEndpointImpl(Endpoint endpoint, String queueName,
+	private DefaultMasterImpl(MasterCommunication endpoint, String queueName,
 			Object registrationObject) {
 		this.endpoint = endpoint;
 		this.registrationObject = registrationObject;
 		taskEndpoint = new TaskEndpointImpl<>(queueName);
 	}
 
-	public static DefaultEndpointImpl newInstance(Endpoint endpoint,
+	public static DefaultMasterImpl newInstance(MasterCommunication endpoint,
 			String queueName, Object registrationObject) {
 		try {
-			Constructor<DefaultEndpointImpl> constructor = DefaultEndpointImpl.class
-					.getDeclaredConstructor(Endpoint.class, String.class,
+			Constructor<DefaultMasterImpl> constructor = DefaultMasterImpl.class
+					.getDeclaredConstructor(MasterCommunication.class, String.class,
 							Object.class);
 			return constructor.newInstance(endpoint, queueName,
 					registrationObject);
@@ -44,13 +44,13 @@ public class DefaultEndpointImpl {
 				| InstantiationException | IllegalAccessException
 				| IllegalArgumentException | InvocationTargetException e) {
 			String errMsg = "Could not instanciate new "
-					+ DefaultEndpointImpl.class.getCanonicalName();
+					+ DefaultMasterImpl.class.getCanonicalName();
 			LOG.error(errMsg, e);
 			throw new InstantiationError(errMsg);
 		}
 	}
 
-	public Endpoint getEndpoint() {
+	public MasterCommunication getEndpoint() {
 		return endpoint;
 	}
 

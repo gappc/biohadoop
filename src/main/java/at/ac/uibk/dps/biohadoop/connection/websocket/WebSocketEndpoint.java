@@ -12,13 +12,13 @@ import javax.websocket.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
-import at.ac.uibk.dps.biohadoop.connection.DefaultEndpointImpl;
+import at.ac.uibk.dps.biohadoop.connection.MasterLifecycle;
+import at.ac.uibk.dps.biohadoop.connection.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.connection.MessageType;
 import at.ac.uibk.dps.biohadoop.endpoint.CommunicationException;
-import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
-import at.ac.uibk.dps.biohadoop.endpoint.Master;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterCommunication;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
 import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
@@ -28,15 +28,15 @@ import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.server.deployment.DeployingClasses;
 import at.ac.uibk.dps.biohadoop.torename.Helper;
 
-public abstract class WebSocketEndpoint implements Endpoint, MasterConnection,
-		Master {
+public abstract class WebSocketEndpoint implements MasterCommunication, MasterLifecycle,
+		MasterEndpoint {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WebSocketEndpoint.class);
 
 	private TaskEndpoint<?, ?> taskEndpoint;
 
-	private DefaultEndpointImpl masterEndpoint;
+	private DefaultMasterImpl masterEndpoint;
 	private Message<?> inputMessage;
 	private Message<?> outputMessage;
 	private boolean close = false;
@@ -130,7 +130,7 @@ public abstract class WebSocketEndpoint implements Endpoint, MasterConnection,
 	}
 
 	private void buildMasterEndpoint() {
-		masterEndpoint = DefaultEndpointImpl.newInstance(this, getQueueName(),
+		masterEndpoint = DefaultMasterImpl.newInstance(this, getQueueName(),
 				getRegistrationObject());
 	}
 

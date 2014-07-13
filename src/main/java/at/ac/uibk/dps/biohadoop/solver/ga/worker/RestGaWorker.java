@@ -2,7 +2,7 @@ package at.ac.uibk.dps.biohadoop.solver.ga.worker;
 
 import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.connectionworker.RestWorker;
-import at.ac.uibk.dps.biohadoop.endpoint.Master;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.GaFitness;
 import at.ac.uibk.dps.biohadoop.solver.ga.master.rest.GaRest;
 
@@ -14,7 +14,7 @@ public class RestGaWorker extends RestWorker<int[], Double> {
 	private double[][] distances;
 
 	@Override
-	public Class<? extends Master> getMasterEndpoint() {
+	public Class<? extends MasterEndpoint> getMasterEndpoint() {
 		return GaRest.class;
 	}
 	

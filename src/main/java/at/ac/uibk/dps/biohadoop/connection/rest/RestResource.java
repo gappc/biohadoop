@@ -13,12 +13,12 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.connection.DefaultEndpointImpl;
-import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
+import at.ac.uibk.dps.biohadoop.connection.DefaultMasterImpl;
+import at.ac.uibk.dps.biohadoop.connection.MasterLifecycle;
 import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.endpoint.CommunicationException;
-import at.ac.uibk.dps.biohadoop.endpoint.Endpoint;
-import at.ac.uibk.dps.biohadoop.endpoint.Master;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterCommunication;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
 import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
@@ -28,13 +28,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Produces(MediaType.APPLICATION_JSON)
-public abstract class RestResource<T, S> implements Endpoint, MasterConnection,
-		Master {
+public abstract class RestResource<T, S> implements MasterCommunication, MasterLifecycle,
+		MasterEndpoint {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(RestResource.class);
 
-	private DefaultEndpointImpl masterEndpoint;
+	private DefaultMasterImpl masterEndpoint;
 	private Message<S> inputMessage;
 	private Message<T> outputMessage;
 
@@ -121,7 +121,7 @@ public abstract class RestResource<T, S> implements Endpoint, MasterConnection,
 	}
 
 	private void buildMasterEndpoint() {
-		masterEndpoint = DefaultEndpointImpl.newInstance(this,
+		masterEndpoint = DefaultMasterImpl.newInstance(this,
 				getQueueName(), getRegistrationObject());
 	}
 

@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ConnectionConfiguration {
 
-	private final List<Class<? extends MasterConnection>> masterEndpoints;
+	private final List<Class<? extends MasterLifecycle>> masterEndpoints;
 	// TODO: Check if can be improved; At the moment: key must be String because
 	// of Json exception
 	// com.fasterxml.jackson.databind.JsonMappingException: Can not find a (Map)
@@ -17,7 +17,7 @@ public class ConnectionConfiguration {
 	private final Map<String, Integer> workerEndpoints;
 
 	public ConnectionConfiguration(
-			List<Class<? extends MasterConnection>> masterEndpoints,
+			List<Class<? extends MasterLifecycle>> masterEndpoints,
 			Map<String, Integer> workerEndpoints) {
 		this.masterEndpoints = masterEndpoints;
 		this.workerEndpoints = workerEndpoints;
@@ -25,12 +25,12 @@ public class ConnectionConfiguration {
 
 	@JsonCreator
 	public static ConnectionConfiguration create(
-			@JsonProperty("masterEndpoints") List<Class<? extends MasterConnection>> masterEndpoints,
+			@JsonProperty("masterEndpoints") List<Class<? extends MasterLifecycle>> masterEndpoints,
 			@JsonProperty("workerEndpoints") Map<String, Integer> workerEndpoints) {
 		return new ConnectionConfiguration(masterEndpoints, workerEndpoints);
 	}
 
-	public List<Class<? extends MasterConnection>> getMasterEndpoints() {
+	public List<Class<? extends MasterLifecycle>> getMasterEndpoints() {
 		return masterEndpoints;
 	}
 

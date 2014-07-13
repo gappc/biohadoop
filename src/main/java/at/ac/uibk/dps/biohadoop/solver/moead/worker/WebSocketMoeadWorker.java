@@ -5,7 +5,7 @@ import javax.websocket.ClientEndpoint;
 import at.ac.uibk.dps.biohadoop.connection.websocket.WebSocketDecoder;
 import at.ac.uibk.dps.biohadoop.connection.websocket.WebSocketEncoder;
 import at.ac.uibk.dps.biohadoop.connectionworker.WebSocketWorker;
-import at.ac.uibk.dps.biohadoop.endpoint.Master;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.solver.moead.algorithm.Functions;
 import at.ac.uibk.dps.biohadoop.solver.moead.master.MoeadWebSocket;
 
@@ -13,7 +13,7 @@ import at.ac.uibk.dps.biohadoop.solver.moead.master.MoeadWebSocket;
 public class WebSocketMoeadWorker extends WebSocketWorker<double[], double[]> {
 
 	@Override
-	public Class<? extends Master> getMasterEndpoint() {
+	public Class<? extends MasterEndpoint> getMasterEndpoint() {
 		return MoeadWebSocket.class;
 	}
 	

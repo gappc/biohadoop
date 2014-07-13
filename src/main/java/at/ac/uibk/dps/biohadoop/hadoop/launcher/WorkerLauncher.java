@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.connection.ConnectionConfiguration;
-import at.ac.uibk.dps.biohadoop.connection.WorkerConnection;
+import at.ac.uibk.dps.biohadoop.connection.WorkerParameter;
 import at.ac.uibk.dps.biohadoop.connectionworker.WorkerStarter;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.LaunchContainerRunnable;
@@ -103,7 +103,7 @@ public class WorkerLauncher {
 				ContainerLaunchContext ctx = Records
 						.newRecord(ContainerLaunchContext.class);
 
-				WorkerConnection worker = (WorkerConnection) Class.forName(
+				WorkerParameter worker = (WorkerParameter) Class.forName(
 						workerList.get(0)).newInstance();
 				String parameters = worker.getWorkerParameters();
 
@@ -207,7 +207,7 @@ public class WorkerLauncher {
 		List<String> workerList = getWorkerList(biohadoopConfiguration);
 		for (String workerClass : workerList) {
 			try {
-				WorkerConnection worker = (WorkerConnection) Class.forName(
+				WorkerParameter worker = (WorkerParameter) Class.forName(
 						workerClass).newInstance();
 				String parameters = worker.getWorkerParameters();
 

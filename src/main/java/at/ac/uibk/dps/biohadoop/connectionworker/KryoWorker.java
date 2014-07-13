@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.connection.MessageType;
-import at.ac.uibk.dps.biohadoop.connection.WorkerConnection;
+import at.ac.uibk.dps.biohadoop.connection.WorkerParameter;
 import at.ac.uibk.dps.biohadoop.connection.kryo.KryoObjectRegistration;
-import at.ac.uibk.dps.biohadoop.endpoint.Master;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.WorkerEndpoint;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.queue.Task;
@@ -20,7 +20,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
 
-public abstract class KryoWorker<T, S> implements WorkerEndpoint<T, S>, WorkerConnection {
+public abstract class KryoWorker<T, S> implements WorkerEndpoint<T, S>, WorkerParameter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(KryoWorker.class);
 
@@ -31,7 +31,7 @@ public abstract class KryoWorker<T, S> implements WorkerEndpoint<T, S>, WorkerCo
 	
 	@Override
 	public String getWorkerParameters() throws Exception {
-		Master masterEndpoint = getMasterEndpoint().newInstance();
+		MasterEndpoint masterEndpoint = getMasterEndpoint().newInstance();
 		String prefix = masterEndpoint.getQueueName();
 		String hostname = Environment.getPrefixed(prefix,
 				Environment.KRYO_SOCKET_HOST);

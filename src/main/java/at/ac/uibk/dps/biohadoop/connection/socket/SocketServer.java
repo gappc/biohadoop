@@ -6,10 +6,10 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
-import at.ac.uibk.dps.biohadoop.endpoint.Master;
+import at.ac.uibk.dps.biohadoop.connection.MasterLifecycle;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 
-public abstract class SocketServer implements MasterConnection, Master {
+public abstract class SocketServer implements MasterLifecycle, MasterEndpoint {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SocketServer.class);

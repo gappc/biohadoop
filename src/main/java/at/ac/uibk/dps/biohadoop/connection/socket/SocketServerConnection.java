@@ -13,7 +13,7 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.endpoint.Master;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.torename.HostInfo;
 
@@ -22,14 +22,14 @@ public class SocketServerConnection implements Runnable {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SocketServerConnection.class);
 
-	private final Master master;
+	private final MasterEndpoint master;
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();
 	private final List<Future<Integer>> futures = new ArrayList<>();
 
 	private volatile boolean stop;
 
-	public SocketServerConnection(Master master) {
+	public SocketServerConnection(MasterEndpoint master) {
 		this.master = master;
 	}
 

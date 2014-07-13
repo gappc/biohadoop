@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.connection.MessageType;
-import at.ac.uibk.dps.biohadoop.connection.WorkerConnection;
+import at.ac.uibk.dps.biohadoop.connection.WorkerParameter;
 import at.ac.uibk.dps.biohadoop.endpoint.WorkerEndpoint;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.queue.Task;
@@ -27,7 +27,7 @@ import at.ac.uibk.dps.biohadoop.queue.Task;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public abstract class WebSocketWorker<T, S> implements WorkerEndpoint<T, S>,
-		WorkerConnection {
+		WorkerParameter {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WebSocketWorker.class);

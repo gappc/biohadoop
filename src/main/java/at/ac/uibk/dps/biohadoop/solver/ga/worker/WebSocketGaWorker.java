@@ -5,7 +5,7 @@ import javax.websocket.ClientEndpoint;
 import at.ac.uibk.dps.biohadoop.connection.websocket.WebSocketDecoder;
 import at.ac.uibk.dps.biohadoop.connection.websocket.WebSocketEncoder;
 import at.ac.uibk.dps.biohadoop.connectionworker.WebSocketWorker;
-import at.ac.uibk.dps.biohadoop.endpoint.Master;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.GaFitness;
 import at.ac.uibk.dps.biohadoop.solver.ga.master.websocket.GaWebSocket;
 
@@ -15,7 +15,7 @@ public class WebSocketGaWorker extends WebSocketWorker<int[], Double> {
 	private double[][] distances;
 
 	@Override
-	public Class<? extends Master> getMasterEndpoint() {
+	public Class<? extends MasterEndpoint> getMasterEndpoint() {
 		return GaWebSocket.class;
 	}
 	

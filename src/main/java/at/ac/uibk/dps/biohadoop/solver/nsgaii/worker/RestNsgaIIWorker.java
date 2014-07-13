@@ -4,14 +4,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.connectionworker.RestWorker;
-import at.ac.uibk.dps.biohadoop.endpoint.Master;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.algorithm.Functions;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIIRest;
 
 public class RestNsgaIIWorker extends RestWorker<double[], double[]> {
 
 	@Override
-	public Class<? extends Master> getMasterEndpoint() {
+	public Class<? extends MasterEndpoint> getMasterEndpoint() {
 		return NsgaIIRest.class;
 	}
 

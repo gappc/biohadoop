@@ -9,13 +9,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.connection.ConnectionConfiguration;
-import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
+import at.ac.uibk.dps.biohadoop.connection.MasterLifecycle;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointLaunchException;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.worker.LocalNsgaIIWorker;
 
-public class NsgaIILocal implements MasterConnection {
+public class NsgaIILocal implements MasterLifecycle {
 
 	private static final Logger LOG = LoggerFactory.getLogger(NsgaIILocal.class);
 	

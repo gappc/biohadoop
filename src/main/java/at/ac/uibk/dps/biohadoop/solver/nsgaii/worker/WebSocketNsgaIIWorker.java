@@ -5,7 +5,7 @@ import javax.websocket.ClientEndpoint;
 import at.ac.uibk.dps.biohadoop.connection.websocket.WebSocketDecoder;
 import at.ac.uibk.dps.biohadoop.connection.websocket.WebSocketEncoder;
 import at.ac.uibk.dps.biohadoop.connectionworker.WebSocketWorker;
-import at.ac.uibk.dps.biohadoop.endpoint.Master;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.algorithm.Functions;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIIWebSocket;
 
@@ -13,7 +13,7 @@ import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIIWebSocket;
 public class WebSocketNsgaIIWorker extends WebSocketWorker<double[], double[]> {
 
 	@Override
-	public Class<? extends Master> getMasterEndpoint() {
+	public Class<? extends MasterEndpoint> getMasterEndpoint() {
 		return NsgaIIWebSocket.class;
 	}
 	

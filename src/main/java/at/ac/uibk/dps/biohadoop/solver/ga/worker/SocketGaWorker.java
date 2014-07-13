@@ -1,7 +1,7 @@
 package at.ac.uibk.dps.biohadoop.solver.ga.worker;
 
 import at.ac.uibk.dps.biohadoop.connectionworker.SocketWorker;
-import at.ac.uibk.dps.biohadoop.endpoint.Master;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.GaFitness;
 import at.ac.uibk.dps.biohadoop.solver.ga.master.socket.GaSocket;
 
@@ -10,7 +10,7 @@ public class SocketGaWorker extends SocketWorker<int[], Double> {
 	private double[][] distances;
 
 	@Override
-	public Class<? extends Master> getMasterEndpoint() {
+	public Class<? extends MasterEndpoint> getMasterEndpoint() {
 		return GaSocket.class;
 	}
 	

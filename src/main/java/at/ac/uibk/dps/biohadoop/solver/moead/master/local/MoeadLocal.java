@@ -9,13 +9,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.connection.ConnectionConfiguration;
-import at.ac.uibk.dps.biohadoop.connection.MasterConnection;
+import at.ac.uibk.dps.biohadoop.connection.MasterLifecycle;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointLaunchException;
 import at.ac.uibk.dps.biohadoop.solver.moead.worker.LocalMoeadWorker;
 
-public class MoeadLocal implements MasterConnection {
+public class MoeadLocal implements MasterLifecycle {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MoeadLocal.class);
 	
