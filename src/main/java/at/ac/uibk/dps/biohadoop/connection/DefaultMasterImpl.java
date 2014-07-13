@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.endpoint.CommunicationException;
-import at.ac.uibk.dps.biohadoop.endpoint.MasterCommunication;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterSendReceive;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
 import at.ac.uibk.dps.biohadoop.queue.Task;
@@ -20,23 +20,23 @@ public class DefaultMasterImpl {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DefaultMasterImpl.class);
 
-	private final MasterCommunication endpoint;
+	private final MasterSendReceive endpoint;
 	private final Object registrationObject;
 	private final TaskEndpoint<Object, Object> taskEndpoint;
 	private Task<?> currentTask = null;
 
-	private DefaultMasterImpl(MasterCommunication endpoint, String queueName,
+	private DefaultMasterImpl(MasterSendReceive endpoint, String queueName,
 			Object registrationObject) {
 		this.endpoint = endpoint;
 		this.registrationObject = registrationObject;
 		taskEndpoint = new TaskEndpointImpl<>(queueName);
 	}
 
-	public static DefaultMasterImpl newInstance(MasterCommunication endpoint,
+	public static DefaultMasterImpl newInstance(MasterSendReceive endpoint,
 			String queueName, Object registrationObject) {
 		try {
 			Constructor<DefaultMasterImpl> constructor = DefaultMasterImpl.class
-					.getDeclaredConstructor(MasterCommunication.class, String.class,
+					.getDeclaredConstructor(MasterSendReceive.class, String.class,
 							Object.class);
 			return constructor.newInstance(endpoint, queueName,
 					registrationObject);
@@ -50,7 +50,7 @@ public class DefaultMasterImpl {
 		}
 	}
 
-	public MasterCommunication getEndpoint() {
+	public MasterSendReceive getEndpoint() {
 		return endpoint;
 	}
 

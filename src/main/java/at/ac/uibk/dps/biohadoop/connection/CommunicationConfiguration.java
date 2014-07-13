@@ -6,7 +6,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ConnectionConfiguration {
+public class CommunicationConfiguration {
 
 	private final List<Class<? extends MasterLifecycle>> masterEndpoints;
 	// TODO: Check if can be improved; At the moment: key must be String because
@@ -16,7 +16,7 @@ public class ConnectionConfiguration {
 	// java.lang.Class<at.ac.uibk.dps.biohadoop.connection.WorkerConnection>]
 	private final Map<String, Integer> workerEndpoints;
 
-	public ConnectionConfiguration(
+	public CommunicationConfiguration(
 			List<Class<? extends MasterLifecycle>> masterEndpoints,
 			Map<String, Integer> workerEndpoints) {
 		this.masterEndpoints = masterEndpoints;
@@ -24,10 +24,10 @@ public class ConnectionConfiguration {
 	}
 
 	@JsonCreator
-	public static ConnectionConfiguration create(
+	public static CommunicationConfiguration create(
 			@JsonProperty("masterEndpoints") List<Class<? extends MasterLifecycle>> masterEndpoints,
 			@JsonProperty("workerEndpoints") Map<String, Integer> workerEndpoints) {
-		return new ConnectionConfiguration(masterEndpoints, workerEndpoints);
+		return new CommunicationConfiguration(masterEndpoints, workerEndpoints);
 	}
 
 	public List<Class<? extends MasterLifecycle>> getMasterEndpoints() {

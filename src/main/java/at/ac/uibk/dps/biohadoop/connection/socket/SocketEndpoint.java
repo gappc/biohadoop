@@ -15,13 +15,13 @@ import at.ac.uibk.dps.biohadoop.connection.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.connection.MessageType;
 import at.ac.uibk.dps.biohadoop.endpoint.CommunicationException;
-import at.ac.uibk.dps.biohadoop.endpoint.MasterCommunication;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterSendReceive;
 import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
 import at.ac.uibk.dps.biohadoop.torename.Helper;
 
-public class SocketEndpoint implements Callable<Integer>, MasterCommunication {
+public class SocketEndpoint implements Callable<Integer>, MasterSendReceive {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SocketEndpoint.class);

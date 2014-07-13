@@ -17,7 +17,7 @@ import at.ac.uibk.dps.biohadoop.connection.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.connection.MasterLifecycle;
 import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.endpoint.CommunicationException;
-import at.ac.uibk.dps.biohadoop.endpoint.MasterCommunication;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterSendReceive;
 import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
@@ -28,7 +28,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Produces(MediaType.APPLICATION_JSON)
-public abstract class RestResource<T, S> implements MasterCommunication, MasterLifecycle,
+public abstract class RestResource<T, S> implements MasterSendReceive, MasterLifecycle,
 		MasterEndpoint {
 
 	private static final Logger LOG = LoggerFactory

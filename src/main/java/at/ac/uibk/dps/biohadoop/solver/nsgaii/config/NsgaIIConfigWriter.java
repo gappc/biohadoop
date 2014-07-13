@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.config.AlgorithmConfiguration;
-import at.ac.uibk.dps.biohadoop.connection.ConnectionConfiguration;
+import at.ac.uibk.dps.biohadoop.connection.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.connection.MasterLifecycle;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.handler.HandlerConfiguration;
@@ -85,15 +85,15 @@ public class NsgaIIConfigWriter {
 				"/biohadoop/conf/");
 		SolverConfiguration solverConfig = buildSolverConfig("MOEAD-LOCAL-1",
 				local);
-		ConnectionConfiguration connectionConfiguration = buildConnectionConfiguration();
+		CommunicationConfiguration communicationConfiguration = buildCommunicationConfiguration();
 		ZooKeeperConfiguration globalDistributionConfiguration = buildGlobalDistributionConfig(local);
 
 		return new BiohadoopConfiguration(version, includePaths, Arrays.asList(
 				solverConfig, solverConfig, solverConfig, solverConfig),
-				connectionConfiguration, globalDistributionConfiguration);
+				communicationConfiguration, globalDistributionConfiguration);
 	}
 
-	private static ConnectionConfiguration buildConnectionConfiguration() {
+	private static CommunicationConfiguration buildCommunicationConfiguration() {
 		List<Class<? extends MasterLifecycle>> masterEndpoints = new ArrayList<>();
 		masterEndpoints.add(NsgaIISocket.class);
 		masterEndpoints.add(NsgaIIWebSocket.class);
@@ -103,7 +103,7 @@ public class NsgaIIConfigWriter {
 		Map<String, Integer> workerEndpoints = new HashMap<>();
 		workerEndpoints.put(SocketNsgaIIWorker.class.getCanonicalName(), 3);
 
-		return new ConnectionConfiguration(masterEndpoints, workerEndpoints);
+		return new CommunicationConfiguration(masterEndpoints, workerEndpoints);
 	}
 
 	private static SolverConfiguration buildSolverConfig(String name,

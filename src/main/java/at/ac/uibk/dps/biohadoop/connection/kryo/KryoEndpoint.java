@@ -1,13 +1,13 @@
 package at.ac.uibk.dps.biohadoop.connection.kryo;
 
 import at.ac.uibk.dps.biohadoop.connection.Message;
-import at.ac.uibk.dps.biohadoop.endpoint.MasterCommunication;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterSendReceive;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
 
 import com.esotericsoftware.kryonet.Connection;
 
-public class KryoEndpoint implements MasterCommunication {
+public class KryoEndpoint implements MasterSendReceive {
 
 	private Message<?> inputMessage;
 	private Connection connection;

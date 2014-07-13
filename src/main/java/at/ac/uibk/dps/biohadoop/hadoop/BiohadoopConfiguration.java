@@ -2,7 +2,7 @@ package at.ac.uibk.dps.biohadoop.hadoop;
 
 import java.util.List;
 
-import at.ac.uibk.dps.biohadoop.connection.ConnectionConfiguration;
+import at.ac.uibk.dps.biohadoop.connection.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.service.distribution.ZooKeeperConfiguration;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverConfiguration;
 
@@ -14,18 +14,18 @@ public class BiohadoopConfiguration {
 	private final String version;
 	private final List<String> includePaths;
 	private final List<SolverConfiguration> solverConfiguration;
-	private final ConnectionConfiguration connectionConfiguration;
+	private final CommunicationConfiguration communicationConfiguration;
 	private final ZooKeeperConfiguration zooKeeperConfiguration;
 
 	public BiohadoopConfiguration(String version, List<String> includePaths,
 			List<SolverConfiguration> solverConfiguration,
-			ConnectionConfiguration connectionConfiguration,
+			CommunicationConfiguration communicationConfiguration,
 			ZooKeeperConfiguration zooKeeperConfiguration) {
 		super();
 		this.version = version;
 		this.includePaths = includePaths;
 		this.solverConfiguration = solverConfiguration;
-		this.connectionConfiguration = connectionConfiguration;
+		this.communicationConfiguration = communicationConfiguration;
 		this.zooKeeperConfiguration = zooKeeperConfiguration;
 	}
 
@@ -34,10 +34,10 @@ public class BiohadoopConfiguration {
 			@JsonProperty("version") String version,
 			@JsonProperty("includePaths") List<String> includePaths,
 			@JsonProperty("solverConfiguration") List<SolverConfiguration> solverConfiguration,
-			@JsonProperty("connectionConfiguration") ConnectionConfiguration connectionConfiguration,
+			@JsonProperty("communicationConfiguration") CommunicationConfiguration communicationConfiguration,
 			@JsonProperty("zooKeeperConfiguration") ZooKeeperConfiguration zooKeeperConfiguration) {
 		return new BiohadoopConfiguration(version, includePaths,
-				solverConfiguration, connectionConfiguration,
+				solverConfiguration, communicationConfiguration,
 				zooKeeperConfiguration);
 	}
 
@@ -53,8 +53,8 @@ public class BiohadoopConfiguration {
 		return solverConfiguration;
 	}
 
-	public ConnectionConfiguration getConnectionConfiguration() {
-		return connectionConfiguration;
+	public CommunicationConfiguration getCommunicationConfiguration() {
+		return communicationConfiguration;
 	}
 
 	public ZooKeeperConfiguration getZooKeeperConfiguration() {

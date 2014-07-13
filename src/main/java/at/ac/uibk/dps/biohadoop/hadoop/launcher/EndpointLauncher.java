@@ -6,7 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.connection.ConnectionConfiguration;
+import at.ac.uibk.dps.biohadoop.connection.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.connection.MasterLifecycle;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
@@ -18,18 +18,18 @@ public class EndpointLauncher {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(EndpointLauncher.class);
 
-	private final ConnectionConfiguration connectionConfiguration;
+	private final CommunicationConfiguration communicationConfiguration;
 	private List<MasterLifecycle> masterConnections = new ArrayList<>();
 	private UndertowServer undertowServer;
 
 	public EndpointLauncher(BiohadoopConfiguration config) {
-		connectionConfiguration = config.getConnectionConfiguration();
+		communicationConfiguration = config.getCommunicationConfiguration();
 	}
 
 	public void startMasterEndpoints() throws EndpointLaunchException {
 		try {
 			LOG.info("Configuring master endpoints");
-			for (Class<? extends MasterLifecycle> endpointClass : connectionConfiguration
+			for (Class<? extends MasterLifecycle> endpointClass : communicationConfiguration
 					.getMasterEndpoints()) {
 				LOG.debug("Configuring master endpoint {}", endpointClass);
 				MasterLifecycle masterConnection = endpointClass.newInstance();

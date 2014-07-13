@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.connection.ConnectionConfiguration;
+import at.ac.uibk.dps.biohadoop.connection.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.connection.MasterLifecycle;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
@@ -27,8 +27,8 @@ public class GaLocal implements MasterLifecycle {
 	@Override
 	public void configure() {
 		BiohadoopConfiguration biohadoopConfiguration = Environment.getBiohadoopConfiguration();
-		ConnectionConfiguration connectionConfiguration = biohadoopConfiguration.getConnectionConfiguration();
-		Integer workerCount = connectionConfiguration.getWorkerEndpoints().get(workerClass);
+		CommunicationConfiguration communicationConfiguration = biohadoopConfiguration.getCommunicationConfiguration();
+		Integer workerCount = communicationConfiguration.getWorkerEndpoints().get(workerClass);
 		if (workerCount != null) {
 			for (int i = 0; i < workerCount; i++) {
 				localGaWorkers.add(new LocalGaWorker());

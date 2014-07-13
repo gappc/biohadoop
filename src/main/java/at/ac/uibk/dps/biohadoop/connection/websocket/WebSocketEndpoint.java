@@ -17,7 +17,7 @@ import at.ac.uibk.dps.biohadoop.connection.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.connection.Message;
 import at.ac.uibk.dps.biohadoop.connection.MessageType;
 import at.ac.uibk.dps.biohadoop.endpoint.CommunicationException;
-import at.ac.uibk.dps.biohadoop.endpoint.MasterCommunication;
+import at.ac.uibk.dps.biohadoop.endpoint.MasterSendReceive;
 import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.endpoint.ReceiveException;
 import at.ac.uibk.dps.biohadoop.endpoint.SendException;
@@ -28,7 +28,7 @@ import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.server.deployment.DeployingClasses;
 import at.ac.uibk.dps.biohadoop.torename.Helper;
 
-public abstract class WebSocketEndpoint implements MasterCommunication, MasterLifecycle,
+public abstract class WebSocketEndpoint implements MasterSendReceive, MasterLifecycle,
 		MasterEndpoint {
 
 	private static final Logger LOG = LoggerFactory

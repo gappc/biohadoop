@@ -27,7 +27,7 @@ import org.apache.hadoop.yarn.util.Records;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.connection.ConnectionConfiguration;
+import at.ac.uibk.dps.biohadoop.connection.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.connection.WorkerParameter;
 import at.ac.uibk.dps.biohadoop.connectionworker.WorkerStarter;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
@@ -178,10 +178,10 @@ public class WorkerLauncher {
 
 	private static List<String> getWorkerList(BiohadoopConfiguration config) {
 		List<String> workerList = new ArrayList<>();
-		ConnectionConfiguration connectionConfiguration = config
-				.getConnectionConfiguration();
-		for (String key : connectionConfiguration.getWorkerEndpoints().keySet()) {
-			int value = connectionConfiguration.getWorkerEndpoints().get(key);
+		CommunicationConfiguration communicationConfiguration = config
+				.getCommunicationConfiguration();
+		for (String key : communicationConfiguration.getWorkerEndpoints().keySet()) {
+			int value = communicationConfiguration.getWorkerEndpoints().get(key);
 			for (int i = 0; i < value; i++) {
 				workerList.add(key);
 				LOG.info("Worker {} added", key);
