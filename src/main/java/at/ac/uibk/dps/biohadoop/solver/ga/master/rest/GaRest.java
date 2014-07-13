@@ -4,8 +4,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import at.ac.uibk.dps.biohadoop.connection.Message;
-import at.ac.uibk.dps.biohadoop.connection.rest.RestResource;
+import at.ac.uibk.dps.biohadoop.communication.Message;
+import at.ac.uibk.dps.biohadoop.communication.master.rest.RestResource;
 import at.ac.uibk.dps.biohadoop.solver.ga.DistancesGlobal;
 import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.Ga;
 

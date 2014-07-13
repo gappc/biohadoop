@@ -6,8 +6,8 @@ import javax.ws.rs.core.MediaType;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import at.ac.uibk.dps.biohadoop.connection.Message;
-import at.ac.uibk.dps.biohadoop.connection.rest.RestResource;
+import at.ac.uibk.dps.biohadoop.communication.Message;
+import at.ac.uibk.dps.biohadoop.communication.master.rest.RestResource;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.algorithm.NsgaII;
 
 @Path("/nsgaii")

@@ -1,7 +1,7 @@
 package at.ac.uibk.dps.biohadoop.solver.ga.worker;
 
-import at.ac.uibk.dps.biohadoop.connectionworker.KryoWorker;
-import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.worker.KryoWorker;
 import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.GaFitness;
 import at.ac.uibk.dps.biohadoop.solver.ga.master.kryo.GaKryo;
 

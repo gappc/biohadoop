@@ -1,8 +1,8 @@
 package at.ac.uibk.dps.biohadoop.solver.ga.worker;
 
-import at.ac.uibk.dps.biohadoop.connection.Message;
-import at.ac.uibk.dps.biohadoop.connectionworker.RestWorker;
-import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.Message;
+import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.worker.RestWorker;
 import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.GaFitness;
 import at.ac.uibk.dps.biohadoop.solver.ga.master.rest.GaRest;
 

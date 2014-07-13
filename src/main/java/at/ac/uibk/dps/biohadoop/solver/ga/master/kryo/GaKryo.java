@@ -1,6 +1,6 @@
 package at.ac.uibk.dps.biohadoop.solver.ga.master.kryo;
 
-import at.ac.uibk.dps.biohadoop.connection.kryo.KryoServer;
+import at.ac.uibk.dps.biohadoop.communication.master.kryo.KryoServer;
 import at.ac.uibk.dps.biohadoop.solver.ga.DistancesGlobal;
 import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.Ga;
 

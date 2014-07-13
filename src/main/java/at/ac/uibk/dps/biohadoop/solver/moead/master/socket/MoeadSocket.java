@@ -1,6 +1,6 @@
 package at.ac.uibk.dps.biohadoop.solver.moead.master.socket;
 
-import at.ac.uibk.dps.biohadoop.connection.socket.SocketServer;
+import at.ac.uibk.dps.biohadoop.communication.master.socket.SocketServer;
 import at.ac.uibk.dps.biohadoop.solver.moead.algorithm.Moead;
 
 public class MoeadSocket extends SocketServer {

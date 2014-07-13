@@ -2,9 +2,9 @@ package at.ac.uibk.dps.biohadoop.solver.moead.worker;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import at.ac.uibk.dps.biohadoop.connection.Message;
-import at.ac.uibk.dps.biohadoop.connectionworker.RestWorker;
-import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.Message;
+import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.worker.RestWorker;
 import at.ac.uibk.dps.biohadoop.solver.moead.algorithm.Functions;
 import at.ac.uibk.dps.biohadoop.solver.moead.master.MoeadRest;
 

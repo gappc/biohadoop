@@ -1,7 +1,7 @@
 package at.ac.uibk.dps.biohadoop.solver.moead.worker;
 
-import at.ac.uibk.dps.biohadoop.connectionworker.KryoWorker;
-import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.worker.KryoWorker;
 import at.ac.uibk.dps.biohadoop.solver.moead.algorithm.Functions;
 import at.ac.uibk.dps.biohadoop.solver.moead.master.MoeadKryo;
 

@@ -2,7 +2,7 @@ package at.ac.uibk.dps.biohadoop.hadoop;
 
 import java.util.List;
 
-import at.ac.uibk.dps.biohadoop.connection.CommunicationConfiguration;
+import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.service.distribution.ZooKeeperConfiguration;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverConfiguration;
 

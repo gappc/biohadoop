@@ -2,10 +2,10 @@ package at.ac.uibk.dps.biohadoop.solver.moead.worker;
 
 import javax.websocket.ClientEndpoint;
 
-import at.ac.uibk.dps.biohadoop.connection.websocket.WebSocketDecoder;
-import at.ac.uibk.dps.biohadoop.connection.websocket.WebSocketEncoder;
-import at.ac.uibk.dps.biohadoop.connectionworker.WebSocketWorker;
-import at.ac.uibk.dps.biohadoop.endpoint.MasterEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketDecoder;
+import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketEncoder;
+import at.ac.uibk.dps.biohadoop.communication.worker.WebSocketWorker;
 import at.ac.uibk.dps.biohadoop.solver.moead.algorithm.Functions;
 import at.ac.uibk.dps.biohadoop.solver.moead.master.MoeadWebSocket;
 
