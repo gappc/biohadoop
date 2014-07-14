@@ -15,7 +15,7 @@ import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.queue.Task;
-import at.ac.uibk.dps.biohadoop.torename.Helper;
+import at.ac.uibk.dps.biohadoop.torename.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.torename.PerformanceLogger;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -25,7 +25,7 @@ public abstract class RestWorker<T, S> implements WorkerEndpoint<T, S>,
 		WorkerParameter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RestWorker.class);
-	private static final String CLASSNAME = Helper
+	private static final String CLASSNAME = ClassnameProvider
 			.getClassname(RestWorker.class);
 
 	private final ObjectMapper objectMapper = new ObjectMapper();

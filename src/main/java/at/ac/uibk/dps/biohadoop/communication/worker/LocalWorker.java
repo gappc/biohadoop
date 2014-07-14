@@ -10,7 +10,7 @@ import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
-import at.ac.uibk.dps.biohadoop.torename.Helper;
+import at.ac.uibk.dps.biohadoop.torename.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.torename.PerformanceLogger;
 
 public abstract class LocalWorker<T, S> implements Callable<Integer>,
@@ -18,7 +18,7 @@ public abstract class LocalWorker<T, S> implements Callable<Integer>,
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(LocalWorker.class);
-	private static final String CLASSNAME = Helper
+	private static final String CLASSNAME = ClassnameProvider
 			.getClassname(LocalWorker.class);
 
 	private final AtomicBoolean stop = new AtomicBoolean(false);

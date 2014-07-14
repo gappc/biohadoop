@@ -15,7 +15,7 @@ import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.queue.Task;
-import at.ac.uibk.dps.biohadoop.torename.Helper;
+import at.ac.uibk.dps.biohadoop.torename.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.torename.PerformanceLogger;
 
 public abstract class SocketWorker<T, S> implements WorkerEndpoint<T, S>,
@@ -24,7 +24,7 @@ public abstract class SocketWorker<T, S> implements WorkerEndpoint<T, S>,
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SocketWorker.class);
 
-	private static String className = Helper.getClassname(SocketWorker.class);
+	private static String className = ClassnameProvider.getClassname(SocketWorker.class);
 	private int logSteps = 1000;
 
 	@Override

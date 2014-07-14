@@ -10,7 +10,7 @@ import at.ac.uibk.dps.biohadoop.algorithm.implementations.nsgaii.algorithm.NsgaI
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
-import at.ac.uibk.dps.biohadoop.torename.Helper;
+import at.ac.uibk.dps.biohadoop.torename.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.torename.PerformanceLogger;
 
 public class LocalNsgaIIWorker implements Callable<Integer> {
@@ -18,7 +18,7 @@ public class LocalNsgaIIWorker implements Callable<Integer> {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(LocalNsgaIIWorker.class);
 
-	private final String className = Helper
+	private final String className = ClassnameProvider
 			.getClassname(LocalNsgaIIWorker.class);
 
 	private Boolean stop = false;

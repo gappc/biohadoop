@@ -19,14 +19,14 @@ import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterSendReceive;
 import at.ac.uibk.dps.biohadoop.communication.master.ReceiveException;
 import at.ac.uibk.dps.biohadoop.communication.master.SendException;
-import at.ac.uibk.dps.biohadoop.torename.Helper;
+import at.ac.uibk.dps.biohadoop.torename.ClassnameProvider;
 
 public class SocketEndpoint implements Callable<Integer>, MasterSendReceive {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SocketEndpoint.class);
 
-	private final String className = Helper.getClassname(SocketEndpoint.class);
+	private final String className = ClassnameProvider.getClassname(SocketEndpoint.class);
 	private final Socket socket;
 	private final MasterEndpoint master;
 

@@ -14,7 +14,7 @@ import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLauncher;
 import at.ac.uibk.dps.biohadoop.queue.TaskQueueService;
 import at.ac.uibk.dps.biohadoop.solver.SolverId;
 import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;
-import at.ac.uibk.dps.biohadoop.torename.Helper;
+import at.ac.uibk.dps.biohadoop.torename.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.torename.HostInfo;
 
 public class BiohadoopApplicationMaster {
@@ -22,7 +22,7 @@ public class BiohadoopApplicationMaster {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(BiohadoopApplicationMaster.class);
 
-	private static final String CLASSNAME = Helper
+	private static final String CLASSNAME = ClassnameProvider
 			.getClassname(BiohadoopApplicationMaster.class);
 
 	private YarnConfiguration yarnConfiguration = new YarnConfiguration();

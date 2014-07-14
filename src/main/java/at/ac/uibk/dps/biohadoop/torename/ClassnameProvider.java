@@ -1,8 +1,8 @@
 package at.ac.uibk.dps.biohadoop.torename;
 
-public class Helper {
+public class ClassnameProvider {
 
-	private Helper() {
+	private ClassnameProvider() {
 	}
 	
 	public static String getClassname(Class<?> clazz) {
