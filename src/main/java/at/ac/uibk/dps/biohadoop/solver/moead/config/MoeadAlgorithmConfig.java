@@ -1,6 +1,6 @@
 package at.ac.uibk.dps.biohadoop.solver.moead.config;
 
-import at.ac.uibk.dps.biohadoop.config.AlgorithmConfiguration;
+import at.ac.uibk.dps.biohadoop.algorithm.AlgorithmConfiguration;
 
 public class MoeadAlgorithmConfig implements AlgorithmConfiguration {
 

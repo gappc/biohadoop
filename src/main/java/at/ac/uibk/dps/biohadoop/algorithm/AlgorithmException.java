@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.config;
+package at.ac.uibk.dps.biohadoop.algorithm;
 
 public class AlgorithmException extends Exception {
 

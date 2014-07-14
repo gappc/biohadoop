@@ -2,8 +2,8 @@ package at.ac.uibk.dps.biohadoop.service.solver;
 
 import java.util.List;
 
-import at.ac.uibk.dps.biohadoop.config.Algorithm;
-import at.ac.uibk.dps.biohadoop.config.AlgorithmConfiguration;
+import at.ac.uibk.dps.biohadoop.algorithm.Algorithm;
+import at.ac.uibk.dps.biohadoop.algorithm.AlgorithmConfiguration;
 import at.ac.uibk.dps.biohadoop.handler.HandlerConfiguration;
 
 import com.fasterxml.jackson.annotation.JsonCreator;

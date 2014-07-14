@@ -9,8 +9,8 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.config.Algorithm;
-import at.ac.uibk.dps.biohadoop.config.AlgorithmException;
+import at.ac.uibk.dps.biohadoop.algorithm.Algorithm;
+import at.ac.uibk.dps.biohadoop.algorithm.AlgorithmException;
 import at.ac.uibk.dps.biohadoop.datastore.DataClient;
 import at.ac.uibk.dps.biohadoop.datastore.DataClientImpl;
 import at.ac.uibk.dps.biohadoop.datastore.DataOptions;

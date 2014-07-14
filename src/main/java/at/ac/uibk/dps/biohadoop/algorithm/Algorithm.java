@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.config;
+package at.ac.uibk.dps.biohadoop.algorithm;
 
 import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
 

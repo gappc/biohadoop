@@ -1,6 +1,6 @@
 package at.ac.uibk.dps.biohadoop.solver.nsgaii.config;
 
-import at.ac.uibk.dps.biohadoop.config.AlgorithmConfiguration;
+import at.ac.uibk.dps.biohadoop.algorithm.AlgorithmConfiguration;
 
 public class NsgaIIAlgorithmConfig implements AlgorithmConfiguration {
 

@@ -11,7 +11,7 @@ import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.config.Algorithm;
+import at.ac.uibk.dps.biohadoop.algorithm.Algorithm;
 import at.ac.uibk.dps.biohadoop.handler.distribution.DistributionException;
 import at.ac.uibk.dps.biohadoop.handler.distribution.ZooKeeperConfiguration;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverConfiguration;
