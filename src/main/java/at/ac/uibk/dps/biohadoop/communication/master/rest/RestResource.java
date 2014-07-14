@@ -22,7 +22,7 @@ import at.ac.uibk.dps.biohadoop.communication.master.MasterSendReceive;
 import at.ac.uibk.dps.biohadoop.communication.master.ReceiveException;
 import at.ac.uibk.dps.biohadoop.communication.master.SendException;
 import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
-import at.ac.uibk.dps.biohadoop.server.deployment.DeployingClasses;
+import at.ac.uibk.dps.biohadoop.webserver.deployment.DeployingClasses;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

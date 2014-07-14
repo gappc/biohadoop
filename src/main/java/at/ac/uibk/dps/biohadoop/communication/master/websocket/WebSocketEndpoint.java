@@ -25,8 +25,8 @@ import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
-import at.ac.uibk.dps.biohadoop.server.deployment.DeployingClasses;
 import at.ac.uibk.dps.biohadoop.torename.Helper;
+import at.ac.uibk.dps.biohadoop.webserver.deployment.DeployingClasses;
 
 public abstract class WebSocketEndpoint implements MasterSendReceive, MasterLifecycle,
 		MasterEndpoint {
