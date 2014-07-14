@@ -4,12 +4,12 @@
   "solverConfiguration" : [ {
     "name" : "GA-LOCAL-1",
     "algorithmConfiguration" : {
-      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.solver.ga.config.GaAlgorithmConfig",
+      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.config.GaAlgorithmConfig",
       "dataFile" : "/sdb/studium/master-thesis/code/git/masterthesis/data/att48.tsp",
       "populationSize" : 10,
       "maxIterations" : 10000
     },
-    "algorithm" : "at.ac.uibk.dps.biohadoop.solver.ga.algorithm.Ga",
+    "algorithm" : "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.algorithm.Ga",
     "handlerConfigurations" : [ {
       "@handlerConfigurationClass" : "at.ac.uibk.dps.biohadoop.handler.persistence.file.FileSaveConfiguration",
       "handler" : "at.ac.uibk.dps.biohadoop.handler.persistence.file.FileSaveHandler",
@@ -23,19 +23,19 @@
     }, {
       "@handlerConfigurationClass" : "at.ac.uibk.dps.biohadoop.handler.distribution.DistributionConfiguration",
       "handler" : "at.ac.uibk.dps.biohadoop.handler.distribution.DistributionHandler",
-      "dataMerger" : "at.ac.uibk.dps.biohadoop.solver.ga.distribution.GaSimpleMerger",
-      "remoteResultGetter" : "at.ac.uibk.dps.biohadoop.solver.ga.distribution.GaBestResultGetter",
+      "dataMerger" : "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.distribution.GaSimpleMerger",
+      "remoteResultGetter" : "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.distribution.GaBestResultGetter",
       "mergeAfterIterations" : 2000
     } ]
   }, {
     "name" : "GA-LOCAL-1",
     "algorithmConfiguration" : {
-      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.solver.ga.config.GaAlgorithmConfig",
+      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.config.GaAlgorithmConfig",
       "dataFile" : "/sdb/studium/master-thesis/code/git/masterthesis/data/att48.tsp",
       "populationSize" : 10,
       "maxIterations" : 10000
     },
-    "algorithm" : "at.ac.uibk.dps.biohadoop.solver.ga.algorithm.Ga",
+    "algorithm" : "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.algorithm.Ga",
     "handlerConfigurations" : [ {
       "@handlerConfigurationClass" : "at.ac.uibk.dps.biohadoop.handler.persistence.file.FileSaveConfiguration",
       "handler" : "at.ac.uibk.dps.biohadoop.handler.persistence.file.FileSaveHandler",
@@ -49,19 +49,19 @@
     }, {
       "@handlerConfigurationClass" : "at.ac.uibk.dps.biohadoop.handler.distribution.DistributionConfiguration",
       "handler" : "at.ac.uibk.dps.biohadoop.handler.distribution.DistributionHandler",
-      "dataMerger" : "at.ac.uibk.dps.biohadoop.solver.ga.distribution.GaSimpleMerger",
-      "remoteResultGetter" : "at.ac.uibk.dps.biohadoop.solver.ga.distribution.GaBestResultGetter",
+      "dataMerger" : "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.distribution.GaSimpleMerger",
+      "remoteResultGetter" : "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.distribution.GaBestResultGetter",
       "mergeAfterIterations" : 2000
     } ]
   }, {
     "name" : "GA-LOCAL-1",
     "algorithmConfiguration" : {
-      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.solver.ga.config.GaAlgorithmConfig",
+      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.config.GaAlgorithmConfig",
       "dataFile" : "/sdb/studium/master-thesis/code/git/masterthesis/data/att48.tsp",
       "populationSize" : 10,
       "maxIterations" : 10000
     },
-    "algorithm" : "at.ac.uibk.dps.biohadoop.solver.ga.algorithm.Ga",
+    "algorithm" : "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.algorithm.Ga",
     "handlerConfigurations" : [ {
       "@handlerConfigurationClass" : "at.ac.uibk.dps.biohadoop.handler.persistence.file.FileSaveConfiguration",
       "handler" : "at.ac.uibk.dps.biohadoop.handler.persistence.file.FileSaveHandler",
@@ -75,19 +75,19 @@
     }, {
       "@handlerConfigurationClass" : "at.ac.uibk.dps.biohadoop.handler.distribution.DistributionConfiguration",
       "handler" : "at.ac.uibk.dps.biohadoop.handler.distribution.DistributionHandler",
-      "dataMerger" : "at.ac.uibk.dps.biohadoop.solver.ga.distribution.GaSimpleMerger",
-      "remoteResultGetter" : "at.ac.uibk.dps.biohadoop.solver.ga.distribution.GaBestResultGetter",
+      "dataMerger" : "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.distribution.GaSimpleMerger",
+      "remoteResultGetter" : "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.distribution.GaBestResultGetter",
       "mergeAfterIterations" : 2000
     } ]
   }, {
     "name" : "GA-LOCAL-1",
     "algorithmConfiguration" : {
-      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.solver.ga.config.GaAlgorithmConfig",
+      "@algorithmConfigClass" : "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.config.GaAlgorithmConfig",
       "dataFile" : "/sdb/studium/master-thesis/code/git/masterthesis/data/att48.tsp",
       "populationSize" : 10,
       "maxIterations" : 10000
     },
-    "algorithm" : "at.ac.uibk.dps.biohadoop.solver.ga.algorithm.Ga",
+    "algorithm" : "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.algorithm.Ga",
     "handlerConfigurations" : [ {
       "@handlerConfigurationClass" : "at.ac.uibk.dps.biohadoop.handler.persistence.file.FileSaveConfiguration",
       "handler" : "at.ac.uibk.dps.biohadoop.handler.persistence.file.FileSaveHandler",
@@ -101,19 +101,19 @@
     }, {
       "@handlerConfigurationClass" : "at.ac.uibk.dps.biohadoop.handler.distribution.DistributionConfiguration",
       "handler" : "at.ac.uibk.dps.biohadoop.handler.distribution.DistributionHandler",
-      "dataMerger" : "at.ac.uibk.dps.biohadoop.solver.ga.distribution.GaSimpleMerger",
-      "remoteResultGetter" : "at.ac.uibk.dps.biohadoop.solver.ga.distribution.GaBestResultGetter",
+      "dataMerger" : "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.distribution.GaSimpleMerger",
+      "remoteResultGetter" : "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.distribution.GaBestResultGetter",
       "mergeAfterIterations" : 2000
     } ]
   } ],
   "communicationConfiguration" : {
-    "masterEndpoints" : [ "at.ac.uibk.dps.biohadoop.solver.ga.communication.master.GaSocket", "at.ac.uibk.dps.biohadoop.solver.ga.communication.master.GaKryo", "at.ac.uibk.dps.biohadoop.solver.ga.communication.master.GaRest", "at.ac.uibk.dps.biohadoop.solver.ga.communication.master.GaWebSocket", "at.ac.uibk.dps.biohadoop.solver.ga.communication.master.GaLocal" ],
+    "masterEndpoints" : [ "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.communication.master.GaSocket", "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.communication.master.GaKryo", "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.communication.master.GaRest", "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.communication.master.GaWebSocket", "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.communication.master.GaLocal" ],
     "workerEndpoints" : {
-      "at.ac.uibk.dps.biohadoop.solver.ga.communication.worker.LocalGaWorker" : 1,
-      "at.ac.uibk.dps.biohadoop.solver.ga.communication.worker.KryoGaWorker" : 1,
-      "at.ac.uibk.dps.biohadoop.solver.ga.communication.worker.WebSocketGaWorker" : 1,
-      "at.ac.uibk.dps.biohadoop.solver.ga.communication.worker.SocketGaWorker" : 3,
-      "at.ac.uibk.dps.biohadoop.solver.ga.communication.worker.RestGaWorker" : 1
+      "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.communication.worker.WebSocketGaWorker" : 1,
+      "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.communication.worker.RestGaWorker" : 1,
+      "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.communication.worker.SocketGaWorker" : 3,
+      "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.communication.worker.LocalGaWorker" : 1,
+      "at.ac.uibk.dps.biohadoop.algorithm.implementations.ga.communication.worker.KryoGaWorker" : 1
     }
   },
   "zooKeeperConfiguration" : {
