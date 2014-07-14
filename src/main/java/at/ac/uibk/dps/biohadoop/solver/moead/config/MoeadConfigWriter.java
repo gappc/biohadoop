@@ -30,7 +30,9 @@ import at.ac.uibk.dps.biohadoop.solver.moead.distribution.MoeadSimpleMerger;
 import at.ac.uibk.dps.biohadoop.solver.moead.master.MoeadKryo;
 import at.ac.uibk.dps.biohadoop.solver.moead.master.MoeadRest;
 import at.ac.uibk.dps.biohadoop.solver.moead.master.MoeadWebSocket;
+import at.ac.uibk.dps.biohadoop.solver.moead.master.local.MoeadLocal;
 import at.ac.uibk.dps.biohadoop.solver.moead.master.socket.MoeadSocket;
+import at.ac.uibk.dps.biohadoop.solver.moead.worker.LocalMoeadWorker;
 import at.ac.uibk.dps.biohadoop.solver.moead.worker.SocketMoeadWorker;
 import at.ac.uibk.dps.biohadoop.solver.moead.worker.WebSocketMoeadWorker;
 
@@ -100,10 +102,12 @@ public class MoeadConfigWriter {
 		masterEndpoints.add(MoeadWebSocket.class);
 		masterEndpoints.add(MoeadRest.class);
 		masterEndpoints.add(MoeadKryo.class);
+		masterEndpoints.add(MoeadLocal.class);
 
 		Map<String, Integer> workerEndpoints = new HashMap<>();
 		workerEndpoints.put(SocketMoeadWorker.class.getCanonicalName(), 3);
 		workerEndpoints.put(WebSocketMoeadWorker.class.getCanonicalName(), 3);
+		workerEndpoints.put(LocalMoeadWorker.class.getCanonicalName(), 1);
 
 		return new CommunicationConfiguration(masterEndpoints, workerEndpoints);
 	}

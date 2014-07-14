@@ -71,6 +71,7 @@ public class DefaultMasterImpl {
 			currentTask = taskEndpoint.getTask();
 			message = new Message<>(MessageType.WORK_INIT_RESPONSE, currentTask);
 		} catch (InterruptedException e) {
+			LOG.debug("Got InterruptedException, stopping work");
 			currentTask = null;
 			message = new Message<>(MessageType.SHUTDOWN, null);
 		}
@@ -88,6 +89,7 @@ public class DefaultMasterImpl {
 			currentTask = taskEndpoint.getTask();
 			message = new Message<>(MessageType.WORK_RESPONSE, currentTask);
 		} catch (InterruptedException e) {
+			LOG.debug("Got InterruptedException, stopping work");
 			currentTask = null;
 			message = new Message<>(MessageType.SHUTDOWN, null);
 		}

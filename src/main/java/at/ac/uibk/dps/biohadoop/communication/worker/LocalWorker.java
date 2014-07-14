@@ -1,53 +1,89 @@
 package at.ac.uibk.dps.biohadoop.communication.worker;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
-import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.Ga;
+import at.ac.uibk.dps.biohadoop.torename.Helper;
 import at.ac.uibk.dps.biohadoop.torename.PerformanceLogger;
 
-
-//TODO: NOT working
-public abstract class LocalWorker<T, S> implements WorkerEndpoint<T, S> {
+public abstract class LocalWorker<T, S> implements Callable<Integer>,
+		WorkerEndpoint<T, S>, WorkerParameter {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(LocalWorker.class);
-	private Boolean stop = false;
+	private static final String CLASSNAME = Helper
+			.getClassname(LocalWorker.class);
+
+	private final AtomicBoolean stop = new AtomicBoolean(false);
+
 	private int logSteps = 1000;
-	public void stop() {
-		synchronized (stop) {
-			stop = true;
-		}
-	}
 
 	@Override
-	public void run(String host, int port) throws Exception {
-//		TODO QUEUENAME
-		TaskEndpoint<T, S> taskEndpoint = new TaskEndpointImpl<>(Ga.GA_QUEUE);
+	public Integer call() {
+		LOG.info("############# {} started ##############", CLASSNAME);
+		MasterEndpoint masterEndpoint;
+		try {
+			masterEndpoint = getMasterEndpoint().newInstance();
+		} catch (InstantiationException | IllegalAccessException e1) {
+			LOG.error("Could not instanciate MasterEndpoint {}",
+					getMasterEndpoint());
+			return 1;
+		}
+
+		TaskEndpoint<T, S> taskEndpoint = new TaskEndpointImpl<>(
+				masterEndpoint.getQueueName());
+		boolean registrationInit = false;
 
 		PerformanceLogger performanceLogger = new PerformanceLogger(
 				System.currentTimeMillis(), 0, logSteps);
-		while (true) {
+		while (!stop.get()) {
 			try {
 				performanceLogger.step(LOG);
 
 				Task<T> task = taskEndpoint.getTask();
 				if (task == null) {
-					LOG.info(
-							"############# {} Worker stopped ###############",
-							LocalWorker.class.getSimpleName());
+					LOG.info("############# {} Worker stopped ###############",
+							CLASSNAME);
 					break;
 				}
-				S fitness = compute(task.getData());
-				Task<S> result = new Task<S>(task.getTaskId(),
-						fitness);
-				taskEndpoint.putResult(result.getTaskId(), result.getData());
+				if (!registrationInit) {
+					doRegistrationInit(masterEndpoint);
+					registrationInit = true;
+				}
+				S data = compute(task.getData());
+				taskEndpoint.putResult(task.getTaskId(), data);
 			} catch (InterruptedException e) {
-				LOG.error("Error while running LocalGaWorker", e);
+				LOG.debug("Got InterruptedException, stopping work");
 			}
 		}
+		return 0;
 	}
+
+	public void stop() {
+		stop.set(true);
+	}
+
+	@Override
+	public String getWorkerParameters() throws Exception {
+		LOG.error("getWorkerParameters");
+		return null;
+	}
+
+	@Override
+	public void run(String host, int port) throws WorkerException {
+		LOG.error("run");
+	}
+
+	private void doRegistrationInit(MasterEndpoint masterEndpoint) {
+		Object registrationObject = masterEndpoint.getRegistrationObject();
+		readRegistrationObject(registrationObject);
+	}
+
 }

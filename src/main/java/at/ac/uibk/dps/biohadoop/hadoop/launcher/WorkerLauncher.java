@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +44,7 @@ public class WorkerLauncher {
 
 	private WorkerLauncher() {
 	}
-	
+
 	public static void launchWorkers(YarnConfiguration yarnConfiguration,
 			BiohadoopConfiguration biohadoopConfig, String configFilename)
 			throws Exception {
@@ -74,6 +75,18 @@ public class WorkerLauncher {
 		capability.setVirtualCores(1);
 
 		List<String> workerList = getWorkerList(biohadoopConfig);
+		List<WorkerParameter> workerParameters = new ArrayList<>();
+		for (Iterator<String> it = workerList.iterator(); it.hasNext();) {
+			String workerName = it.next();
+			WorkerParameter workerParameter = (WorkerParameter) Class.forName(workerName).newInstance();
+			if (workerParameter.getWorkerParameters() == null) {
+				it.remove();
+			}
+			else {
+				workerParameters.add(workerParameter);
+			}
+		}
+
 		final int containerCount = workerList.size();
 
 		LOG.info("Make container requests to ResourceManager");
@@ -103,9 +116,10 @@ public class WorkerLauncher {
 				ContainerLaunchContext ctx = Records
 						.newRecord(ContainerLaunchContext.class);
 
-				WorkerParameter worker = (WorkerParameter) Class.forName(
-						workerList.get(0)).newInstance();
-				String parameters = worker.getWorkerParameters();
+//				WorkerParameter worker = (WorkerParameter) Class.forName(
+//						workerList.get(0)).newInstance();
+//				String parameters = worker.getWorkerParameters();
+				String parameters = workerParameters.get(0).getWorkerParameters();
 
 				String clientCommand = String
 						.format("$JAVA_HOME/bin/java -Xmx128M %s %s %s configFilename 1>%s/stdout 2>%s/stderr",
@@ -180,8 +194,10 @@ public class WorkerLauncher {
 		List<String> workerList = new ArrayList<>();
 		CommunicationConfiguration communicationConfiguration = config
 				.getCommunicationConfiguration();
-		for (String key : communicationConfiguration.getWorkerEndpoints().keySet()) {
-			int value = communicationConfiguration.getWorkerEndpoints().get(key);
+		for (String key : communicationConfiguration.getWorkerEndpoints()
+				.keySet()) {
+			int value = communicationConfiguration.getWorkerEndpoints()
+					.get(key);
 			for (int i = 0; i < value; i++) {
 				workerList.add(key);
 				LOG.info("Worker {} added", key);

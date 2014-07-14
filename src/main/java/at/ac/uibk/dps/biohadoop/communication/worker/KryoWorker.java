@@ -1,5 +1,6 @@
 package at.ac.uibk.dps.biohadoop.communication.worker;
 
+import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
 import org.slf4j.Logger;
@@ -18,7 +19,8 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
 
-public abstract class KryoWorker<T, S> implements WorkerEndpoint<T, S>, WorkerParameter {
+public abstract class KryoWorker<T, S> implements WorkerEndpoint<T, S>,
+		WorkerParameter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(KryoWorker.class);
 
@@ -26,7 +28,7 @@ public abstract class KryoWorker<T, S> implements WorkerEndpoint<T, S>, WorkerPa
 	private int counter = 0;
 	private int logSteps = 1000;
 	private CountDownLatch latch = new CountDownLatch(1);
-	
+
 	@Override
 	public String getWorkerParameters() throws Exception {
 		MasterEndpoint masterEndpoint = getMasterEndpoint().newInstance();
@@ -39,12 +41,17 @@ public abstract class KryoWorker<T, S> implements WorkerEndpoint<T, S>, WorkerPa
 	}
 
 	@Override
-	public void run(String host, int port) throws Exception {
+	public void run(String host, int port) throws WorkerException {
 		Log.set(Log.LEVEL_DEBUG);
-		
+
 		final Client client = new Client(64 * 1024, 64 * 1024);
 		client.start();
-		client.connect(10000, host, port);
+		try {
+			client.connect(10000, host, port);
+		} catch (IOException e) {
+			throw new WorkerException("Could not communicate with " + host + ":" + port,
+					e);
+		}
 
 		Kryo kryo = client.getKryo();
 		KryoObjectRegistration.register(kryo);
@@ -100,7 +107,12 @@ public abstract class KryoWorker<T, S> implements WorkerEndpoint<T, S>, WorkerPa
 			}
 		});
 		register(client);
-		latch.await();
+		try {
+			latch.await();
+		} catch (InterruptedException e) {
+			throw new WorkerException(
+					"Error while waiting for worker to finish", e);
+		}
 	}
 
 	private void register(Client client) {

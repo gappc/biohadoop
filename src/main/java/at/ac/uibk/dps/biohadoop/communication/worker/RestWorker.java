@@ -44,7 +44,7 @@ public abstract class RestWorker<T, S> implements WorkerEndpoint<T, S>,
 	}
 
 	@Override
-	public void run(String host, int port) throws Exception {
+	public void run(String host, int port) throws WorkerException {
 		String path = getPath();
 		if (!path.startsWith("/")) {
 			path = "/" + path;
@@ -52,34 +52,40 @@ public abstract class RestWorker<T, S> implements WorkerEndpoint<T, S>,
 		String url = "http://" + host + ":" + port + "/rs" + path;
 		Client client = ClientBuilder.newClient();
 
-		Message<?> registrationMessage = receiveRegistration(client, url
-				+ "/registration");
-		Object data = registrationMessage.getPayload().getData();
-		readRegistrationObject(data);
+		try {
+			Message<?> registrationMessage = receiveRegistration(client, url
+					+ "/registration");
+			Object data = registrationMessage.getPayload().getData();
+			readRegistrationObject(data);
 
-		Message<T> inputMessage = receive(client, url + "/workinit");
+			Message<T> inputMessage = receive(client, url + "/workinit");
 
-		PerformanceLogger performanceLogger = new PerformanceLogger(
-				System.currentTimeMillis(), 0, logSteps);
-		while (true) {
-			performanceLogger.step(LOG);
+			PerformanceLogger performanceLogger = new PerformanceLogger(
+					System.currentTimeMillis(), 0, logSteps);
+			while (true) {
+				performanceLogger.step(LOG);
 
-			LOG.debug("{} WORK_RESPONSE", CLASSNAME);
+				LOG.debug("{} WORK_RESPONSE", CLASSNAME);
 
-			if (inputMessage.getType() == MessageType.SHUTDOWN) {
-				LOG.info("Got shutdown");
-				break;
+				if (inputMessage.getType() == MessageType.SHUTDOWN) {
+					LOG.info("Got shutdown");
+					break;
+				}
+
+				Task<T> inputTask = inputMessage.getPayload();
+
+				S response = compute((T) inputTask.getData());
+
+				Task<S> responseTask = new Task<S>(inputTask.getTaskId(),
+						response);
+
+				Message<S> message = new Message<S>(MessageType.WORK_REQUEST,
+						responseTask);
+				inputMessage = sendAndReceive(message, client, url + "/work");
 			}
-
-			Task<T> inputTask = inputMessage.getPayload();
-
-			S response = compute((T) inputTask.getData());
-
-			Task<S> responseTask = new Task<S>(inputTask.getTaskId(), response);
-
-			Message<S> message = new Message<S>(MessageType.WORK_REQUEST,
-					responseTask);
-			inputMessage = sendAndReceive(message, client, url + "/work");
+		} catch (IOException e) {
+			throw new WorkerException("Could not communicate with " + host + ":" + port,
+					e);
 		}
 	}
 
@@ -91,8 +97,7 @@ public abstract class RestWorker<T, S> implements WorkerEndpoint<T, S>,
 		return response.readEntity(Message.class);
 	}
 
-	private Message<T> receive(Client client, String url)
-			throws IOException {
+	private Message<T> receive(Client client, String url) throws IOException {
 		Response response = client.target(url)
 				.request(MediaType.APPLICATION_JSON).get();
 		String dataString = response.readEntity(String.class);

@@ -107,8 +107,9 @@
     } ]
   } ],
   "communicationConfiguration" : {
-    "masterEndpoints" : [ "at.ac.uibk.dps.biohadoop.solver.ga.master.socket.GaSocket", "at.ac.uibk.dps.biohadoop.solver.ga.master.kryo.GaKryo", "at.ac.uibk.dps.biohadoop.solver.ga.master.rest.GaRest", "at.ac.uibk.dps.biohadoop.solver.ga.master.websocket.GaWebSocket" ],
+    "masterEndpoints" : [ "at.ac.uibk.dps.biohadoop.solver.ga.master.socket.GaSocket", "at.ac.uibk.dps.biohadoop.solver.ga.master.kryo.GaKryo", "at.ac.uibk.dps.biohadoop.solver.ga.master.rest.GaRest", "at.ac.uibk.dps.biohadoop.solver.ga.master.websocket.GaWebSocket", "at.ac.uibk.dps.biohadoop.solver.ga.master.local.GaLocal" ],
     "workerEndpoints" : {
+      "at.ac.uibk.dps.biohadoop.solver.ga.worker.LocalGaWorker" : 1,
       "at.ac.uibk.dps.biohadoop.solver.ga.worker.WebSocketGaWorker" : 1,
       "at.ac.uibk.dps.biohadoop.solver.ga.worker.RestGaWorker" : 1,
       "at.ac.uibk.dps.biohadoop.solver.ga.worker.SocketGaWorker" : 3,

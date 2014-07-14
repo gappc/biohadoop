@@ -6,6 +6,7 @@ import java.util.concurrent.CountDownLatch;
 
 import javax.websocket.CloseReason;
 import javax.websocket.ContainerProvider;
+import javax.websocket.DeploymentException;
 import javax.websocket.EncodeException;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -35,7 +36,7 @@ public abstract class WebSocketWorker<T, S> implements WorkerEndpoint<T, S>,
 	private int counter = 0;
 	private int logSteps = 1000;
 	private ObjectMapper om = new ObjectMapper();
-	
+
 	public abstract String getPath();
 
 	@Override
@@ -46,7 +47,7 @@ public abstract class WebSocketWorker<T, S> implements WorkerEndpoint<T, S>,
 	}
 
 	@Override
-	public void run(String host, int port) throws Exception {
+	public void run(String host, int port) throws WorkerException {
 		WebSocketContainer container = ContainerProvider
 				.getWebSocketContainer();
 
@@ -55,10 +56,23 @@ public abstract class WebSocketWorker<T, S> implements WorkerEndpoint<T, S>,
 			path = "/" + path;
 		}
 		String url = "ws://" + host + ":" + port + "/websocket" + path;
-		Session session = container.connectToServer(this, URI.create(url));
-		register(session);
 
-		latch.await();
+		try {
+			Session session = container.connectToServer(this, URI.create(url));
+			register(session);
+			latch.await();
+		} catch (DeploymentException e) {
+			throw new WorkerException("Could not deploy WebSocket", e);
+		} catch (IOException e) {
+			throw new WorkerException("Could not communicate with " + host + ":" + port,
+					e);
+		} catch (EncodeException e) {
+			throw new WorkerException("Could not encode data", e);
+		} catch (InterruptedException e) {
+			throw new WorkerException(
+					"Error while waiting for worker to finish", e);
+		}
+
 	}
 
 	private void register(Session session) throws EncodeException, IOException {
@@ -101,8 +115,7 @@ public abstract class WebSocketWorker<T, S> implements WorkerEndpoint<T, S>,
 			LOG.debug("Registration successful for URI {} and sessionId {}",
 					session.getRequestURI(), session.getId());
 
-			Task<?> task = om.convertValue(
-					message.getPayload(), Task.class);
+			Task<?> task = om.convertValue(message.getPayload(), Task.class);
 
 			Object data = task.getData();
 			readRegistrationObject(data);

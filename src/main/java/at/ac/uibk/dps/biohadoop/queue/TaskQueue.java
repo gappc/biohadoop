@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ public class TaskQueue<T, S> implements TaskClient<T, S>, TaskEndpoint<T, S> {
 	private final BlockingQueue<Task<T>> queue = new LinkedBlockingQueue<>();
 	private final Map<TaskId, TaskQueueEntry<T, S>> workingSet = new ConcurrentHashMap<>();
 	private final Map<Thread, Thread> waitingThreads = new ConcurrentHashMap<>();
+	private final AtomicBoolean stop = new AtomicBoolean(false);
 
 	@Override
 	public TaskFuture<S> add(T taskRequest)
@@ -58,6 +60,9 @@ public class TaskQueue<T, S> implements TaskClient<T, S>, TaskEndpoint<T, S> {
 	
 	@Override
 	public Task<T> getTask() throws InterruptedException {
+		if (stop.get()) {
+			Thread.currentThread().interrupt();
+		}
 		waitingThreads.put(Thread.currentThread(), Thread.currentThread());
 		Task<T> task = queue.take();
 		waitingThreads.remove(Thread.currentThread());
@@ -80,6 +85,7 @@ public class TaskQueue<T, S> implements TaskClient<T, S>, TaskEndpoint<T, S> {
 	}
 	
 	public void stopQueue() {
+		stop.set(true);
 		LOG.info("Interrupting all waiting Threads");
 		for (Thread thread : waitingThreads.keySet()) {
 			LOG.debug("Interrupting {}", thread);

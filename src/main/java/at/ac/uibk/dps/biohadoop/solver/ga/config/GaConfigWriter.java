@@ -28,10 +28,12 @@ import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.Ga;
 import at.ac.uibk.dps.biohadoop.solver.ga.distribution.GaBestResultGetter;
 import at.ac.uibk.dps.biohadoop.solver.ga.distribution.GaSimpleMerger;
 import at.ac.uibk.dps.biohadoop.solver.ga.master.kryo.GaKryo;
+import at.ac.uibk.dps.biohadoop.solver.ga.master.local.GaLocal;
 import at.ac.uibk.dps.biohadoop.solver.ga.master.rest.GaRest;
 import at.ac.uibk.dps.biohadoop.solver.ga.master.socket.GaSocket;
 import at.ac.uibk.dps.biohadoop.solver.ga.master.websocket.GaWebSocket;
 import at.ac.uibk.dps.biohadoop.solver.ga.worker.KryoGaWorker;
+import at.ac.uibk.dps.biohadoop.solver.ga.worker.LocalGaWorker;
 import at.ac.uibk.dps.biohadoop.solver.ga.worker.RestGaWorker;
 import at.ac.uibk.dps.biohadoop.solver.ga.worker.SocketGaWorker;
 import at.ac.uibk.dps.biohadoop.solver.ga.worker.WebSocketGaWorker;
@@ -101,12 +103,14 @@ public class GaConfigWriter {
 		masterEndpoints.add(GaKryo.class);
 		masterEndpoints.add(GaRest.class);
 		masterEndpoints.add(GaWebSocket.class);
+		masterEndpoints.add(GaLocal.class);
 
 		Map<String, Integer> workerEndpoints = new HashMap<>();
 		workerEndpoints.put(SocketGaWorker.class.getCanonicalName(), 3);
 		workerEndpoints.put(KryoGaWorker.class.getCanonicalName(), 1);
 		workerEndpoints.put(RestGaWorker.class.getCanonicalName(), 1);
 		workerEndpoints.put(WebSocketGaWorker.class.getCanonicalName(), 1);
+		workerEndpoints.put(LocalGaWorker.class.getCanonicalName(), 1);
 
 		return new CommunicationConfiguration(masterEndpoints, workerEndpoints);
 	}

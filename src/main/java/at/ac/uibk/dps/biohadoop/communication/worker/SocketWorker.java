@@ -18,39 +18,46 @@ import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.torename.Helper;
 import at.ac.uibk.dps.biohadoop.torename.PerformanceLogger;
 
-public abstract class SocketWorker<T, S> implements WorkerEndpoint<T, S>, WorkerParameter {
+public abstract class SocketWorker<T, S> implements WorkerEndpoint<T, S>,
+		WorkerParameter {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SocketWorker.class);
 
 	private static String className = Helper.getClassname(SocketWorker.class);
 	private int logSteps = 1000;
-	
+
 	@Override
 	public String getWorkerParameters() throws Exception {
 		MasterEndpoint masterEndpoint = getMasterEndpoint().newInstance();
 		String prefix = masterEndpoint.getQueueName();
-		String hostname = Environment.getPrefixed(prefix, Environment.SOCKET_HOST);
+		String hostname = Environment.getPrefixed(prefix,
+				Environment.SOCKET_HOST);
 		String port = Environment.getPrefixed(prefix, Environment.SOCKET_PORT);
 		return hostname + " " + port;
 	}
 
-	public void run(String host, int port) throws Exception {
-		Socket clientSocket = new Socket(host, port);
-		ObjectOutputStream os = new ObjectOutputStream(
-				new BufferedOutputStream(clientSocket.getOutputStream()));
-		os.flush();
-		ObjectInputStream is = new ObjectInputStream(new BufferedInputStream(
-				clientSocket.getInputStream()));
+	public void run(String host, int port) throws WorkerException {
+		try {
+			Socket clientSocket = new Socket(host, port);
+			ObjectOutputStream os = new ObjectOutputStream(
+					new BufferedOutputStream(clientSocket.getOutputStream()));
+			os.flush();
+			ObjectInputStream is = new ObjectInputStream(
+					new BufferedInputStream(clientSocket.getInputStream()));
 
-		doRegistration(os, host, port);
-		handleRegistrationResponse(is, os);
-		doWorkInit(os);
-		handleWork(is, os);
+			doRegistration(os, host, port);
+			handleRegistrationResponse(is, os);
+			doWorkInit(os);
+			handleWork(is, os);
 
-		is.close();
-		os.close();
-		clientSocket.close();
+			is.close();
+			os.close();
+			clientSocket.close();
+		} catch (IOException | ClassNotFoundException e) {
+			throw new WorkerException("Could not communicate with " + host + ":" + port,
+					e);
+		}
 	}
 
 	private void doRegistration(ObjectOutputStream os, String hostname, int port)
@@ -63,7 +70,7 @@ public abstract class SocketWorker<T, S> implements WorkerEndpoint<T, S>, Worker
 	}
 
 	private void handleRegistrationResponse(ObjectInputStream is,
-			ObjectOutputStream os) throws ClassNotFoundException, IOException {
+			ObjectOutputStream os) throws IOException, ClassNotFoundException {
 		Message<T> message = receive(is);
 		LOG.info("{} registration successful", className);
 
@@ -100,14 +107,13 @@ public abstract class SocketWorker<T, S> implements WorkerEndpoint<T, S>, Worker
 			}
 
 			Task<T> inputTask = inputMessage.getPayload();
-			
+
 			S response = compute((T) inputTask.getData());
 
-			Task<S> responseTask = new Task<S>(inputTask
-					.getTaskId(), response);
+			Task<S> responseTask = new Task<S>(inputTask.getTaskId(), response);
 
-			Message<S> message = new Message<S>(
-					MessageType.WORK_REQUEST, responseTask);
+			Message<S> message = new Message<S>(MessageType.WORK_REQUEST,
+					responseTask);
 			send(os, message);
 		}
 	}
