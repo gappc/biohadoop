@@ -13,7 +13,6 @@ import at.ac.uibk.dps.biohadoop.hadoop.launcher.WeldLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLauncher;
 import at.ac.uibk.dps.biohadoop.queue.TaskQueueService;
 import at.ac.uibk.dps.biohadoop.solver.SolverId;
-import at.ac.uibk.dps.biohadoop.torename.BiohadoopConfigurationReader;
 import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;
 import at.ac.uibk.dps.biohadoop.torename.Helper;
 import at.ac.uibk.dps.biohadoop.torename.HostInfo;

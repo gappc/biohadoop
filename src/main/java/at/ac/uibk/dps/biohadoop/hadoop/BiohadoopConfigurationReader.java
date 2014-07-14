@@ -1,10 +1,10 @@
-package at.ac.uibk.dps.biohadoop.torename;
+package at.ac.uibk.dps.biohadoop.hadoop;
 
 import java.io.IOException;
 
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 
-import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
+import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
