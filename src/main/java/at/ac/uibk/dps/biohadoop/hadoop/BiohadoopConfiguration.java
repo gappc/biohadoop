@@ -4,7 +4,7 @@ import java.util.List;
 
 import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.handler.distribution.ZooKeeperConfiguration;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverConfiguration;
+import at.ac.uibk.dps.biohadoop.solver.SolverConfiguration;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

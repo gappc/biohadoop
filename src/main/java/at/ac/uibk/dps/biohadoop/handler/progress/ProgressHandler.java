@@ -9,8 +9,8 @@ import at.ac.uibk.dps.biohadoop.datastore.DataOptions;
 import at.ac.uibk.dps.biohadoop.handler.Handler;
 import at.ac.uibk.dps.biohadoop.handler.HandlerConstants;
 import at.ac.uibk.dps.biohadoop.handler.HandlerInitException;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
+import at.ac.uibk.dps.biohadoop.solver.SolverId;
+import at.ac.uibk.dps.biohadoop.solver.SolverService;
 
 public class ProgressHandler implements Handler {
 

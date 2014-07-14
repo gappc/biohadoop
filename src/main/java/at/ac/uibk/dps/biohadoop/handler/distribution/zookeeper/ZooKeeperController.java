@@ -14,9 +14,9 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.algorithm.Algorithm;
 import at.ac.uibk.dps.biohadoop.handler.distribution.DistributionException;
 import at.ac.uibk.dps.biohadoop.handler.distribution.ZooKeeperConfiguration;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverConfiguration;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
+import at.ac.uibk.dps.biohadoop.solver.SolverConfiguration;
+import at.ac.uibk.dps.biohadoop.solver.SolverId;
+import at.ac.uibk.dps.biohadoop.solver.SolverService;
 
 public class ZooKeeperController {
 

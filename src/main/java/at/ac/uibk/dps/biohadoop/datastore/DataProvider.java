@@ -1,7 +1,7 @@
 package at.ac.uibk.dps.biohadoop.datastore;
 
-import at.ac.uibk.dps.biohadoop.service.solver.SolverData;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
+import at.ac.uibk.dps.biohadoop.solver.SolverData;
+import at.ac.uibk.dps.biohadoop.solver.SolverId;
 
 public class DataProvider {
 

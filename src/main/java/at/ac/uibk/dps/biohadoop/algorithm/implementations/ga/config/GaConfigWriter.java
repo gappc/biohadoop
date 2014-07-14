@@ -36,7 +36,7 @@ import at.ac.uibk.dps.biohadoop.handler.persistence.file.FileLoadConfiguration;
 import at.ac.uibk.dps.biohadoop.handler.persistence.file.FileLoadHandler;
 import at.ac.uibk.dps.biohadoop.handler.persistence.file.FileSaveConfiguration;
 import at.ac.uibk.dps.biohadoop.handler.persistence.file.FileSaveHandler;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverConfiguration;
+import at.ac.uibk.dps.biohadoop.solver.SolverConfiguration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;

@@ -8,7 +8,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
+import at.ac.uibk.dps.biohadoop.solver.SolverId;
 
 public class HandlerService {
 

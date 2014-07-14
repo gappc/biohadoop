@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xnio.Option;
 
-import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
+import at.ac.uibk.dps.biohadoop.solver.SolverId;
 
 public class DataService {
 

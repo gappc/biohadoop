@@ -1,6 +1,6 @@
 package at.ac.uibk.dps.biohadoop.handler.persistence.file;
 
-import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
+import at.ac.uibk.dps.biohadoop.solver.SolverId;
 
 public class FileHandlerUtils {
 

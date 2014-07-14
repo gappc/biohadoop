@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.service.solver;
+package at.ac.uibk.dps.biohadoop.solver;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

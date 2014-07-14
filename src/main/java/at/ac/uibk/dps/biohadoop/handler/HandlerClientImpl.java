@@ -2,7 +2,7 @@ package at.ac.uibk.dps.biohadoop.handler;
 
 import java.util.List;
 
-import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
+import at.ac.uibk.dps.biohadoop.solver.SolverId;
 
 public class HandlerClientImpl implements HandlerClient {
 

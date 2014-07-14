@@ -8,7 +8,7 @@ import at.ac.uibk.dps.biohadoop.handler.distribution.DistributionException;
 import at.ac.uibk.dps.biohadoop.handler.distribution.RemoteDataLoader;
 import at.ac.uibk.dps.biohadoop.handler.distribution.RemoteResultGetter;
 import at.ac.uibk.dps.biohadoop.handler.distribution.zookeeper.NodeData;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverData;
+import at.ac.uibk.dps.biohadoop.solver.SolverData;
 
 public class GaBestResultGetter implements RemoteResultGetter {
 

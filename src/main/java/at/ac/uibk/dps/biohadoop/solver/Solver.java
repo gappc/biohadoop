@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.service.solver;
+package at.ac.uibk.dps.biohadoop.solver;
 
 
 public class Solver {

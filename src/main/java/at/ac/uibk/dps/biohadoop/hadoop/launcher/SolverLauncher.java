@@ -18,11 +18,11 @@ import at.ac.uibk.dps.biohadoop.handler.HandlerConfiguration;
 import at.ac.uibk.dps.biohadoop.handler.HandlerConstants;
 import at.ac.uibk.dps.biohadoop.handler.HandlerService;
 import at.ac.uibk.dps.biohadoop.handler.progress.ProgressHandler;
-import at.ac.uibk.dps.biohadoop.service.solver.Solver;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverConfiguration;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverState;
+import at.ac.uibk.dps.biohadoop.solver.Solver;
+import at.ac.uibk.dps.biohadoop.solver.SolverConfiguration;
+import at.ac.uibk.dps.biohadoop.solver.SolverId;
+import at.ac.uibk.dps.biohadoop.solver.SolverService;
+import at.ac.uibk.dps.biohadoop.solver.SolverState;
 
 public class SolverLauncher {
 

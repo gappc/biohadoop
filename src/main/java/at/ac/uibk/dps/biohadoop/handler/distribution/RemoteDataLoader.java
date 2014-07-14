@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.handler.distribution.zookeeper.NodeData;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverData;
+import at.ac.uibk.dps.biohadoop.solver.SolverData;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

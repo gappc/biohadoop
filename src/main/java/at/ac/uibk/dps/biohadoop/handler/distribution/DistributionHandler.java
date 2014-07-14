@@ -16,7 +16,7 @@ import at.ac.uibk.dps.biohadoop.handler.HandlerInitException;
 import at.ac.uibk.dps.biohadoop.handler.UnknownHandlerException;
 import at.ac.uibk.dps.biohadoop.handler.distribution.zookeeper.NodeData;
 import at.ac.uibk.dps.biohadoop.handler.distribution.zookeeper.ZooKeeperController;
-import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
+import at.ac.uibk.dps.biohadoop.solver.SolverId;
 
 public class DistributionHandler implements Handler {
 
