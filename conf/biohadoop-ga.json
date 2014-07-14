@@ -106,7 +106,7 @@
       "mergeAfterIterations" : 2000
     } ]
   } ],
-  "connectionConfiguration" : {
+  "communicationConfiguration" : {
     "masterEndpoints" : [ "at.ac.uibk.dps.biohadoop.solver.ga.master.socket.GaSocket", "at.ac.uibk.dps.biohadoop.solver.ga.master.kryo.GaKryo", "at.ac.uibk.dps.biohadoop.solver.ga.master.rest.GaRest", "at.ac.uibk.dps.biohadoop.solver.ga.master.websocket.GaWebSocket" ],
     "workerEndpoints" : {
       "at.ac.uibk.dps.biohadoop.solver.ga.worker.WebSocketGaWorker" : 1,
