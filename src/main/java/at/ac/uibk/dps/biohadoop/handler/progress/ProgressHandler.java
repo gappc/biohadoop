@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.service.solver;
+package at.ac.uibk.dps.biohadoop.handler.progress;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +9,8 @@ import at.ac.uibk.dps.biohadoop.datastore.DataOptions;
 import at.ac.uibk.dps.biohadoop.handler.Handler;
 import at.ac.uibk.dps.biohadoop.handler.HandlerConstants;
 import at.ac.uibk.dps.biohadoop.handler.HandlerInitException;
+import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
+import at.ac.uibk.dps.biohadoop.service.solver.SolverService;
 
 public class ProgressHandler implements Handler {
 

@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.service.distribution;
+package at.ac.uibk.dps.biohadoop.handler.distribution;
 
 public class DistributionException extends Exception {
 

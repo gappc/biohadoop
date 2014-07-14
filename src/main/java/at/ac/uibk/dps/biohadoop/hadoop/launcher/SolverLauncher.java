@@ -17,7 +17,7 @@ import at.ac.uibk.dps.biohadoop.handler.HandlerClientImpl;
 import at.ac.uibk.dps.biohadoop.handler.HandlerConfiguration;
 import at.ac.uibk.dps.biohadoop.handler.HandlerConstants;
 import at.ac.uibk.dps.biohadoop.handler.HandlerService;
-import at.ac.uibk.dps.biohadoop.service.solver.ProgressHandler;
+import at.ac.uibk.dps.biohadoop.handler.progress.ProgressHandler;
 import at.ac.uibk.dps.biohadoop.service.solver.Solver;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverConfiguration;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverId;

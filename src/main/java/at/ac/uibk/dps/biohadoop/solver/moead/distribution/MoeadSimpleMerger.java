@@ -3,8 +3,8 @@ package at.ac.uibk.dps.biohadoop.solver.moead.distribution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.service.distribution.DataMergeException;
-import at.ac.uibk.dps.biohadoop.service.distribution.DataMerger;
+import at.ac.uibk.dps.biohadoop.handler.distribution.DataMergeException;
+import at.ac.uibk.dps.biohadoop.handler.distribution.DataMerger;
 
 public class MoeadSimpleMerger implements DataMerger<double[][]> {
 

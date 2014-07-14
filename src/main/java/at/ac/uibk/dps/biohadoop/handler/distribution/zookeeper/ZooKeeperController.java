@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.service.distribution.zookeeper;
+package at.ac.uibk.dps.biohadoop.handler.distribution.zookeeper;
 
 import java.io.IOException;
 import java.util.List;
@@ -12,8 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.config.Algorithm;
-import at.ac.uibk.dps.biohadoop.service.distribution.DistributionException;
-import at.ac.uibk.dps.biohadoop.service.distribution.ZooKeeperConfiguration;
+import at.ac.uibk.dps.biohadoop.handler.distribution.DistributionException;
+import at.ac.uibk.dps.biohadoop.handler.distribution.ZooKeeperConfiguration;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverConfiguration;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverService;

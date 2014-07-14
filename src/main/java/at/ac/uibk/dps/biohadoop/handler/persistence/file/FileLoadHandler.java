@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.service.persistence.file;
+package at.ac.uibk.dps.biohadoop.handler.persistence.file;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -18,7 +18,7 @@ import at.ac.uibk.dps.biohadoop.handler.HandlerBuilder;
 import at.ac.uibk.dps.biohadoop.handler.HandlerConstants;
 import at.ac.uibk.dps.biohadoop.handler.HandlerInitException;
 import at.ac.uibk.dps.biohadoop.handler.UnknownHandlerException;
-import at.ac.uibk.dps.biohadoop.service.persistence.PersistenceLoadException;
+import at.ac.uibk.dps.biohadoop.handler.persistence.PersistenceLoadException;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverData;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
 import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;

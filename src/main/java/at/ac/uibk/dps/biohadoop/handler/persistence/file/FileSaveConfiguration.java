@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.service.persistence.file;
+package at.ac.uibk.dps.biohadoop.handler.persistence.file;
 
 import at.ac.uibk.dps.biohadoop.handler.Handler;
 import at.ac.uibk.dps.biohadoop.handler.HandlerConfiguration;
@@ -6,27 +6,26 @@ import at.ac.uibk.dps.biohadoop.handler.HandlerConfiguration;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class FileLoadConfiguration implements HandlerConfiguration {
+public class FileSaveConfiguration implements HandlerConfiguration {
 
 	private final Class<? extends Handler> handler;
 	private final String path;
-	private final boolean onStartup;
+	private final int afterIterations;
 
-	public FileLoadConfiguration(Class<? extends Handler> handler, String path,
-			boolean onStartup) {
+	public FileSaveConfiguration(Class<? extends Handler> handler, String path, int afterIterations) {
 		this.handler = handler;
 		this.path = path;
-		this.onStartup = onStartup;
+		this.afterIterations = afterIterations;
 	}
-
+	
 	@JsonCreator
-	public static FileLoadConfiguration create(
+	public static FileSaveConfiguration create(
 			@JsonProperty("handler") Class<? extends Handler> handler,
 			@JsonProperty("path") String path,
-			@JsonProperty("onStartup") boolean onStartup) {
-		return new FileLoadConfiguration(handler, path, onStartup);
+			@JsonProperty("afterIterations") int afterIterations) {
+		return new FileSaveConfiguration(handler, path, afterIterations);
 	}
-
+	
 	@Override
 	public Class<? extends Handler> getHandler() {
 		return handler;
@@ -35,9 +34,9 @@ public class FileLoadConfiguration implements HandlerConfiguration {
 	public String getPath() {
 		return path;
 	}
-
-	public boolean isOnStartup() {
-		return onStartup;
+	
+	public int getAfterIterations() {
+		return afterIterations;
 	}
 
 }

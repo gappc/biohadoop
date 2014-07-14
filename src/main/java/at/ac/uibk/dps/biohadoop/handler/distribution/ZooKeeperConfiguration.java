@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.service.distribution;
+package at.ac.uibk.dps.biohadoop.handler.distribution;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

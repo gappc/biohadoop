@@ -1,7 +1,7 @@
 package at.ac.uibk.dps.biohadoop.solver.ga.distribution;
 
-import at.ac.uibk.dps.biohadoop.service.distribution.DataMergeException;
-import at.ac.uibk.dps.biohadoop.service.distribution.DataMerger;
+import at.ac.uibk.dps.biohadoop.handler.distribution.DataMergeException;
+import at.ac.uibk.dps.biohadoop.handler.distribution.DataMerger;
 
 public class GaSimpleMerger implements DataMerger<int[][]> {
 

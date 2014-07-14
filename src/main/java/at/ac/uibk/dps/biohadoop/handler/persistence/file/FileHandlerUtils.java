@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.service.persistence.file;
+package at.ac.uibk.dps.biohadoop.handler.persistence.file;
 
 import at.ac.uibk.dps.biohadoop.service.solver.SolverId;
 

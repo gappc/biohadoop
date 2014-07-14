@@ -1,8 +1,8 @@
-package at.ac.uibk.dps.biohadoop.service.distribution;
+package at.ac.uibk.dps.biohadoop.handler.distribution;
 
 import java.util.List;
 
-import at.ac.uibk.dps.biohadoop.service.distribution.zookeeper.NodeData;
+import at.ac.uibk.dps.biohadoop.handler.distribution.zookeeper.NodeData;
 
 public interface RemoteResultGetter {
 

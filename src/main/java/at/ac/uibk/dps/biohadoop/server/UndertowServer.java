@@ -14,10 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
+import at.ac.uibk.dps.biohadoop.handler.distribution.DistributionResource;
 import at.ac.uibk.dps.biohadoop.server.deployment.DeployingClasses;
 import at.ac.uibk.dps.biohadoop.server.deployment.ResteasyHandler;
 import at.ac.uibk.dps.biohadoop.server.deployment.WebSocketHandler;
-import at.ac.uibk.dps.biohadoop.service.distribution.DistributionResource;
 import at.ac.uibk.dps.biohadoop.torename.HostInfo;
 
 public class UndertowServer {

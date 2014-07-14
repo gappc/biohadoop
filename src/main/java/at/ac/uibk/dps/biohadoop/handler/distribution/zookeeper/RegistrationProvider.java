@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.service.distribution.zookeeper;
+package at.ac.uibk.dps.biohadoop.handler.distribution.zookeeper;
 
 import java.io.IOException;
 import java.util.List;
