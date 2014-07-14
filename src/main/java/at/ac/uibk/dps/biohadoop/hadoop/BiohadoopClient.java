@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;
 import at.ac.uibk.dps.biohadoop.torename.Helper;
 import at.ac.uibk.dps.biohadoop.torename.HostInfo;
-import at.ac.uibk.dps.biohadoop.torename.LocalResourceBuilder;
 
 /**
  * @author Christian Gapp

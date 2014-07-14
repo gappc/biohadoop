@@ -33,8 +33,8 @@ import at.ac.uibk.dps.biohadoop.communication.worker.WorkerParameter;
 import at.ac.uibk.dps.biohadoop.communication.worker.WorkerStarter;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.LaunchContainerRunnable;
+import at.ac.uibk.dps.biohadoop.hadoop.LocalResourceBuilder;
 import at.ac.uibk.dps.biohadoop.solver.SolverService;
-import at.ac.uibk.dps.biohadoop.torename.LocalResourceBuilder;
 
 //TODO make more parallel and use Callable instead of Thread
 public class WorkerLauncher {

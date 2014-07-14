@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.torename;
+package at.ac.uibk.dps.biohadoop.hadoop;
 
 import java.io.IOException;
 import java.util.ArrayList;

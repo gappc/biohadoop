@@ -14,12 +14,12 @@ import at.ac.uibk.dps.biohadoop.algorithm.implementations.nsgaii.config.NsgaIIAl
 import at.ac.uibk.dps.biohadoop.datastore.DataOptions;
 import at.ac.uibk.dps.biohadoop.datastore.DataService;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
+import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfigurationReader;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.SolverLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointLauncher;
 import at.ac.uibk.dps.biohadoop.solver.SolverConfiguration;
 import at.ac.uibk.dps.biohadoop.solver.SolverId;
 import at.ac.uibk.dps.biohadoop.solver.SolverService;
-import at.ac.uibk.dps.biohadoop.torename.BiohadoopConfigurationReader;
 
 public class NsgaIIMain {
 
