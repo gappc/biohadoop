@@ -10,8 +10,8 @@ import at.ac.uibk.dps.biohadoop.algorithm.implementations.nsgaii.algorithm.NsgaI
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
-import at.ac.uibk.dps.biohadoop.torename.ClassnameProvider;
-import at.ac.uibk.dps.biohadoop.torename.PerformanceLogger;
+import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
+import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
 public class LocalNsgaIIWorker implements Callable<Integer> {
 

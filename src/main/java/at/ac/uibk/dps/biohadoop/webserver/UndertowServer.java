@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.handler.distribution.DistributionResource;
-import at.ac.uibk.dps.biohadoop.torename.HostInfo;
+import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 import at.ac.uibk.dps.biohadoop.webserver.deployment.DeployingClasses;
 import at.ac.uibk.dps.biohadoop.webserver.deployment.ResteasyHandler;
 import at.ac.uibk.dps.biohadoop.webserver.deployment.WebSocketHandler;

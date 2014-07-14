@@ -30,9 +30,9 @@ import org.mortbay.util.ajax.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;
-import at.ac.uibk.dps.biohadoop.torename.ClassnameProvider;
-import at.ac.uibk.dps.biohadoop.torename.HostInfo;
+import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
+import at.ac.uibk.dps.biohadoop.utils.HdfsUtil;
+import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 
 /**
  * @author Christian Gapp

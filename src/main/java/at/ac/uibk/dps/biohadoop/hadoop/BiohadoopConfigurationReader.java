@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 
-import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;
+import at.ac.uibk.dps.biohadoop.utils.HdfsUtil;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

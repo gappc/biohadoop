@@ -19,7 +19,7 @@ import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterSendReceive;
 import at.ac.uibk.dps.biohadoop.communication.master.ReceiveException;
 import at.ac.uibk.dps.biohadoop.communication.master.SendException;
-import at.ac.uibk.dps.biohadoop.torename.ClassnameProvider;
+import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 
 public class SocketEndpoint implements Callable<Integer>, MasterSendReceive {
 

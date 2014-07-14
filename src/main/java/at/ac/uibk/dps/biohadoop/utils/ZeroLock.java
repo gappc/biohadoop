@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.torename;
+package at.ac.uibk.dps.biohadoop.utils;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;

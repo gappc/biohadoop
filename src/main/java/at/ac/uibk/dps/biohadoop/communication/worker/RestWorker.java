@@ -15,8 +15,8 @@ import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.queue.Task;
-import at.ac.uibk.dps.biohadoop.torename.ClassnameProvider;
-import at.ac.uibk.dps.biohadoop.torename.PerformanceLogger;
+import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
+import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

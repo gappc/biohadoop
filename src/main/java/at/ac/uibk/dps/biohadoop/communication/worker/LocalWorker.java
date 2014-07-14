@@ -10,8 +10,8 @@ import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
-import at.ac.uibk.dps.biohadoop.torename.ClassnameProvider;
-import at.ac.uibk.dps.biohadoop.torename.PerformanceLogger;
+import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
+import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
 public abstract class LocalWorker<T, S> implements Callable<Integer>,
 		WorkerEndpoint<T, S>, WorkerParameter {

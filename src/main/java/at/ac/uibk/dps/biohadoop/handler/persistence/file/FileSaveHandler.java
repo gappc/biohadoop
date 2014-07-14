@@ -17,7 +17,7 @@ import at.ac.uibk.dps.biohadoop.handler.UnknownHandlerException;
 import at.ac.uibk.dps.biohadoop.handler.persistence.PersistenceSaveException;
 import at.ac.uibk.dps.biohadoop.solver.SolverData;
 import at.ac.uibk.dps.biohadoop.solver.SolverId;
-import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;
+import at.ac.uibk.dps.biohadoop.utils.HdfsUtil;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

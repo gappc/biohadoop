@@ -11,7 +11,7 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;
+import at.ac.uibk.dps.biohadoop.utils.HdfsUtil;
 
 public class TspFileReader {
 

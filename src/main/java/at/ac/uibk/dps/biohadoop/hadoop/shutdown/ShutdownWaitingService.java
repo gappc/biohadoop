@@ -2,7 +2,7 @@ package at.ac.uibk.dps.biohadoop.hadoop.shutdown;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import at.ac.uibk.dps.biohadoop.torename.ZeroLock;
+import at.ac.uibk.dps.biohadoop.utils.ZeroLock;
 
 public class ShutdownWaitingService {
 

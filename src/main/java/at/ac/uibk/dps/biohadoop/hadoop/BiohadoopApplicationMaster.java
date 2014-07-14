@@ -13,9 +13,9 @@ import at.ac.uibk.dps.biohadoop.hadoop.launcher.WeldLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLauncher;
 import at.ac.uibk.dps.biohadoop.queue.TaskQueueService;
 import at.ac.uibk.dps.biohadoop.solver.SolverId;
-import at.ac.uibk.dps.biohadoop.torename.HdfsUtil;
-import at.ac.uibk.dps.biohadoop.torename.ClassnameProvider;
-import at.ac.uibk.dps.biohadoop.torename.HostInfo;
+import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
+import at.ac.uibk.dps.biohadoop.utils.HdfsUtil;
+import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 
 public class BiohadoopApplicationMaster {
 
