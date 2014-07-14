@@ -6,7 +6,7 @@ import org.jboss.weld.environment.se.Weld;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.server.UndertowServer;
+import at.ac.uibk.dps.biohadoop.webserver.UndertowServer;
 
 public class WeldLauncher {
 

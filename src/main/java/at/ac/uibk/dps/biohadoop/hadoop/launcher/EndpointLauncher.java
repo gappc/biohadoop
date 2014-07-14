@@ -10,8 +10,8 @@ import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
-import at.ac.uibk.dps.biohadoop.server.StartServerException;
-import at.ac.uibk.dps.biohadoop.server.UndertowServer;
+import at.ac.uibk.dps.biohadoop.webserver.StartServerException;
+import at.ac.uibk.dps.biohadoop.webserver.UndertowServer;
 
 public class EndpointLauncher {
 

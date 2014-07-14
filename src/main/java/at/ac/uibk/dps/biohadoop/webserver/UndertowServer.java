@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.server;
+package at.ac.uibk.dps.biohadoop.webserver;
 
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;

@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.server;
+package at.ac.uibk.dps.biohadoop.webserver;
 
 //TODO should be made checked
 public class StartServerException extends Exception {
