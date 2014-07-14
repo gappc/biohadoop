@@ -111,9 +111,9 @@
     } ]
   } ],
   "communicationConfiguration" : {
-    "masterEndpoints" : [ "at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIISocket", "at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIIWebSocket", "at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIIRest", "at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIIKryo" ],
+    "masterEndpoints" : [ "at.ac.uibk.dps.biohadoop.solver.nsgaii.communication.master.NsgaIISocket", "at.ac.uibk.dps.biohadoop.solver.nsgaii.communication.master.NsgaIIWebSocket", "at.ac.uibk.dps.biohadoop.solver.nsgaii.communication.master.NsgaIIRest", "at.ac.uibk.dps.biohadoop.solver.nsgaii.communication.master.NsgaIIKryo" ],
     "workerEndpoints" : {
-      "at.ac.uibk.dps.biohadoop.solver.nsgaii.worker.SocketNsgaIIWorker" : 3
+      "at.ac.uibk.dps.biohadoop.solver.nsgaii.communication.worker.SocketNsgaIIWorker" : 3
     }
   },
   "zooKeeperConfiguration" : {

@@ -25,13 +25,13 @@ import at.ac.uibk.dps.biohadoop.handler.persistence.file.FileSaveConfiguration;
 import at.ac.uibk.dps.biohadoop.handler.persistence.file.FileSaveHandler;
 import at.ac.uibk.dps.biohadoop.service.solver.SolverConfiguration;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.algorithm.NsgaII;
+import at.ac.uibk.dps.biohadoop.solver.nsgaii.communication.master.NsgaIIKryo;
+import at.ac.uibk.dps.biohadoop.solver.nsgaii.communication.master.NsgaIIRest;
+import at.ac.uibk.dps.biohadoop.solver.nsgaii.communication.master.NsgaIISocket;
+import at.ac.uibk.dps.biohadoop.solver.nsgaii.communication.master.NsgaIIWebSocket;
+import at.ac.uibk.dps.biohadoop.solver.nsgaii.communication.worker.SocketNsgaIIWorker;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.distribution.NsgaIIBestResultGetter;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.distribution.NsgaIISimpleMerger;
-import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIIKryo;
-import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIIRest;
-import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIISocket;
-import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIIWebSocket;
-import at.ac.uibk.dps.biohadoop.solver.nsgaii.worker.SocketNsgaIIWorker;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
