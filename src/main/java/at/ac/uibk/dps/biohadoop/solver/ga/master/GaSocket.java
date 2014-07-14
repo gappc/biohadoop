@@ -1,10 +1,10 @@
-package at.ac.uibk.dps.biohadoop.solver.ga.master.kryo;
+package at.ac.uibk.dps.biohadoop.solver.ga.master;
 
-import at.ac.uibk.dps.biohadoop.communication.master.kryo.KryoServer;
+import at.ac.uibk.dps.biohadoop.communication.master.socket.SocketServer;
 import at.ac.uibk.dps.biohadoop.solver.ga.DistancesGlobal;
 import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.Ga;
 
-public class GaKryo extends KryoServer {
+public class GaSocket extends SocketServer {
 
 	@Override
 	public String getQueueName() {

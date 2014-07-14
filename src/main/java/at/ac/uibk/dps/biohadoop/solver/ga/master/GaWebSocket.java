@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.solver.ga.master.websocket;
+package at.ac.uibk.dps.biohadoop.solver.ga.master;
 
 import javax.websocket.server.ServerEndpoint;
 

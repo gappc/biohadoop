@@ -3,7 +3,7 @@ package at.ac.uibk.dps.biohadoop.solver.ga.worker;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.worker.KryoWorker;
 import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.GaFitness;
-import at.ac.uibk.dps.biohadoop.solver.ga.master.kryo.GaKryo;
+import at.ac.uibk.dps.biohadoop.solver.ga.master.GaKryo;
 
 public class KryoGaWorker extends KryoWorker<int[], Double> {
 

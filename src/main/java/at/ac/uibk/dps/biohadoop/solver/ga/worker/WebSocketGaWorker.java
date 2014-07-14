@@ -7,7 +7,7 @@ import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketDecoder;
 import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketEncoder;
 import at.ac.uibk.dps.biohadoop.communication.worker.WebSocketWorker;
 import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.GaFitness;
-import at.ac.uibk.dps.biohadoop.solver.ga.master.websocket.GaWebSocket;
+import at.ac.uibk.dps.biohadoop.solver.ga.master.GaWebSocket;
 
 @ClientEndpoint(encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
 public class WebSocketGaWorker extends WebSocketWorker<int[], Double> {

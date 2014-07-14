@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.solver.ga.master.rest;
+package at.ac.uibk.dps.biohadoop.solver.ga.master;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;

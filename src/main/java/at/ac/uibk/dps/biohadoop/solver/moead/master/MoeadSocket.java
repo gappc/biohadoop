@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.solver.moead.master.socket;
+package at.ac.uibk.dps.biohadoop.solver.moead.master;
 
 import at.ac.uibk.dps.biohadoop.communication.master.socket.SocketServer;
 import at.ac.uibk.dps.biohadoop.solver.moead.algorithm.Moead;

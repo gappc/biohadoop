@@ -29,8 +29,8 @@ import at.ac.uibk.dps.biohadoop.solver.nsgaii.distribution.NsgaIIBestResultGette
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.distribution.NsgaIISimpleMerger;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIIKryo;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIIRest;
+import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIISocket;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIIWebSocket;
-import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.socket.NsgaIISocket;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.worker.SocketNsgaIIWorker;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;

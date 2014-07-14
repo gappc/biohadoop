@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.solver.nsgaii.master.socket;
+package at.ac.uibk.dps.biohadoop.solver.nsgaii.master;
 
 import at.ac.uibk.dps.biohadoop.communication.master.socket.SocketServer;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.algorithm.NsgaII;

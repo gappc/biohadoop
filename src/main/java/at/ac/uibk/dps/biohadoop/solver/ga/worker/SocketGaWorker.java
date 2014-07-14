@@ -3,7 +3,7 @@ package at.ac.uibk.dps.biohadoop.solver.ga.worker;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.worker.SocketWorker;
 import at.ac.uibk.dps.biohadoop.solver.ga.algorithm.GaFitness;
-import at.ac.uibk.dps.biohadoop.solver.ga.master.socket.GaSocket;
+import at.ac.uibk.dps.biohadoop.solver.ga.master.GaSocket;
 
 public class SocketGaWorker extends SocketWorker<int[], Double> {
 

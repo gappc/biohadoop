@@ -3,7 +3,7 @@ package at.ac.uibk.dps.biohadoop.solver.nsgaii.worker;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.worker.SocketWorker;
 import at.ac.uibk.dps.biohadoop.solver.nsgaii.algorithm.Functions;
-import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.socket.NsgaIISocket;
+import at.ac.uibk.dps.biohadoop.solver.nsgaii.master.NsgaIISocket;
 
 public class SocketNsgaIIWorker extends SocketWorker<double[], double[]> {
 

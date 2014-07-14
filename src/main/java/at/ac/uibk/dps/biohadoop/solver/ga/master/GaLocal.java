@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.solver.ga.master.local;
+package at.ac.uibk.dps.biohadoop.solver.ga.master;
 
 import at.ac.uibk.dps.biohadoop.communication.master.local.LocalEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.worker.LocalWorker;

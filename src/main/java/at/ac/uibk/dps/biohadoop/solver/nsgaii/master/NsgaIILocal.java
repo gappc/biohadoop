@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.solver.nsgaii.master.local;
+package at.ac.uibk.dps.biohadoop.solver.nsgaii.master;
 
 import java.util.ArrayList;
 import java.util.List;

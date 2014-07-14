@@ -3,7 +3,7 @@ package at.ac.uibk.dps.biohadoop.solver.moead.worker;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.worker.LocalWorker;
 import at.ac.uibk.dps.biohadoop.solver.moead.algorithm.Functions;
-import at.ac.uibk.dps.biohadoop.solver.moead.master.local.MoeadLocal;
+import at.ac.uibk.dps.biohadoop.solver.moead.master.MoeadLocal;
 
 public class LocalMoeadWorker extends LocalWorker<double[], double[]> {
 
