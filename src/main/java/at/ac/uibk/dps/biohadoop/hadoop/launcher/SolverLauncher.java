@@ -72,14 +72,16 @@ public class SolverLauncher {
 
 		// Register default handlers
 		handlerService.registerHandler(solverId, new ProgressHandler());
-
-		// Register dynamic handlers
+		
 		try {
-			for (HandlerConfiguration handlerConfiguration : solverConfig
-					.getHandlerConfigurations()) {
-				Handler handler = handlerConfiguration.getHandler()
-						.newInstance();
-				handlerService.registerHandler(solverId, handler);
+			if (solverConfig.getHandlerConfigurations() != null) {
+				// Register dynamic handlers
+				for (HandlerConfiguration handlerConfiguration : solverConfig
+						.getHandlerConfigurations()) {
+					Handler handler = handlerConfiguration.getHandler()
+							.newInstance();
+					handlerService.registerHandler(solverId, handler);
+				}
 			}
 			for (Handler handler : handlerService.getHandlers(solverId)) {
 				handler.init(solverId);
@@ -87,6 +89,7 @@ public class SolverLauncher {
 		} catch (Exception e) {
 			LOG.error("Could not register handlers", e);
 			throw new SolverLaunchException(e);
+
 		}
 	}
 
@@ -100,7 +103,7 @@ public class SolverLauncher {
 						solverConfig.getName(), solverId);
 				SolverService.getInstance().setSolverState(solverId,
 						SolverState.NEW);
-				
+
 				HandlerClientImpl handlerClientImpl = new HandlerClientImpl(
 						solverId);
 				handlerClientImpl.invokeHandlers(
@@ -114,7 +117,7 @@ public class SolverLauncher {
 						SolverState.RUNNING);
 
 				((Algorithm<Object, ?>) algorithm).compute(solverId, parameter);
-				
+
 				handlerClientImpl.invokeHandlers(
 						HandlerConstants.ALGORITHM_STOP, null);
 
