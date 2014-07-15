@@ -49,5 +49,7 @@ public class WorkerStarter {
 			LOG.error("Error while running worker {}", className, e);
 		}
 		
+		LOG.info("Worker finished");
+		
 	}
 }
