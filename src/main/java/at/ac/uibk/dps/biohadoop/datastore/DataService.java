@@ -26,6 +26,11 @@ public class DataService {
 	}
 
 	public <T> void setData(SolverId solverId, Option<T> option, T data) {
+		if (data == null) {
+			LOG.debug("Can not store null, therefor storing nothing");
+			return;
+		}
+		
 		Map<Option<?>, Object> dataStore = null;
 		synchronized (monitor) {
 			dataStore = dataForSolver.get(solverId);
@@ -34,7 +39,6 @@ public class DataService {
 				dataForSolver.put(solverId, dataStore);
 			}
 		}
-
 		dataStore.put(option, data);
 	}
 
