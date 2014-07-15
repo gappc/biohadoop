@@ -2,6 +2,7 @@ package at.ac.uibk.dps.biohadoop.communication.worker;
 
 import java.io.IOException;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -83,7 +84,7 @@ public abstract class RestWorker<T, S> implements WorkerEndpoint<T, S>,
 						responseTask);
 				inputMessage = sendAndReceive(message, client, url + "/work");
 			}
-		} catch (IOException e) {
+		} catch (IOException | ProcessingException e) {
 			throw new WorkerException("Could not communicate with " + host + ":" + port,
 					e);
 		}
