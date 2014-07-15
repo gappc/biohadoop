@@ -2,7 +2,11 @@ package at.ac.uibk.dps.biohadoop.communication.worker;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.websocket.CloseReason;
 import javax.websocket.ContainerProvider;
@@ -31,7 +35,10 @@ public abstract class WebSocketWorker<T, S> implements WorkerEndpoint<T, S>,
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WebSocketWorker.class);
 
-	private CountDownLatch latch = new CountDownLatch(1);
+	private static final int connectionTimeout = 2000;
+	
+	private final CountDownLatch latch = new CountDownLatch(1);
+	private final AtomicBoolean forceShutdown = new AtomicBoolean(true);
 	private long startTime = System.currentTimeMillis();
 	private int counter = 0;
 	private int logSteps = 1000;
@@ -58,7 +65,9 @@ public abstract class WebSocketWorker<T, S> implements WorkerEndpoint<T, S>,
 		String url = "ws://" + host + ":" + port + "/websocket" + path;
 
 		try {
+			configureForceShutdown();
 			Session session = container.connectToServer(this, URI.create(url));
+			forceShutdown.set(false);
 			register(session);
 			latch.await();
 		} catch (DeploymentException e) {
@@ -73,6 +82,27 @@ public abstract class WebSocketWorker<T, S> implements WorkerEndpoint<T, S>,
 					"Error while waiting for worker to finish", e);
 		}
 
+	}
+
+	private void configureForceShutdown() {
+		ExecutorService executorService = Executors
+				.newCachedThreadPool();
+		executorService.submit(new Callable<Integer>() {
+			@Override
+			public Integer call() throws WorkerException {
+				try {
+					Thread.sleep(connectionTimeout);
+					if (forceShutdown.get()) {
+						LOG.error("Forcing shutdown due to initial connection timeout");
+						System.exit(0);
+					}
+				} catch (InterruptedException e) {
+					LOG.error("Got interrupted while waiting for connection timeout", e);
+				}
+				return 0;
+			}
+		});
+		executorService.shutdown();
 	}
 
 	private void register(Session session) throws EncodeException, IOException {
