@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
+import at.ac.uibk.dps.biohadoop.utils.PortFinder;
 
 public class SocketServerConnection implements Runnable {
 
@@ -38,38 +39,36 @@ public class SocketServerConnection implements Runnable {
 		try {
 			String prefix = master.getQueueName();
 			String host = HostInfo.getHostname();
+			
+			PortFinder.aquireBindingLock();
 			int port = HostInfo.getPort(30000);
-
+			ServerSocket serverSocket = new ServerSocket(port);
+			PortFinder.releaseBindingLock();
+			
 			Environment.setPrefixed(prefix, Environment.SOCKET_HOST, host);
 			Environment.setPrefixed(prefix, Environment.SOCKET_PORT,
 					Integer.toString(port));
 
 			LOG.info("host: " + HostInfo.getHostname() + "  port: " + port);
 
-			runSocket(port);
+			int socketTimeout = 2000;
+			serverSocket.setSoTimeout(socketTimeout);
+			
+			while (!stop) {
+				try {
+					Socket socket = serverSocket.accept();
+					SocketEndpoint socketRunnable = new SocketEndpoint(socket,
+							master);
+					Future<Integer> future = executorService.submit(socketRunnable);
+					futures.add(future);
+				} catch (SocketTimeoutException e) {
+					LOG.debug("Socket timeout after {} ms", socketTimeout, e);
+				}
+			}
+			serverSocket.close();
 		} catch (IOException e) {
 			LOG.error("ServerSocket error", e);
 		}
-	}
-
-	private void runSocket(int port)
-			throws IOException {
-		ServerSocket serverSocket = new ServerSocket(port);
-		int socketTimeout = 2000;
-		serverSocket.setSoTimeout(socketTimeout);
-		
-		while (!stop) {
-			try {
-				Socket socket = serverSocket.accept();
-				SocketEndpoint socketRunnable = new SocketEndpoint(socket,
-						master);
-				Future<Integer> future = executorService.submit(socketRunnable);
-				futures.add(future);
-			} catch (SocketTimeoutException e) {
-				LOG.debug("Socket timeout after {} ms", socketTimeout, e);
-			}
-		}
-		serverSocket.close();
 	}
 
 	public void stop() {

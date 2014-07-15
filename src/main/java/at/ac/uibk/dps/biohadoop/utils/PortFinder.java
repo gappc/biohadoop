@@ -3,6 +3,7 @@ package at.ac.uibk.dps.biohadoop.utils;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
+import java.util.concurrent.Semaphore;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,13 +13,14 @@ import org.slf4j.LoggerFactory;
  * Finds an available port on localhost.
  */
 public class PortFinder {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(PortFinder.class);
 	private static final int MAX_PORT_NUMBER = 49151;
+	private static final Semaphore SEMAPHORE = new Semaphore(1);
 
 	private PortFinder() {
 	}
-	
+
 	public static int findFreePort(int start) {
 		for (int i = start; i <= MAX_PORT_NUMBER; i++) {
 			if (available(i)) {
@@ -27,6 +29,18 @@ public class PortFinder {
 		}
 		throw new RuntimeException("Could not find an available port between "
 				+ start + " and " + MAX_PORT_NUMBER);
+	}
+
+	public static void aquireBindingLock() {
+		try {
+			SEMAPHORE.acquire();
+		} catch (InterruptedException e) {
+			LOG.error("Got interrupted while waiting for semaphore", e);
+		}
+	}
+
+	public static void releaseBindingLock() {
+		SEMAPHORE.release();
 	}
 
 	/**
@@ -56,7 +70,8 @@ public class PortFinder {
 				try {
 					serverSocket.close();
 				} catch (final IOException e) {
-					LOG.error("Error while checking for port {} availability", port, e);
+					LOG.error("Error while checking for port {} availability",
+							port, e);
 				}
 			}
 		}

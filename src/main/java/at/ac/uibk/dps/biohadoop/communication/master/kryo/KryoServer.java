@@ -9,6 +9,7 @@ import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
+import at.ac.uibk.dps.biohadoop.utils.PortFinder;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Server;
@@ -51,9 +52,11 @@ public abstract class KryoServer implements MasterLifecycle, MasterEndpoint {
 
 		String prefix = getQueueName();
 		String host = HostInfo.getHostname();
+		
+		PortFinder.aquireBindingLock();
 		int port = HostInfo.getPort(30000);
-
 		server.bind(port);
+		PortFinder.releaseBindingLock();
 
 		Environment.setPrefixed(prefix, Environment.KRYO_SOCKET_HOST, host);
 		Environment.setPrefixed(prefix, Environment.KRYO_SOCKET_PORT,
