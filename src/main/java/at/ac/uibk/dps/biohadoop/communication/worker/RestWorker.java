@@ -2,6 +2,7 @@ package at.ac.uibk.dps.biohadoop.communication.worker;
 
 import java.io.IOException;
 
+import javax.ws.rs.Path;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -33,8 +34,6 @@ public abstract class RestWorker<T, S> implements WorkerEndpoint<T, S>,
 
 	private int logSteps = 1000;
 
-	public abstract String getPath();
-
 	public abstract TypeReference<Message<T>> getInputType();
 
 	@Override
@@ -46,7 +45,7 @@ public abstract class RestWorker<T, S> implements WorkerEndpoint<T, S>,
 
 	@Override
 	public void run(String host, int port) throws WorkerException {
-		String path = getPath();
+		String path = getMasterEndpoint().getAnnotation(Path.class).value();
 		if (!path.startsWith("/")) {
 			path = "/" + path;
 		}

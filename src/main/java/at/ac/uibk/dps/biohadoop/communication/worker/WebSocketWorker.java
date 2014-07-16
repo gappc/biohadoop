@@ -18,6 +18,7 @@ import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
+import javax.websocket.server.ServerEndpoint;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,8 +45,6 @@ public abstract class WebSocketWorker<T, S> implements WorkerEndpoint<T, S>,
 	private int logSteps = 1000;
 	private ObjectMapper om = new ObjectMapper();
 
-	public abstract String getPath();
-
 	@Override
 	public String getWorkerParameters() {
 		String hostname = Environment.get(Environment.HTTP_HOST);
@@ -55,10 +54,7 @@ public abstract class WebSocketWorker<T, S> implements WorkerEndpoint<T, S>,
 
 	@Override
 	public void run(String host, int port) throws WorkerException {
-		WebSocketContainer container = ContainerProvider
-				.getWebSocketContainer();
-
-		String path = getPath();
+		String path = getMasterEndpoint().getAnnotation(ServerEndpoint.class).value();
 		if (!path.startsWith("/")) {
 			path = "/" + path;
 		}
@@ -66,6 +62,8 @@ public abstract class WebSocketWorker<T, S> implements WorkerEndpoint<T, S>,
 
 		try {
 			configureForceShutdown();
+			WebSocketContainer container = ContainerProvider
+					.getWebSocketContainer();
 			Session session = container.connectToServer(this, URI.create(url));
 			forceShutdown.set(false);
 			register(session);
