@@ -28,8 +28,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Produces(MediaType.APPLICATION_JSON)
-public abstract class RestResource<T, S> implements MasterSendReceive, MasterLifecycle,
-		MasterEndpoint {
+public abstract class RestResource<T, S> implements MasterSendReceive,
+		MasterLifecycle, MasterEndpoint {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(RestResource.class);
@@ -72,26 +72,32 @@ public abstract class RestResource<T, S> implements MasterSendReceive, MasterLif
 			masterEndpoint.handleRegistration();
 			return outputMessage;
 		} catch (CommunicationException e) {
-			LOG.error("Error while communicating with worker, closing communication", e);
+			LOG.error(
+					"Error while communicating with worker, closing communication",
+					e);
 		}
 		return null;
 	}
 
 	@GET
 	@Path("workinit")
+	// TODO add @Produces?
 	public Message<T> workInit() {
 		buildMasterEndpoint();
 		try {
 			masterEndpoint.handleWorkInit();
-			return outputMessage;			
+			return outputMessage;
 		} catch (CommunicationException e) {
-			LOG.error("Error while communicating with worker, closing communication", e);
+			LOG.error(
+					"Error while communicating with worker, closing communication",
+					e);
 		}
 		return null;
 	}
 
 	@POST
 	@Path("work")
+	// TODO add @Produces?
 	public Message<T> work(String messageString) {
 		try {
 			Message<S> message = new ObjectMapper().readValue(messageString,
@@ -104,7 +110,9 @@ public abstract class RestResource<T, S> implements MasterSendReceive, MasterLif
 			LOG.error("Could not deserialize data {} to object {}",
 					messageString, Message.class, e);
 		} catch (CommunicationException e) {
-			LOG.error("Error while communicating with worker, closing communication", e);
+			LOG.error(
+					"Error while communicating with worker, closing communication",
+					e);
 		}
 		return null;
 	}
@@ -121,8 +129,8 @@ public abstract class RestResource<T, S> implements MasterSendReceive, MasterLif
 	}
 
 	private void buildMasterEndpoint() {
-		masterEndpoint = DefaultMasterImpl.newInstance(this,
-				getQueueName(), getRegistrationObject());
+		masterEndpoint = DefaultMasterImpl.newInstance(this, getQueueName(),
+				getRegistrationObject());
 	}
 
 }
