@@ -8,8 +8,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.websocket.server.ServerEndpoint;
 import javax.ws.rs.Path;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class DeployingClasses {
 
+	private static final Logger LOG = LoggerFactory.getLogger(DeployingClasses.class);
+	
 	private static final Map<Class<?>, Class<?>> RESTFUL_CLASSES = new ConcurrentHashMap<Class<?>, Class<?>>();
 	private static final Map<Class<?>, Class<?>> WEBSOCKET_CLASSES = new ConcurrentHashMap<Class<?>, Class<?>>();
 	
@@ -17,19 +22,21 @@ public class DeployingClasses {
 	}
 	
 	public static boolean addRestfulClass(Class<?> restfulClass) {
-		if (isRestful(restfulClass)) {
-			RESTFUL_CLASSES.put(restfulClass, restfulClass);
-			return true;
+		if (!isRestful(restfulClass)) {
+			LOG.error("{} must be annotated with {}", restfulClass, Path.class);
+			return false;
 		}
-		return false;
+		RESTFUL_CLASSES.put(restfulClass, restfulClass);
+		return true;
 	}
 	
 	public static boolean addWebSocketClass(Class<?> webSocketClass) {
-		if (isWebSocket(webSocketClass)) {
-			WEBSOCKET_CLASSES.put(webSocketClass, webSocketClass);
-			return true;
+		if (!isWebSocket(webSocketClass)) {
+			LOG.error("{} must be annotated with {}", webSocketClass, ServerEndpoint.class);
+			return false;
 		}
-		return false;		
+		WEBSOCKET_CLASSES.put(webSocketClass, webSocketClass);
+		return true;
 	}
 	
 	public static boolean isRestful(Class<?> restfulClass) {
