@@ -2,7 +2,6 @@ package at.ac.uibk.dps.biohadoop.communication.worker;
 
 import java.io.IOException;
 
-import javax.ws.rs.Path;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -15,27 +14,30 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
+import at.ac.uibk.dps.biohadoop.communication.master.rest2.RestMaster;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public abstract class RestWorker<T, S> implements WorkerEndpoint<T, S>,
-		WorkerParameter {
+public class SuperRestWorker<T, S> implements WorkerParameter {
 
-	private static final Logger LOG = LoggerFactory.getLogger(RestWorker.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SuperRestWorker.class);
 	private static final String CLASSNAME = ClassnameProvider
-			.getClassname(RestWorker.class);
+			.getClassname(SuperRestWorker.class);
 
+	private final Class<? extends SuperWorker<T, S>> workerClass;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	private int logSteps = 1000;
 
-	public abstract TypeReference<Message<T>> getInputType();
-
+	public SuperRestWorker(Class<? extends SuperWorker<T, S>> workerClass) {
+		this.workerClass = workerClass;
+	}
+	
 	@Override
 	public String getWorkerParameters() {
 		String hostname = Environment.get(Environment.HTTP_HOST);
@@ -43,21 +45,20 @@ public abstract class RestWorker<T, S> implements WorkerEndpoint<T, S>,
 		return hostname + " " + port;
 	}
 
-	@Override
 	public void run(String host, int port) throws WorkerException {
-		String path = getMasterEndpoint().getAnnotation(Path.class).value();
+		String path = workerClass.getAnnotation(RestWorkerAnnotation.class).master().getAnnotation(RestMaster.class).path();
 		if (!path.startsWith("/")) {
 			path = "/" + path;
 		}
 		String url = "http://" + host + ":" + port + "/rs" + path;
-url = "http://" + host + ":" + port + "/rs/rs2/test";
 		Client client = ClientBuilder.newClient();
 
 		try {
 			Message<?> registrationMessage = receiveRegistration(client, url
 					+ "/registration");
 			Object data = registrationMessage.getPayload().getData();
-			readRegistrationObject(data);
+			
+			workerClass.newInstance().readRegistrationObject(data);
 
 			Message<T> inputMessage = receive(client, url + "/workinit");
 
@@ -75,7 +76,7 @@ url = "http://" + host + ":" + port + "/rs/rs2/test";
 
 				Task<T> inputTask = inputMessage.getPayload();
 
-				S response = compute((T) inputTask.getData());
+				S response = workerClass.newInstance().compute((T) inputTask.getData());
 
 				Task<S> responseTask = new Task<S>(inputTask.getTaskId(),
 						response);
@@ -87,6 +88,12 @@ url = "http://" + host + ":" + port + "/rs/rs2/test";
 		} catch (IOException | ProcessingException e) {
 			throw new WorkerException("Could not communicate with " + host + ":" + port,
 					e);
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -102,7 +109,9 @@ url = "http://" + host + ":" + port + "/rs/rs2/test";
 		Response response = client.target(url)
 				.request(MediaType.APPLICATION_JSON).get();
 		String dataString = response.readEntity(String.class);
-		return objectMapper.readValue(dataString, getInputType());
+		Class<?> receiveClass = workerClass.getAnnotation(RestWorkerAnnotation.class).receive();
+		JavaType javaType = objectMapper.getTypeFactory().constructParametricType(Message.class, receiveClass);
+		return objectMapper.readValue(dataString, javaType);
 	}
 
 	private Message<T> sendAndReceive(Message<?> message, Client client,
@@ -112,6 +121,9 @@ url = "http://" + host + ":" + port + "/rs/rs2/test";
 				.post(Entity.entity(message, MediaType.APPLICATION_JSON));
 
 		String dataString = response.readEntity(String.class);
-		return objectMapper.readValue(dataString, getInputType());
+		
+		Class<?> receiveClass = workerClass.getAnnotation(RestWorkerAnnotation.class).receive();
+		JavaType javaType = objectMapper.getTypeFactory().constructParametricType(Message.class, receiveClass);
+		return objectMapper.readValue(dataString, javaType);
 	}
 }
