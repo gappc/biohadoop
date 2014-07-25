@@ -18,6 +18,7 @@ import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterSendReceive;
 import at.ac.uibk.dps.biohadoop.communication.master.ReceiveException;
 import at.ac.uibk.dps.biohadoop.communication.master.SendException;
+import at.ac.uibk.dps.biohadoop.communication.master.rest2.SuperComputable;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 
 public class SocketSuperEndpoint implements Callable<Integer>, MasterSendReceive {
@@ -27,18 +28,16 @@ public class SocketSuperEndpoint implements Callable<Integer>, MasterSendReceive
 
 	private final String className = ClassnameProvider.getClassname(SocketSuperEndpoint.class);
 	private final Socket socket;
-	private final String queueName;
-	private final Object registrationObject;
+	private final Class<? extends SuperComputable> masterClass;
 
 	private ObjectOutputStream os = null;
 	private ObjectInputStream is = null;
 	private int counter = 0;
 	private boolean close = false;
 
-	public SocketSuperEndpoint(Socket socket, String queueName, Object registrationObject) {
+	public SocketSuperEndpoint(Socket socket, Class<? extends SuperComputable> masterClass) {
 		this.socket = socket;
-		this.queueName = queueName;
-		this.registrationObject = registrationObject;
+		this.masterClass = masterClass;
 	}
 
 	@Override
@@ -63,6 +62,12 @@ public class SocketSuperEndpoint implements Callable<Integer>, MasterSendReceive
 			LOG.error("Error while running {}", className, e);
 		} catch (CommunicationException e) {
 			LOG.error("Error while communicating with worker, closing communication", e);
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} finally {
 			if (os != null) {
 				try {
@@ -110,7 +115,9 @@ public class SocketSuperEndpoint implements Callable<Integer>, MasterSendReceive
 		}
 	}
 	
-	private DefaultMasterImpl buildMaster() {
-		return DefaultMasterImpl.newInstance(this, queueName, registrationObject);
+	private DefaultMasterImpl buildMaster() throws InstantiationException, IllegalAccessException {
+		String queueName = masterClass.getAnnotation(SocketMaster.class).queueName();
+		SuperComputable master = masterClass.newInstance();
+		return DefaultMasterImpl.newInstance(this, queueName, master.getRegistrationObject());
 	}
 }

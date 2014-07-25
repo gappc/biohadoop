@@ -97,12 +97,13 @@ public class RestSuperMaster implements MasterSendReceive, MasterLifecycle {
 	@Path("{path}/work")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Message<?> work(@PathParam("path") String path, String messageString) {
+		Class<?> receiveClass = null;
 		try {
 			buildMasterEndpoint(path);
 			
 			Class<? extends SuperComputable> superComputableClass = ResourcePath
 					.getRestEntry(path);
-			Class<?> receiveClass = superComputableClass.getAnnotation(RestMaster.class).receive();
+			receiveClass = superComputableClass.getAnnotation(RestMaster.class).receive();
 			JavaType javaType = OBJECT_MAPPER.getTypeFactory().constructParametricType(Message.class, receiveClass);
 			
 			Message<?> message = OBJECT_MAPPER.readValue(messageString, javaType);
@@ -111,7 +112,7 @@ public class RestSuperMaster implements MasterSendReceive, MasterLifecycle {
 			return outputMessage;
 		} catch (IOException e) {
 			LOG.error("Could not deserialize data {} to object {}",
-					messageString, Message.class, e);
+					messageString, receiveClass, e);
 		} catch (CommunicationException e) {
 			LOG.error(
 					"Error while communicating with worker, closing communication",

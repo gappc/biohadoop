@@ -41,16 +41,19 @@ public class EndpointLauncher {
 	}
 
 	// TODO: what happens if any endpoint throws exception?
-	public void startMasterEndpoints() throws EndpointLaunchException {
+	public void startMasterEndpoints() throws EndpointException {
 		try {
 			LOG.info("Configuring master endpoints");
-			for (Class<? extends MasterLifecycle> endpointClass : communicationConfiguration
-					.getMasterEndpoints()) {
-				LOG.debug("Configuring master endpoint {}", endpointClass);
-				MasterLifecycle masterConnection = endpointClass.newInstance();
-				masterConnection.configure();
-				masterConnections.add(masterConnection);
-			}
+			// TODO make it possible to extend Biohadoop with new endpoints by
+			// simply implementing MasterLifecycle
+			// for (Class<? extends MasterLifecycle> endpointClass :
+			// communicationConfiguration
+			// .getMasterEndpoints()) {
+			// LOG.debug("Configuring master endpoint {}", endpointClass);
+			// MasterLifecycle masterConnection = endpointClass.newInstance();
+			// masterConnection.configure();
+			// masterConnections.add(masterConnection);
+			// }
 
 			for (Class<? extends SuperComputable> endpointClass : communicationConfiguration
 					.getMasters()) {
@@ -82,10 +85,8 @@ public class EndpointLauncher {
 				Annotation socketMasterAnnotation = endpointClass
 						.getAnnotation(SocketMaster.class);
 				if (socketMasterAnnotation != null) {
-					SuperComputable testMaster = endpointClass.newInstance();
 					SocketSuperServer socketSuperServer = new SocketSuperServer(
-							((SocketMaster) socketMasterAnnotation).queueName(),
-							testMaster.getRegistrationObject());
+							endpointClass);
 					socketSuperServer.configure();
 					masterConnections.add(socketSuperServer);
 					// socketSuperServer.start();
@@ -96,10 +97,8 @@ public class EndpointLauncher {
 				Annotation kryoMasterAnnotation = endpointClass
 						.getAnnotation(KryoMaster.class);
 				if (kryoMasterAnnotation != null) {
-					SuperComputable testMaster2 = endpointClass.newInstance();
 					KryoSuperServer kryoSuperServer = new KryoSuperServer(
-							((KryoMaster) kryoMasterAnnotation).queueName(),
-							testMaster2.getRegistrationObject());
+							endpointClass);
 					kryoSuperServer.configure();
 					masterConnections.add(kryoSuperServer);
 					// kryoSuperServer.start();
@@ -110,11 +109,8 @@ public class EndpointLauncher {
 				Annotation localMasterAnnotation = endpointClass
 						.getAnnotation(LocalMaster.class);
 				if (localMasterAnnotation != null) {
-					SuperComputable testMaster3 = endpointClass.newInstance();
 					LocalSuperEndpoint localSuperEndpoint = new LocalSuperEndpoint(
-							((LocalMaster) localMasterAnnotation).localWorker(),
-							((LocalMaster) localMasterAnnotation).queueName(),
-							testMaster3.getRegistrationObject());
+							((LocalMaster) localMasterAnnotation).localWorker());
 					localSuperEndpoint.configure();
 					masterConnections.add(localSuperEndpoint);
 				}
@@ -130,10 +126,12 @@ public class EndpointLauncher {
 						.getClass().getCanonicalName());
 				masterConnection.start();
 			}
-		} catch (InstantiationException | IllegalAccessException
-				| StartServerException e) {
-			LOG.error("Could not start endpoints", e);
-			throw new EndpointLaunchException(e);
+		} catch (EndpointConfigureException e) {
+			throw new EndpointException(e);
+		} catch (EndpointLaunchException e) {
+			throw new EndpointException(e);
+		} catch (StartServerException e) {
+			throw new EndpointException(e);
 		}
 	}
 

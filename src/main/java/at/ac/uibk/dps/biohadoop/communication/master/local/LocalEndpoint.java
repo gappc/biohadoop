@@ -8,12 +8,9 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
-import at.ac.uibk.dps.biohadoop.communication.worker.LocalWorker;
-import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
-import at.ac.uibk.dps.biohadoop.hadoop.Environment;
+import at.ac.uibk.dps.biohadoop.communication.worker.LocalWorker2;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointLaunchException;
 
 public abstract class LocalEndpoint implements MasterLifecycle, MasterEndpoint {
@@ -23,35 +20,35 @@ public abstract class LocalEndpoint implements MasterLifecycle, MasterEndpoint {
 
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();
-	private final List<LocalWorker<?, ?>> localWorkers = new ArrayList<>();
+	private final List<LocalWorker2<?, ?>> localWorkers = new ArrayList<>();
 
 	@Override
 	public void configure() {
-		BiohadoopConfiguration biohadoopConfiguration = Environment
-				.getBiohadoopConfiguration();
-		CommunicationConfiguration communicationConfiguration = biohadoopConfiguration
-				.getCommunicationConfiguration();
-		String localWorkerClass = getWorkerClass().getCanonicalName();
-		Integer workerCount = communicationConfiguration.getWorkerEndpoints()
-				.get(localWorkerClass);
-		if (workerCount != null) {
-			try {
-				for (int i = 0; i < workerCount; i++) {
-					LocalWorker<?, ?> localWorker = (LocalWorker<?, ?>) getWorkerClass()
-							.newInstance();
-					// localWorker.setRegistrationObject(getRegistrationObject());
-					localWorkers.add(localWorker);
-				}
-			} catch (InstantiationException | IllegalAccessException e) {
-				LOG.error("Could not instanciate {}", getWorkerClass(), e);
-				localWorkers.clear();
-			}
-		}
+//		BiohadoopConfiguration biohadoopConfiguration = Environment
+//				.getBiohadoopConfiguration();
+//		CommunicationConfiguration communicationConfiguration = biohadoopConfiguration
+//				.getCommunicationConfiguration();
+//		String localWorkerClass = getWorkerClass().getCanonicalName();
+//		Integer workerCount = communicationConfiguration.getWorkerEndpoints()
+//				.get(localWorkerClass);
+//		if (workerCount != null) {
+//			try {
+//				for (int i = 0; i < workerCount; i++) {
+//					LocalWorker<?, ?> localWorker = (LocalWorker<?, ?>) getWorkerClass()
+//							.newInstance();
+//					// localWorker.setRegistrationObject(getRegistrationObject());
+//					localWorkers.add(localWorker);
+//				}
+//			} catch (InstantiationException | IllegalAccessException e) {
+//				LOG.error("Could not instanciate {}", getWorkerClass(), e);
+//				localWorkers.clear();
+//			}
+//		}
 	}
 
 	@Override
 	public void start() throws EndpointLaunchException {
-		for (LocalWorker<?, ?> localGaWorker : localWorkers) {
+		for (LocalWorker2<?, ?> localGaWorker : localWorkers) {
 			executorService.submit(localGaWorker);
 		}
 		LOG.info("Local Workers started");
@@ -59,12 +56,12 @@ public abstract class LocalEndpoint implements MasterLifecycle, MasterEndpoint {
 
 	@Override
 	public void stop() {
-		for (LocalWorker<?, ?> localGaWorker : localWorkers) {
+		for (LocalWorker2<?, ?> localGaWorker : localWorkers) {
 			localGaWorker.stop();
 		}
 		executorService.shutdown();
 	}
 
-	public abstract Class<? extends LocalWorker<?, ?>> getWorkerClass();
+	public abstract Class<? extends LocalWorker2<?, ?>> getWorkerClass();
 
 }

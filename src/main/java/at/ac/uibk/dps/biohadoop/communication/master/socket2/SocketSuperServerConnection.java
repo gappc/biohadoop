@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.master.rest2.SuperComputable;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 import at.ac.uibk.dps.biohadoop.utils.PortFinder;
@@ -26,20 +27,18 @@ public class SocketSuperServerConnection implements Runnable {
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();
 	private final List<Future<Integer>> futures = new ArrayList<>();
-	private final String queueName;
-	private final Object registrationObject;
-
+	private final Class<? extends SuperComputable> masterClass;
+	
 	private volatile boolean stop;
 
-	public SocketSuperServerConnection(String queueName, Object registrationObject) {
-		this.queueName = queueName;
-		this.registrationObject = registrationObject;
+	public SocketSuperServerConnection(Class<? extends SuperComputable> masterClass) {
+		this.masterClass = masterClass;
 	}
 
 	@Override
 	public void run() {
 		try {
-			String prefix = queueName;
+			String prefix = masterClass.getCanonicalName();
 			String host = HostInfo.getHostname();
 			
 			PortFinder.aquireBindingLock();
@@ -59,8 +58,7 @@ public class SocketSuperServerConnection implements Runnable {
 			while (!stop) {
 				try {
 					Socket socket = serverSocket.accept();
-					SocketSuperEndpoint socketRunnable = new SocketSuperEndpoint(socket,
-							queueName, registrationObject);
+					SocketSuperEndpoint socketRunnable = new SocketSuperEndpoint(socket, masterClass);
 					Future<Integer> future = executorService.submit(socketRunnable);
 					futures.add(future);
 				} catch (SocketTimeoutException e) {

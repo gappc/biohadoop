@@ -19,26 +19,26 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
 
-public abstract class KryoWorker<T, S> implements WorkerEndpoint<T, S>,
-		WorkerParameter {
+public abstract class KryoWorker2<T, S> implements WorkerEndpoint<T, S> {//,
+//		WorkerParameter {
 
-	private static final Logger LOG = LoggerFactory.getLogger(KryoWorker.class);
+	private static final Logger LOG = LoggerFactory.getLogger(KryoWorker2.class);
 
 	private long startTime = System.currentTimeMillis();
 	private int counter = 0;
 	private int logSteps = 1000;
 	private CountDownLatch latch = new CountDownLatch(1);
 
-	@Override
-	public String getWorkerParameters() throws Exception {
-		MasterEndpoint masterEndpoint = getMasterEndpoint().newInstance();
-		String prefix = masterEndpoint.getQueueName();
-		String hostname = Environment.getPrefixed(prefix,
-				Environment.KRYO_SOCKET_HOST);
-		String port = Environment.getPrefixed(prefix,
-				Environment.KRYO_SOCKET_PORT);
-		return hostname + " " + port;
-	}
+//	@Override
+//	public String getWorkerParameters() throws Exception {
+//		MasterEndpoint masterEndpoint = getMasterEndpoint().newInstance();
+//		String prefix = masterEndpoint.getQueueName();
+//		String hostname = Environment.getPrefixed(prefix,
+//				Environment.KRYO_SOCKET_HOST);
+//		String port = Environment.getPrefixed(prefix,
+//				Environment.KRYO_SOCKET_PORT);
+//		return hostname + " " + port;
+//	}
 
 	@Override
 	public void run(String host, int port) throws WorkerException {
@@ -99,7 +99,7 @@ public abstract class KryoWorker<T, S> implements WorkerEndpoint<T, S>,
 					if (inputMessage.getType() == MessageType.SHUTDOWN) {
 						LOG.info(
 								"############# {} Worker stopped ###############",
-								KryoWorker.class.getSimpleName());
+								KryoWorker2.class.getSimpleName());
 						client.close();
 						latch.countDown();
 					}

@@ -23,12 +23,12 @@ import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public abstract class RestWorker<T, S> implements WorkerEndpoint<T, S>,
-		WorkerParameter {
+public abstract class RestWorker2<T, S> implements WorkerEndpoint<T, S> {//,
+//		WorkerParameter {
 
-	private static final Logger LOG = LoggerFactory.getLogger(RestWorker.class);
+	private static final Logger LOG = LoggerFactory.getLogger(RestWorker2.class);
 	private static final String CLASSNAME = ClassnameProvider
-			.getClassname(RestWorker.class);
+			.getClassname(RestWorker2.class);
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -36,12 +36,12 @@ public abstract class RestWorker<T, S> implements WorkerEndpoint<T, S>,
 
 	public abstract TypeReference<Message<T>> getInputType();
 
-	@Override
-	public String getWorkerParameters() {
-		String hostname = Environment.get(Environment.HTTP_HOST);
-		String port = Environment.get(Environment.HTTP_PORT);
-		return hostname + " " + port;
-	}
+//	@Override
+//	public String getWorkerParameters() {
+//		String hostname = Environment.get(Environment.HTTP_HOST);
+//		String port = Environment.get(Environment.HTTP_PORT);
+//		return hostname + " " + port;
+//	}
 
 	@Override
 	public void run(String host, int port) throws WorkerException {

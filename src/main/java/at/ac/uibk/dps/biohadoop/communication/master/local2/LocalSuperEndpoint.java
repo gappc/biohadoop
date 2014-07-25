@@ -11,11 +11,14 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
+import at.ac.uibk.dps.biohadoop.communication.master.rest2.SuperComputable;
+import at.ac.uibk.dps.biohadoop.communication.master.socket2.SocketMaster;
 import at.ac.uibk.dps.biohadoop.communication.worker.LocalWorkerAnnotation;
 import at.ac.uibk.dps.biohadoop.communication.worker.SuperLocalWorker;
 import at.ac.uibk.dps.biohadoop.communication.worker.SuperWorker;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
+import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointConfigureException;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointLaunchException;
 
 public class LocalSuperEndpoint implements MasterLifecycle {
@@ -27,18 +30,13 @@ public class LocalSuperEndpoint implements MasterLifecycle {
 			.newCachedThreadPool();
 	private final List<SuperLocalWorker<?, ?>> localWorkers = new ArrayList<>();
 	private final Class<? extends SuperWorker<?, ?>> localWorker;
-	private final String queueName;
-	private final Object registrationObject;
 
-	public LocalSuperEndpoint(Class<? extends SuperWorker<?, ?>> localWorker,
-			String queueName, Object registrationObject) {
+	public LocalSuperEndpoint(Class<? extends SuperWorker<?, ?>> localWorker) {
 		this.localWorker = localWorker;
-		this.queueName = queueName;
-		this.registrationObject = registrationObject;
 	}
 
 	@Override
-	public void configure() {
+	public void configure() throws EndpointConfigureException {
 		Annotation annotation = localWorker
 				.getAnnotation(LocalWorkerAnnotation.class);
 		if (annotation != null) {
@@ -49,10 +47,20 @@ public class LocalSuperEndpoint implements MasterLifecycle {
 
 			Integer workerCount = communicationConfiguration.getWorkers().get(
 					localWorker);
-
-			for (int i = 0; i < workerCount; i++) {
-				localWorkers.add(new SuperLocalWorker(localWorker, queueName,
-						registrationObject));
+			
+			if (workerCount != null) {
+				try {
+					for (int i = 0; i < workerCount; i++) {
+						localWorkers.add(new SuperLocalWorker(localWorker));
+					}
+				} catch (InstantiationException | IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					throw new EndpointConfigureException(e);
+				}
+			}
+			else {
+				LOG.warn("No workers for local running solver found");
 			}
 		}
 	}

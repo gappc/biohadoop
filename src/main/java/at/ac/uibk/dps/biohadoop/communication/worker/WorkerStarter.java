@@ -44,10 +44,10 @@ public class WorkerStarter {
 
 			// TODO make parallel
 			// TODO exceptions cought in methods, should be caught here?
-			// buildKryoWorker(workerClass, host, port);
-			// buildRestWorker(workerClass, host, port);
+			buildKryoWorker(workerClass, host, port);
+			buildRestWorker(workerClass, host, port);
 			buildSocketWorker(workerClass, host, port);
-			// buildWebSocketWorker(workerClass, host, port);
+			buildWebSocketWorker(workerClass, host, port);
 
 			//
 			// workerEndpoint.run(host, port);
@@ -58,6 +58,12 @@ public class WorkerStarter {
 			LOG.error("Could not run worker {}", className, e);
 			// } catch (WorkerException e) {
 			// LOG.error("Error while running worker {}", className, e);
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		LOG.info("Worker finished");
@@ -65,7 +71,8 @@ public class WorkerStarter {
 
 	private static void buildKryoWorker(
 			Class<? extends SuperWorker<Object, Object>> workerClass,
-			String host, int port) {
+			String host, int port) throws InstantiationException,
+			IllegalAccessException {
 		Annotation kryoWorkerAnnotation = workerClass
 				.getAnnotation(KryoWorkerAnnotation.class);
 		if (kryoWorkerAnnotation != null) {
@@ -82,7 +89,7 @@ public class WorkerStarter {
 
 	private static void buildRestWorker(
 			Class<? extends SuperWorker<Object, Object>> workerClass,
-			String host, int port) {
+			String host, int port) throws InstantiationException, IllegalAccessException {
 		Annotation restWorkerAnnotation = workerClass
 				.getAnnotation(RestWorkerAnnotation.class);
 		if (restWorkerAnnotation != null) {
@@ -99,7 +106,8 @@ public class WorkerStarter {
 
 	private static void buildSocketWorker(
 			Class<? extends SuperWorker<Object, Object>> workerClass,
-			String host, int port) {
+			String host, int port) throws InstantiationException,
+			IllegalAccessException {
 		Annotation socketWorkerAnnotation = workerClass
 				.getAnnotation(SocketWorkerAnnotation.class);
 		if (socketWorkerAnnotation != null) {
@@ -116,7 +124,7 @@ public class WorkerStarter {
 
 	private static void buildWebSocketWorker(
 			Class<? extends SuperWorker<Object, Object>> workerClass,
-			String host, int port) {
+			String host, int port) throws InstantiationException, IllegalAccessException {
 		Annotation webSocketWorkerAnnotation = workerClass
 				.getAnnotation(WebSocketWorkerAnnotation.class);
 		if (webSocketWorkerAnnotation != null) {

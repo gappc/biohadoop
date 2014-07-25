@@ -13,13 +13,13 @@ import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
-public abstract class LocalWorker<T, S> implements Callable<Integer>,
-		WorkerEndpoint<T, S>, WorkerParameter {
+public abstract class LocalWorker2<T, S> implements Callable<Integer>,
+		WorkerEndpoint<T, S> {//, WorkerParameter {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(LocalWorker.class);
+			.getLogger(LocalWorker2.class);
 	private static final String CLASSNAME = ClassnameProvider
-			.getClassname(LocalWorker.class);
+			.getClassname(LocalWorker2.class);
 
 	private final AtomicBoolean stop = new AtomicBoolean(false);
 
@@ -70,11 +70,11 @@ public abstract class LocalWorker<T, S> implements Callable<Integer>,
 		stop.set(true);
 	}
 
-	@Override
-	public String getWorkerParameters() throws Exception {
-		LOG.error("getWorkerParameters");
-		return null;
-	}
+//	@Override
+//	public String getWorkerParameters() throws Exception {
+//		LOG.error("getWorkerParameters");
+//		return null;
+//	}
 
 	@Override
 	public void run(String host, int port) throws WorkerException {

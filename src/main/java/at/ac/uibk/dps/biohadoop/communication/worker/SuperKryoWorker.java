@@ -18,33 +18,41 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
 
-public class SuperKryoWorker<T, S> implements WorkerParameter {
+public class SuperKryoWorker<T, S> {//implements WorkerParameter {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SuperKryoWorker.class);
 
-	private final Class<? extends SuperWorker<T, S>> workerClass;
+	private final SuperWorker<T, S> worker;
 
 	private long startTime = System.currentTimeMillis();
 	private int counter = 0;
 	private int logSteps = 1000;
 	private CountDownLatch latch = new CountDownLatch(1);
 
-	public SuperKryoWorker(Class<? extends SuperWorker<T, S>> workerClass) {
-		this.workerClass = workerClass;
+	public SuperKryoWorker(Class<? extends SuperWorker<T, S>> workerClass)
+			throws InstantiationException, IllegalAccessException {
+		worker = workerClass.newInstance();
 	}
 
-	@Override
-	public String getWorkerParameters() throws Exception {
-		String prefix = ((KryoWorkerAnnotation) workerClass
-				.getAnnotation(KryoWorkerAnnotation.class)).master()
-				.getCanonicalName();
-		String hostname = Environment.getPrefixed(prefix,
-				Environment.KRYO_SOCKET_HOST);
-		String port = Environment.getPrefixed(prefix,
-				Environment.KRYO_SOCKET_PORT);
-		return hostname + " " + port;
-	}
+//	@Override
+//	public String getWorkerParameters() throws Exception {
+////		LOG.info("---------" + worker + "--------");
+////		LOG.info("---------" + worker.getClass() + "--------");
+////		LOG.info("---------" + ((KryoWorkerAnnotation) worker.getClass()
+////				.getAnnotation(KryoWorkerAnnotation.class)) + "--------");
+//		String prefix = ((KryoWorkerAnnotation) worker.getClass()
+//				.getAnnotation(KryoWorkerAnnotation.class)).master()
+//				.getCanonicalName();
+//		LOG.info("---------" + prefix + "--------");
+//		String hostname = Environment.getPrefixed(prefix,
+//				Environment.KRYO_SOCKET_HOST);
+//		LOG.info("HOSTNAME: " + hostname);
+//		String port = Environment.getPrefixed(prefix,
+//				Environment.KRYO_SOCKET_PORT);
+//		LOG.info("PORT: " + port);
+//		return hostname + " " + port;
+//	}
 
 	public void run(String host, int port) throws WorkerException {
 		Log.set(Log.LEVEL_DEBUG);
@@ -79,7 +87,6 @@ public class SuperKryoWorker<T, S> implements WorkerParameter {
 					if (inputMessage.getType() == MessageType.REGISTRATION_RESPONSE) {
 						LOG.info("Registration successful");
 						Object data = inputMessage.getPayload().getData();
-						SuperWorker<T, S> worker = workerClass.newInstance();
 						worker.readRegistrationObject(data);
 						Message<?> message = new Message<Object>(
 								MessageType.WORK_INIT_REQUEST, null);
@@ -92,7 +99,6 @@ public class SuperKryoWorker<T, S> implements WorkerParameter {
 
 						Task<?> inputTask = inputMessage.getPayload();
 
-						SuperWorker<T, S> worker = workerClass.newInstance();
 						@SuppressWarnings("unchecked")
 						S response = worker.compute((T) inputTask.getData());
 

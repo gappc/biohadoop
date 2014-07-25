@@ -17,33 +17,36 @@ import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
-public class SuperSocketWorker<T, S> implements WorkerParameter {
+public class SuperSocketWorker<T, S> {//implements WorkerParameter {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SuperSocketWorker.class);
 
-	private final Class<? extends SuperWorker<T, S>> workerClass;
-	
-	private static String className = ClassnameProvider.getClassname(SuperSocketWorker.class);
+	private final SuperWorker<T, S> worker;
+
+	private static String className = ClassnameProvider
+			.getClassname(SuperSocketWorker.class);
 	private int logSteps = 1000;
 
-	public SuperSocketWorker(Class<? extends SuperWorker<T, S>> workerClass) {
-		this.workerClass = workerClass;
+	public SuperSocketWorker(Class<? extends SuperWorker<T, S>> workerClass)
+			throws InstantiationException, IllegalAccessException {
+		worker = workerClass.newInstance();
 	}
-	
-	@Override
-	public String getWorkerParameters() throws Exception {
-		String prefix = ((SocketWorkerAnnotation) workerClass
-				.getAnnotation(SocketWorkerAnnotation.class)).master()
-				.getCanonicalName();
-		String hostname = Environment.getPrefixed(prefix,
-				Environment.SOCKET_HOST);
-		String port = Environment.getPrefixed(prefix, Environment.SOCKET_PORT);
-		return hostname + " " + port;
-	}
+
+//	@Override
+//	public String getWorkerParameters() throws Exception {
+//		String prefix = ((SocketWorkerAnnotation) worker.getClass()
+//				.getAnnotation(SocketWorkerAnnotation.class)).master()
+//				.getCanonicalName();
+//		String hostname = Environment.getPrefixed(prefix,
+//				Environment.SOCKET_HOST);
+//		String port = Environment.getPrefixed(prefix, Environment.SOCKET_PORT);
+//		return hostname + " " + port;
+//	}
 
 	public void run(String host, int port) throws WorkerException {
 		try {
+			// TODO: implement timeout
 			Socket clientSocket = new Socket(host, port);
 			ObjectOutputStream os = new ObjectOutputStream(
 					new BufferedOutputStream(clientSocket.getOutputStream()));
@@ -60,8 +63,8 @@ public class SuperSocketWorker<T, S> implements WorkerParameter {
 			os.close();
 			clientSocket.close();
 		} catch (IOException | ClassNotFoundException e) {
-			throw new WorkerException("Could not communicate with " + host + ":" + port,
-					e);
+			throw new WorkerException("Could not communicate with " + host
+					+ ":" + port, e);
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -81,12 +84,12 @@ public class SuperSocketWorker<T, S> implements WorkerParameter {
 	}
 
 	private void handleRegistrationResponse(ObjectInputStream is,
-			ObjectOutputStream os) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+			ObjectOutputStream os) throws IOException, ClassNotFoundException,
+			InstantiationException, IllegalAccessException {
 		Message<T> message = receive(is);
 		LOG.info("{} registration successful", className);
 
 		Object data = message.getPayload().getData();
-		SuperWorker<T, S> worker = workerClass.newInstance();
 		worker.readRegistrationObject(data);
 	}
 
@@ -98,7 +101,8 @@ public class SuperSocketWorker<T, S> implements WorkerParameter {
 	}
 
 	private void handleWork(ObjectInputStream is, ObjectOutputStream os)
-			throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+			throws IOException, ClassNotFoundException, InstantiationException,
+			IllegalAccessException {
 		PerformanceLogger performanceLogger = new PerformanceLogger(
 				System.currentTimeMillis(), 0, logSteps);
 		int counter = 0;
@@ -120,7 +124,6 @@ public class SuperSocketWorker<T, S> implements WorkerParameter {
 
 			Task<T> inputTask = inputMessage.getPayload();
 
-			SuperWorker<T, S> worker = workerClass.newInstance();
 			S response = worker.compute((T) inputTask.getData());
 
 			Task<S> responseTask = new Task<S>(inputTask.getTaskId(), response);

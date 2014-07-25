@@ -6,44 +6,46 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.communication.master.local2.LocalMaster;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
-public class SuperLocalWorker<T, S> implements Callable<Integer>, WorkerParameter {
+public class SuperLocalWorker<T, S> implements Callable<Integer> {//,
+//		WorkerParameter {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SuperLocalWorker.class);
 	private static final String CLASSNAME = ClassnameProvider
 			.getClassname(SuperLocalWorker.class);
 
-	private final Class<? extends SuperWorker<T, S>> workerClass;
-	private final String queueName;
-	private final Object registrationObject;
+	private final SuperWorker<T, S> worker;
 	private final AtomicBoolean stop = new AtomicBoolean(false);
 
 	private int logSteps = 1000;
-	
-	public SuperLocalWorker(Class<? extends SuperWorker<T, S>> workerClass, String queueName, Object registrationObject) {
-		this.workerClass = workerClass;
-		this.queueName = queueName;
-		this.registrationObject = registrationObject;
+
+	public SuperLocalWorker(Class<? extends SuperWorker<T, S>> workerClass)
+			throws InstantiationException, IllegalAccessException {
+		worker = workerClass.newInstance();
 	}
-	
+
 	@Override
 	public Integer call() {
 		LOG.info("############# {} started ##############", CLASSNAME);
-//		MasterEndpoint masterEndpoint;
-//		try {
-//			masterEndpoint = getMasterEndpoint().newInstance();
-//		} catch (InstantiationException | IllegalAccessException e1) {
-//			LOG.error("Could not instanciate MasterEndpoint {}",
-//					getMasterEndpoint());
-//			return 1;
-//		}
+		// MasterEndpoint masterEndpoint;
+		// try {
+		// masterEndpoint = getMasterEndpoint().newInstance();
+		// } catch (InstantiationException | IllegalAccessException e1) {
+		// LOG.error("Could not instanciate MasterEndpoint {}",
+		// getMasterEndpoint());
+		// return 1;
+		// }
 
+		String queueName = worker.getClass()
+				.getAnnotation(LocalWorkerAnnotation.class).master()
+				.getAnnotation(LocalMaster.class).queueName();
 		TaskEndpoint<T, S> taskEndpoint = new TaskEndpointImpl<>(queueName);
 		boolean registrationInit = false;
 
@@ -63,7 +65,7 @@ public class SuperLocalWorker<T, S> implements Callable<Integer>, WorkerParamete
 					doRegistrationInit();
 					registrationInit = true;
 				}
-				S data = workerClass.newInstance().compute(task.getData());
+				S data = worker.compute(task.getData());
 				taskEndpoint.putResult(task.getTaskId(), data);
 			} catch (InterruptedException e) {
 				LOG.debug("Got InterruptedException, stopping work");
@@ -82,18 +84,22 @@ public class SuperLocalWorker<T, S> implements Callable<Integer>, WorkerParamete
 		stop.set(true);
 	}
 
-	@Override
-	public String getWorkerParameters() throws Exception {
-		LOG.error("getWorkerParameters");
-		return null;
-	}
+//	@Override
+//	public String getWorkerParameters() throws Exception {
+//		LOG.error("getWorkerParameters");
+//		return null;
+//	}
 
 	public void run(String host, int port) throws WorkerException {
 		LOG.error("run");
 	}
 
-	private void doRegistrationInit() throws InstantiationException, IllegalAccessException {
-		workerClass.newInstance().readRegistrationObject(registrationObject);
+	private void doRegistrationInit() throws InstantiationException,
+			IllegalAccessException {
+		Object data = worker.getClass()
+				.getAnnotation(LocalWorkerAnnotation.class).master()
+				.newInstance().getRegistrationObject();
+		worker.readRegistrationObject(data);
 	}
 
 }

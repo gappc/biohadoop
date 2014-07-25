@@ -17,50 +17,36 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 public class CommunicationConfiguration {
 
-	private final List<Class<? extends MasterLifecycle>> masterEndpoints;
 	private final List<Class<? extends SuperComputable>> masters;
 	// TODO: Check if can be improved; At the moment: key must be String because
 	// of Json exception
 	// com.fasterxml.jackson.databind.JsonMappingException: Can not find a (Map)
 	// Key deserializer for type [simple type, class
 	// java.lang.Class<at.ac.uibk.dps.biohadoop.connection.WorkerConnection>]
-	private final Map<String, Integer> workerEndpoints;
-	@JsonSerialize(keyUsing=ClassAsKeySerializer.class)
-	@JsonDeserialize(keyUsing=ClassAsKeyDeserializer.class)
+	@JsonSerialize(keyUsing = ClassAsKeySerializer.class)
+	@JsonDeserialize(keyUsing = ClassAsKeyDeserializer.class)
 	private final Map<Class<? extends SuperWorker<?, ?>>, Integer> workers;
 
 	public CommunicationConfiguration(
-			List<Class<? extends MasterLifecycle>> masterEndpoints, List<Class<? extends SuperComputable>> masters,
-			Map<String, Integer> workerEndpoints, Map<Class<? extends SuperWorker<?, ?>>, Integer> workers) {
-		this.masterEndpoints = masterEndpoints;
+			List<Class<? extends SuperComputable>> masters,
+			Map<Class<? extends SuperWorker<?, ?>>, Integer> workers) {
 		this.masters = masters;
-		this.workerEndpoints = workerEndpoints;
 		this.workers = workers;
 	}
 
 	@JsonCreator
 	public static CommunicationConfiguration create(
-			@JsonProperty("masterEndpoints") List<Class<? extends MasterLifecycle>> masterEndpoints,
 			@JsonProperty("masters") List<Class<? extends SuperComputable>> masters,
-			@JsonProperty("workerEndpoints") Map<String, Integer> workerEndpoints,
 			@JsonProperty("workers") Map<Class<? extends SuperWorker<?, ?>>, Integer> workers) {
-		return new CommunicationConfiguration(masterEndpoints, masters, workerEndpoints, workers);
+		return new CommunicationConfiguration(masters, workers);
 	}
 
-	public List<Class<? extends MasterLifecycle>> getMasterEndpoints() {
-		return masterEndpoints;
-	}
-	
 	public List<Class<? extends SuperComputable>> getMasters() {
 		return masters;
-	}
-
-	public Map<String, Integer> getWorkerEndpoints() {
-		return workerEndpoints;
 	}
 
 	public Map<Class<? extends SuperWorker<?, ?>>, Integer> getWorkers() {
 		return workers;
 	}
-	
+
 }

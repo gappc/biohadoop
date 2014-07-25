@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
 import at.ac.uibk.dps.biohadoop.communication.master.kryo.KryoObjectRegistration;
+import at.ac.uibk.dps.biohadoop.communication.master.rest2.SuperComputable;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 import at.ac.uibk.dps.biohadoop.utils.PortFinder;
@@ -20,20 +21,18 @@ public class KryoSuperServer implements MasterLifecycle {
 	private static final Logger LOG = LoggerFactory.getLogger(KryoSuperServer.class);
 
 	private final Server server = new Server(64 * 1024, 64 * 1024);
-	private final String queueName;
-	private final Object registrationObject;
+	private final Class<? extends SuperComputable> masterClass;
 
 	private KryoSuperServerListener kryoServerListener;
 
-	public KryoSuperServer(String queueName, Object registrationObject) {
-		this.queueName = queueName;
-		this.registrationObject = registrationObject;
+	public KryoSuperServer(Class<? extends SuperComputable> masterClass) {
+		this.masterClass = masterClass;
 	}
 	
 	@Override
 	public void configure() {
 		Log.set(Log.LEVEL_DEBUG);
-		kryoServerListener = new KryoSuperServerListener(queueName, registrationObject);
+		kryoServerListener = new KryoSuperServerListener(masterClass);
 	}
 
 	@Override
@@ -57,7 +56,7 @@ public class KryoSuperServer implements MasterLifecycle {
 	private void startServer() throws IOException {
 		new Thread(server).start();
 
-		String prefix = queueName;
+		String prefix = masterClass.getCanonicalName();
 		String host = HostInfo.getHostname();
 		
 		PortFinder.aquireBindingLock();

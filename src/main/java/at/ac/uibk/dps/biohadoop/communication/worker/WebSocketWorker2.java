@@ -30,11 +30,11 @@ import at.ac.uibk.dps.biohadoop.queue.Task;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public abstract class WebSocketWorker<T, S> implements WorkerEndpoint<T, S>,
-		WorkerParameter {
+public abstract class WebSocketWorker2<T, S> implements WorkerEndpoint<T, S> {//,
+//		WorkerParameter {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(WebSocketWorker.class);
+			.getLogger(WebSocketWorker2.class);
 
 	private static final int connectionTimeout = 2000;
 	
@@ -45,12 +45,12 @@ public abstract class WebSocketWorker<T, S> implements WorkerEndpoint<T, S>,
 	private int logSteps = 1000;
 	private ObjectMapper om = new ObjectMapper();
 
-	@Override
-	public String getWorkerParameters() {
-		String hostname = Environment.get(Environment.HTTP_HOST);
-		String port = Environment.get(Environment.HTTP_PORT);
-		return hostname + " " + port;
-	}
+//	@Override
+//	public String getWorkerParameters() {
+//		String hostname = Environment.get(Environment.HTTP_HOST);
+//		String port = Environment.get(Environment.HTTP_PORT);
+//		return hostname + " " + port;
+//	}
 
 	@Override
 	public void run(String host, int port) throws WorkerException {
@@ -120,7 +120,7 @@ url="ws://kleintroppl:30000/websocket/websocket2/test";
 		LOG.info("Closed connection to URI {}, sessionId={}",
 				session.getRequestURI(), session.getId());
 		LOG.info("############# {} stopped #############",
-				WebSocketWorker.class.getSimpleName());
+				WebSocketWorker2.class.getSimpleName());
 		latch.countDown();
 	}
 
@@ -167,7 +167,7 @@ url="ws://kleintroppl:30000/websocket/websocket2/test";
 		}
 		if (message.getType() == MessageType.SHUTDOWN) {
 			LOG.info("############# {} Worker stopped ###############",
-					WebSocketWorker.class.getSimpleName());
+					WebSocketWorker2.class.getSimpleName());
 			session.close();
 			return null;
 		}

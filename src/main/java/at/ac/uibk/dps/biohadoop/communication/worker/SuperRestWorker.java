@@ -23,30 +23,31 @@ import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class SuperRestWorker<T, S> implements WorkerParameter {
+public class SuperRestWorker<T, S> {// implements WorkerParameter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SuperRestWorker.class);
 	private static final String CLASSNAME = ClassnameProvider
 			.getClassname(SuperRestWorker.class);
 
-	private final Class<? extends SuperWorker<T, S>> workerClass;
 	private final ObjectMapper objectMapper = new ObjectMapper();
+	private final SuperWorker<T, S> worker;
 
 	private int logSteps = 1000;
 
-	public SuperRestWorker(Class<? extends SuperWorker<T, S>> workerClass) {
-		this.workerClass = workerClass;
+	public SuperRestWorker(Class<? extends SuperWorker<T, S>> workerClass)
+			throws InstantiationException, IllegalAccessException {
+		worker = workerClass.newInstance();
 	}
 	
-	@Override
-	public String getWorkerParameters() {
-		String hostname = Environment.get(Environment.HTTP_HOST);
-		String port = Environment.get(Environment.HTTP_PORT);
-		return hostname + " " + port;
-	}
+//	@Override
+//	public String getWorkerParameters() {
+//		String hostname = Environment.get(Environment.HTTP_HOST);
+//		String port = Environment.get(Environment.HTTP_PORT);
+//		return hostname + " " + port;
+//	}
 
 	public void run(String host, int port) throws WorkerException {
-		String path = workerClass.getAnnotation(RestWorkerAnnotation.class).master().getAnnotation(RestMaster.class).path();
+		String path = worker.getClass().getAnnotation(RestWorkerAnnotation.class).master().getAnnotation(RestMaster.class).path();
 		if (!path.startsWith("/")) {
 			path = "/" + path;
 		}
@@ -58,7 +59,7 @@ public class SuperRestWorker<T, S> implements WorkerParameter {
 					+ "/registration");
 			Object data = registrationMessage.getPayload().getData();
 			
-			workerClass.newInstance().readRegistrationObject(data);
+			worker.readRegistrationObject(data);
 
 			Message<T> inputMessage = receive(client, url + "/workinit");
 
@@ -76,7 +77,7 @@ public class SuperRestWorker<T, S> implements WorkerParameter {
 
 				Task<T> inputTask = inputMessage.getPayload();
 
-				S response = workerClass.newInstance().compute((T) inputTask.getData());
+				S response = worker.compute((T) inputTask.getData());
 
 				Task<S> responseTask = new Task<S>(inputTask.getTaskId(),
 						response);
@@ -88,12 +89,6 @@ public class SuperRestWorker<T, S> implements WorkerParameter {
 		} catch (IOException | ProcessingException e) {
 			throw new WorkerException("Could not communicate with " + host + ":" + port,
 					e);
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 
@@ -109,7 +104,7 @@ public class SuperRestWorker<T, S> implements WorkerParameter {
 		Response response = client.target(url)
 				.request(MediaType.APPLICATION_JSON).get();
 		String dataString = response.readEntity(String.class);
-		Class<?> receiveClass = workerClass.getAnnotation(RestWorkerAnnotation.class).receive();
+		Class<?> receiveClass = worker.getClass().getAnnotation(RestWorkerAnnotation.class).receive();
 		JavaType javaType = objectMapper.getTypeFactory().constructParametricType(Message.class, receiveClass);
 		return objectMapper.readValue(dataString, javaType);
 	}
@@ -122,7 +117,7 @@ public class SuperRestWorker<T, S> implements WorkerParameter {
 
 		String dataString = response.readEntity(String.class);
 		
-		Class<?> receiveClass = workerClass.getAnnotation(RestWorkerAnnotation.class).receive();
+		Class<?> receiveClass = worker.getClass().getAnnotation(RestWorkerAnnotation.class).receive();
 		JavaType javaType = objectMapper.getTypeFactory().constructParametricType(Message.class, receiveClass);
 		return objectMapper.readValue(dataString, javaType);
 	}

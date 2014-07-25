@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.worker.WorkerParameter;
+import at.ac.uibk.dps.biohadoop.communication.worker.SuperWorker;
 import at.ac.uibk.dps.biohadoop.communication.worker.WorkerStarter;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.LaunchContainerRunnable;
@@ -74,15 +74,17 @@ public class WorkerLauncher {
 		capability.setMemory(128);
 		capability.setVirtualCores(1);
 
-		List<String> workerList = getWorkerList(biohadoopConfig);
-		List<WorkerParameter> workerParameters = new ArrayList<>();
-		for (Iterator<String> it = workerList.iterator(); it.hasNext();) {
-			String workerName = it.next();
-			WorkerParameter workerParameter = (WorkerParameter) Class.forName(workerName).newInstance();
-			if (workerParameter.getWorkerParameters() == null) {
+		List<Class<? extends SuperWorker<?, ?>>> workerList = getWorkerList(biohadoopConfig);
+		List<String> workerParameters = new ArrayList<>();
+		for (Iterator<Class<? extends SuperWorker<?, ?>>> it = workerList
+				.iterator(); it.hasNext();) {
+			Class<? extends SuperWorker<?, ?>> workerClass = it.next();
+
+			String workerParameter = getWorkerParameters(workerClass);
+
+			if (workerParameter == null) {
 				it.remove();
-			}
-			else {
+			} else {
 				workerParameters.add(workerParameter);
 			}
 		}
@@ -116,15 +118,15 @@ public class WorkerLauncher {
 				ContainerLaunchContext ctx = Records
 						.newRecord(ContainerLaunchContext.class);
 
-//				WorkerParameter worker = (WorkerParameter) Class.forName(
-//						workerList.get(0)).newInstance();
-//				String parameters = worker.getWorkerParameters();
-				String parameters = workerParameters.get(0).getWorkerParameters();
+				// WorkerParameter worker = (WorkerParameter) Class.forName(
+				// workerList.get(0)).newInstance();
+				// String parameters = worker.getWorkerParameters();
+				String parameters = workerParameters.get(0);
 
 				String clientCommand = String
 						.format("$JAVA_HOME/bin/java -Xmx128M %s %s %s configFilename 1>%s/stdout 2>%s/stderr",
 								WorkerStarter.class.getCanonicalName(),
-								workerList.get(0), parameters,
+								workerList.get(0).getCanonicalName(), parameters,
 								ApplicationConstants.LOG_DIR_EXPANSION_VAR,
 								ApplicationConstants.LOG_DIR_EXPANSION_VAR);
 
@@ -190,14 +192,14 @@ public class WorkerLauncher {
 		}).start();
 	}
 
-	private static List<String> getWorkerList(BiohadoopConfiguration config) {
-		List<String> workerList = new ArrayList<>();
+	private static List<Class<? extends SuperWorker<?, ?>>> getWorkerList(
+			BiohadoopConfiguration config) {
+		List<Class<? extends SuperWorker<?, ?>>> workerList = new ArrayList<>();
 		CommunicationConfiguration communicationConfiguration = config
 				.getCommunicationConfiguration();
-		for (String key : communicationConfiguration.getWorkerEndpoints()
-				.keySet()) {
-			int value = communicationConfiguration.getWorkerEndpoints()
-					.get(key);
+		for (Class<? extends SuperWorker<?, ?>> key : communicationConfiguration
+				.getWorkers().keySet()) {
+			int value = communicationConfiguration.getWorkers().get(key);
 			for (int i = 0; i < value; i++) {
 				workerList.add(key);
 				LOG.info("Worker {} added", key);
@@ -220,16 +222,14 @@ public class WorkerLauncher {
 
 	public static void pretendToLaunchWorkers(
 			BiohadoopConfiguration biohadoopConfiguration) {
-		List<String> workerList = getWorkerList(biohadoopConfiguration);
-		for (String workerClass : workerList) {
+		List<Class<? extends SuperWorker<?, ?>>> workerList = getWorkerList(biohadoopConfiguration);
+		for (Class<? extends SuperWorker<?, ?>> workerClass : workerList) {
 			try {
-				WorkerParameter worker = (WorkerParameter) Class.forName(
-						workerClass).newInstance();
-				String parameters = worker.getWorkerParameters();
+				String workerParameter = getWorkerParameters(workerClass);
 
 				String clientCommand = String
 						.format("$JAVA_HOME/bin/java -Xmx128M %s configFilename 1>%s/stdout 2>%s/stderr",
-								parameters,
+								workerParameter,
 								ApplicationConstants.LOG_DIR_EXPANSION_VAR,
 								ApplicationConstants.LOG_DIR_EXPANSION_VAR);
 
@@ -240,6 +240,22 @@ public class WorkerLauncher {
 			}
 
 		}
-
 	}
+	private static String getWorkerParameters(Class<? extends SuperWorker<?, ?>> workerClass) throws Exception {
+		String workerParameters = WorkerParametersResolver.getKryoWorkerParameters(workerClass);
+		if (workerParameters == null) {
+			workerParameters = WorkerParametersResolver.getLocalWorkerParameters(workerClass);
+		}
+		if (workerParameters == null) {
+			workerParameters = WorkerParametersResolver.getRestWorkerParameters(workerClass);
+		}
+		if (workerParameters == null) {
+			workerParameters = WorkerParametersResolver.getSocketWorkerParameters(workerClass);
+		}
+		if (workerParameters == null) {
+			workerParameters = WorkerParametersResolver.getWebSocketWorkerParameters(workerClass);
+		}
+		return workerParameters;
+	}
+	
 }

@@ -18,24 +18,24 @@ import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
-public abstract class SocketWorker<T, S> implements WorkerEndpoint<T, S>,
-		WorkerParameter {
+public abstract class SocketWorker2<T, S> implements WorkerEndpoint<T, S> {//,
+//		WorkerParameter {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(SocketWorker.class);
+			.getLogger(SocketWorker2.class);
 
-	private static String className = ClassnameProvider.getClassname(SocketWorker.class);
+	private static String className = ClassnameProvider.getClassname(SocketWorker2.class);
 	private int logSteps = 1000;
 
-	@Override
-	public String getWorkerParameters() throws Exception {
-		MasterEndpoint masterEndpoint = getMasterEndpoint().newInstance();
-		String prefix = masterEndpoint.getQueueName();
-		String hostname = Environment.getPrefixed(prefix,
-				Environment.SOCKET_HOST);
-		String port = Environment.getPrefixed(prefix, Environment.SOCKET_PORT);
-		return hostname + " " + port;
-	}
+//	@Override
+//	public String getWorkerParameters() throws Exception {
+//		MasterEndpoint masterEndpoint = getMasterEndpoint().newInstance();
+//		String prefix = masterEndpoint.getQueueName();
+//		String hostname = Environment.getPrefixed(prefix,
+//				Environment.SOCKET_HOST);
+//		String port = Environment.getPrefixed(prefix, Environment.SOCKET_PORT);
+//		return hostname + " " + port;
+//	}
 
 	public void run(String host, int port) throws WorkerException {
 		try {

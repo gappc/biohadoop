@@ -35,16 +35,17 @@ import at.ac.uibk.dps.biohadoop.queue.Task;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ClientEndpoint(encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
-public class SuperWebSocketWorker<T, S> implements WorkerParameter {
+public class SuperWebSocketWorker<T, S> {//implements WorkerParameter {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SuperWebSocketWorker.class);
 
 	private static final int connectionTimeout = 2000;
 
-	private Class<? extends SuperWorker<T, S>> workerClass;
 	private final CountDownLatch latch = new CountDownLatch(1);
 	private final AtomicBoolean forceShutdown = new AtomicBoolean(true);
+
+	private SuperWorker<T, S> worker;
 	private long startTime = System.currentTimeMillis();
 	private int counter = 0;
 	private int logSteps = 1000;
@@ -52,20 +53,21 @@ public class SuperWebSocketWorker<T, S> implements WorkerParameter {
 
 	public SuperWebSocketWorker() {
 	}
-	
-	public SuperWebSocketWorker(Class<? extends SuperWorker<T, S>> workerClass) {
-		this.workerClass = workerClass;
+
+	public SuperWebSocketWorker(Class<? extends SuperWorker<T, S>> workerClass)
+			throws InstantiationException, IllegalAccessException {
+		worker = workerClass.newInstance();
 	}
 
-	@Override
-	public String getWorkerParameters() {
-		String hostname = Environment.get(Environment.HTTP_HOST);
-		String port = Environment.get(Environment.HTTP_PORT);
-		return hostname + " " + port;
-	}
+//	@Override
+//	public String getWorkerParameters() {
+//		String hostname = Environment.get(Environment.HTTP_HOST);
+//		String port = Environment.get(Environment.HTTP_PORT);
+//		return hostname + " " + port;
+//	}
 
 	public void run(String host, int port) throws WorkerException {
-		Class<? extends SuperComputable> master = ((WebSocketWorkerAnnotation) workerClass
+		Class<? extends SuperComputable> master = ((WebSocketWorkerAnnotation) worker.getClass()
 				.getAnnotation(WebSocketWorkerAnnotation.class)).master();
 		String path = master.getAnnotation(WebSocketMaster.class).path();
 		if (!path.startsWith("/")) {
@@ -159,7 +161,6 @@ public class SuperWebSocketWorker<T, S> implements WorkerParameter {
 			Task<?> task = om.convertValue(message.getPayload(), Task.class);
 
 			Object data = task.getData();
-			SuperWorker<T, S> worker = workerClass.newInstance();
 			worker.readRegistrationObject(data);
 
 			return new Message<Object>(MessageType.WORK_INIT_REQUEST, null);
@@ -174,7 +175,6 @@ public class SuperWebSocketWorker<T, S> implements WorkerParameter {
 			Task<T> inputTask = om.convertValue(message.getPayload(),
 					Task.class);
 
-			SuperWorker<T, S> worker = workerClass.newInstance();
 			S response = worker.compute(inputTask.getData());
 			Task<S> responseTask = new Task<S>(inputTask.getTaskId(), response);
 
