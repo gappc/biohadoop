@@ -22,10 +22,10 @@ import at.ac.uibk.dps.biohadoop.utils.ZeroLock;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
-public class KryoSuperServerListener extends Listener {
+public class KryoMasterServerListener extends Listener {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(KryoSuperServerListener.class);
+			.getLogger(KryoMasterServerListener.class);
 
 	private final Map<Connection, DefaultMasterImpl> masters = new ConcurrentHashMap<>();
 	private final ExecutorService executorService = Executors
@@ -34,7 +34,7 @@ public class KryoSuperServerListener extends Listener {
 	private final Class<? extends Master> masterClass;
 	private final String queueName;
 
-	public KryoSuperServerListener(Class<? extends Master> masterClass) {
+	public KryoMasterServerListener(Class<? extends Master> masterClass) {
 		this.masterClass = masterClass;
 		queueName = masterClass.getAnnotation(KryoMaster.class).queueName();
 	}
@@ -50,7 +50,7 @@ public class KryoSuperServerListener extends Listener {
 	}
 
 	public void connected(Connection connection) {
-		KryoSuperEndpoint kryoEndpoint = new KryoSuperEndpoint();
+		KryoMasterEndpoint kryoEndpoint = new KryoMasterEndpoint();
 		kryoEndpoint.setConnection(connection);
 
 		try {
@@ -87,7 +87,7 @@ public class KryoSuperServerListener extends Listener {
 					DefaultMasterImpl endpointImpl = masters.get(connection);
 
 					Message<?> inputMessage = (Message<?>) object;
-					KryoSuperEndpoint endpoint = (KryoSuperEndpoint) endpointImpl
+					KryoMasterEndpoint endpoint = (KryoMasterEndpoint) endpointImpl
 							.getEndpoint();
 					endpoint.setConnection(connection);
 					endpoint.setInputMessage(inputMessage);
@@ -115,7 +115,7 @@ public class KryoSuperServerListener extends Listener {
 		}
 	}
 
-	private DefaultMasterImpl buildMaster(KryoSuperEndpoint kryoEndpoint)
+	private DefaultMasterImpl buildMaster(KryoMasterEndpoint kryoEndpoint)
 			throws Exception {
 		String queueName = masterClass.getAnnotation(SocketMaster.class).queueName();
 		Master master = masterClass.newInstance();

@@ -21,12 +21,12 @@ import at.ac.uibk.dps.biohadoop.communication.master.SendException;
 import at.ac.uibk.dps.biohadoop.communication.master.Master;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 
-public class SocketSuperEndpoint implements Callable<Integer>, MasterSendReceive {
+public class SocketMasterEndpoint implements Callable<Integer>, MasterSendReceive {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(SocketSuperEndpoint.class);
+			.getLogger(SocketMasterEndpoint.class);
 
-	private final String className = ClassnameProvider.getClassname(SocketSuperEndpoint.class);
+	private final String className = ClassnameProvider.getClassname(SocketMasterEndpoint.class);
 	private final Socket socket;
 	private final Class<? extends Master> masterClass;
 
@@ -35,7 +35,7 @@ public class SocketSuperEndpoint implements Callable<Integer>, MasterSendReceive
 	private int counter = 0;
 	private boolean close = false;
 
-	public SocketSuperEndpoint(Socket socket, Class<? extends Master> masterClass) {
+	public SocketMasterEndpoint(Socket socket, Class<? extends Master> masterClass) {
 		this.socket = socket;
 		this.masterClass = masterClass;
 	}

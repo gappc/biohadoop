@@ -7,7 +7,7 @@ import at.ac.uibk.dps.biohadoop.communication.master.SendException;
 
 import com.esotericsoftware.kryonet.Connection;
 
-public class KryoSuperEndpoint implements MasterSendReceive {
+public class KryoMasterEndpoint implements MasterSendReceive {
 
 	private Message<?> inputMessage;
 	private Connection connection;

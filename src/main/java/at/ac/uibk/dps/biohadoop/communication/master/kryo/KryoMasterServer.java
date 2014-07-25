@@ -15,23 +15,23 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Server;
 import com.esotericsoftware.minlog.Log;
 
-public class KryoSuperServer implements MasterLifecycle {
+public class KryoMasterServer implements MasterLifecycle {
 
-	private static final Logger LOG = LoggerFactory.getLogger(KryoSuperServer.class);
+	private static final Logger LOG = LoggerFactory.getLogger(KryoMasterServer.class);
 
 	private final Server server = new Server(64 * 1024, 64 * 1024);
 	private final Class<? extends Master> masterClass;
 
-	private KryoSuperServerListener kryoServerListener;
+	private KryoMasterServerListener kryoServerListener;
 
-	public KryoSuperServer(Class<? extends Master> masterClass) {
+	public KryoMasterServer(Class<? extends Master> masterClass) {
 		this.masterClass = masterClass;
 	}
 	
 	@Override
 	public void configure() {
 		Log.set(Log.LEVEL_DEBUG);
-		kryoServerListener = new KryoSuperServerListener(masterClass);
+		kryoServerListener = new KryoMasterServerListener(masterClass);
 	}
 
 	@Override

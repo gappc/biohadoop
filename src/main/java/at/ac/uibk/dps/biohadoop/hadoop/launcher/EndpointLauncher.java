@@ -11,16 +11,16 @@ import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
 import at.ac.uibk.dps.biohadoop.communication.master.Master;
 import at.ac.uibk.dps.biohadoop.communication.master.kryo.KryoMaster;
-import at.ac.uibk.dps.biohadoop.communication.master.kryo.KryoSuperServer;
+import at.ac.uibk.dps.biohadoop.communication.master.kryo.KryoMasterServer;
 import at.ac.uibk.dps.biohadoop.communication.master.local.LocalMaster;
-import at.ac.uibk.dps.biohadoop.communication.master.local.LocalSuperEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.master.local.LocalMasterEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.master.rest.ResourcePath;
 import at.ac.uibk.dps.biohadoop.communication.master.rest.RestMaster;
-import at.ac.uibk.dps.biohadoop.communication.master.rest.RestSuperMaster;
+import at.ac.uibk.dps.biohadoop.communication.master.rest.RestMasterEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.master.socket.SocketMaster;
-import at.ac.uibk.dps.biohadoop.communication.master.socket.SocketSuperServer;
+import at.ac.uibk.dps.biohadoop.communication.master.socket.SocketMasterServer;
 import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketMaster;
-import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketSuperMaster;
+import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketMasterEndpoint;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
 import at.ac.uibk.dps.biohadoop.webserver.StartServerException;
@@ -67,7 +67,7 @@ public class EndpointLauncher {
 					ResourcePath.addRestEntry(
 							((RestMaster) restMasterAnnotation).path(),
 							endpointClass);
-					DeployingClasses.addRestfulClass(RestSuperMaster.class);
+					DeployingClasses.addRestfulClass(RestMasterEndpoint.class);
 				}
 				// ///////////WEBSOCKET///////////////////////////
 				Annotation wsMasterAnnotation = endpointClass
@@ -78,14 +78,14 @@ public class EndpointLauncher {
 							((WebSocketMaster) wsMasterAnnotation).path(),
 							endpointClass);
 					DeployingClasses
-							.addWebSocketClass(WebSocketSuperMaster.class);
+							.addWebSocketClass(WebSocketMasterEndpoint.class);
 				}
 
 				// ///////////SOCKET///////////////////////////
 				Annotation socketMasterAnnotation = endpointClass
 						.getAnnotation(SocketMaster.class);
 				if (socketMasterAnnotation != null) {
-					SocketSuperServer socketSuperServer = new SocketSuperServer(
+					SocketMasterServer socketSuperServer = new SocketMasterServer(
 							endpointClass);
 					socketSuperServer.configure();
 					masterConnections.add(socketSuperServer);
@@ -97,7 +97,7 @@ public class EndpointLauncher {
 				Annotation kryoMasterAnnotation = endpointClass
 						.getAnnotation(KryoMaster.class);
 				if (kryoMasterAnnotation != null) {
-					KryoSuperServer kryoSuperServer = new KryoSuperServer(
+					KryoMasterServer kryoSuperServer = new KryoMasterServer(
 							endpointClass);
 					kryoSuperServer.configure();
 					masterConnections.add(kryoSuperServer);
@@ -109,7 +109,7 @@ public class EndpointLauncher {
 				Annotation localMasterAnnotation = endpointClass
 						.getAnnotation(LocalMaster.class);
 				if (localMasterAnnotation != null) {
-					LocalSuperEndpoint localSuperEndpoint = new LocalSuperEndpoint(
+					LocalMasterEndpoint localSuperEndpoint = new LocalMasterEndpoint(
 							((LocalMaster) localMasterAnnotation).localWorker());
 					localSuperEndpoint.configure();
 					masterConnections.add(localSuperEndpoint);

@@ -18,10 +18,10 @@ import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 import at.ac.uibk.dps.biohadoop.utils.PortFinder;
 
-public class SocketSuperServerConnection implements Runnable {
+public class SocketMasterServerConnection implements Runnable {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(SocketSuperServerConnection.class);
+			.getLogger(SocketMasterServerConnection.class);
 
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();
@@ -30,7 +30,7 @@ public class SocketSuperServerConnection implements Runnable {
 	
 	private volatile boolean stop;
 
-	public SocketSuperServerConnection(Class<? extends Master> masterClass) {
+	public SocketMasterServerConnection(Class<? extends Master> masterClass) {
 		this.masterClass = masterClass;
 	}
 
@@ -57,7 +57,7 @@ public class SocketSuperServerConnection implements Runnable {
 			while (!stop) {
 				try {
 					Socket socket = serverSocket.accept();
-					SocketSuperEndpoint socketRunnable = new SocketSuperEndpoint(socket, masterClass);
+					SocketMasterEndpoint socketRunnable = new SocketMasterEndpoint(socket, masterClass);
 					Future<Integer> future = executorService.submit(socketRunnable);
 					futures.add(future);
 				} catch (SocketTimeoutException e) {

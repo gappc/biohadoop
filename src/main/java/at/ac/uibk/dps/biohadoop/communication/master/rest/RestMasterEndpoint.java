@@ -26,10 +26,10 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Path("/")
-public class RestSuperMaster implements MasterSendReceive, MasterLifecycle {
+public class RestMasterEndpoint implements MasterSendReceive, MasterLifecycle {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(RestSuperMaster.class);
+			.getLogger(RestMasterEndpoint.class);
 
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 	

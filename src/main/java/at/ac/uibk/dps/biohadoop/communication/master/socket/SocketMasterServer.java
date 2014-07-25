@@ -9,24 +9,24 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
 import at.ac.uibk.dps.biohadoop.communication.master.Master;
 
-public class SocketSuperServer implements MasterLifecycle {
+public class SocketMasterServer implements MasterLifecycle {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(SocketSuperServer.class);
+			.getLogger(SocketMasterServer.class);
 
 	private final ExecutorService executorService = Executors
 			.newFixedThreadPool(1);
 	private final Class<? extends Master> masterClass;
 	
-	private SocketSuperServerConnection socketServerConnection;
+	private SocketMasterServerConnection socketServerConnection;
 	
-	public SocketSuperServer(Class<? extends Master> masterClass) {
+	public SocketMasterServer(Class<? extends Master> masterClass) {
 		this.masterClass = masterClass;
 	}
 
 	@Override
 	public void configure() {
-		socketServerConnection = new SocketSuperServerConnection(masterClass);
+		socketServerConnection = new SocketMasterServerConnection(masterClass);
 	}
 
 	@Override

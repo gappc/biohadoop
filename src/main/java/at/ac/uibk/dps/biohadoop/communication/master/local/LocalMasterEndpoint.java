@@ -21,17 +21,17 @@ import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointConfigureException;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointLaunchException;
 
-public class LocalSuperEndpoint implements MasterLifecycle {
+public class LocalMasterEndpoint implements MasterLifecycle {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(LocalSuperEndpoint.class);
+			.getLogger(LocalMasterEndpoint.class);
 
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();
 	private final List<DefaultLocalWorker<?, ?>> localWorkers = new ArrayList<>();
 	private final Class<? extends Worker<?, ?>> localWorker;
 
-	public LocalSuperEndpoint(Class<? extends Worker<?, ?>> localWorker) {
+	public LocalMasterEndpoint(Class<? extends Worker<?, ?>> localWorker) {
 		this.localWorker = localWorker;
 	}
 

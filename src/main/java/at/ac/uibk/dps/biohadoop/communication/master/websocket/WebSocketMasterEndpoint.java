@@ -33,10 +33,10 @@ import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.webserver.deployment.DeployingClasses;
 
 @ServerEndpoint(value = "/{path}", encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
-public class WebSocketSuperMaster implements MasterSendReceive, MasterLifecycle {
+public class WebSocketMasterEndpoint implements MasterSendReceive, MasterLifecycle {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(WebSocketSuperMaster.class);
+			.getLogger(WebSocketMasterEndpoint.class);
 
 	private TaskEndpoint<?, ?> taskEndpoint;
 
@@ -137,7 +137,7 @@ public class WebSocketSuperMaster implements MasterSendReceive, MasterLifecycle 
 	@Override
 	public void stop() {
 		LOG.info("Stopping {}",
-				ClassnameProvider.getClassname(WebSocketSuperMaster.class));
+				ClassnameProvider.getClassname(WebSocketMasterEndpoint.class));
 	}
 
 	@Override
