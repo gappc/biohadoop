@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
-import at.ac.uibk.dps.biohadoop.communication.master.rest.SuperComputable;
+import at.ac.uibk.dps.biohadoop.communication.master.Master;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 import at.ac.uibk.dps.biohadoop.utils.PortFinder;
@@ -20,11 +20,11 @@ public class KryoSuperServer implements MasterLifecycle {
 	private static final Logger LOG = LoggerFactory.getLogger(KryoSuperServer.class);
 
 	private final Server server = new Server(64 * 1024, 64 * 1024);
-	private final Class<? extends SuperComputable> masterClass;
+	private final Class<? extends Master> masterClass;
 
 	private KryoSuperServerListener kryoServerListener;
 
-	public KryoSuperServer(Class<? extends SuperComputable> masterClass) {
+	public KryoSuperServer(Class<? extends Master> masterClass) {
 		this.masterClass = masterClass;
 	}
 	

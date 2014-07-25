@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
+import at.ac.uibk.dps.biohadoop.communication.master.Master;
 import at.ac.uibk.dps.biohadoop.communication.master.kryo.KryoMaster;
 import at.ac.uibk.dps.biohadoop.communication.master.kryo.KryoSuperServer;
 import at.ac.uibk.dps.biohadoop.communication.master.local.LocalMaster;
@@ -16,7 +17,6 @@ import at.ac.uibk.dps.biohadoop.communication.master.local.LocalSuperEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.master.rest.ResourcePath;
 import at.ac.uibk.dps.biohadoop.communication.master.rest.RestMaster;
 import at.ac.uibk.dps.biohadoop.communication.master.rest.RestSuperMaster;
-import at.ac.uibk.dps.biohadoop.communication.master.rest.SuperComputable;
 import at.ac.uibk.dps.biohadoop.communication.master.socket.SocketMaster;
 import at.ac.uibk.dps.biohadoop.communication.master.socket.SocketSuperServer;
 import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketMaster;
@@ -55,7 +55,7 @@ public class EndpointLauncher {
 			// masterConnections.add(masterConnection);
 			// }
 
-			for (Class<? extends SuperComputable> endpointClass : communicationConfiguration
+			for (Class<? extends Master> endpointClass : communicationConfiguration
 					.getMasters()) {
 				LOG.debug("Configuring SUPER master endpoint {}", endpointClass);
 

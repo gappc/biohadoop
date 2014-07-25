@@ -19,6 +19,7 @@ import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterSendReceive;
 import at.ac.uibk.dps.biohadoop.communication.master.ReceiveException;
 import at.ac.uibk.dps.biohadoop.communication.master.SendException;
+import at.ac.uibk.dps.biohadoop.communication.master.Master;
 import at.ac.uibk.dps.biohadoop.webserver.deployment.DeployingClasses;
 
 import com.fasterxml.jackson.databind.JavaType;
@@ -101,7 +102,7 @@ public class RestSuperMaster implements MasterSendReceive, MasterLifecycle {
 		try {
 			buildMasterEndpoint(path);
 			
-			Class<? extends SuperComputable> superComputableClass = ResourcePath
+			Class<? extends Master> superComputableClass = ResourcePath
 					.getRestEntry(path);
 			receiveClass = superComputableClass.getAnnotation(RestMaster.class).receive();
 			JavaType javaType = OBJECT_MAPPER.getTypeFactory().constructParametricType(Message.class, receiveClass);
@@ -128,7 +129,7 @@ public class RestSuperMaster implements MasterSendReceive, MasterLifecycle {
 	}
 	
 	private void buildMasterEndpoint(String path) throws InstantiationException, IllegalAccessException {
-		Class<? extends SuperComputable> superComputable = ResourcePath
+		Class<? extends Master> superComputable = ResourcePath
 				.getRestEntry(path);
 		String queueName = superComputable.getAnnotation(RestMaster.class)
 				.queueName();

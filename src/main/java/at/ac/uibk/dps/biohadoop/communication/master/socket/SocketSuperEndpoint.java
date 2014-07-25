@@ -18,7 +18,7 @@ import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterSendReceive;
 import at.ac.uibk.dps.biohadoop.communication.master.ReceiveException;
 import at.ac.uibk.dps.biohadoop.communication.master.SendException;
-import at.ac.uibk.dps.biohadoop.communication.master.rest.SuperComputable;
+import at.ac.uibk.dps.biohadoop.communication.master.Master;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 
 public class SocketSuperEndpoint implements Callable<Integer>, MasterSendReceive {
@@ -28,14 +28,14 @@ public class SocketSuperEndpoint implements Callable<Integer>, MasterSendReceive
 
 	private final String className = ClassnameProvider.getClassname(SocketSuperEndpoint.class);
 	private final Socket socket;
-	private final Class<? extends SuperComputable> masterClass;
+	private final Class<? extends Master> masterClass;
 
 	private ObjectOutputStream os = null;
 	private ObjectInputStream is = null;
 	private int counter = 0;
 	private boolean close = false;
 
-	public SocketSuperEndpoint(Socket socket, Class<? extends SuperComputable> masterClass) {
+	public SocketSuperEndpoint(Socket socket, Class<? extends Master> masterClass) {
 		this.socket = socket;
 		this.masterClass = masterClass;
 	}
@@ -117,7 +117,7 @@ public class SocketSuperEndpoint implements Callable<Integer>, MasterSendReceive
 	
 	private DefaultMasterImpl buildMaster() throws InstantiationException, IllegalAccessException {
 		String queueName = masterClass.getAnnotation(SocketMaster.class).queueName();
-		SuperComputable master = masterClass.newInstance();
+		Master master = masterClass.newInstance();
 		return DefaultMasterImpl.newInstance(this, queueName, master.getRegistrationObject());
 	}
 }

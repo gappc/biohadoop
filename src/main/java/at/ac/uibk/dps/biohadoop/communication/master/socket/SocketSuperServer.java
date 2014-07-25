@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
-import at.ac.uibk.dps.biohadoop.communication.master.rest.SuperComputable;
+import at.ac.uibk.dps.biohadoop.communication.master.Master;
 
 public class SocketSuperServer implements MasterLifecycle {
 
@@ -16,11 +16,11 @@ public class SocketSuperServer implements MasterLifecycle {
 
 	private final ExecutorService executorService = Executors
 			.newFixedThreadPool(1);
-	private final Class<? extends SuperComputable> masterClass;
+	private final Class<? extends Master> masterClass;
 	
 	private SocketSuperServerConnection socketServerConnection;
 	
-	public SocketSuperServer(Class<? extends SuperComputable> masterClass) {
+	public SocketSuperServer(Class<? extends Master> masterClass) {
 		this.masterClass = masterClass;
 	}
 

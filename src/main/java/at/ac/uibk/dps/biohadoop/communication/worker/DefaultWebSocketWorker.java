@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
-import at.ac.uibk.dps.biohadoop.communication.master.rest.SuperComputable;
+import at.ac.uibk.dps.biohadoop.communication.master.Master;
 import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketDecoder;
 import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketEncoder;
 import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketMaster;
@@ -59,7 +59,7 @@ public class DefaultWebSocketWorker<T, S> {
 	}
 
 	public void run(String host, int port) throws WorkerException {
-		Class<? extends SuperComputable> master = ((WebSocketWorker) worker.getClass()
+		Class<? extends Master> master = ((WebSocketWorker) worker.getClass()
 				.getAnnotation(WebSocketWorker.class)).master();
 		String path = master.getAnnotation(WebSocketMaster.class).path();
 		if (!path.startsWith("/")) {

@@ -13,7 +13,7 @@ import at.ac.uibk.dps.biohadoop.communication.CommunicationException;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
-import at.ac.uibk.dps.biohadoop.communication.master.rest.SuperComputable;
+import at.ac.uibk.dps.biohadoop.communication.master.Master;
 import at.ac.uibk.dps.biohadoop.communication.master.socket.SocketMaster;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
@@ -31,10 +31,10 @@ public class KryoSuperServerListener extends Listener {
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();
 	private final ZeroLock zeroLock = new ZeroLock();
-	private final Class<? extends SuperComputable> masterClass;
+	private final Class<? extends Master> masterClass;
 	private final String queueName;
 
-	public KryoSuperServerListener(Class<? extends SuperComputable> masterClass) {
+	public KryoSuperServerListener(Class<? extends Master> masterClass) {
 		this.masterClass = masterClass;
 		queueName = masterClass.getAnnotation(KryoMaster.class).queueName();
 	}
@@ -118,7 +118,7 @@ public class KryoSuperServerListener extends Listener {
 	private DefaultMasterImpl buildMaster(KryoSuperEndpoint kryoEndpoint)
 			throws Exception {
 		String queueName = masterClass.getAnnotation(SocketMaster.class).queueName();
-		SuperComputable master = masterClass.newInstance();
+		Master master = masterClass.newInstance();
 		return DefaultMasterImpl.newInstance(kryoEndpoint,
 				queueName, master.getRegistrationObject());
 	}

@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
-import at.ac.uibk.dps.biohadoop.communication.master.rest.SuperComputable;
+import at.ac.uibk.dps.biohadoop.communication.master.Master;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 import at.ac.uibk.dps.biohadoop.utils.PortFinder;
@@ -27,11 +27,11 @@ public class SocketSuperServerConnection implements Runnable {
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();
 	private final List<Future<Integer>> futures = new ArrayList<>();
-	private final Class<? extends SuperComputable> masterClass;
+	private final Class<? extends Master> masterClass;
 	
 	private volatile boolean stop;
 
-	public SocketSuperServerConnection(Class<? extends SuperComputable> masterClass) {
+	public SocketSuperServerConnection(Class<? extends Master> masterClass) {
 		this.masterClass = masterClass;
 	}
 

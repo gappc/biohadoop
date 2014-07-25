@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
-import at.ac.uibk.dps.biohadoop.communication.master.rest.SuperComputable;
+import at.ac.uibk.dps.biohadoop.communication.master.Master;
 import at.ac.uibk.dps.biohadoop.communication.master.socket.SocketMaster;
 import at.ac.uibk.dps.biohadoop.communication.worker.LocalWorker;
 import at.ac.uibk.dps.biohadoop.communication.worker.DefaultLocalWorker;

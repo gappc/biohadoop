@@ -22,9 +22,9 @@ import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterSendReceive;
 import at.ac.uibk.dps.biohadoop.communication.master.ReceiveException;
 import at.ac.uibk.dps.biohadoop.communication.master.SendException;
+import at.ac.uibk.dps.biohadoop.communication.master.Master;
 import at.ac.uibk.dps.biohadoop.communication.master.rest.ResourcePath;
 import at.ac.uibk.dps.biohadoop.communication.master.rest.RestMaster;
-import at.ac.uibk.dps.biohadoop.communication.master.rest.SuperComputable;
 import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
@@ -62,7 +62,7 @@ public class WebSocketSuperMaster implements MasterSendReceive, MasterLifecycle 
 		
 		session.getRequestURI();
 		try {
-			Class<? extends SuperComputable> superComputable = ResourcePath
+			Class<? extends Master> superComputable = ResourcePath
 					.getWebSocketEntry(path);
 			String queueName = superComputable.getAnnotation(RestMaster.class)
 					.queueName();
@@ -152,7 +152,7 @@ public class WebSocketSuperMaster implements MasterSendReceive, MasterLifecycle 
 	}
 	
 	private void buildMasterEndpoint(String path) throws InstantiationException, IllegalAccessException {
-		Class<? extends SuperComputable> superComputable = ResourcePath
+		Class<? extends Master> superComputable = ResourcePath
 				.getWebSocketEntry(path);
 		String queueName = superComputable.getAnnotation(RestMaster.class)
 				.queueName();
