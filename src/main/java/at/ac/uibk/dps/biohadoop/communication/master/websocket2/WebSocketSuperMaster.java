@@ -25,8 +25,6 @@ import at.ac.uibk.dps.biohadoop.communication.master.SendException;
 import at.ac.uibk.dps.biohadoop.communication.master.rest2.ResourcePath;
 import at.ac.uibk.dps.biohadoop.communication.master.rest2.RestMaster;
 import at.ac.uibk.dps.biohadoop.communication.master.rest2.SuperComputable;
-import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketDecoder;
-import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketEncoder;
 import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;

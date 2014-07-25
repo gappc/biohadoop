@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master.websocket;
+package at.ac.uibk.dps.biohadoop.communication.master.websocket2;
 
 import javax.websocket.EncodeException;
 import javax.websocket.Encoder;

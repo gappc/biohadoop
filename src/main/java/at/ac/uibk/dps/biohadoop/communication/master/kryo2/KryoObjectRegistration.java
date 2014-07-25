@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master.kryo;
+package at.ac.uibk.dps.biohadoop.communication.master.kryo2;
 
 import java.io.Serializable;
 import java.util.Arrays;

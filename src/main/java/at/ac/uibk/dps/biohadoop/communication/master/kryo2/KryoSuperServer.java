@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
-import at.ac.uibk.dps.biohadoop.communication.master.kryo.KryoObjectRegistration;
 import at.ac.uibk.dps.biohadoop.communication.master.rest2.SuperComputable;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
