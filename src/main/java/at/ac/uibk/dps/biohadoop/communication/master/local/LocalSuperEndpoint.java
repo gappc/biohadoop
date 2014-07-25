@@ -13,7 +13,7 @@ import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
 import at.ac.uibk.dps.biohadoop.communication.master.rest.SuperComputable;
 import at.ac.uibk.dps.biohadoop.communication.master.socket.SocketMaster;
-import at.ac.uibk.dps.biohadoop.communication.worker.LocalWorkerAnnotation;
+import at.ac.uibk.dps.biohadoop.communication.worker.LocalWorker;
 import at.ac.uibk.dps.biohadoop.communication.worker.SuperLocalWorker;
 import at.ac.uibk.dps.biohadoop.communication.worker.SuperWorker;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
@@ -38,7 +38,7 @@ public class LocalSuperEndpoint implements MasterLifecycle {
 	@Override
 	public void configure() throws EndpointConfigureException {
 		Annotation annotation = localWorker
-				.getAnnotation(LocalWorkerAnnotation.class);
+				.getAnnotation(LocalWorker.class);
 		if (annotation != null) {
 			BiohadoopConfiguration biohadoopConfiguration = Environment
 					.getBiohadoopConfiguration();

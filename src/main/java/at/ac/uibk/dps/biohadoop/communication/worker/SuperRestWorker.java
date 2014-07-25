@@ -47,7 +47,7 @@ public class SuperRestWorker<T, S> {// implements WorkerParameter {
 //	}
 
 	public void run(String host, int port) throws WorkerException {
-		String path = worker.getClass().getAnnotation(RestWorkerAnnotation.class).master().getAnnotation(RestMaster.class).path();
+		String path = worker.getClass().getAnnotation(RestWorker.class).master().getAnnotation(RestMaster.class).path();
 		if (!path.startsWith("/")) {
 			path = "/" + path;
 		}
@@ -104,7 +104,7 @@ public class SuperRestWorker<T, S> {// implements WorkerParameter {
 		Response response = client.target(url)
 				.request(MediaType.APPLICATION_JSON).get();
 		String dataString = response.readEntity(String.class);
-		Class<?> receiveClass = worker.getClass().getAnnotation(RestWorkerAnnotation.class).receive();
+		Class<?> receiveClass = worker.getClass().getAnnotation(RestWorker.class).receive();
 		JavaType javaType = objectMapper.getTypeFactory().constructParametricType(Message.class, receiveClass);
 		return objectMapper.readValue(dataString, javaType);
 	}
@@ -117,7 +117,7 @@ public class SuperRestWorker<T, S> {// implements WorkerParameter {
 
 		String dataString = response.readEntity(String.class);
 		
-		Class<?> receiveClass = worker.getClass().getAnnotation(RestWorkerAnnotation.class).receive();
+		Class<?> receiveClass = worker.getClass().getAnnotation(RestWorker.class).receive();
 		JavaType javaType = objectMapper.getTypeFactory().constructParametricType(Message.class, receiveClass);
 		return objectMapper.readValue(dataString, javaType);
 	}

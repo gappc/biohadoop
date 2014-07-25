@@ -6,8 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import at.ac.uibk.dps.biohadoop.communication.master.rest.SuperComputable;
 
 @Retention(RetentionPolicy.RUNTIME)
-public @interface SocketWorkerAnnotation {
+public @interface RestWorker {
 
 	Class<? extends SuperComputable> master();
+
+	Class<?> receive();
 
 }

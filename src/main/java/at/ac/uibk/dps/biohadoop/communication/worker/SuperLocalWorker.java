@@ -44,7 +44,7 @@ public class SuperLocalWorker<T, S> implements Callable<Integer> {//,
 		// }
 
 		String queueName = worker.getClass()
-				.getAnnotation(LocalWorkerAnnotation.class).master()
+				.getAnnotation(LocalWorker.class).master()
 				.getAnnotation(LocalMaster.class).queueName();
 		TaskEndpoint<T, S> taskEndpoint = new TaskEndpointImpl<>(queueName);
 		boolean registrationInit = false;
@@ -97,7 +97,7 @@ public class SuperLocalWorker<T, S> implements Callable<Integer> {//,
 	private void doRegistrationInit() throws InstantiationException,
 			IllegalAccessException {
 		Object data = worker.getClass()
-				.getAnnotation(LocalWorkerAnnotation.class).master()
+				.getAnnotation(LocalWorker.class).master()
 				.newInstance().getRegistrationObject();
 		worker.readRegistrationObject(data);
 	}

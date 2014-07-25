@@ -67,8 +67,8 @@ public class SuperWebSocketWorker<T, S> {//implements WorkerParameter {
 //	}
 
 	public void run(String host, int port) throws WorkerException {
-		Class<? extends SuperComputable> master = ((WebSocketWorkerAnnotation) worker.getClass()
-				.getAnnotation(WebSocketWorkerAnnotation.class)).master();
+		Class<? extends SuperComputable> master = ((WebSocketWorker) worker.getClass()
+				.getAnnotation(WebSocketWorker.class)).master();
 		String path = master.getAnnotation(WebSocketMaster.class).path();
 		if (!path.startsWith("/")) {
 			path = "/" + path;

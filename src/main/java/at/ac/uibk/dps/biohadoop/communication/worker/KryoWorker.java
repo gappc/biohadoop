@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import at.ac.uibk.dps.biohadoop.communication.master.rest.SuperComputable;
 
 @Retention(RetentionPolicy.RUNTIME)
-public @interface KryoWorkerAnnotation {
+public @interface KryoWorker {
 
 	Class<? extends SuperComputable> master();
 

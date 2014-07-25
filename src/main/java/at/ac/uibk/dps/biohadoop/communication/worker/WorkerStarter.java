@@ -74,7 +74,7 @@ public class WorkerStarter {
 			String host, int port) throws InstantiationException,
 			IllegalAccessException {
 		Annotation kryoWorkerAnnotation = workerClass
-				.getAnnotation(KryoWorkerAnnotation.class);
+				.getAnnotation(KryoWorker.class);
 		if (kryoWorkerAnnotation != null) {
 			SuperKryoWorker<?, ?> superKryoWorker = new SuperKryoWorker<Object, Object>(
 					workerClass);
@@ -91,7 +91,7 @@ public class WorkerStarter {
 			Class<? extends SuperWorker<Object, Object>> workerClass,
 			String host, int port) throws InstantiationException, IllegalAccessException {
 		Annotation restWorkerAnnotation = workerClass
-				.getAnnotation(RestWorkerAnnotation.class);
+				.getAnnotation(RestWorker.class);
 		if (restWorkerAnnotation != null) {
 			SuperRestWorker<?, ?> superRestWorker = new SuperRestWorker<Object, Object>(
 					workerClass);
@@ -109,7 +109,7 @@ public class WorkerStarter {
 			String host, int port) throws InstantiationException,
 			IllegalAccessException {
 		Annotation socketWorkerAnnotation = workerClass
-				.getAnnotation(SocketWorkerAnnotation.class);
+				.getAnnotation(SocketWorker.class);
 		if (socketWorkerAnnotation != null) {
 			SuperSocketWorker<?, ?> superSocketWorker = new SuperSocketWorker<Object, Object>(
 					workerClass);
@@ -126,7 +126,7 @@ public class WorkerStarter {
 			Class<? extends SuperWorker<Object, Object>> workerClass,
 			String host, int port) throws InstantiationException, IllegalAccessException {
 		Annotation webSocketWorkerAnnotation = workerClass
-				.getAnnotation(WebSocketWorkerAnnotation.class);
+				.getAnnotation(WebSocketWorker.class);
 		if (webSocketWorkerAnnotation != null) {
 			SuperWebSocketWorker<?, ?> superWebSocketWorker = new SuperWebSocketWorker<Object, Object>(
 					workerClass);

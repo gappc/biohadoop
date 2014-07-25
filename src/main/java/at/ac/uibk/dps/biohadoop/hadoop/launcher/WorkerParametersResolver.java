@@ -2,12 +2,12 @@ package at.ac.uibk.dps.biohadoop.hadoop.launcher;
 
 import java.lang.annotation.Annotation;
 
-import at.ac.uibk.dps.biohadoop.communication.worker.KryoWorkerAnnotation;
-import at.ac.uibk.dps.biohadoop.communication.worker.LocalWorkerAnnotation;
-import at.ac.uibk.dps.biohadoop.communication.worker.RestWorkerAnnotation;
-import at.ac.uibk.dps.biohadoop.communication.worker.SocketWorkerAnnotation;
+import at.ac.uibk.dps.biohadoop.communication.worker.KryoWorker;
+import at.ac.uibk.dps.biohadoop.communication.worker.LocalWorker;
+import at.ac.uibk.dps.biohadoop.communication.worker.RestWorker;
+import at.ac.uibk.dps.biohadoop.communication.worker.SocketWorker;
 import at.ac.uibk.dps.biohadoop.communication.worker.SuperWorker;
-import at.ac.uibk.dps.biohadoop.communication.worker.WebSocketWorkerAnnotation;
+import at.ac.uibk.dps.biohadoop.communication.worker.WebSocketWorker;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 
 public class WorkerParametersResolver {
@@ -15,9 +15,9 @@ public class WorkerParametersResolver {
 	public static String getKryoWorkerParameters(
 			Class<? extends SuperWorker<?, ?>> workerClass) throws Exception {
 		Annotation workerAnnotation = workerClass
-				.getAnnotation(KryoWorkerAnnotation.class);
+				.getAnnotation(KryoWorker.class);
 		if (workerAnnotation != null) {
-			String prefix = ((KryoWorkerAnnotation) workerAnnotation).master()
+			String prefix = ((KryoWorker) workerAnnotation).master()
 					.getCanonicalName();
 			String hostname = Environment.getPrefixed(prefix,
 					Environment.KRYO_SOCKET_HOST);
@@ -31,7 +31,7 @@ public class WorkerParametersResolver {
 	public static String getLocalWorkerParameters(
 			Class<? extends SuperWorker<?, ?>> workerClass) throws Exception {
 		Annotation workerAnnotation = workerClass
-				.getAnnotation(LocalWorkerAnnotation.class);
+				.getAnnotation(LocalWorker.class);
 		if (workerAnnotation != null) {
 			return "EMPTY";
 		}
@@ -41,7 +41,7 @@ public class WorkerParametersResolver {
 	public static String getRestWorkerParameters(
 			Class<? extends SuperWorker<?, ?>> workerClass) throws Exception {
 		Annotation workerAnnotation = workerClass
-				.getAnnotation(RestWorkerAnnotation.class);
+				.getAnnotation(RestWorker.class);
 		if (workerAnnotation != null) {
 			return Environment.get(Environment.HTTP_HOST) + " "
 					+ Environment.get(Environment.HTTP_PORT);
@@ -52,9 +52,9 @@ public class WorkerParametersResolver {
 	public static String getSocketWorkerParameters(
 			Class<? extends SuperWorker<?, ?>> workerClass) throws Exception {
 		Annotation workerAnnotation = workerClass
-				.getAnnotation(SocketWorkerAnnotation.class);
+				.getAnnotation(SocketWorker.class);
 		if (workerAnnotation != null) {
-			String prefix = ((SocketWorkerAnnotation) workerAnnotation)
+			String prefix = ((SocketWorker) workerAnnotation)
 					.master().getCanonicalName();
 			String hostname = Environment.getPrefixed(prefix,
 					Environment.SOCKET_HOST);
@@ -68,7 +68,7 @@ public class WorkerParametersResolver {
 	public static String getWebSocketWorkerParameters(
 			Class<? extends SuperWorker<?, ?>> workerClass) throws Exception {
 		Annotation workerAnnotation = workerClass
-				.getAnnotation(WebSocketWorkerAnnotation.class);
+				.getAnnotation(WebSocketWorker.class);
 		if (workerAnnotation != null) {
 			return Environment.get(Environment.HTTP_HOST) + " "
 					+ Environment.get(Environment.HTTP_PORT);
