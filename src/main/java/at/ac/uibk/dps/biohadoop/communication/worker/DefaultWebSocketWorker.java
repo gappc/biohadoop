@@ -29,13 +29,12 @@ import at.ac.uibk.dps.biohadoop.communication.master.rest.SuperComputable;
 import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketDecoder;
 import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketEncoder;
 import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketMaster;
-import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ClientEndpoint(encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
-public class DefaultWebSocketWorker<T, S> {//implements WorkerParameter {
+public class DefaultWebSocketWorker<T, S> {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DefaultWebSocketWorker.class);
@@ -58,13 +57,6 @@ public class DefaultWebSocketWorker<T, S> {//implements WorkerParameter {
 			throws InstantiationException, IllegalAccessException {
 		worker = workerClass.newInstance();
 	}
-
-//	@Override
-//	public String getWorkerParameters() {
-//		String hostname = Environment.get(Environment.HTTP_HOST);
-//		String port = Environment.get(Environment.HTTP_PORT);
-//		return hostname + " " + port;
-//	}
 
 	public void run(String host, int port) throws WorkerException {
 		Class<? extends SuperComputable> master = ((WebSocketWorker) worker.getClass()

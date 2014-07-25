@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.master.rest.RestMaster;
-import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
@@ -23,7 +22,7 @@ import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class DefaultRestWorker<T, S> {// implements WorkerParameter {
+public class DefaultRestWorker<T, S> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DefaultRestWorker.class);
 	private static final String CLASSNAME = ClassnameProvider

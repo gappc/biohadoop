@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.master.kryo.KryoObjectRegistration;
-import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -18,7 +17,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
 
-public class DefaultKryoWorker<T, S> {//implements WorkerParameter {
+public class DefaultKryoWorker<T, S> {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DefaultKryoWorker.class);
@@ -34,25 +33,6 @@ public class DefaultKryoWorker<T, S> {//implements WorkerParameter {
 			throws InstantiationException, IllegalAccessException {
 		worker = workerClass.newInstance();
 	}
-
-//	@Override
-//	public String getWorkerParameters() throws Exception {
-////		LOG.info("---------" + worker + "--------");
-////		LOG.info("---------" + worker.getClass() + "--------");
-////		LOG.info("---------" + ((KryoWorkerAnnotation) worker.getClass()
-////				.getAnnotation(KryoWorkerAnnotation.class)) + "--------");
-//		String prefix = ((KryoWorkerAnnotation) worker.getClass()
-//				.getAnnotation(KryoWorkerAnnotation.class)).master()
-//				.getCanonicalName();
-//		LOG.info("---------" + prefix + "--------");
-//		String hostname = Environment.getPrefixed(prefix,
-//				Environment.KRYO_SOCKET_HOST);
-//		LOG.info("HOSTNAME: " + hostname);
-//		String port = Environment.getPrefixed(prefix,
-//				Environment.KRYO_SOCKET_PORT);
-//		LOG.info("PORT: " + port);
-//		return hostname + " " + port;
-//	}
 
 	public void run(String host, int port) throws WorkerException {
 		Log.set(Log.LEVEL_DEBUG);

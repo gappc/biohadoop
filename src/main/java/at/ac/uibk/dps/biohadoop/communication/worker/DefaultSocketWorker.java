@@ -12,12 +12,11 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
-import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
-public class DefaultSocketWorker<T, S> {//implements WorkerParameter {
+public class DefaultSocketWorker<T, S> {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DefaultSocketWorker.class);
@@ -32,17 +31,6 @@ public class DefaultSocketWorker<T, S> {//implements WorkerParameter {
 			throws InstantiationException, IllegalAccessException {
 		worker = workerClass.newInstance();
 	}
-
-//	@Override
-//	public String getWorkerParameters() throws Exception {
-//		String prefix = ((SocketWorkerAnnotation) worker.getClass()
-//				.getAnnotation(SocketWorkerAnnotation.class)).master()
-//				.getCanonicalName();
-//		String hostname = Environment.getPrefixed(prefix,
-//				Environment.SOCKET_HOST);
-//		String port = Environment.getPrefixed(prefix, Environment.SOCKET_PORT);
-//		return hostname + " " + port;
-//	}
 
 	public void run(String host, int port) throws WorkerException {
 		try {

@@ -13,8 +13,7 @@ import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
-public class DefaultLocalWorker<T, S> implements Callable<Integer> {//,
-//		WorkerParameter {
+public class DefaultLocalWorker<T, S> implements Callable<Integer> {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DefaultLocalWorker.class);
@@ -34,14 +33,6 @@ public class DefaultLocalWorker<T, S> implements Callable<Integer> {//,
 	@Override
 	public Integer call() {
 		LOG.info("############# {} started ##############", CLASSNAME);
-		// MasterEndpoint masterEndpoint;
-		// try {
-		// masterEndpoint = getMasterEndpoint().newInstance();
-		// } catch (InstantiationException | IllegalAccessException e1) {
-		// LOG.error("Could not instanciate MasterEndpoint {}",
-		// getMasterEndpoint());
-		// return 1;
-		// }
 
 		String queueName = worker.getClass()
 				.getAnnotation(LocalWorker.class).master()
@@ -83,12 +74,6 @@ public class DefaultLocalWorker<T, S> implements Callable<Integer> {//,
 	public void stop() {
 		stop.set(true);
 	}
-
-//	@Override
-//	public String getWorkerParameters() throws Exception {
-//		LOG.error("getWorkerParameters");
-//		return null;
-//	}
 
 	public void run(String host, int port) throws WorkerException {
 		LOG.error("run");
