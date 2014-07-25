@@ -13,20 +13,20 @@ import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
-public class SuperLocalWorker<T, S> implements Callable<Integer> {//,
+public class DefaultLocalWorker<T, S> implements Callable<Integer> {//,
 //		WorkerParameter {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(SuperLocalWorker.class);
+			.getLogger(DefaultLocalWorker.class);
 	private static final String CLASSNAME = ClassnameProvider
-			.getClassname(SuperLocalWorker.class);
+			.getClassname(DefaultLocalWorker.class);
 
-	private final SuperWorker<T, S> worker;
+	private final Worker<T, S> worker;
 	private final AtomicBoolean stop = new AtomicBoolean(false);
 
 	private int logSteps = 1000;
 
-	public SuperLocalWorker(Class<? extends SuperWorker<T, S>> workerClass)
+	public DefaultLocalWorker(Class<? extends Worker<T, S>> workerClass)
 			throws InstantiationException, IllegalAccessException {
 		worker = workerClass.newInstance();
 	}

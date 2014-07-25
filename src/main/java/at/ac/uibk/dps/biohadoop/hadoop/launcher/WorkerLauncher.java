@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.worker.SuperWorker;
+import at.ac.uibk.dps.biohadoop.communication.worker.Worker;
 import at.ac.uibk.dps.biohadoop.communication.worker.WorkerStarter;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.LaunchContainerRunnable;
@@ -74,11 +74,11 @@ public class WorkerLauncher {
 		capability.setMemory(128);
 		capability.setVirtualCores(1);
 
-		List<Class<? extends SuperWorker<?, ?>>> workerList = getWorkerList(biohadoopConfig);
+		List<Class<? extends Worker<?, ?>>> workerList = getWorkerList(biohadoopConfig);
 		List<String> workerParameters = new ArrayList<>();
-		for (Iterator<Class<? extends SuperWorker<?, ?>>> it = workerList
+		for (Iterator<Class<? extends Worker<?, ?>>> it = workerList
 				.iterator(); it.hasNext();) {
-			Class<? extends SuperWorker<?, ?>> workerClass = it.next();
+			Class<? extends Worker<?, ?>> workerClass = it.next();
 
 			String workerParameter = getWorkerParameters(workerClass);
 
@@ -192,12 +192,12 @@ public class WorkerLauncher {
 		}).start();
 	}
 
-	private static List<Class<? extends SuperWorker<?, ?>>> getWorkerList(
+	private static List<Class<? extends Worker<?, ?>>> getWorkerList(
 			BiohadoopConfiguration config) {
-		List<Class<? extends SuperWorker<?, ?>>> workerList = new ArrayList<>();
+		List<Class<? extends Worker<?, ?>>> workerList = new ArrayList<>();
 		CommunicationConfiguration communicationConfiguration = config
 				.getCommunicationConfiguration();
-		for (Class<? extends SuperWorker<?, ?>> key : communicationConfiguration
+		for (Class<? extends Worker<?, ?>> key : communicationConfiguration
 				.getWorkers().keySet()) {
 			int value = communicationConfiguration.getWorkers().get(key);
 			for (int i = 0; i < value; i++) {
@@ -222,8 +222,8 @@ public class WorkerLauncher {
 
 	public static void pretendToLaunchWorkers(
 			BiohadoopConfiguration biohadoopConfiguration) {
-		List<Class<? extends SuperWorker<?, ?>>> workerList = getWorkerList(biohadoopConfiguration);
-		for (Class<? extends SuperWorker<?, ?>> workerClass : workerList) {
+		List<Class<? extends Worker<?, ?>>> workerList = getWorkerList(biohadoopConfiguration);
+		for (Class<? extends Worker<?, ?>> workerClass : workerList) {
 			try {
 				String workerParameter = getWorkerParameters(workerClass);
 
@@ -241,7 +241,7 @@ public class WorkerLauncher {
 
 		}
 	}
-	private static String getWorkerParameters(Class<? extends SuperWorker<?, ?>> workerClass) throws Exception {
+	private static String getWorkerParameters(Class<? extends Worker<?, ?>> workerClass) throws Exception {
 		String workerParameters = WorkerParametersResolver.getKryoWorkerParameters(workerClass);
 		if (workerParameters == null) {
 			workerParameters = WorkerParametersResolver.getLocalWorkerParameters(workerClass);

@@ -5,7 +5,7 @@ import java.util.Map;
 
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
 import at.ac.uibk.dps.biohadoop.communication.master.rest.SuperComputable;
-import at.ac.uibk.dps.biohadoop.communication.worker.SuperWorker;
+import at.ac.uibk.dps.biohadoop.communication.worker.Worker;
 import at.ac.uibk.dps.biohadoop.utils.ClassAsKeyDeserializer;
 import at.ac.uibk.dps.biohadoop.utils.ClassAsKeySerializer;
 
@@ -25,11 +25,11 @@ public class CommunicationConfiguration {
 	// java.lang.Class<at.ac.uibk.dps.biohadoop.connection.WorkerConnection>]
 	@JsonSerialize(keyUsing = ClassAsKeySerializer.class)
 	@JsonDeserialize(keyUsing = ClassAsKeyDeserializer.class)
-	private final Map<Class<? extends SuperWorker<?, ?>>, Integer> workers;
+	private final Map<Class<? extends Worker<?, ?>>, Integer> workers;
 
 	public CommunicationConfiguration(
 			List<Class<? extends SuperComputable>> masters,
-			Map<Class<? extends SuperWorker<?, ?>>, Integer> workers) {
+			Map<Class<? extends Worker<?, ?>>, Integer> workers) {
 		this.masters = masters;
 		this.workers = workers;
 	}
@@ -37,7 +37,7 @@ public class CommunicationConfiguration {
 	@JsonCreator
 	public static CommunicationConfiguration create(
 			@JsonProperty("masters") List<Class<? extends SuperComputable>> masters,
-			@JsonProperty("workers") Map<Class<? extends SuperWorker<?, ?>>, Integer> workers) {
+			@JsonProperty("workers") Map<Class<? extends Worker<?, ?>>, Integer> workers) {
 		return new CommunicationConfiguration(masters, workers);
 	}
 
@@ -45,7 +45,7 @@ public class CommunicationConfiguration {
 		return masters;
 	}
 
-	public Map<Class<? extends SuperWorker<?, ?>>, Integer> getWorkers() {
+	public Map<Class<? extends Worker<?, ?>>, Integer> getWorkers() {
 		return workers;
 	}
 

@@ -18,19 +18,19 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
 
-public class SuperKryoWorker<T, S> {//implements WorkerParameter {
+public class DefaultKryoWorker<T, S> {//implements WorkerParameter {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(SuperKryoWorker.class);
+			.getLogger(DefaultKryoWorker.class);
 
-	private final SuperWorker<T, S> worker;
+	private final Worker<T, S> worker;
 
 	private long startTime = System.currentTimeMillis();
 	private int counter = 0;
 	private int logSteps = 1000;
 	private CountDownLatch latch = new CountDownLatch(1);
 
-	public SuperKryoWorker(Class<? extends SuperWorker<T, S>> workerClass)
+	public DefaultKryoWorker(Class<? extends Worker<T, S>> workerClass)
 			throws InstantiationException, IllegalAccessException {
 		worker = workerClass.newInstance();
 	}
@@ -113,7 +113,7 @@ public class SuperKryoWorker<T, S> {//implements WorkerParameter {
 					if (inputMessage.getType() == MessageType.SHUTDOWN) {
 						LOG.info(
 								"############# {} Worker stopped ###############",
-								SuperKryoWorker.class.getSimpleName());
+								DefaultKryoWorker.class.getSimpleName());
 						client.close();
 						latch.countDown();
 					}

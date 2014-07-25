@@ -17,18 +17,18 @@ import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
-public class SuperSocketWorker<T, S> {//implements WorkerParameter {
+public class DefaultSocketWorker<T, S> {//implements WorkerParameter {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(SuperSocketWorker.class);
+			.getLogger(DefaultSocketWorker.class);
 
-	private final SuperWorker<T, S> worker;
+	private final Worker<T, S> worker;
 
 	private static String className = ClassnameProvider
-			.getClassname(SuperSocketWorker.class);
+			.getClassname(DefaultSocketWorker.class);
 	private int logSteps = 1000;
 
-	public SuperSocketWorker(Class<? extends SuperWorker<T, S>> workerClass)
+	public DefaultSocketWorker(Class<? extends Worker<T, S>> workerClass)
 			throws InstantiationException, IllegalAccessException {
 		worker = workerClass.newInstance();
 	}

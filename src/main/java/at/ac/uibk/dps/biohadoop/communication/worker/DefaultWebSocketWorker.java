@@ -35,26 +35,26 @@ import at.ac.uibk.dps.biohadoop.queue.Task;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ClientEndpoint(encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
-public class SuperWebSocketWorker<T, S> {//implements WorkerParameter {
+public class DefaultWebSocketWorker<T, S> {//implements WorkerParameter {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(SuperWebSocketWorker.class);
+			.getLogger(DefaultWebSocketWorker.class);
 
 	private static final int connectionTimeout = 2000;
 
 	private final CountDownLatch latch = new CountDownLatch(1);
 	private final AtomicBoolean forceShutdown = new AtomicBoolean(true);
 
-	private SuperWorker<T, S> worker;
+	private Worker<T, S> worker;
 	private long startTime = System.currentTimeMillis();
 	private int counter = 0;
 	private int logSteps = 1000;
 	private ObjectMapper om = new ObjectMapper();
 
-	public SuperWebSocketWorker() {
+	public DefaultWebSocketWorker() {
 	}
 
-	public SuperWebSocketWorker(Class<? extends SuperWorker<T, S>> workerClass)
+	public DefaultWebSocketWorker(Class<? extends Worker<T, S>> workerClass)
 			throws InstantiationException, IllegalAccessException {
 		worker = workerClass.newInstance();
 	}
@@ -135,7 +135,7 @@ public class SuperWebSocketWorker<T, S> {//implements WorkerParameter {
 		LOG.info("Closed connection to URI {}, sessionId={}",
 				session.getRequestURI(), session.getId());
 		LOG.info("############# {} stopped #############",
-				SuperWebSocketWorker.class.getSimpleName());
+				DefaultWebSocketWorker.class.getSimpleName());
 		latch.countDown();
 	}
 
@@ -182,7 +182,7 @@ public class SuperWebSocketWorker<T, S> {//implements WorkerParameter {
 		}
 		if (message.getType() == MessageType.SHUTDOWN) {
 			LOG.info("############# {} Worker stopped ###############",
-					SuperWebSocketWorker.class.getSimpleName());
+					DefaultWebSocketWorker.class.getSimpleName());
 			session.close();
 			return null;
 		}

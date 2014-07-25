@@ -40,7 +40,7 @@ public class WorkerStarter {
 					className, host, port);
 
 			Class<?> clazz = Class.forName(className);
-			Class<? extends SuperWorker<Object, Object>> workerClass = (Class<? extends SuperWorker<Object, Object>>) clazz;
+			Class<? extends Worker<Object, Object>> workerClass = (Class<? extends Worker<Object, Object>>) clazz;
 
 			// TODO make parallel
 			// TODO exceptions cought in methods, should be caught here?
@@ -70,13 +70,13 @@ public class WorkerStarter {
 	}
 
 	private static void buildKryoWorker(
-			Class<? extends SuperWorker<Object, Object>> workerClass,
+			Class<? extends Worker<Object, Object>> workerClass,
 			String host, int port) throws InstantiationException,
 			IllegalAccessException {
 		Annotation kryoWorkerAnnotation = workerClass
 				.getAnnotation(KryoWorker.class);
 		if (kryoWorkerAnnotation != null) {
-			SuperKryoWorker<?, ?> superKryoWorker = new SuperKryoWorker<Object, Object>(
+			DefaultKryoWorker<?, ?> superKryoWorker = new DefaultKryoWorker<Object, Object>(
 					workerClass);
 			try {
 				superKryoWorker.run(host, port);
@@ -88,12 +88,12 @@ public class WorkerStarter {
 	}
 
 	private static void buildRestWorker(
-			Class<? extends SuperWorker<Object, Object>> workerClass,
+			Class<? extends Worker<Object, Object>> workerClass,
 			String host, int port) throws InstantiationException, IllegalAccessException {
 		Annotation restWorkerAnnotation = workerClass
 				.getAnnotation(RestWorker.class);
 		if (restWorkerAnnotation != null) {
-			SuperRestWorker<?, ?> superRestWorker = new SuperRestWorker<Object, Object>(
+			DefaultRestWorker<?, ?> superRestWorker = new DefaultRestWorker<Object, Object>(
 					workerClass);
 			try {
 				superRestWorker.run(host, port);
@@ -105,13 +105,13 @@ public class WorkerStarter {
 	}
 
 	private static void buildSocketWorker(
-			Class<? extends SuperWorker<Object, Object>> workerClass,
+			Class<? extends Worker<Object, Object>> workerClass,
 			String host, int port) throws InstantiationException,
 			IllegalAccessException {
 		Annotation socketWorkerAnnotation = workerClass
 				.getAnnotation(SocketWorker.class);
 		if (socketWorkerAnnotation != null) {
-			SuperSocketWorker<?, ?> superSocketWorker = new SuperSocketWorker<Object, Object>(
+			DefaultSocketWorker<?, ?> superSocketWorker = new DefaultSocketWorker<Object, Object>(
 					workerClass);
 			try {
 				superSocketWorker.run(host, port);
@@ -123,12 +123,12 @@ public class WorkerStarter {
 	}
 
 	private static void buildWebSocketWorker(
-			Class<? extends SuperWorker<Object, Object>> workerClass,
+			Class<? extends Worker<Object, Object>> workerClass,
 			String host, int port) throws InstantiationException, IllegalAccessException {
 		Annotation webSocketWorkerAnnotation = workerClass
 				.getAnnotation(WebSocketWorker.class);
 		if (webSocketWorkerAnnotation != null) {
-			SuperWebSocketWorker<?, ?> superWebSocketWorker = new SuperWebSocketWorker<Object, Object>(
+			DefaultWebSocketWorker<?, ?> superWebSocketWorker = new DefaultWebSocketWorker<Object, Object>(
 					workerClass);
 			try {
 				superWebSocketWorker.run(host, port);

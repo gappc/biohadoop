@@ -3,13 +3,13 @@ package at.ac.uibk.dps.biohadoop.communication.master.local;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import at.ac.uibk.dps.biohadoop.communication.worker.SuperWorker;
+import at.ac.uibk.dps.biohadoop.communication.worker.Worker;
 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LocalMaster {
 
 	String queueName();
 	
-	Class<? extends SuperWorker<?, ?>> localWorker();
+	Class<? extends Worker<?, ?>> localWorker();
 	
 }

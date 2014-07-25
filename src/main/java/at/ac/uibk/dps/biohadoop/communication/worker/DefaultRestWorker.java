@@ -23,18 +23,18 @@ import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class SuperRestWorker<T, S> {// implements WorkerParameter {
+public class DefaultRestWorker<T, S> {// implements WorkerParameter {
 
-	private static final Logger LOG = LoggerFactory.getLogger(SuperRestWorker.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DefaultRestWorker.class);
 	private static final String CLASSNAME = ClassnameProvider
-			.getClassname(SuperRestWorker.class);
+			.getClassname(DefaultRestWorker.class);
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
-	private final SuperWorker<T, S> worker;
+	private final Worker<T, S> worker;
 
 	private int logSteps = 1000;
 
-	public SuperRestWorker(Class<? extends SuperWorker<T, S>> workerClass)
+	public DefaultRestWorker(Class<? extends Worker<T, S>> workerClass)
 			throws InstantiationException, IllegalAccessException {
 		worker = workerClass.newInstance();
 	}

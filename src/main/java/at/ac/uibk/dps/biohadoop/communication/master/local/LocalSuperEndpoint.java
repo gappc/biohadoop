@@ -14,8 +14,8 @@ import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
 import at.ac.uibk.dps.biohadoop.communication.master.rest.SuperComputable;
 import at.ac.uibk.dps.biohadoop.communication.master.socket.SocketMaster;
 import at.ac.uibk.dps.biohadoop.communication.worker.LocalWorker;
-import at.ac.uibk.dps.biohadoop.communication.worker.SuperLocalWorker;
-import at.ac.uibk.dps.biohadoop.communication.worker.SuperWorker;
+import at.ac.uibk.dps.biohadoop.communication.worker.DefaultLocalWorker;
+import at.ac.uibk.dps.biohadoop.communication.worker.Worker;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointConfigureException;
@@ -28,10 +28,10 @@ public class LocalSuperEndpoint implements MasterLifecycle {
 
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();
-	private final List<SuperLocalWorker<?, ?>> localWorkers = new ArrayList<>();
-	private final Class<? extends SuperWorker<?, ?>> localWorker;
+	private final List<DefaultLocalWorker<?, ?>> localWorkers = new ArrayList<>();
+	private final Class<? extends Worker<?, ?>> localWorker;
 
-	public LocalSuperEndpoint(Class<? extends SuperWorker<?, ?>> localWorker) {
+	public LocalSuperEndpoint(Class<? extends Worker<?, ?>> localWorker) {
 		this.localWorker = localWorker;
 	}
 
@@ -51,7 +51,7 @@ public class LocalSuperEndpoint implements MasterLifecycle {
 			if (workerCount != null) {
 				try {
 					for (int i = 0; i < workerCount; i++) {
-						localWorkers.add(new SuperLocalWorker(localWorker));
+						localWorkers.add(new DefaultLocalWorker(localWorker));
 					}
 				} catch (InstantiationException | IllegalAccessException e) {
 					// TODO Auto-generated catch block
@@ -67,7 +67,7 @@ public class LocalSuperEndpoint implements MasterLifecycle {
 
 	@Override
 	public void start() throws EndpointLaunchException {
-		for (SuperLocalWorker<?, ?> localGaWorker : localWorkers) {
+		for (DefaultLocalWorker<?, ?> localGaWorker : localWorkers) {
 			executorService.submit(localGaWorker);
 		}
 		LOG.info("Local Workers started");
@@ -75,7 +75,7 @@ public class LocalSuperEndpoint implements MasterLifecycle {
 
 	@Override
 	public void stop() {
-		for (SuperLocalWorker<?, ?> localGaWorker : localWorkers) {
+		for (DefaultLocalWorker<?, ?> localGaWorker : localWorkers) {
 			localGaWorker.stop();
 		}
 		executorService.shutdown();
