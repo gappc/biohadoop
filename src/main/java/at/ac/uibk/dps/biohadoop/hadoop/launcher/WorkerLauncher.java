@@ -118,9 +118,6 @@ public class WorkerLauncher {
 				ContainerLaunchContext ctx = Records
 						.newRecord(ContainerLaunchContext.class);
 
-				// WorkerParameter worker = (WorkerParameter) Class.forName(
-				// workerList.get(0)).newInstance();
-				// String parameters = worker.getWorkerParameters();
 				String parameters = workerParameters.get(0);
 
 				String clientCommand = String
@@ -131,6 +128,7 @@ public class WorkerLauncher {
 								ApplicationConstants.LOG_DIR_EXPANSION_VAR);
 
 				workerList.remove(0);
+				workerParameters.remove(0);
 				LOG.info("Client command: " + clientCommand);
 				ctx.setCommands(Collections.singletonList(clientCommand));
 
