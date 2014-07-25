@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master.socket2;
+package at.ac.uibk.dps.biohadoop.communication.master.socket;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -18,7 +18,7 @@ import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterSendReceive;
 import at.ac.uibk.dps.biohadoop.communication.master.ReceiveException;
 import at.ac.uibk.dps.biohadoop.communication.master.SendException;
-import at.ac.uibk.dps.biohadoop.communication.master.rest2.SuperComputable;
+import at.ac.uibk.dps.biohadoop.communication.master.rest.SuperComputable;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 
 public class SocketSuperEndpoint implements Callable<Integer>, MasterSendReceive {

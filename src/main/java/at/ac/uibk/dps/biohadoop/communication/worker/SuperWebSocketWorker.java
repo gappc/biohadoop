@@ -25,10 +25,10 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
-import at.ac.uibk.dps.biohadoop.communication.master.rest2.SuperComputable;
-import at.ac.uibk.dps.biohadoop.communication.master.websocket2.WebSocketDecoder;
-import at.ac.uibk.dps.biohadoop.communication.master.websocket2.WebSocketEncoder;
-import at.ac.uibk.dps.biohadoop.communication.master.websocket2.WebSocketMaster;
+import at.ac.uibk.dps.biohadoop.communication.master.rest.SuperComputable;
+import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketDecoder;
+import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketEncoder;
+import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketMaster;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 

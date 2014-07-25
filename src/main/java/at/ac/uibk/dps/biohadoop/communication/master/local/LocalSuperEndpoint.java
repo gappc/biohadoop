@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master.local2;
+package at.ac.uibk.dps.biohadoop.communication.master.local;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -11,8 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
-import at.ac.uibk.dps.biohadoop.communication.master.rest2.SuperComputable;
-import at.ac.uibk.dps.biohadoop.communication.master.socket2.SocketMaster;
+import at.ac.uibk.dps.biohadoop.communication.master.rest.SuperComputable;
+import at.ac.uibk.dps.biohadoop.communication.master.socket.SocketMaster;
 import at.ac.uibk.dps.biohadoop.communication.worker.LocalWorkerAnnotation;
 import at.ac.uibk.dps.biohadoop.communication.worker.SuperLocalWorker;
 import at.ac.uibk.dps.biohadoop.communication.worker.SuperWorker;

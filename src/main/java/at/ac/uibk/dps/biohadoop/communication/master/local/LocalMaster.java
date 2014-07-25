@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master.local2;
+package at.ac.uibk.dps.biohadoop.communication.master.local;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master.rest2;
+package at.ac.uibk.dps.biohadoop.communication.master.rest;
 
 import java.io.IOException;
 

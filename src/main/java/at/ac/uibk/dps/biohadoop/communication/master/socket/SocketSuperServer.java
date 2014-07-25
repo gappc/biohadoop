@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master.socket2;
+package at.ac.uibk.dps.biohadoop.communication.master.socket;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
-import at.ac.uibk.dps.biohadoop.communication.master.rest2.SuperComputable;
+import at.ac.uibk.dps.biohadoop.communication.master.rest.SuperComputable;
 
 public class SocketSuperServer implements MasterLifecycle {
 

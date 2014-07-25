@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master.kryo2;
+package at.ac.uibk.dps.biohadoop.communication.master.kryo;
 
 import java.util.UUID;
 

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
-import at.ac.uibk.dps.biohadoop.communication.master.rest2.SuperComputable;
+import at.ac.uibk.dps.biohadoop.communication.master.rest.SuperComputable;
 import at.ac.uibk.dps.biohadoop.communication.worker.SuperWorker;
 import at.ac.uibk.dps.biohadoop.utils.ClassAsKeyDeserializer;
 import at.ac.uibk.dps.biohadoop.utils.ClassAsKeySerializer;
