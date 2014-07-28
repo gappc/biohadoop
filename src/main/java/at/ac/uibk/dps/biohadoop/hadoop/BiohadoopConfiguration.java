@@ -11,18 +11,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class BiohadoopConfiguration {
 
-	private final String version;
 	private final List<String> includePaths;
 	private final List<SolverConfiguration> solverConfiguration;
 	private final CommunicationConfiguration communicationConfiguration;
 	private final ZooKeeperConfiguration zooKeeperConfiguration;
 
-	public BiohadoopConfiguration(String version, List<String> includePaths,
+	public BiohadoopConfiguration(List<String> includePaths,
 			List<SolverConfiguration> solverConfiguration,
 			CommunicationConfiguration communicationConfiguration,
 			ZooKeeperConfiguration zooKeeperConfiguration) {
-		super();
-		this.version = version;
 		this.includePaths = includePaths;
 		this.solverConfiguration = solverConfiguration;
 		this.communicationConfiguration = communicationConfiguration;
@@ -31,18 +28,12 @@ public class BiohadoopConfiguration {
 
 	@JsonCreator
 	public static BiohadoopConfiguration create(
-			@JsonProperty("version") String version,
 			@JsonProperty("includePaths") List<String> includePaths,
 			@JsonProperty("solverConfiguration") List<SolverConfiguration> solverConfiguration,
 			@JsonProperty("communicationConfiguration") CommunicationConfiguration communicationConfiguration,
 			@JsonProperty("zooKeeperConfiguration") ZooKeeperConfiguration zooKeeperConfiguration) {
-		return new BiohadoopConfiguration(version, includePaths,
-				solverConfiguration, communicationConfiguration,
-				zooKeeperConfiguration);
-	}
-
-	public String getVersion() {
-		return version;
+		return new BiohadoopConfiguration(includePaths, solverConfiguration,
+				communicationConfiguration, zooKeeperConfiguration);
 	}
 
 	public List<String> getIncludePaths() {
