@@ -20,18 +20,15 @@ public class KryoMasterServer implements MasterLifecycle {
 	private static final Logger LOG = LoggerFactory.getLogger(KryoMasterServer.class);
 
 	private final Server server = new Server(64 * 1024, 64 * 1024);
-	private final Class<? extends Master> masterClass;
 
+	private Class<? extends Master> master;
 	private KryoMasterServerListener kryoServerListener;
 
-	public KryoMasterServer(Class<? extends Master> masterClass) {
-		this.masterClass = masterClass;
-	}
-	
 	@Override
-	public void configure() {
+	public void configure(Class<? extends Master> master) {
 		Log.set(Log.LEVEL_DEBUG);
-		kryoServerListener = new KryoMasterServerListener(masterClass);
+		this.master = master;
+		kryoServerListener = new KryoMasterServerListener(master);
 	}
 
 	@Override
@@ -55,7 +52,7 @@ public class KryoMasterServer implements MasterLifecycle {
 	private void startServer() throws IOException {
 		new Thread(server).start();
 
-		String prefix = masterClass.getCanonicalName();
+		String prefix = master.getCanonicalName();
 		String host = HostInfo.getHostname();
 		
 		PortFinder.aquireBindingLock();

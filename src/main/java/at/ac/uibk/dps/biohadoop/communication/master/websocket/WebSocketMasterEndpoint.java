@@ -1,6 +1,7 @@
 package at.ac.uibk.dps.biohadoop.communication.master.websocket;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 
 import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
@@ -18,11 +19,11 @@ import at.ac.uibk.dps.biohadoop.communication.CommunicationException;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
+import at.ac.uibk.dps.biohadoop.communication.master.Master;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterSendReceive;
 import at.ac.uibk.dps.biohadoop.communication.master.ReceiveException;
 import at.ac.uibk.dps.biohadoop.communication.master.SendException;
-import at.ac.uibk.dps.biohadoop.communication.master.Master;
 import at.ac.uibk.dps.biohadoop.communication.master.rest.ResourcePath;
 import at.ac.uibk.dps.biohadoop.communication.master.rest.RestMaster;
 import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
@@ -33,7 +34,8 @@ import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.webserver.deployment.DeployingClasses;
 
 @ServerEndpoint(value = "/{path}", encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
-public class WebSocketMasterEndpoint implements MasterSendReceive, MasterLifecycle {
+public class WebSocketMasterEndpoint implements MasterSendReceive,
+		MasterLifecycle {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WebSocketMasterEndpoint.class);
@@ -46,8 +48,11 @@ public class WebSocketMasterEndpoint implements MasterSendReceive, MasterLifecyc
 	private boolean close = false;
 
 	@Override
-	public void configure() {
-		DeployingClasses.addWebSocketClass(this.getClass());
+	public void configure(Class<? extends Master> master) {
+		Annotation annotation = master.getAnnotation(WebSocketMaster.class);
+		ResourcePath.addWebSocketEntry(((WebSocketMaster) annotation).path(),
+				master);
+		DeployingClasses.addWebSocketClass(WebSocketMasterEndpoint.class);
 	}
 
 	@Override
@@ -59,7 +64,7 @@ public class WebSocketMasterEndpoint implements MasterSendReceive, MasterLifecyc
 		LOG.info("Opened Websocket connection to URI {}, sessionId={}",
 				session.getRequestURI(), session.getId());
 		ShutdownWaitingService.register();
-		
+
 		session.getRequestURI();
 		try {
 			Class<? extends Master> superComputable = ResourcePath
@@ -67,7 +72,7 @@ public class WebSocketMasterEndpoint implements MasterSendReceive, MasterLifecyc
 			String queueName = superComputable.getAnnotation(RestMaster.class)
 					.queueName();
 			taskEndpoint = new TaskEndpointImpl<>(queueName);
-			
+
 			buildMasterEndpoint(path);
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
@@ -150,8 +155,9 @@ public class WebSocketMasterEndpoint implements MasterSendReceive, MasterLifecyc
 	public <T> void send(Message<T> message) throws SendException {
 		outputMessage = message;
 	}
-	
-	private void buildMasterEndpoint(String path) throws InstantiationException, IllegalAccessException {
+
+	private void buildMasterEndpoint(String path)
+			throws InstantiationException, IllegalAccessException {
 		Class<? extends Master> superComputable = ResourcePath
 				.getWebSocketEntry(path);
 		String queueName = superComputable.getAnnotation(RestMaster.class)

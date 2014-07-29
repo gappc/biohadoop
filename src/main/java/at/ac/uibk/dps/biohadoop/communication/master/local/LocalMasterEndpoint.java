@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
+import at.ac.uibk.dps.biohadoop.communication.master.Master;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
 import at.ac.uibk.dps.biohadoop.communication.worker.DefaultLocalWorker;
 import at.ac.uibk.dps.biohadoop.communication.worker.LocalWorker;
@@ -27,16 +28,15 @@ public class LocalMasterEndpoint implements MasterLifecycle {
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();
 	private final List<DefaultLocalWorker<?, ?>> localWorkers = new ArrayList<>();
-	private final Class<? extends Worker<?, ?>> localWorker;
-
-	public LocalMasterEndpoint(Class<? extends Worker<?, ?>> localWorker) {
-		this.localWorker = localWorker;
-	}
 
 	@Override
-	public void configure() throws EndpointConfigureException {
-		Annotation annotation = localWorker
-				.getAnnotation(LocalWorker.class);
+	public void configure(Class<? extends Master> master)
+			throws EndpointConfigureException {
+		LocalMaster localMasterAnnotation = master
+				.getAnnotation(LocalMaster.class);
+		Class<? extends Worker<?, ?>> localWorker = localMasterAnnotation
+				.localWorker();
+		Annotation annotation = localWorker.getAnnotation(LocalWorker.class);
 		if (annotation != null) {
 			BiohadoopConfiguration biohadoopConfiguration = Environment
 					.getBiohadoopConfiguration();
@@ -45,7 +45,7 @@ public class LocalMasterEndpoint implements MasterLifecycle {
 
 			Integer workerCount = communicationConfiguration.getWorkers().get(
 					localWorker);
-			
+
 			if (workerCount != null) {
 				try {
 					for (int i = 0; i < workerCount; i++) {
@@ -56,9 +56,8 @@ public class LocalMasterEndpoint implements MasterLifecycle {
 					e.printStackTrace();
 					throw new EndpointConfigureException(e);
 				}
-			}
-			else {
-				LOG.warn("No workers for local running solver found");
+			} else {
+				LOG.warn("No workers for local running solver found, therefor no local workers started");
 			}
 		}
 	}

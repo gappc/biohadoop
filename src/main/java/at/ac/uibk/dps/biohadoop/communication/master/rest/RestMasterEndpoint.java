@@ -1,6 +1,7 @@
 package at.ac.uibk.dps.biohadoop.communication.master.rest;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -20,6 +21,7 @@ import at.ac.uibk.dps.biohadoop.communication.master.MasterSendReceive;
 import at.ac.uibk.dps.biohadoop.communication.master.ReceiveException;
 import at.ac.uibk.dps.biohadoop.communication.master.SendException;
 import at.ac.uibk.dps.biohadoop.communication.master.Master;
+import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketMaster;
 import at.ac.uibk.dps.biohadoop.webserver.deployment.DeployingClasses;
 
 import com.fasterxml.jackson.databind.JavaType;
@@ -38,8 +40,12 @@ public class RestMasterEndpoint implements MasterSendReceive, MasterLifecycle {
 	private Message<?> outputMessage;
 
 	@Override
-	public void configure() {
-		DeployingClasses.addWebSocketClass(this.getClass());
+	public void configure(Class<? extends Master> master) {
+		Annotation annotation = master.getAnnotation(RestMaster.class);
+		ResourcePath.addRestEntry(
+				((RestMaster) annotation).path(),
+				master);
+		DeployingClasses.addRestfulClass(RestMasterEndpoint.class);
 	}
 
 	@Override
