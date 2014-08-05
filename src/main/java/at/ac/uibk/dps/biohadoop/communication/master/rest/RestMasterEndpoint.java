@@ -2,6 +2,8 @@ package at.ac.uibk.dps.biohadoop.communication.master.rest;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -13,61 +15,49 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.communication.CommunicationException;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
-import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
-import at.ac.uibk.dps.biohadoop.communication.master.MasterSendReceive;
-import at.ac.uibk.dps.biohadoop.communication.master.ReceiveException;
-import at.ac.uibk.dps.biohadoop.communication.master.SendException;
 import at.ac.uibk.dps.biohadoop.communication.master.Master;
-import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketMaster;
+import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
+import at.ac.uibk.dps.biohadoop.utils.ResourcePath;
 import at.ac.uibk.dps.biohadoop.webserver.deployment.DeployingClasses;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Path("/")
-public class RestMasterEndpoint implements MasterSendReceive, MasterLifecycle {
+public class RestMasterEndpoint implements MasterLifecycle {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(RestMasterEndpoint.class);
-
+	private static final Map<String, DefaultMasterImpl> MASTERS = new ConcurrentHashMap<>();
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-	
-	private DefaultMasterImpl masterEndpoint;
-	private Message<?> inputMessage;
-	private Message<?> outputMessage;
 
 	@Override
 	public void configure(Class<? extends Master> master) {
 		Annotation annotation = master.getAnnotation(RestMaster.class);
-		ResourcePath.addRestEntry(
-				((RestMaster) annotation).path(),
-				master);
+		ResourcePath.addRestEntry(((RestMaster) annotation).path(), master);
 		DeployingClasses.addRestfulClass(RestMasterEndpoint.class);
 	}
 
 	@Override
 	public void start() {
 	}
-	
+
 	@Override
 	public void stop() {
 	}
-	
+
 	@GET
 	@Path("{path}/registration")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Message<?> registration(@PathParam("path") String path) {
 		try {
-			buildMasterEndpoint(path);
-			masterEndpoint.handleRegistration();
-			return outputMessage;
-		} catch (CommunicationException e) {
-			LOG.error(
-					"Error while communicating with worker, closing communication",
-					e);
+			DefaultMasterImpl masterEndpoint = buildMasterEndpoint(path);
+			Object registrationObject = getRegistrationObject(path);
+			return masterEndpoint.handleRegistration(registrationObject);
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -83,13 +73,8 @@ public class RestMasterEndpoint implements MasterSendReceive, MasterLifecycle {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Message<?> workinit(@PathParam("path") String path) {
 		try {
-			buildMasterEndpoint(path);
-			masterEndpoint.handleWorkInit();
-			return outputMessage;
-		} catch (CommunicationException e) {
-			LOG.error(
-					"Error while communicating with worker, closing communication",
-					e);
+			DefaultMasterImpl masterEndpoint = buildMasterEndpoint(path);
+			return masterEndpoint.handleWorkInit();
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -104,26 +89,13 @@ public class RestMasterEndpoint implements MasterSendReceive, MasterLifecycle {
 	@Path("{path}/work")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Message<?> work(@PathParam("path") String path, String messageString) {
-		Class<?> receiveClass = null;
 		try {
-			buildMasterEndpoint(path);
-			
-			Class<? extends Master> superComputableClass = ResourcePath
-					.getRestEntry(path);
-			receiveClass = superComputableClass.getAnnotation(RestMaster.class).receive();
-			JavaType javaType = OBJECT_MAPPER.getTypeFactory().constructParametricType(Message.class, receiveClass);
-			
-			Message<?> message = OBJECT_MAPPER.readValue(messageString, javaType);
-			inputMessage = message;
-			masterEndpoint.handleWork();
-			return outputMessage;
+			DefaultMasterImpl masterEndpoint = buildMasterEndpoint(path);
+			Message<?> inputMessage = getInputMessage(path, messageString);
+			return masterEndpoint.handleWork(inputMessage);
 		} catch (IOException e) {
-			LOG.error("Could not deserialize data {} to object {}",
-					messageString, receiveClass, e);
-		} catch (CommunicationException e) {
-			LOG.error(
-					"Error while communicating with worker, closing communication",
-					e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -133,27 +105,36 @@ public class RestMasterEndpoint implements MasterSendReceive, MasterLifecycle {
 		}
 		return null;
 	}
-	
-	private void buildMasterEndpoint(String path) throws InstantiationException, IllegalAccessException {
-		Class<? extends Master> superComputable = ResourcePath
-				.getRestEntry(path);
-		String queueName = superComputable.getAnnotation(RestMaster.class)
-				.queueName();
-		Object registrationObject = superComputable.newInstance()
-				.getRegistrationObject();
-		masterEndpoint = DefaultMasterImpl.newInstance(this, queueName,
-				registrationObject);
+
+	private DefaultMasterImpl buildMasterEndpoint(String path)
+			throws InstantiationException, IllegalAccessException {
+		DefaultMasterImpl masterEndpoint = MASTERS.get(path);
+		if (masterEndpoint == null) {
+			Class<? extends Master> masterClass = ResourcePath
+					.getRestEntry(path);
+			String queueName = masterClass.getAnnotation(RestMaster.class)
+					.queueName();
+			masterEndpoint = DefaultMasterImpl.newInstance(queueName);
+			MASTERS.put(path, masterEndpoint);
+		}
+		return masterEndpoint;
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> Message<T> receive() throws ReceiveException {
-		return (Message<T>) inputMessage;
+	private Object getRegistrationObject(String path)
+			throws InstantiationException, IllegalAccessException {
+		Class<? extends Master> masterClass = ResourcePath.getRestEntry(path);
+		Master master = masterClass.newInstance();
+		return master.getRegistrationObject();
 	}
 
-	@Override
-	public <T> void send(Message<T> message) throws SendException {
-		outputMessage = message;
+	private Message<?> getInputMessage(String path, String messageString)
+			throws JsonParseException, JsonMappingException, IOException {
+		Class<? extends Master> masterClass = ResourcePath.getRestEntry(path);
+		Class<?> receiveClass = masterClass.getAnnotation(RestMaster.class)
+				.receive();
+		JavaType javaType = OBJECT_MAPPER.getTypeFactory()
+				.constructParametricType(Message.class, receiveClass);
+		return OBJECT_MAPPER.readValue(messageString, javaType);
 	}
-	
+
 }

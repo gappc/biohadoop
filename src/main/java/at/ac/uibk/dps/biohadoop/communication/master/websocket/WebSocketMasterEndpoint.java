@@ -15,27 +15,21 @@ import javax.websocket.server.ServerEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.communication.CommunicationException;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.communication.master.Master;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
-import at.ac.uibk.dps.biohadoop.communication.master.MasterSendReceive;
-import at.ac.uibk.dps.biohadoop.communication.master.ReceiveException;
-import at.ac.uibk.dps.biohadoop.communication.master.SendException;
-import at.ac.uibk.dps.biohadoop.communication.master.rest.ResourcePath;
-import at.ac.uibk.dps.biohadoop.communication.master.rest.RestMaster;
 import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
+import at.ac.uibk.dps.biohadoop.utils.ResourcePath;
 import at.ac.uibk.dps.biohadoop.webserver.deployment.DeployingClasses;
 
 @ServerEndpoint(value = "/{path}", encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
-public class WebSocketMasterEndpoint implements MasterSendReceive,
-		MasterLifecycle {
+public class WebSocketMasterEndpoint implements MasterLifecycle {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WebSocketMasterEndpoint.class);
@@ -43,8 +37,6 @@ public class WebSocketMasterEndpoint implements MasterSendReceive,
 	private TaskEndpoint<?, ?> taskEndpoint;
 
 	private DefaultMasterImpl masterEndpoint;
-	private Message<?> inputMessage;
-	private Message<?> outputMessage;
 	private boolean close = false;
 
 	@Override
@@ -67,12 +59,6 @@ public class WebSocketMasterEndpoint implements MasterSendReceive,
 
 		session.getRequestURI();
 		try {
-			Class<? extends Master> superComputable = ResourcePath
-					.getWebSocketEntry(path);
-			String queueName = superComputable.getAnnotation(RestMaster.class)
-					.queueName();
-			taskEndpoint = new TaskEndpointImpl<>(queueName);
-
 			buildMasterEndpoint(path);
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
@@ -85,35 +71,40 @@ public class WebSocketMasterEndpoint implements MasterSendReceive,
 
 	@OnMessage
 	public Message<?> onMessage(@PathParam("path") String path,
-			Message<Double> message, Session session) {
+			Message<Double> inputMessage, Session session) {
 		if (close) {
 			LOG.info("CLOSE");
 			return new Message<>(MessageType.SHUTDOWN, null);
 		}
 
-		inputMessage = message;
 		try {
-			if (message.getType() == MessageType.REGISTRATION_REQUEST) {
-				masterEndpoint.handleRegistration();
+			if (inputMessage.getType() == MessageType.REGISTRATION_REQUEST) {
+				Object registrationObject = getRegistrationObject(path);
+				return masterEndpoint.handleRegistration(registrationObject);
 			}
-			if (message.getType() == MessageType.WORK_INIT_REQUEST) {
-				masterEndpoint.handleWorkInit();
+			if (inputMessage.getType() == MessageType.WORK_INIT_REQUEST) {
+				return masterEndpoint.handleWorkInit();
 			}
-			if (message.getType() == MessageType.WORK_REQUEST) {
-				masterEndpoint.handleWork();
+			if (inputMessage.getType() == MessageType.WORK_REQUEST) {
+				return masterEndpoint.handleWork(inputMessage);
 			}
-		} catch (CommunicationException e) {
-			String errMsg = "Error while communicating with worker, closing communication";
-			LOG.error(errMsg, e);
-			try {
-				session.close(new CloseReason(
-						CloseReason.CloseCodes.UNEXPECTED_CONDITION, errMsg));
-			} catch (IOException e1) {
-				LOG.error("Could not close connection", e1);
-			}
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-
-		return outputMessage;
+		
+		// Something went wrong, try to close connection
+		try {
+			String errMsg = "Error while communicating with worker, closing communication";
+			session.close(new CloseReason(
+					CloseReason.CloseCodes.UNEXPECTED_CONDITION, errMsg));
+		} catch (IOException e1) {
+			LOG.error("Could not close connection", e1);
+		}
+		return null;
 	}
 
 	@OnClose
@@ -145,27 +136,21 @@ public class WebSocketMasterEndpoint implements MasterSendReceive,
 				ClassnameProvider.getClassname(WebSocketMasterEndpoint.class));
 	}
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T> Message<T> receive() throws ReceiveException {
-		return (Message<T>) inputMessage;
-	}
-
-	@Override
-	public <T> void send(Message<T> message) throws SendException {
-		outputMessage = message;
-	}
-
 	private void buildMasterEndpoint(String path)
 			throws InstantiationException, IllegalAccessException {
-		Class<? extends Master> superComputable = ResourcePath
+		Class<? extends Master> masterClass = ResourcePath
 				.getWebSocketEntry(path);
-		String queueName = superComputable.getAnnotation(RestMaster.class)
+		String queueName = masterClass.getAnnotation(WebSocketMaster.class)
 				.queueName();
-		Object registrationObject = superComputable.newInstance()
-				.getRegistrationObject();
-		masterEndpoint = DefaultMasterImpl.newInstance(this, queueName,
-				registrationObject);
+		masterEndpoint = DefaultMasterImpl.newInstance(queueName);
+		taskEndpoint = new TaskEndpointImpl<>(queueName);
+	}
+	
+	private Object getRegistrationObject(String path) throws InstantiationException, IllegalAccessException {
+		Class<? extends Master> masterClass = ResourcePath
+				.getWebSocketEntry(path);
+		Master master = masterClass.newInstance();
+		return master.getRegistrationObject();
 	}
 
 }

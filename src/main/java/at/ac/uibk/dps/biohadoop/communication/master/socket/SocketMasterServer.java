@@ -16,13 +16,8 @@ public class SocketMasterServer implements MasterLifecycle {
 
 	private final ExecutorService executorService = Executors
 			.newFixedThreadPool(1);
-//	private final Class<? extends Master> masterClass;
 	
 	private SocketMasterServerConnection socketServerConnection;
-	
-//	public SocketMasterServer(Class<? extends Master> masterClass) {
-//		this.masterClass = masterClass;
-//	}
 
 	@Override
 	public void configure(Class<? extends Master> master) {

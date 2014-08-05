@@ -22,13 +22,13 @@ public class KryoMasterServer implements MasterLifecycle {
 	private final Server server = new Server(64 * 1024, 64 * 1024);
 
 	private Class<? extends Master> master;
-	private KryoMasterServerListener kryoServerListener;
+	private KryoMasterEndpoint kryoServerListener;
 
 	@Override
 	public void configure(Class<? extends Master> master) {
 		Log.set(Log.LEVEL_DEBUG);
 		this.master = master;
-		kryoServerListener = new KryoMasterServerListener(master);
+		kryoServerListener = new KryoMasterEndpoint(master);
 	}
 
 	@Override

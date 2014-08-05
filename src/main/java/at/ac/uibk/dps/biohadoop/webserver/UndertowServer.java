@@ -49,6 +49,13 @@ public class UndertowServer {
 
 	public void stop() throws StopServerException {
 		LOG.info("Stopping Undertow");
+		try {
+			// Wait a short period of time to allow workers to recognize that we
+			// are shutting down. Important e.g. for Rest workers
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			LOG.error("Error while sleeping", e);
+		}
 		undertow.stop();
 	}
 
@@ -58,9 +65,9 @@ public class UndertowServer {
 		ResteasyHandler resteasyHandler = new ResteasyHandler();
 		List<Class<?>> restfulClasses = DeployingClasses.getRestfulClasses();
 		restfulClasses.add(DistributionResource.class);
-		
+
 		List<Class<?>> providerClasses = new ArrayList<Class<?>>();
-		
+
 		HttpHandler httpHandler = resteasyHandler.getHandler(
 				resteasyContextPath, restfulClasses, providerClasses);
 
@@ -71,7 +78,8 @@ public class UndertowServer {
 		HttpHandler webSocketHandler = webSocket.getHandler(
 				webSocketContextPath, webSocketClasses);
 
-		return new PathHandler().addPrefixPath(resteasyContextPath, httpHandler)
-				.addPrefixPath(webSocketContextPath, webSocketHandler);
+		return new PathHandler()
+				.addPrefixPath(resteasyContextPath, httpHandler).addPrefixPath(
+						webSocketContextPath, webSocketHandler);
 	}
 }

@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master.rest;
+package at.ac.uibk.dps.biohadoop.utils;
 
 import java.util.HashMap;
 import java.util.Map;

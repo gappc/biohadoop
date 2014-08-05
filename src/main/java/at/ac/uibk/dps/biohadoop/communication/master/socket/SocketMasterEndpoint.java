@@ -11,22 +11,19 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.communication.CommunicationException;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
-import at.ac.uibk.dps.biohadoop.communication.master.MasterSendReceive;
-import at.ac.uibk.dps.biohadoop.communication.master.ReceiveException;
-import at.ac.uibk.dps.biohadoop.communication.master.SendException;
 import at.ac.uibk.dps.biohadoop.communication.master.Master;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 
-public class SocketMasterEndpoint implements Callable<Integer>, MasterSendReceive {
+public class SocketMasterEndpoint implements Callable<Integer> {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SocketMasterEndpoint.class);
 
-	private final String className = ClassnameProvider.getClassname(SocketMasterEndpoint.class);
+	private final String className = ClassnameProvider
+			.getClassname(SocketMasterEndpoint.class);
 	private final Socket socket;
 	private final Class<? extends Master> masterClass;
 
@@ -35,14 +32,15 @@ public class SocketMasterEndpoint implements Callable<Integer>, MasterSendReceiv
 	private int counter = 0;
 	private boolean close = false;
 
-	public SocketMasterEndpoint(Socket socket, Class<? extends Master> masterClass) {
+	public SocketMasterEndpoint(Socket socket,
+			Class<? extends Master> masterClass) {
 		this.socket = socket;
 		this.masterClass = masterClass;
 	}
 
 	@Override
 	public Integer call() {
-		DefaultMasterImpl endpoint = null;
+		DefaultMasterImpl masterEndpoint = null;
 		try {
 			LOG.info("Opened Socket on server");
 
@@ -52,20 +50,22 @@ public class SocketMasterEndpoint implements Callable<Integer>, MasterSendReceiv
 			is = new ObjectInputStream(new BufferedInputStream(
 					socket.getInputStream()));
 
-			endpoint = buildMaster();
-			endpoint.handleRegistration();
-			endpoint.handleWorkInit();
+			masterEndpoint = buildMaster();
+
+			handleRegistration(masterEndpoint);
+			handleWorkInit(masterEndpoint);
 			while (!close) {
-				endpoint.handleWork();
+				handleWork(masterEndpoint);
 			}
 		} catch (IOException e) {
 			LOG.error("Error while running {}", className, e);
-		} catch (CommunicationException e) {
-			LOG.error("Error while communicating with worker, closing communication", e);
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
@@ -87,37 +87,49 @@ public class SocketMasterEndpoint implements Callable<Integer>, MasterSendReceiv
 		return 0;
 	}
 
+	private void handleRegistration(DefaultMasterImpl masterEndpoint)
+			throws InstantiationException, IllegalAccessException, IOException,
+			ClassNotFoundException {
+		receive();
+		Master master = masterClass.newInstance();
+		Message<?> outputMessage = masterEndpoint.handleRegistration(master.getRegistrationObject());
+		send(outputMessage);
+	}
+	
+	private void handleWorkInit(DefaultMasterImpl masterEndpoint) throws ClassNotFoundException, IOException {
+		receive();
+		Message<?> outputMessage = masterEndpoint.handleWorkInit();
+		send(outputMessage);
+	}
+	
+	private void handleWork(DefaultMasterImpl masterEndpoint) throws IOException, ClassNotFoundException {
+		Message<?> inputMessage = receive();
+		Message<?> outputMessage = masterEndpoint.handleWork(inputMessage);
+		send(outputMessage);
+	}
+
 	@SuppressWarnings("unchecked")
-	public <T> Message<T> receive() throws ReceiveException {
-		try {
-			return (Message<T>) is.readUnshared();
-		} catch (ClassNotFoundException | IOException e) {
-			LOG.error("Error while receiving", e);
-			throw new ReceiveException(e);
+	private <T> Message<T> receive() throws ClassNotFoundException, IOException {
+		return (Message<T>) is.readUnshared();
+	}
+
+	private <T> void send(Message<T> message) throws IOException {
+		counter++;
+		if (counter % 10000 == 0) {
+			counter = 0;
+			os.reset();
+		}
+		os.writeUnshared(message);
+		os.flush();
+		if (message.getType() == MessageType.SHUTDOWN) {
+			close = true;
 		}
 	}
 
-	public <T> void send(Message<T> message) throws SendException {
-		try {
-			counter++;
-			if (counter % 10000 == 0) {
-				counter = 0;
-				os.reset();
-			}
-			os.writeUnshared(message);
-			os.flush();
-			if (message.getType() == MessageType.SHUTDOWN) {
-				close = true;
-			}
-		} catch (IOException e) {
-			LOG.error("Error while sending", e);
-			throw new SendException(e);
-		}
-	}
-	
-	private DefaultMasterImpl buildMaster() throws InstantiationException, IllegalAccessException {
-		String queueName = masterClass.getAnnotation(SocketMaster.class).queueName();
-		Master master = masterClass.newInstance();
-		return DefaultMasterImpl.newInstance(this, queueName, master.getRegistrationObject());
+	private DefaultMasterImpl buildMaster() throws InstantiationException,
+			IllegalAccessException {
+		String queueName = masterClass.getAnnotation(SocketMaster.class)
+				.queueName();
+		return DefaultMasterImpl.newInstance(queueName);
 	}
 }
