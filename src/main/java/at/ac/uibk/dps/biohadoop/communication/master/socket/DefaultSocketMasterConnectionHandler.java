@@ -13,7 +13,6 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.communication.master.DedicatedRest;
 import at.ac.uibk.dps.biohadoop.communication.master.DedicatedSocket;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.queue.DefaultTaskClient;
@@ -22,7 +21,7 @@ import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 import at.ac.uibk.dps.biohadoop.utils.PortFinder;
 import at.ac.uibk.dps.biohadoop.utils.ResourcePath;
 
-public class DefaultSocketMasterConnectionHandler implements Runnable {
+public class DefaultSocketMasterConnectionHandler<R, T, S> implements Runnable {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DefaultSocketMasterConnectionHandler.class);
@@ -30,12 +29,14 @@ public class DefaultSocketMasterConnectionHandler implements Runnable {
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();
 	private final List<Future<Integer>> futures = new ArrayList<>();
+	private Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass;
 	private String path;
 	
 	private volatile boolean stop;
 
 	public DefaultSocketMasterConnectionHandler(
-			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass) {
+			Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass) {
+		this.remoteExecutableClass = remoteExecutableClass;
 		path = DefaultTaskClient.QUEUE_NAME;
 		if (remoteExecutableClass != null) {
 			DedicatedSocket dedicated = remoteExecutableClass
@@ -72,7 +73,7 @@ public class DefaultSocketMasterConnectionHandler implements Runnable {
 			while (!stop) {
 				try {
 					Socket socket = serverSocket.accept();
-					DefaultSocketMasterEndpoint socketRunnable = new DefaultSocketMasterEndpoint(socket, path);
+					DefaultSocketMasterEndpoint<R, T, S> socketRunnable = new DefaultSocketMasterEndpoint<>(socket, remoteExecutableClass, path);
 					Future<Integer> future = executorService.submit(socketRunnable);
 					futures.add(future);
 				} catch (SocketTimeoutException e) {

@@ -57,7 +57,7 @@ public class DefaultLocalWorker<T, S> implements Callable<Integer> {
 					registrationInit = true;
 				}
 				S data = worker.compute(task.getData());
-				taskEndpoint.putResult(task.getTaskId(), data);
+				taskEndpoint.storeResult(task.getTaskId(), data);
 			} catch (InterruptedException e) {
 				LOG.debug("Got InterruptedException, stopping work");
 			} catch (InstantiationException e) {

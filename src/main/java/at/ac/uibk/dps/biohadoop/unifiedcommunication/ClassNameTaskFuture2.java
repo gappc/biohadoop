@@ -2,12 +2,12 @@ package at.ac.uibk.dps.biohadoop.unifiedcommunication;
 
 import at.ac.uibk.dps.biohadoop.queue.TaskFuture;
 
-public class ClassNameTaskFuture<T> implements TaskFuture<T> {
+public class ClassNameTaskFuture2<T> implements TaskFuture<T> {
 
-	private final TaskFuture<ClassNameWrapper<T>> wrapped;
+	private final TaskFuture<ClassNameWrapper2<T>> wrapped;
 
-	public ClassNameTaskFuture(TaskFuture<T> wrapped) {
-		this.wrapped = (TaskFuture<ClassNameWrapper<T>>)wrapped;
+	public ClassNameTaskFuture2(TaskFuture<T> wrapped) {
+		this.wrapped = (TaskFuture<ClassNameWrapper2<T>>)wrapped;
 	}
 
 	@Override

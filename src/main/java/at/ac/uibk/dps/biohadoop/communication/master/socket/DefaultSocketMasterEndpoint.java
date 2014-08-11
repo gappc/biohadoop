@@ -14,8 +14,7 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrapper;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrapperUtils;
+import at.ac.uibk.dps.biohadoop.communication.master.HandleMessageException;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 
@@ -27,6 +26,7 @@ public class DefaultSocketMasterEndpoint<R, T, S> implements Callable<Integer> {
 	private final String className = ClassnameProvider
 			.getClassname(DefaultSocketMasterEndpoint.class);
 	private final Socket socket;
+	private final Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass;
 	private final String path;
 
 	private ObjectOutputStream os = null;
@@ -34,14 +34,17 @@ public class DefaultSocketMasterEndpoint<R, T, S> implements Callable<Integer> {
 	private int counter = 0;
 	private boolean close = false;
 
-	public DefaultSocketMasterEndpoint(Socket socket, String path) {
+	public DefaultSocketMasterEndpoint(Socket socket,
+			Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass,
+			String path) {
+		this.remoteExecutableClass = remoteExecutableClass;
 		this.socket = socket;
 		this.path = path;
 	}
 
 	@Override
 	public Integer call() {
-		DefaultMasterImpl masterEndpoint = null;
+		DefaultMasterImpl<R, T, S> masterEndpoint = null;
 		try {
 			LOG.info("Opened Socket on server");
 
@@ -54,18 +57,18 @@ public class DefaultSocketMasterEndpoint<R, T, S> implements Callable<Integer> {
 			masterEndpoint = buildMaster();
 
 			while (!close) {
-				Message<?> inputMessage = receive();
-				Message<?> outputMessage = null;
-				if (inputMessage.getType() == MessageType.REGISTRATION_REQUEST) {
-					outputMessage = handleRegistration(masterEndpoint,
-							inputMessage);
-				}
-				if (inputMessage.getType() == MessageType.WORK_INIT_REQUEST) {
-					outputMessage = masterEndpoint.handleWorkInit();
-				}
-				if (inputMessage.getType() == MessageType.WORK_REQUEST) {
-					outputMessage = masterEndpoint.handleWork(inputMessage);
-				}
+				Message<S> inputMessage = receive();
+				Message<T> outputMessage = masterEndpoint.handleMessage(inputMessage);
+//				if (inputMessage.getType() == MessageType.REGISTRATION_REQUEST) {
+//					outputMessage = handleRegistration(masterEndpoint,
+//							inputMessage);
+//				}
+//				if (inputMessage.getType() == MessageType.WORK_INIT_REQUEST) {
+//					outputMessage = masterEndpoint.handleWorkInit();
+//				}
+//				if (inputMessage.getType() == MessageType.WORK_REQUEST) {
+//					outputMessage = masterEndpoint.handleWork(inputMessage);
+//				}
 				send(outputMessage);
 			}
 		} catch (IOException e) {
@@ -79,6 +82,8 @@ public class DefaultSocketMasterEndpoint<R, T, S> implements Callable<Integer> {
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (HandleMessageException e) {
+			LOG.error("Could not handle worker request", e);
 		} finally {
 			if (os != null) {
 				try {
@@ -102,21 +107,22 @@ public class DefaultSocketMasterEndpoint<R, T, S> implements Callable<Integer> {
 			Message<?> inputMessage) throws InstantiationException,
 			IllegalAccessException, IOException, ClassNotFoundException {
 
-		ClassNameWrapper<String> wrapper = (ClassNameWrapper<String>) inputMessage
-				.getTask().getData();
-		String className = wrapper.getWrapped();
-
-		Object registrationObject = getRegistrationObject(className);
-
-		Message<?> registrationMessage = masterEndpoint
-				.handleRegistration(registrationObject);
-		return ClassNameWrapperUtils
-				.wrapMessage(registrationMessage, className);
+//		ClassNameWrapper<String> wrapper = (ClassNameWrapper<String>) inputMessage
+//				.getTask().getData();
+//		String className = wrapper.getWrapped();
+//
+//		Object registrationObject = getRegistrationObject(className);
+//
+//		Message<?> registrationMessage = masterEndpoint
+//				.handleRegistration(registrationObject);
+//		return ClassNameWrapperUtils
+//				.wrapMessage(registrationMessage, className);
+		return null;
 	}
 
 	@SuppressWarnings("unchecked")
-	private Message<T> receive() throws ClassNotFoundException, IOException {
-		return (Message<T>) is.readUnshared();
+	private Message<S> receive() throws ClassNotFoundException, IOException {
+		return (Message<S>) is.readUnshared();
 	}
 
 	private void send(Message<?> message) throws IOException {
@@ -132,9 +138,9 @@ public class DefaultSocketMasterEndpoint<R, T, S> implements Callable<Integer> {
 		}
 	}
 
-	private DefaultMasterImpl buildMaster() throws InstantiationException,
+	private DefaultMasterImpl<R, T, S> buildMaster() throws InstantiationException,
 			IllegalAccessException {
-		return DefaultMasterImpl.newInstance(path);
+		return new DefaultMasterImpl<R, T, S>(path);
 	}
 
 	private Object getRegistrationObject(String className)

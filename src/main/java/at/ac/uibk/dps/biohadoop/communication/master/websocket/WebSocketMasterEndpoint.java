@@ -10,7 +10,6 @@ import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.PathParam;
-import javax.websocket.server.ServerEndpoint;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -139,12 +138,12 @@ public class WebSocketMasterEndpoint implements MasterEndpoint {
 
 	private void buildMasterEndpoint(String path)
 			throws InstantiationException, IllegalAccessException {
-		Class<? extends RemoteExecutable<?, ?, ?>> masterClass = ResourcePath
-				.getWebSocketEntry(path);
-		String queueName = masterClass.getAnnotation(DedicatedWebSocket.class)
-				.queueName();
-		masterEndpoint = DefaultMasterImpl.newInstance(queueName);
-		taskEndpoint = new TaskEndpointImpl<>(queueName);
+//		Class<? extends RemoteExecutable<?, ?, ?>> masterClass = ResourcePath
+//				.getWebSocketEntry(path);
+//		String queueName = masterClass.getAnnotation(DedicatedWebSocket.class)
+//				.queueName();
+//		masterEndpoint = DefaultMasterImpl.newInstance(queueName);
+//		taskEndpoint = new TaskEndpointImpl<>(queueName);
 	}
 	
 	private Object getRegistrationObject(String path) throws InstantiationException, IllegalAccessException {

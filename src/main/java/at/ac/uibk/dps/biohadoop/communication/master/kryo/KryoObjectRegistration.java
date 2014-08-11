@@ -10,9 +10,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
-import at.ac.uibk.dps.biohadoop.queue.Task;
+import at.ac.uibk.dps.biohadoop.queue.SimpleTask;
 import at.ac.uibk.dps.biohadoop.queue.TaskId;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrapper;
+import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrappedTask;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
@@ -20,9 +20,11 @@ import com.esotericsoftware.kryo.Serializer;
 public class KryoObjectRegistration {
 
 	private static final List<Class<? extends Serializable>> OBJECTS = new CopyOnWriteArrayList<>(
-			Arrays.asList(String[].class, Class.class, ClassNameWrapper.class, Message.class, MessageType.class, Object[].class,
-					double[][].class, double[].class, int[].class, Task.class,
-					TaskId.class, Double[][].class, Double[].class));
+			Arrays.asList(String[].class, Class.class, Message.class,
+					MessageType.class, Object[].class, double[][].class,
+					double[].class, int[].class, SimpleTask.class,
+					ClassNameWrappedTask.class, TaskId.class, Double[][].class,
+					Double[].class));
 	private static final Map<Class<?>, Serializer<?>> OBJECTS_WITH_SERIALIZER = new ConcurrentHashMap<>();
 
 	static {

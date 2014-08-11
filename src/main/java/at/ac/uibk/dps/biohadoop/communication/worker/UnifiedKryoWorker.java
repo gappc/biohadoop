@@ -13,8 +13,8 @@ import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.master.kryo.KryoObjectRegistration;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskId;
+import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrappedTask;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrapper;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.WorkerData;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
@@ -35,7 +35,7 @@ public class UnifiedKryoWorker<R, T, S> implements WorkerEndpoint {
 	private int logSteps = 1000;
 	private CountDownLatch latch = new CountDownLatch(1);
 
-	private Message<ClassNameWrapper<T>> oldTask;
+	private Message<T> oldMessage;
 
 	@Override
 	public void configure(String[] args) throws WorkerException {
@@ -65,7 +65,7 @@ public class UnifiedKryoWorker<R, T, S> implements WorkerEndpoint {
 			public void received(Connection connection, Object object) {
 				if (object instanceof Message) {
 					try {
-						Message<ClassNameWrapper<T>> inputMessage = (Message<ClassNameWrapper<T>>) object;
+						Message<T> inputMessage = (Message<T>) object;
 
 						performanceLogger.step(LOG);
 
@@ -78,73 +78,42 @@ public class UnifiedKryoWorker<R, T, S> implements WorkerEndpoint {
 							return;
 						}
 
-						String classString = inputMessage.getTask().getData()
-								.getClassName();
+						ClassNameWrappedTask<T> task = (ClassNameWrappedTask<T>) inputMessage
+								.getTask();
+						String classString = task.getClassName();
 
 						if (inputMessage.getType() == MessageType.REGISTRATION_RESPONSE) {
 							Class<? extends RemoteExecutable<R, T, S>> className = (Class<? extends RemoteExecutable<R, T, S>>) Class
 									.forName(classString);
 							RemoteExecutable<R, T, S> unifiedCommunication = className
 									.newInstance();
+
 							WorkerData<R, T, S> workerEntry = new WorkerData<>(
-									unifiedCommunication, (R) inputMessage
-											.getTask().getData().getWrapped());
+									unifiedCommunication, (R) task
+											.getData());
 							workerData.put(classString, workerEntry);
-							inputMessage = oldTask;
+							inputMessage = oldMessage;
+							task = (ClassNameWrappedTask<T>)inputMessage.getTask();
 						}
 
 						WorkerData<R, T, S> workerEntry = workerData
 								.get(classString);
 						if (workerEntry == null) {
-							oldTask = inputMessage;
+							oldMessage = inputMessage;
 
-							ClassNameWrapper<String> wrapper = new ClassNameWrapper<>(
-									classString, classString);
-							Task<ClassNameWrapper<?>> responseTask = new Task<ClassNameWrapper<?>>(
-									null, wrapper);
+							Task<T> intialTask = new ClassNameWrappedTask<>(null, null, classString);
 
 							connection.sendTCP(new Message<>(
 									MessageType.REGISTRATION_REQUEST,
-									responseTask));
+									intialTask));
 							return;
 						}
-						// RemoteExecutable<R, T, S> unifiedCommunication =
-						// (RemoteExecutable<R, T, S>) workerEntry
-						// .getRemoteExecutable();
-						// Object registrationObject = workerEntry
-						// .getInitialData();
-
-						// if (inputMessage.getType() ==
-						// MessageType.REGISTRATION_RESPONSE) {
-						// LOG.info("Registration successful");
-						// Message<?> message = new Message<Object>(
-						// MessageType.WORK_INIT_REQUEST, null);
-						// connection.sendTCP(message);
-						// }
 
 						if (inputMessage.getType() == MessageType.WORK_INIT_RESPONSE
 								|| inputMessage.getType() == MessageType.WORK_RESPONSE) {
 							LOG.debug("WORK_INIT_RESPONSE | WORK_RESPONSE");
 
-							// Task<ClassNameWrapper<?>> inputTask =
-							// inputMessage
-							// .getTask();
-							//
-							// S response = ((RemoteExecutable<R, T, S>)
-							// workerEntry
-							// .getRemoteExecutable()).compute(
-							// (T) inputTask.getData().getWrapped(),
-							// (R) workerEntry.getInitialData());
-							//
-							// Task<S> responseTask = new Task<S>(inputTask
-							// .getTaskId(), response);
-							//
-							// Message<S> message = new Message<S>(
-							// MessageType.WORK_REQUEST, responseTask);
-
-							Task<ClassNameWrapper<T>> task = inputMessage
-									.getTask();
-							T data = task.getData().getWrapped();
+							T data = task.getData();
 
 							RemoteExecutable<R, T, S> remoteExecutable = workerEntry
 									.getRemoteExecutable();
@@ -152,7 +121,7 @@ public class UnifiedKryoWorker<R, T, S> implements WorkerEndpoint {
 							S result = remoteExecutable.compute(data,
 									initalData);
 
-							Message<ClassNameWrapper<S>> outputMessage = createMessage(
+							Message<S> outputMessage = createMessage(
 									task.getTaskId(), classString, result);
 
 							connection.sendTCP(outputMessage);
@@ -181,11 +150,10 @@ public class UnifiedKryoWorker<R, T, S> implements WorkerEndpoint {
 		client.sendTCP(message);
 	}
 
-	public Message<ClassNameWrapper<S>> createMessage(TaskId taskId,
+	public Message<S> createMessage(TaskId taskId,
 			String classString, S data) {
-		ClassNameWrapper<S> wrapper = new ClassNameWrapper<>(classString, data);
-		Task<ClassNameWrapper<S>> responseTask = new Task<>(taskId, wrapper);
-		return new Message<>(MessageType.WORK_REQUEST, responseTask);
+		ClassNameWrappedTask<S> task = new ClassNameWrappedTask<>(taskId, data, classString);
+		return new Message<>(MessageType.WORK_REQUEST, task);
 	}
 
 }

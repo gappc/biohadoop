@@ -29,9 +29,10 @@ import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketDecoder;
 import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketEncoder;
+import at.ac.uibk.dps.biohadoop.queue.SimpleTask;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskId;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrapper;
+import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrappedTask;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.WorkerData;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
@@ -52,7 +53,7 @@ public class UnifiedWebSocketWorker<R, T, S> implements WorkerEndpoint {
 
 	private WorkerParameters parameters;
 	private String path;
-	private Message<ClassNameWrapper<T>> oldTask;
+	private Message<T> oldMessage;
 
 	public UnifiedWebSocketWorker() {
 		path = null;
@@ -112,13 +113,6 @@ public class UnifiedWebSocketWorker<R, T, S> implements WorkerEndpoint {
 		executorService.shutdown();
 	}
 
-	// private void register(Session session) throws EncodeException,
-	// IOException {
-	// Message<?> message = new Message<Object>(
-	// MessageType.REGISTRATION_REQUEST, null);
-	// session.getBasicRemote().sendObject(message);
-	// }
-
 	private void workInit(Session session) throws IOException, EncodeException {
 		Message<?> message = new Message<Object>(MessageType.WORK_INIT_REQUEST,
 				null);
@@ -141,8 +135,8 @@ public class UnifiedWebSocketWorker<R, T, S> implements WorkerEndpoint {
 	}
 
 	@OnMessage
-	public Message<ClassNameWrapper<?>> onMessage(
-			Message<ClassNameWrapper<T>> inputMessage, Session session)
+	public Message<?> onMessage(
+			Message<T> inputMessage, Session session)
 			throws IOException, ClassNotFoundException, InstantiationException,
 			IllegalAccessException {
 		performanceLogger.step(LOG);
@@ -157,7 +151,8 @@ public class UnifiedWebSocketWorker<R, T, S> implements WorkerEndpoint {
 			return null;
 		}
 
-		String classString = inputMessage.getTask().getData().getClassName();
+		ClassNameWrappedTask<T> task = ((ClassNameWrappedTask<T>)inputMessage.getTask());
+		String classString = task.getClassName();
 
 		if (inputMessage.getType() == MessageType.REGISTRATION_RESPONSE) {
 			Class<? extends RemoteExecutable<R, T, S>> className = (Class<? extends RemoteExecutable<R, T, S>>) Class
@@ -166,21 +161,17 @@ public class UnifiedWebSocketWorker<R, T, S> implements WorkerEndpoint {
 					.newInstance();
 			// Need conversion here as return type is none of R, T, S
 			WorkerData<R, T, S> workerEntry = new WorkerData<R, T, S>(
-					remoteExecutable, (R) inputMessage.getTask().getData()
-							.getWrapped());
+					remoteExecutable, (R) task.getData());
 			workerDatas.put(classString, workerEntry);
-			inputMessage = oldTask;
+			inputMessage = oldMessage;
+			task = (ClassNameWrappedTask<T>)inputMessage.getTask();
 		}
 
 		WorkerData<R, T, S> workerData = workerDatas.get(classString);
 		if (workerData == null) {
-			oldTask = inputMessage;
-
-			ClassNameWrapper<String> wrapper = new ClassNameWrapper<>(
-					classString, classString);
-			Task<ClassNameWrapper<?>> responseTask = new Task<ClassNameWrapper<?>>(
-					null, wrapper);
-			return new Message<>(MessageType.REGISTRATION_REQUEST, responseTask);
+			oldMessage = inputMessage;
+			Task<T> intialTask = new ClassNameWrappedTask<>(null, null, classString);
+			return new Message<>(MessageType.REGISTRATION_REQUEST, intialTask);
 		}
 		//
 		// if (inputMessage.getType() == MessageType.REGISTRATION_RESPONSE) {
@@ -212,8 +203,7 @@ public class UnifiedWebSocketWorker<R, T, S> implements WorkerEndpoint {
 			// Task<S> responseTask = new Task<S>(inputTask.getTaskId(),
 			// response);
 
-			Task<ClassNameWrapper<T>> task = inputMessage.getTask();
-			T data = task.getData().getWrapped();
+			T data = task.getData();
 
 			RemoteExecutable<R, T, S> remoteExecutable = workerData
 					.getRemoteExecutable();
@@ -221,7 +211,7 @@ public class UnifiedWebSocketWorker<R, T, S> implements WorkerEndpoint {
 
 			S result = remoteExecutable.compute(data, initialData);
 
-			Message<ClassNameWrapper<?>> outputMessage = createMessage(
+			Message<?> outputMessage = createMessage(
 					task.getTaskId(), classString, result);
 
 			return outputMessage;
@@ -239,12 +229,10 @@ public class UnifiedWebSocketWorker<R, T, S> implements WorkerEndpoint {
 		latch.countDown();
 	}
 
-	public Message<ClassNameWrapper<?>> createMessage(TaskId taskId,
+	public Message<?> createMessage(TaskId taskId,
 			String classString, S data) {
-		ClassNameWrapper<?> wrapper = new ClassNameWrapper<>(classString, data);
-		Task<ClassNameWrapper<?>> responseTask = new Task<ClassNameWrapper<?>>(
-				taskId, wrapper);
-		return new Message<>(MessageType.WORK_REQUEST, responseTask);
+		ClassNameWrappedTask<?> task = new ClassNameWrappedTask<>(taskId, data, classString);
+		return new Message<>(MessageType.WORK_REQUEST, task);
 	}
 
 }

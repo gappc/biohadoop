@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TaskQueue<T, S> implements TaskClient<T, S>, TaskEndpoint<T, S> {
+public class TaskQueue<T, S>  {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TaskQueue.class);
 	
@@ -19,46 +19,40 @@ public class TaskQueue<T, S> implements TaskClient<T, S>, TaskEndpoint<T, S> {
 	private final Map<TaskId, TaskQueueEntry<T, S>> workingSet = new ConcurrentHashMap<>();
 	private final Map<Thread, Thread> waitingThreads = new ConcurrentHashMap<>();
 	private final AtomicBoolean stop = new AtomicBoolean(false);
-
-	@Override
-	public TaskFuture<S> add(T taskRequest)
+	
+	public TaskFuture<S> add(Task<T> task)
 			throws InterruptedException {
-		LOG.debug("Adding task request {}", taskRequest);
-		Task<T> task = new Task<T>(TaskId.newInstance(), taskRequest);
+		LOG.debug("Adding task {}", task);
 		TaskFutureImpl<S> taskFutureImpl = new TaskFutureImpl<>();
-		
 		TaskQueueEntry<T, S> taskQueueEntry = new TaskQueueEntry<>(task, taskFutureImpl);
 		workingSet.put(task.getTaskId(), taskQueueEntry);
 		queue.put(task);
-		LOG.debug("Task request {} was put to queue", taskRequest);
+		LOG.debug("Task {} was put to queue", task);
 		return taskFutureImpl;
 	}
 
-	@Override
-	public List<TaskFuture<S>> addAll(List<T> taskRequests)
+	public List<TaskFuture<S>> addAll(List<Task<T>> tasks)
 			throws InterruptedException {
-		LOG.debug("Adding list of task requests with size {}", taskRequests.size());
+		LOG.debug("Adding list of tasks with size {}", tasks.size());
 		List<TaskFuture<S>> taskFutures = new ArrayList<>();
-		for (T taskRequest : taskRequests) {
-			TaskFuture<S> taskFutureImpl = add(taskRequest);
+		for (Task<T> task : tasks) {
+			TaskFuture<S> taskFutureImpl = add(task);
 			taskFutures.add(taskFutureImpl);
 		}
 		return taskFutures;
 	}
 
-	@Override
-	public List<TaskFuture<S>> addAll(T[] taskRequests)
+	public List<TaskFuture<S>> addAll(Task<T>[] tasks)
 			throws InterruptedException {
-		LOG.debug("Adding list of task requests with size {}", taskRequests.length);
+		LOG.debug("Adding list of tasks with size {}", tasks.length);
 		List<TaskFuture<S>> taskFutures = new ArrayList<>();
-		for (T taskRequest : taskRequests) {
-			TaskFuture<S> taskFutureImpl = add(taskRequest);
+		for (Task<T> task : tasks) {
+			TaskFuture<S> taskFutureImpl = add(task);
 			taskFutures.add(taskFutureImpl);
 		}
 		return taskFutures;
 	}
 	
-	@Override
 	public Task<T> getTask() throws InterruptedException {
 		if (stop.get()) {
 			Thread.currentThread().interrupt();
@@ -69,15 +63,13 @@ public class TaskQueue<T, S> implements TaskClient<T, S>, TaskEndpoint<T, S> {
 		return task;
 	}
 
-	@Override
-	public void putResult(TaskId taskId, S data) throws InterruptedException {
+	public void storeResult(TaskId taskId, S data) throws InterruptedException {
 		LOG.debug("Putting result for task {}", taskId);
 		TaskQueueEntry<T, S> taskQueueEntry = workingSet.remove(taskId);
 		TaskFutureImpl<S> taskFutureImpl = taskQueueEntry.getTaskFutureImpl();
 		taskFutureImpl.set(data);
 	}
 	
-	@Override
 	public void reschedule(TaskId taskId) throws InterruptedException {
 		LOG.info("Rescheduling task {}", taskId);
 		TaskQueueEntry<T, S> taskQueueEntry = workingSet.get(taskId);

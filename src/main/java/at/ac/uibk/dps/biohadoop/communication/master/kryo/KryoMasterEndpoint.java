@@ -14,7 +14,7 @@ import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.master.DedicatedKryo;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.communication.master.Master;
-import at.ac.uibk.dps.biohadoop.queue.Task;
+import at.ac.uibk.dps.biohadoop.queue.SimpleTask;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.utils.ZeroLock;
@@ -60,17 +60,17 @@ public class KryoMasterEndpoint extends Listener {
 	}
 
 	public void disconnected(Connection connection) {
-		zeroLock.decrement();
-		DefaultMasterImpl masterEndpoint = masters.get(connection);
-		masters.remove(masterEndpoint);
-		Task<?> task = masterEndpoint.getCurrentTask();
-		if (task != null) {
-			try {
-				new TaskEndpointImpl<>(queueName).reschedule(task.getTaskId());
-			} catch (InterruptedException e) {
-				LOG.error("Could not reschedule task at {}", task);
-			}
-		}
+//		zeroLock.decrement();
+//		DefaultMasterImpl masterEndpoint = masters.get(connection);
+//		masters.remove(masterEndpoint);
+//		SimpleTask<?> task = masterEndpoint.getCurrentTask();
+//		if (task != null) {
+//			try {
+//				new TaskEndpointImpl<>(queueName).reschedule(task.getTaskId());
+//			} catch (InterruptedException e) {
+//				LOG.error("Could not reschedule task at {}", task);
+//			}
+//		}
 	}
 
 	public void received(final Connection connection, final Object object) {
@@ -112,8 +112,9 @@ public class KryoMasterEndpoint extends Listener {
 
 	private DefaultMasterImpl buildMaster()
 			throws Exception {
-		String queueName = masterClass.getAnnotation(DedicatedKryo.class)
-				.queueName();
-		return DefaultMasterImpl.newInstance(queueName);
+		return null;
+//		String queueName = masterClass.getAnnotation(DedicatedKryo.class)
+//				.queueName();
+//		return DefaultMasterImpl.newInstance(queueName);
 	}
 }

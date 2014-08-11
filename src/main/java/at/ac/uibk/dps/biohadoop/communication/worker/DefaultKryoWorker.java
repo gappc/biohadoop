@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.master.kryo.KryoObjectRegistration;
+import at.ac.uibk.dps.biohadoop.queue.SimpleTask;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 
@@ -83,7 +84,7 @@ public class DefaultKryoWorker<R, T, S> {
 						@SuppressWarnings("unchecked")
 						S response = worker.compute(inputTask.getData(), registrationObject);
 
-						Task<S> responseTask = new Task<S>(inputTask
+						SimpleTask<S> responseTask = new SimpleTask<S>(inputTask
 								.getTaskId(), response);
 
 						Message<S> message = new Message<S>(

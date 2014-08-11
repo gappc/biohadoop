@@ -4,13 +4,13 @@ import java.util.List;
 
 public interface TaskClient<T, S> {
 
-	public TaskFuture<S> add(T taskRequest)
+	public TaskFuture<S> add(T data)
 			throws InterruptedException;
 
-	public List<TaskFuture<S>> addAll(List<T> taskRequests)
+	public List<TaskFuture<S>> addAll(List<T> datas)
 			throws InterruptedException;
 	
-	public List<TaskFuture<S>> addAll(T[] taskRequests)
+	public List<TaskFuture<S>> addAll(T[] datas)
 			throws InterruptedException;
-
+	
 }

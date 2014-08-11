@@ -8,10 +8,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrapper;
+import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrappedTask;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.WorkerData;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
@@ -41,26 +40,12 @@ public class UnifiedLocalWorker<R, T, S> implements WorkerEndpoint, Callable<Int
 		// TODO Auto-generated method stub
 		
 	}
-	
-//	public UnifiedLocalWorker(String className) throws WorkerException {
-//		path = WorkerInitializer.getWebSocketPath(className);
-////		try {
-////			remoteExecutableClass = (Class<? extends RemoteExecutable<R, T, S>>) Class.forName(className);
-////		} catch (ClassNotFoundException e) {
-////			throw new WorkerException("Could not find " + className);
-////		}
-//	}
-	
-//	public UnifiedLocalWorker(Class<? extends Worker<T, S>> workerClass)
-//			throws InstantiationException, IllegalAccessException {
-//		worker = workerClass.newInstance();
-//	}
 
 	@Override
 	public Integer call() {
 		LOG.info("############# {} started ##############", CLASSNAME);
 
-		TaskEndpoint<T, ClassNameWrapper<S>> taskEndpoint = new TaskEndpointImpl<>(path);
+		TaskEndpoint<T, S> taskEndpoint = new TaskEndpointImpl<>(path);
 		boolean registrationInit = false;
 
 		PerformanceLogger performanceLogger = new PerformanceLogger(
@@ -69,16 +54,14 @@ public class UnifiedLocalWorker<R, T, S> implements WorkerEndpoint, Callable<Int
 			try {
 				performanceLogger.step(LOG);
 
-				Task<T> task = taskEndpoint.getTask();
+				ClassNameWrappedTask<T> task = (ClassNameWrappedTask<T>)taskEndpoint.getTask();
 				if (task == null) {
 					LOG.info("############# {} Worker stopped ###############",
 							CLASSNAME);
 					break;
 				}
 				
-				ClassNameWrapper<T> wrapper = (ClassNameWrapper<T>)task.getData();
-				
-				String className = wrapper.getClassName();
+				String className = task.getClassName();
 				WorkerData<R, T, S> workerData = workerDatas.get(className);
 				if (workerData == null) {
 					workerData = getInitialData(className);
@@ -93,12 +76,10 @@ public class UnifiedLocalWorker<R, T, S> implements WorkerEndpoint, Callable<Int
 						.getRemoteExecutable();
 				R initialData = workerData.getInitialData();
 				
-				T data = wrapper.getWrapped();
+				T data = task.getData();
 				S result = remoteExecutable.compute(data, initialData);
 				
-				ClassNameWrapper<S> resultWrapper = new ClassNameWrapper<>(className, result);
-				
-				taskEndpoint.putResult(task.getTaskId(), resultWrapper);
+				taskEndpoint.storeResult(task.getTaskId(), result);
 			} catch (InterruptedException e) {
 				LOG.debug("Got InterruptedException, stopping work");
 			} catch (InstantiationException e) {

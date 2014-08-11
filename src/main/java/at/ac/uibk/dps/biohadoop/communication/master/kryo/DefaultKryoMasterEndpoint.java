@@ -15,27 +15,29 @@ import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrapper;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrapperUtils;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.utils.ZeroLock;
 
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
-public class DefaultKryoMasterEndpoint extends Listener {
+public class DefaultKryoMasterEndpoint<R, T, S> extends Listener {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DefaultKryoMasterEndpoint.class);
 
-	private final Map<Connection, DefaultMasterImpl> masters = new ConcurrentHashMap<>();
+	private final Map<Connection, DefaultMasterImpl<R, T, S>> masters = new ConcurrentHashMap<>();
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();
 	private final ZeroLock zeroLock = new ZeroLock();
 
-	private String queueName;
+	private final Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass;
+	private final String queueName;
 
-	public DefaultKryoMasterEndpoint(String path) {
+	public DefaultKryoMasterEndpoint(
+			Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass,
+			String path) {
+		this.remoteExecutableClass = remoteExecutableClass;
 		this.queueName = path;
 	}
 
@@ -51,7 +53,7 @@ public class DefaultKryoMasterEndpoint extends Listener {
 
 	public void connected(Connection connection) {
 		try {
-			DefaultMasterImpl masterEndpoint = buildMaster();
+			DefaultMasterImpl<R, T, S> masterEndpoint = buildMaster();
 			masters.put(connection, masterEndpoint);
 			zeroLock.increment();
 		} catch (Exception e) {
@@ -81,55 +83,12 @@ public class DefaultKryoMasterEndpoint extends Listener {
 				@Override
 				public Integer call() {
 					try {
-						DefaultMasterImpl masterEndpoint = masters
+						DefaultMasterImpl<R, T, S> masterEndpoint = masters
 								.get(connection);
 
-						Message<?> inputMessage = (Message<?>) object;
-						Message<?> outputMessage = null;
+						Message<S> inputMessage = (Message<S>) object;
+						Message<T> outputMessage = masterEndpoint.handleMessage(inputMessage);
 
-						if (inputMessage.getType() == MessageType.REGISTRATION_REQUEST) {
-							outputMessage = handleRegistration(masterEndpoint,
-									inputMessage);
-							// try {
-							// String className = (String) inputMessage
-							// .getTask().getData();
-							//
-							// Object registrationObject =
-							// getRegistrationObject(className);
-							// outputMessage = endpointImpl
-							// .handleRegistration(registrationObject);
-							// ClassNameWrapper<?> unifiedTask = new
-							// ClassNameWrapper(
-							// className, outputMessage.getTask()
-							// .getData());
-							// Task<?> task = new Task(outputMessage
-							// .getTask().getTaskId(), unifiedTask);
-							// Message<ClassNameWrapper<?>> unifiedMessage = new
-							// Message(
-							// outputMessage.getType(), task);
-							//
-							// outputMessage = unifiedMessage;
-							//
-							// // outputMessage =
-							// // endpointImpl.handleRegistration(master
-							// // .getRegistrationObject());
-							// } catch (InstantiationException
-							// | IllegalAccessException e) {
-							// LOG.error("Could net get registration object",
-							// e);
-							// return 1;
-							// } catch (ClassNotFoundException e) {
-							// // TODO Auto-generated catch block
-							// e.printStackTrace();
-							// }
-						}
-						if (inputMessage.getType() == MessageType.WORK_INIT_REQUEST) {
-							outputMessage = masterEndpoint.handleWorkInit();
-						}
-						if (inputMessage.getType() == MessageType.WORK_REQUEST) {
-							outputMessage = masterEndpoint
-									.handleWork(inputMessage);
-						}
 						connection.sendTCP(outputMessage);
 
 						return 0;
@@ -142,10 +101,11 @@ public class DefaultKryoMasterEndpoint extends Listener {
 		}
 	}
 
-	private DefaultMasterImpl buildMaster() throws Exception {
+	private DefaultMasterImpl<R, T, S> buildMaster()
+			throws Exception {
 		// String queueName = masterClass.getAnnotation(KryoMaster.class)
 		// .queueName();
-		return DefaultMasterImpl.newInstance(queueName);
+		return new DefaultMasterImpl<R, T, S>(queueName);
 	}
 
 	private Object getRegistrationObject(String className)
@@ -160,17 +120,17 @@ public class DefaultKryoMasterEndpoint extends Listener {
 	private Message<?> handleRegistration(DefaultMasterImpl masterEndpoint,
 			Message<?> inputMessage) throws InstantiationException,
 			IllegalAccessException, IOException, ClassNotFoundException {
-
-		ClassNameWrapper<String> wrapper = (ClassNameWrapper<String>) inputMessage
-				.getTask().getData();
-		String className = wrapper.getWrapped();
-
-		Object registrationObject = getRegistrationObject(className);
-
-		Message<?> registrationMessage = masterEndpoint
-				.handleRegistration(registrationObject);
-		return ClassNameWrapperUtils
-				.wrapMessage(registrationMessage, className);
+//		ClassNameWrapper<String> wrapper = (ClassNameWrapper<String>) inputMessage
+//				.getTask().getData();
+//		String className = wrapper.getWrapped();
+//
+//		Object registrationObject = getRegistrationObject(className);
+//
+//		Message<?> registrationMessage = masterEndpoint
+//				.handleRegistration(registrationObject);
+//		return ClassNameWrapperUtils
+//				.wrapMessage(registrationMessage, className);
+		return null;
 	}
 
 }

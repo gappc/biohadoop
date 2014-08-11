@@ -14,8 +14,8 @@ public class TaskEndpointImpl<T, S> implements TaskEndpoint<T, S> {
 	}
 	
 	@Override
-	public void putResult(TaskId taskId, S data) throws InterruptedException {
-		 getTaskQueue().putResult(taskId, data);
+	public void storeResult(TaskId taskId, S data) throws InterruptedException {
+		 getTaskQueue().storeResult(taskId, data);
 	}
 	
 	@Override

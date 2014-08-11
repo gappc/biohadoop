@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.enterprise.context.Dependent;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -15,14 +16,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
+import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.master.DedicatedRest;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
+import at.ac.uibk.dps.biohadoop.communication.master.HandleMessageException;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.DefaultTaskClient;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrapper;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrapperUtils;
+import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrappedTask;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.utils.ResourcePath;
 import at.ac.uibk.dps.biohadoop.utils.convert.ConversionException;
@@ -32,11 +34,12 @@ import at.ac.uibk.dps.biohadoop.webserver.deployment.DeployingClasses;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Path("/")
-public class DefaultRestEndpoint implements MasterEndpoint {
+@Dependent
+public class DefaultRestEndpoint<R, T, S> implements MasterEndpoint {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(RestMasterEndpoint.class);
-	private static final Map<String, DefaultMasterImpl> MASTERS = new ConcurrentHashMap<>();
+	private static final Map<String, DefaultMasterImpl<?, ?, ?>> MASTERS = new ConcurrentHashMap<>();
 
 	public void configure(
 			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass) {
@@ -52,7 +55,8 @@ public class DefaultRestEndpoint implements MasterEndpoint {
 				LOG.error("No suitable annotation for Rest resource found");
 			}
 		}
-		MASTERS.put(path, DefaultMasterImpl.newInstance(path));
+		DefaultMasterImpl<?, ?, ?> master = new DefaultMasterImpl<>(path);
+		MASTERS.put(path, master);
 		DeployingClasses.addRestfulClass(DefaultRestEndpoint.class);
 	}
 
@@ -65,26 +69,14 @@ public class DefaultRestEndpoint implements MasterEndpoint {
 	@GET
 	@Path("{path}/initialdata/{classname}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public <T> Message<ClassNameWrapper<T>> registration(
-			@PathParam("path") String path,
+	public Message<T> getInitialData(@PathParam("path") String path,
 			@PathParam("classname") String className) {
+		Message<T> inputMessage = new Message<>(MessageType.REGISTRATION_REQUEST, new ClassNameWrappedTask<T>(null, null, className));
 		try {
 			DefaultMasterImpl masterEndpoint = MASTERS.get(path);
-			Object registrationObject = getInitialData(className);
-
-			Message<T> registrationMessage = (Message<T>) masterEndpoint
-					.handleRegistration(registrationObject);
-			return ClassNameWrapperUtils.wrapMessage(registrationMessage,
-					className);
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return masterEndpoint.handleMessage(inputMessage);
+		} catch (HandleMessageException e) {
+			LOG.error("Could not handle worker request {}", inputMessage, e);
 		}
 		return null;
 	}
@@ -92,26 +84,32 @@ public class DefaultRestEndpoint implements MasterEndpoint {
 	@GET
 	@Path("{path}/workinit")
 	@Produces(MediaType.APPLICATION_JSON)
-	public <T> Message<ClassNameWrapper<T>> workinit(
-			@PathParam("path") String path) {
+	public Message<T> workinit(@PathParam("path") String path) {
 		DefaultMasterImpl masterEndpoint = MASTERS.get(path);
-		return (Message<ClassNameWrapper<T>>) masterEndpoint.handleWorkInit();
+		Message<T> inputMessage = new Message<>(MessageType.WORK_INIT_REQUEST, null);
+		try {
+			return masterEndpoint.handleMessage(inputMessage);
+		} catch (HandleMessageException e) {
+			LOG.error("Could not handle worker request {}", inputMessage, e);
+		}
+		return null;
 	}
 
 	@POST
 	@Path("{path}/work")
 	@Produces(MediaType.APPLICATION_JSON)
-	public <T> Message<ClassNameWrapper<T>> work(
-			@PathParam("path") String path, String message) {
+	public Message<T> work(@PathParam("path") String path,
+			String message) {
 		DefaultMasterImpl masterEndpoint = MASTERS.get(path);
 		try {
-			Message<ClassNameWrapper<T>> inputMessage = MessageConverter
-					.getMessageForMethod(message, "compute", -1);
-			Message<ClassNameWrapper<T>> outputMessage = (Message<ClassNameWrapper<T>>) masterEndpoint
-					.handleWork(inputMessage);
-			return outputMessage;
+			Message<T> inputMessage = MessageConverter
+					.getTypedMessageForMethod(message, "compute", -1);
+			return masterEndpoint.handleMessage(inputMessage);
 		} catch (ConversionException e) {
 			LOG.error("Error while converting String to Message", e);
+			tryReschedule(path, message);
+		} catch (HandleMessageException e) {
+			LOG.error("Could not handle worker request {}", message, e);
 			tryReschedule(path, message);
 		}
 		return null;

@@ -40,7 +40,7 @@ public class DefaultKryoServer implements MasterEndpoint {
 				LOG.error("No suitable annotation for Rest resource found");
 			}
 		}
-		kryoServerEndpoint = new DefaultKryoMasterEndpoint(path);
+		kryoServerEndpoint = new DefaultKryoMasterEndpoint(remoteExecutableClass, path);
 	}
 	
 	@Override

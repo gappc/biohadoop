@@ -14,9 +14,10 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
+import at.ac.uibk.dps.biohadoop.queue.SimpleTask;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskId;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrapper;
+import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrappedTask;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.WorkerData;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
@@ -51,9 +52,6 @@ public class UnifiedSocketWorker<R, T, S> implements WorkerEndpoint {
 			ObjectInputStream is = new ObjectInputStream(
 					new BufferedInputStream(clientSocket.getInputStream()));
 
-			// doWorkInit(os);
-			// doRegistration(os, host, port);
-			// handleRegistrationResponse(is, os);
 			handleWork(is, os);
 
 			is.close();
@@ -68,33 +66,6 @@ public class UnifiedSocketWorker<R, T, S> implements WorkerEndpoint {
 		}
 	}
 
-	// private void doRegistration(ObjectOutputStream os, String hostname, int
-	// port)
-	// throws IOException {
-	// LOG.debug("{} starting registration to {}:{}", className, hostname,
-	// port);
-	// Message<Object> message = new Message<Object>(
-	// MessageType.REGISTRATION_REQUEST, null);
-	// send(os, message);
-	// }
-
-	// private void handleRegistrationResponse(ObjectInputStream is,
-	// ObjectOutputStream os) throws IOException, ClassNotFoundException,
-	// InstantiationException, IllegalAccessException {
-	// Message<T> message = receive(is);
-	// LOG.info("{} registration successful", className);
-	//
-	// Object data = message.getPayload().getData();
-	// worker.readRegistrationObject(data);
-	// }
-
-	// private void doWorkInit(ObjectOutputStream os) throws IOException {
-	// LOG.debug("{} starting work");
-	// Message<Object> message = new Message<Object>(
-	// MessageType.WORK_INIT_REQUEST, null);
-	// send(os, message);
-	// }
-
 	private void handleWork(ObjectInputStream is, ObjectOutputStream os)
 			throws IOException, ClassNotFoundException, InstantiationException,
 			IllegalAccessException, ConversionException {
@@ -106,7 +77,7 @@ public class UnifiedSocketWorker<R, T, S> implements WorkerEndpoint {
 				MessageType.WORK_INIT_REQUEST, null);
 		send(os, requestMessage);
 
-		Message<ClassNameWrapper<T>> inputMessage = receive(is);
+		Message<T> inputMessage = receive(is);
 
 		while (inputMessage.getType() != MessageType.SHUTDOWN) {
 			performanceLogger.step(LOG);
@@ -118,63 +89,21 @@ public class UnifiedSocketWorker<R, T, S> implements WorkerEndpoint {
 
 			LOG.debug("{} WORK_RESPONSE", className);
 
-			Task<ClassNameWrapper<T>> task = inputMessage.getTask();
-			String classString = task.getData().getClassName();
+			ClassNameWrappedTask<T> task = (ClassNameWrappedTask<T>)inputMessage.getTask();
+			String classString = task.getClassName();
 
 			WorkerData<R, T, S> workerEntry = getWorkerData(classString, os, is);
 
 			RemoteExecutable<R, T, S> remoteExecutable = workerEntry
 					.getRemoteExecutable();
 			R initalData = workerEntry.getInitialData();
-			T data = task.getData().getWrapped();
+			T data = task.getData();
 
 			S result = remoteExecutable.compute(data, initalData);
 
-			Message<ClassNameWrapper<S>> outputMessage = createMessage(
+			Message<S> outputMessage = createMessage(
 					task.getTaskId(), classString, result);
 
-			// // //////////
-			// String classString = inputMessage.getTask().getData()
-			// .getClassName();
-			//
-			// WorkerData<R, T, S> workerData = workerData.get(className);
-			// if (workerData == null) {
-			// Class<? extends RemoteExecutable<?, ?, ?>> className = (Class<?
-			// extends RemoteExecutable<?, ?, ?>>) Class
-			// .forName(classString);
-			// inputMessage = new
-			// Message<Object>(MessageType.REGISTRATION_REQUEST,
-			// new Task(null, className.getCanonicalName()));
-			// send(os, inputMessage);
-			//
-			// Message<ClassNameWrapper<T>> registrationMessage = receive(is);
-			// Object registrationObject = registrationMessage.getTask()
-			// .getData().getWrapped();
-			// RemoteExecutable<?, ?, ?> unifiedCommunication = className
-			// .newInstance();
-			//
-			// workerData = new WorkerData(unifiedCommunication,
-			// registrationObject);
-			// workerData.put(className, workerData);
-			// }
-			// RemoteExecutable<R, T, S> unifiedCommunication =
-			// (RemoteExecutable<R, T, S>) workerData
-			// .getRemoteExecutable();
-			// Object registrationObject = workerData.getInitialData();
-			//
-			// // Task<T> inputTask = inputMessage.getPayload();
-			//
-			// T data = inputMessage.getTask().getData().getWrapped();
-			// S response = ((RemoteExecutable<R, T, S>) workerData
-			// .getRemoteExecutable()).compute(data,
-			// (R)registrationObject);
-			//
-			// Task<S> responseTask = new
-			// Task<S>(inputMessage.getTask().getTaskId(), result);
-			//
-			// Message<S> outputMessage = new
-			// Message<S>(MessageType.WORK_REQUEST,
-			// responseTask);
 			send(os, outputMessage);
 
 			inputMessage = receive(is);
@@ -182,9 +111,9 @@ public class UnifiedSocketWorker<R, T, S> implements WorkerEndpoint {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Message<ClassNameWrapper<T>> receive(ObjectInputStream is)
+	private Message<T> receive(ObjectInputStream is)
 			throws IOException, ClassNotFoundException {
-		return (Message<ClassNameWrapper<T>>) is.readUnshared();
+		return (Message<T>) is.readUnshared();
 	}
 
 	private void send(ObjectOutputStream os, Message<?> message)
@@ -199,22 +128,19 @@ public class UnifiedSocketWorker<R, T, S> implements WorkerEndpoint {
 			InstantiationException, IllegalAccessException {
 		WorkerData<R, T, S> workerEntry = workerData.get(classString);
 		if (workerEntry == null) {
-			ClassNameWrapper<String> wrapper = new ClassNameWrapper<>(
-					classString, classString);
-			Task<ClassNameWrapper<?>> responseTask = new Task<ClassNameWrapper<?>>(
-					null, wrapper);
+			Task<T> intialTask = new ClassNameWrappedTask<>(null, null, classString);
 			Message<?> registrationRequest = new Message<>(
-					MessageType.REGISTRATION_REQUEST, responseTask);
+					MessageType.REGISTRATION_REQUEST, intialTask);
 
 			send(os, registrationRequest);
-			Message<ClassNameWrapper<T>> inputMessage = receive(is);
+			Message<T> inputMessage = receive(is);
 
 			Class<? extends RemoteExecutable<R, T, S>> className = (Class<? extends RemoteExecutable<R, T, S>>) Class
 					.forName(classString);
 			RemoteExecutable<R, T, S> remoteExecutable = className
 					.newInstance();
 
-			T initialData = inputMessage.getTask().getData().getWrapped();
+			T initialData = inputMessage.getTask().getData();
 			workerEntry = new WorkerData<>(remoteExecutable, (R) initialData);
 
 			workerData.put(classString, workerEntry);
@@ -222,11 +148,10 @@ public class UnifiedSocketWorker<R, T, S> implements WorkerEndpoint {
 		return workerEntry;
 	}
 
-	public Message<ClassNameWrapper<S>> createMessage(TaskId taskId,
+	public Message<S> createMessage(TaskId taskId,
 			String classString, S data) {
-		ClassNameWrapper<S> wrapper = new ClassNameWrapper<>(classString, data);
-		Task<ClassNameWrapper<S>> responseTask = new Task<>(taskId, wrapper);
-		return new Message<>(MessageType.WORK_REQUEST, responseTask);
+		ClassNameWrappedTask<S> task = new ClassNameWrappedTask<>(taskId, data, classString);
+		return new Message<>(MessageType.WORK_REQUEST, task);
 	}
 
 }

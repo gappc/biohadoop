@@ -115,8 +115,8 @@ public class RestMasterEndpoint implements MasterEndpoint {
 					.getRestEntry(path);
 			String queueName = masterClass.getAnnotation(DedicatedRest.class)
 					.queueName();
-			masterEndpoint = DefaultMasterImpl.newInstance(queueName);
-			MASTERS.put(path, masterEndpoint);
+//			masterEndpoint = DefaultMasterImpl.newInstance(queueName);
+//			MASTERS.put(path, masterEndpoint);
 		}
 		return masterEndpoint;
 	}

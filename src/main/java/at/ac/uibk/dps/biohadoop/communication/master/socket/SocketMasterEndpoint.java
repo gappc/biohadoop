@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
-import at.ac.uibk.dps.biohadoop.communication.master.DedicatedSocket;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
@@ -129,8 +128,9 @@ public class SocketMasterEndpoint implements Callable<Integer> {
 
 	private DefaultMasterImpl buildMaster() throws InstantiationException,
 			IllegalAccessException {
-		String queueName = masterClass.getAnnotation(DedicatedSocket.class)
-				.queueName();
-		return DefaultMasterImpl.newInstance(queueName);
+//		String queueName = masterClass.getAnnotation(DedicatedSocket.class)
+//				.queueName();
+//		return DefaultMasterImpl.newInstance(queueName);
+		return null;
 	}
 }

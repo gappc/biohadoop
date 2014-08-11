@@ -18,7 +18,7 @@ import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskId;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrapper;
+import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrappedTask;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.WorkerData;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
@@ -51,14 +51,14 @@ public class UnifiedRestWorker<R, T, S> implements WorkerEndpoint {
 		PerformanceLogger performanceLogger = new PerformanceLogger(
 				System.currentTimeMillis(), 0, logSteps);
 		try {
-			Message<ClassNameWrapper<T>> inputMessage = receive(client, url
+			Message<T> inputMessage = receive(client, url
 					+ "/workinit");
 
 			while (inputMessage.getType() != MessageType.SHUTDOWN) {
 				performanceLogger.step(LOG);
 
-				Task<ClassNameWrapper<T>> task = inputMessage.getTask();
-				String classString = task.getData().getClassName();
+				ClassNameWrappedTask<T> task = (ClassNameWrappedTask<T>)inputMessage.getTask();
+				String classString = task.getClassName();
 
 				WorkerData<R, T, S> workerEntry = getWorkerData(classString,
 						client, url);
@@ -66,11 +66,11 @@ public class UnifiedRestWorker<R, T, S> implements WorkerEndpoint {
 				RemoteExecutable<R, T, S> remoteExecutable = workerEntry
 						.getRemoteExecutable();
 				R initalData = workerEntry.getInitialData();
-				T data = task.getData().getWrapped();
+				T data = task.getData();
 
 				S result = remoteExecutable.compute(data, initalData);
 
-				Message<ClassNameWrapper<S>> outputMessage = createMessage(
+				Message<S> outputMessage = createMessage(
 						task.getTaskId(), classString, result);
 				inputMessage = sendAndReceive(outputMessage, client, url
 						+ "/work");
@@ -102,10 +102,9 @@ public class UnifiedRestWorker<R, T, S> implements WorkerEndpoint {
 					.request(MediaType.APPLICATION_JSON).get();
 			String dataString = response.readEntity(String.class);
 
-			Message<ClassNameWrapper<R>> registrationMessage = MessageConverter
-					.getMessageForMethod(dataString, "getInitalData", -1);
-			R initialData = registrationMessage.getTask().getData()
-					.getWrapped();
+			Message<R> registrationMessage = MessageConverter
+					.getTypedMessageForMethod(dataString, "getInitalData", -1);
+			R initialData = registrationMessage.getTask().getData();
 			workerEntry = new WorkerData<R, T, S>(remoteExecutable, initialData);
 
 			workerData.put(classString, workerEntry);
@@ -113,30 +112,29 @@ public class UnifiedRestWorker<R, T, S> implements WorkerEndpoint {
 		return workerEntry;
 	}
 
-	public Message<ClassNameWrapper<S>> createMessage(TaskId taskId,
+	public Message<S> createMessage(TaskId taskId,
 			String classString, S data) {
-		ClassNameWrapper<S> wrapper = new ClassNameWrapper<>(classString, data);
-		Task<ClassNameWrapper<S>> responseTask = new Task<>(taskId, wrapper);
-		return new Message<>(MessageType.WORK_REQUEST, responseTask);
+		Task<S> task = new ClassNameWrappedTask<>(taskId, data, classString);
+		return new Message<>(MessageType.WORK_REQUEST, task);
 	}
 
-	private Message<ClassNameWrapper<T>> receive(Client client, String url)
+	private Message<T> receive(Client client, String url)
 			throws ConversionException {
 		Response response = client.target(url)
 				.request(MediaType.APPLICATION_JSON).get();
 
 		String dataString = response.readEntity(String.class);
-		return MessageConverter.getMessageForMethod(dataString, "compute", 0);
+		return MessageConverter.getTypedMessageForMethod(dataString, "compute", 0);
 	}
 
-	private Message<ClassNameWrapper<T>> sendAndReceive(Message<?> message,
+	private Message<T> sendAndReceive(Message<?> message,
 			Client client, String url) throws IOException, ConversionException {
 		Response response = client.target(url)
 				.request(MediaType.APPLICATION_JSON)
 				.post(Entity.entity(message, MediaType.APPLICATION_JSON));
 
 		String dataString = response.readEntity(String.class);
-		return MessageConverter.getMessageForMethod(dataString, "compute", 0);
+		return MessageConverter.getTypedMessageForMethod(dataString, "compute", 0);
 	}
 
 }

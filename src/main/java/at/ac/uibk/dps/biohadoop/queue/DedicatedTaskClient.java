@@ -13,19 +13,22 @@ public class DedicatedTaskClient<R, T, S> implements TaskClient<T, S> {
 	@Override
 	public TaskFuture<S> add(T taskRequest)
 			throws InterruptedException {
-		return taskQueue.add(taskRequest);
+//		return taskQueue.add(taskRequest);
+		return null;
 	}
 
 	@Override
 	public List<TaskFuture<S>> addAll(List<T> taskRequests)
 			throws InterruptedException {
-		return taskQueue.addAll(taskRequests);
+//		return taskQueue.addAll(taskRequests);
+		return null;
 	}
 	
 	@Override
 	public List<TaskFuture<S>> addAll(T[] taskRequests)
 			throws InterruptedException {
-		return taskQueue.addAll(taskRequests);
+//		return taskQueue.addAll(taskRequests);
+		return null;
 	}
 
 	@SuppressWarnings("unchecked")

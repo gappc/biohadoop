@@ -28,7 +28,7 @@ import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.master.DedicatedWebSocket;
 import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketDecoder;
 import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketEncoder;
-import at.ac.uibk.dps.biohadoop.queue.Task;
+import at.ac.uibk.dps.biohadoop.queue.SimpleTask;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -151,7 +151,7 @@ public class DefaultWebSocketWorker<R, T, S> {
 			LOG.debug("Registration successful for URI {} and sessionId {}",
 					session.getRequestURI(), session.getId());
 
-			Task<?> task = om.convertValue(message.getTask(), Task.class);
+			SimpleTask<?> task = om.convertValue(message.getTask(), SimpleTask.class);
 
 			registrationObject = (R) task.getData();
 
@@ -164,12 +164,12 @@ public class DefaultWebSocketWorker<R, T, S> {
 					session.getRequestURI(), session.getId());
 
 			@SuppressWarnings("unchecked")
-			Task<T> inputTask = om.convertValue(message.getTask(),
-					Task.class);
+			SimpleTask<T> inputTask = om.convertValue(message.getTask(),
+					SimpleTask.class);
 
 			S response = worker
 					.compute(inputTask.getData(), registrationObject);
-			Task<S> responseTask = new Task<S>(inputTask.getTaskId(), response);
+			SimpleTask<S> responseTask = new SimpleTask<S>(inputTask.getTaskId(), response);
 
 			return new Message<S>(MessageType.WORK_REQUEST, responseTask);
 		}
