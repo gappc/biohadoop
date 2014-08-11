@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master.socket;
+package at.ac.uibk.dps.biohadoop.deletable;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
-
+@Deprecated
 public class SocketMasterServer implements MasterEndpoint {
 
 	private static final Logger LOG = LoggerFactory

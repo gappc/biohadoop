@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master.kryo;
+package at.ac.uibk.dps.biohadoop.deletable;
 
 import java.io.IOException;
 
@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.master.kryo.KryoObjectRegistration;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
@@ -13,7 +14,7 @@ import at.ac.uibk.dps.biohadoop.utils.PortFinder;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Server;
-
+@Deprecated
 public class KryoMasterServer implements MasterEndpoint {
 
 	private static final Logger LOG = LoggerFactory.getLogger(KryoMasterServer.class);

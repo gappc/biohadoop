@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.worker;
+package at.ac.uibk.dps.biohadoop.deletable;
 
 import java.io.IOException;
 import java.net.URI;
@@ -25,14 +25,15 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
-import at.ac.uibk.dps.biohadoop.communication.master.DedicatedWebSocket;
+import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedWebSocket;
 import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketDecoder;
 import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketEncoder;
+import at.ac.uibk.dps.biohadoop.communication.worker.WorkerException;
 import at.ac.uibk.dps.biohadoop.queue.SimpleTask;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+@Deprecated
 @ClientEndpoint(encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
 public class DefaultWebSocketWorker<R, T, S> {
 

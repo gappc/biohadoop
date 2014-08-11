@@ -3,9 +3,9 @@ package at.ac.uibk.dps.biohadoop.communication.worker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.communication.master.DedicatedLocal;
-import at.ac.uibk.dps.biohadoop.communication.master.DedicatedRest;
-import at.ac.uibk.dps.biohadoop.communication.master.DedicatedWebSocket;
+import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedLocal;
+import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedRest;
+import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedWebSocket;
 import at.ac.uibk.dps.biohadoop.queue.DefaultTaskClient;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.utils.ResourcePath;

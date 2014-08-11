@@ -13,7 +13,7 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.communication.master.DedicatedSocket;
+import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedSocket;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.queue.DefaultTaskClient;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;

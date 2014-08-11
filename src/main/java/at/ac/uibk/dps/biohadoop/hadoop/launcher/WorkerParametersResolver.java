@@ -2,12 +2,12 @@ package at.ac.uibk.dps.biohadoop.hadoop.launcher;
 
 import java.lang.annotation.Annotation;
 
-import at.ac.uibk.dps.biohadoop.communication.master.DedicatedKryo;
-import at.ac.uibk.dps.biohadoop.communication.master.DedicatedLocal;
-import at.ac.uibk.dps.biohadoop.communication.master.DedicatedRest;
-import at.ac.uibk.dps.biohadoop.communication.master.DedicatedSocket;
-import at.ac.uibk.dps.biohadoop.communication.master.DedicatedWebSocket;
-import at.ac.uibk.dps.biohadoop.communication.worker.Worker;
+import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedKryo;
+import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedLocal;
+import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedRest;
+import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedSocket;
+import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedWebSocket;
+import at.ac.uibk.dps.biohadoop.deletable.Worker;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 
 public class WorkerParametersResolver {

@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.worker;
+package at.ac.uibk.dps.biohadoop.deletable;
 
 @Deprecated
 public interface Worker<T, S> {

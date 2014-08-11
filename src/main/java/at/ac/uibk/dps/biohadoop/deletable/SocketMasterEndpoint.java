@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master.socket;
+package at.ac.uibk.dps.biohadoop.deletable;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -16,7 +16,7 @@ import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
-
+@Deprecated
 public class SocketMasterEndpoint implements Callable<Integer> {
 
 	private static final Logger LOG = LoggerFactory
@@ -52,11 +52,11 @@ public class SocketMasterEndpoint implements Callable<Integer> {
 
 			masterEndpoint = buildMaster();
 
-			handleRegistration(masterEndpoint);
-			handleWorkInit(masterEndpoint);
-			while (!close) {
-				handleWork(masterEndpoint);
-			}
+//			handleRegistration(masterEndpoint);
+//			handleWorkInit(masterEndpoint);
+//			while (!close) {
+//				handleWork(masterEndpoint);
+//			}
 		} catch (IOException e) {
 			LOG.error("Error while running {}", className, e);
 		} catch (InstantiationException e) {
@@ -65,9 +65,9 @@ public class SocketMasterEndpoint implements Callable<Integer> {
 		} catch (IllegalAccessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+//		} catch (ClassNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
 		} finally {
 			if (os != null) {
 				try {
@@ -87,26 +87,26 @@ public class SocketMasterEndpoint implements Callable<Integer> {
 		return 0;
 	}
 
-	private void handleRegistration(DefaultMasterImpl masterEndpoint)
-			throws InstantiationException, IllegalAccessException, IOException,
-			ClassNotFoundException {
-		receive();
-		RemoteExecutable<?, ?, ?> master = masterClass.newInstance();
-		Message<?> outputMessage = masterEndpoint.handleRegistration(master.getInitalData());
-		send(outputMessage);
-	}
-	
-	private void handleWorkInit(DefaultMasterImpl masterEndpoint) throws ClassNotFoundException, IOException {
-		receive();
-		Message<?> outputMessage = masterEndpoint.handleWorkInit();
-		send(outputMessage);
-	}
-	
-	private void handleWork(DefaultMasterImpl masterEndpoint) throws IOException, ClassNotFoundException {
-		Message<?> inputMessage = receive();
-		Message<?> outputMessage = masterEndpoint.handleWork(inputMessage);
-		send(outputMessage);
-	}
+//	private void handleRegistration(DefaultMasterImpl masterEndpoint)
+//			throws InstantiationException, IllegalAccessException, IOException,
+//			ClassNotFoundException {
+//		receive();
+//		RemoteExecutable<?, ?, ?> master = masterClass.newInstance();
+//		Message<?> outputMessage = masterEndpoint.handleRegistration(master.getInitalData());
+//		send(outputMessage);
+//	}
+//	
+//	private void handleWorkInit(DefaultMasterImpl masterEndpoint) throws ClassNotFoundException, IOException {
+//		receive();
+//		Message<?> outputMessage = masterEndpoint.handleWorkInit();
+//		send(outputMessage);
+//	}
+//	
+//	private void handleWork(DefaultMasterImpl masterEndpoint) throws IOException, ClassNotFoundException {
+//		Message<?> inputMessage = receive();
+//		Message<?> outputMessage = masterEndpoint.handleWork(inputMessage);
+//		send(outputMessage);
+//	}
 
 	@SuppressWarnings("unchecked")
 	private <T> Message<T> receive() throws ClassNotFoundException, IOException {

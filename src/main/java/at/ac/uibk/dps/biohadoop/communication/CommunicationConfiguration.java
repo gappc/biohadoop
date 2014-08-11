@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
-import at.ac.uibk.dps.biohadoop.communication.master.Master;
-import at.ac.uibk.dps.biohadoop.communication.worker.Worker;
+import at.ac.uibk.dps.biohadoop.deletable.Master;
+import at.ac.uibk.dps.biohadoop.deletable.Worker;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.utils.ClassAsKeyDeserializer;
 import at.ac.uibk.dps.biohadoop.utils.ClassAsKeySerializer;

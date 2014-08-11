@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master.kryo;
+package at.ac.uibk.dps.biohadoop.deletable;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -11,9 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
-import at.ac.uibk.dps.biohadoop.communication.master.DedicatedKryo;
+import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedKryo;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
-import at.ac.uibk.dps.biohadoop.communication.master.Master;
 import at.ac.uibk.dps.biohadoop.queue.SimpleTask;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
@@ -21,7 +20,7 @@ import at.ac.uibk.dps.biohadoop.utils.ZeroLock;
 
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
-
+@Deprecated
 public class KryoMasterEndpoint extends Listener {
 
 	private static final Logger LOG = LoggerFactory
@@ -85,24 +84,24 @@ public class KryoMasterEndpoint extends Listener {
 					Message<?> inputMessage = (Message<?>) object;
 					Message<?> outputMessage = null;
 					
-					if (inputMessage.getType() == MessageType.REGISTRATION_REQUEST) {
-						try {
-							RemoteExecutable<?, ?, ?> master = masterClass.newInstance();
-							outputMessage = endpointImpl.handleRegistration(master
-									.getInitalData());
-						} catch (InstantiationException
-								| IllegalAccessException e) {
-							LOG.error("Could net get registration object from {}", masterClass, e);
-							return 1;
-						}
-					}
-					if (inputMessage.getType() == MessageType.WORK_INIT_REQUEST) {
-						outputMessage = endpointImpl.handleWorkInit();
-					}
-					if (inputMessage.getType() == MessageType.WORK_REQUEST) {
-						outputMessage = endpointImpl.handleWork(inputMessage);
-					}
-					connection.sendTCP(outputMessage);
+//					if (inputMessage.getType() == MessageType.REGISTRATION_REQUEST) {
+//						try {
+//							RemoteExecutable<?, ?, ?> master = masterClass.newInstance();
+//							outputMessage = endpointImpl.handleRegistration(master
+//									.getInitalData());
+//						} catch (InstantiationException
+//								| IllegalAccessException e) {
+//							LOG.error("Could net get registration object from {}", masterClass, e);
+//							return 1;
+//						}
+//					}
+//					if (inputMessage.getType() == MessageType.WORK_INIT_REQUEST) {
+//						outputMessage = endpointImpl.handleWorkInit();
+//					}
+//					if (inputMessage.getType() == MessageType.WORK_REQUEST) {
+//						outputMessage = endpointImpl.handleWork(inputMessage);
+//					}
+//					connection.sendTCP(outputMessage);
 
 					return 0;
 				}

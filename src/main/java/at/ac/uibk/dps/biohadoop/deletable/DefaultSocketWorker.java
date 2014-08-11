@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.worker;
+package at.ac.uibk.dps.biohadoop.deletable;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -12,12 +12,13 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
+import at.ac.uibk.dps.biohadoop.communication.worker.WorkerException;
 import at.ac.uibk.dps.biohadoop.queue.SimpleTask;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
-
+@Deprecated
 public class DefaultSocketWorker<R, T, S> {
 
 	private static final Logger LOG = LoggerFactory

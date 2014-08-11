@@ -1,6 +1,6 @@
-package at.ac.uibk.dps.biohadoop.communication.master;
+package at.ac.uibk.dps.biohadoop.deletable;
 
-
+@Deprecated
 public interface Master {
 
 	public Object getRegistrationObject();

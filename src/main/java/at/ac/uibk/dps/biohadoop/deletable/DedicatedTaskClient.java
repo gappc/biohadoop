@@ -1,7 +1,13 @@
-package at.ac.uibk.dps.biohadoop.queue;
+package at.ac.uibk.dps.biohadoop.deletable;
 
 import java.util.List;
 
+import at.ac.uibk.dps.biohadoop.queue.TaskClient;
+import at.ac.uibk.dps.biohadoop.queue.TaskFuture;
+import at.ac.uibk.dps.biohadoop.queue.TaskQueue;
+import at.ac.uibk.dps.biohadoop.queue.TaskQueueService;
+
+@Deprecated
 public class DedicatedTaskClient<R, T, S> implements TaskClient<T, S> {
 
 	private final TaskQueue<T, S> taskQueue;

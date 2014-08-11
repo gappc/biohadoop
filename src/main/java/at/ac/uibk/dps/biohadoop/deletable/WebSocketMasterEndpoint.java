@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master.websocket;
+package at.ac.uibk.dps.biohadoop.deletable;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
-import at.ac.uibk.dps.biohadoop.communication.master.DedicatedWebSocket;
+import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedWebSocket;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
@@ -27,7 +27,7 @@ import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.ResourcePath;
 import at.ac.uibk.dps.biohadoop.webserver.deployment.DeployingClasses;
-
+@Deprecated
 //@ServerEndpoint(value = "/{path}", encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
 public class WebSocketMasterEndpoint implements MasterEndpoint {
 
@@ -77,24 +77,24 @@ public class WebSocketMasterEndpoint implements MasterEndpoint {
 			return new Message<>(MessageType.SHUTDOWN, null);
 		}
 
-		try {
-			if (inputMessage.getType() == MessageType.REGISTRATION_REQUEST) {
-				Object registrationObject = getRegistrationObject(path);
-				return masterEndpoint.handleRegistration(registrationObject);
-			}
-			if (inputMessage.getType() == MessageType.WORK_INIT_REQUEST) {
-				return masterEndpoint.handleWorkInit();
-			}
-			if (inputMessage.getType() == MessageType.WORK_REQUEST) {
-				return masterEndpoint.handleWork(inputMessage);
-			}
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			if (inputMessage.getType() == MessageType.REGISTRATION_REQUEST) {
+//				Object registrationObject = getRegistrationObject(path);
+//				return masterEndpoint.handleRegistration(registrationObject);
+//			}
+//			if (inputMessage.getType() == MessageType.WORK_INIT_REQUEST) {
+//				return masterEndpoint.handleWorkInit();
+//			}
+//			if (inputMessage.getType() == MessageType.WORK_REQUEST) {
+//				return masterEndpoint.handleWork(inputMessage);
+//			}
+//		} catch (InstantiationException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IllegalAccessException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		
 		// Something went wrong, try to close connection
 		try {

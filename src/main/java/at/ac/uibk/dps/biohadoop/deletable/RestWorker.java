@@ -1,13 +1,13 @@
-package at.ac.uibk.dps.biohadoop.communication.worker;
+package at.ac.uibk.dps.biohadoop.deletable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
-import at.ac.uibk.dps.biohadoop.communication.master.Master;
-
+@Deprecated
 @Retention(RetentionPolicy.RUNTIME)
-public @interface SocketWorker {
+public @interface RestWorker {
 
 	Class<? extends Master> master();
+
+	Class<?> receive();
 
 }

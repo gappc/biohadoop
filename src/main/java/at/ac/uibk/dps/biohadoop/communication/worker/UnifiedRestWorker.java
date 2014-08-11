@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
+import at.ac.uibk.dps.biohadoop.deletable.DefaultRestWorker;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskId;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrappedTask;

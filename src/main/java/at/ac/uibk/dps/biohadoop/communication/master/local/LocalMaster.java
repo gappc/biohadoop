@@ -4,7 +4,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
-import at.ac.uibk.dps.biohadoop.communication.worker.Worker;
+import at.ac.uibk.dps.biohadoop.deletable.Worker;
 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LocalMaster {

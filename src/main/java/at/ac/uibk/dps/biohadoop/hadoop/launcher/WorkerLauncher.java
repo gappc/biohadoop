@@ -29,8 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.worker.Worker;
 import at.ac.uibk.dps.biohadoop.communication.worker.WorkerStarter;
+import at.ac.uibk.dps.biohadoop.deletable.Worker;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.LaunchContainerRunnable;
 import at.ac.uibk.dps.biohadoop.hadoop.LocalResourceBuilder;

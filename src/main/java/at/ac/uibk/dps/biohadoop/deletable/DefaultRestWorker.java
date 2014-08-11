@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.worker;
+package at.ac.uibk.dps.biohadoop.deletable;
 
 import java.io.IOException;
 
@@ -13,7 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
-import at.ac.uibk.dps.biohadoop.communication.master.DedicatedRest;
+import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedRest;
+import at.ac.uibk.dps.biohadoop.communication.worker.WorkerException;
 import at.ac.uibk.dps.biohadoop.queue.SimpleTask;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
@@ -21,7 +22,7 @@ import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+@Deprecated
 public class DefaultRestWorker<R, T, S> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DefaultRestWorker.class);

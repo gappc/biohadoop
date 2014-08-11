@@ -17,10 +17,11 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
-import at.ac.uibk.dps.biohadoop.communication.master.DedicatedRest;
+import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedRest;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.communication.master.HandleMessageException;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
+import at.ac.uibk.dps.biohadoop.deletable.RestMasterEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.DefaultTaskClient;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;

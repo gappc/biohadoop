@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master.socket;
+package at.ac.uibk.dps.biohadoop.deletable;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -13,12 +13,11 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.communication.master.Master;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 import at.ac.uibk.dps.biohadoop.utils.PortFinder;
-
+@Deprecated
 public class SocketMasterServerConnection implements Runnable {
 
 	private static final Logger LOG = LoggerFactory

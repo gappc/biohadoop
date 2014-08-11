@@ -29,7 +29,6 @@ import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketDecoder;
 import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketEncoder;
-import at.ac.uibk.dps.biohadoop.queue.SimpleTask;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskId;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrappedTask;
@@ -43,7 +42,7 @@ public class UnifiedWebSocketWorker<R, T, S> implements WorkerEndpoint {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(UnifiedWebSocketWorker.class);
 
-	private static final int connectionTimeout = 2000;
+	private static final int connectionTimeout = 5000;
 
 	private final Map<String, WorkerData<R, T, S>> workerDatas = new ConcurrentHashMap<>();
 	private final CountDownLatch latch = new CountDownLatch(1);
