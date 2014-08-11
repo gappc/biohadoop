@@ -10,6 +10,6 @@ public @interface DedicatedRest {
 	
 	String queueName();
 	
-	Class<? extends MasterLifecycle> master() default DefaultRestEndpoint.class;
+	Class<? extends MasterEndpoint> master() default DefaultRestEndpoint.class;
 	
 }

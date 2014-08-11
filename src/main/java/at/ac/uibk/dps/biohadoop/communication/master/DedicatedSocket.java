@@ -10,6 +10,6 @@ public @interface DedicatedSocket {
 
 	String queueName();
 	
-	Class<? extends MasterLifecycle> master() default DefaultSocketConnection.class;
+	Class<? extends MasterEndpoint> master() default DefaultSocketConnection.class;
 	
 }

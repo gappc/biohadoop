@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.master.DedicatedRest;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
-import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
+import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.utils.ResourcePath;
 import at.ac.uibk.dps.biohadoop.webserver.deployment.DeployingClasses;
@@ -29,7 +29,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 //@Path("/")
-public class RestMasterEndpoint implements MasterLifecycle {
+public class RestMasterEndpoint implements MasterEndpoint {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(RestMasterEndpoint.class);

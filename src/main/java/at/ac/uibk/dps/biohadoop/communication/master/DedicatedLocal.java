@@ -10,6 +10,6 @@ public @interface DedicatedLocal {
 
 	String queueName();
 	
-	Class<? extends MasterLifecycle> master() default LocalMasterEndpoint.class;
+	Class<? extends MasterEndpoint> master() default LocalMasterEndpoint.class;
 	
 }

@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
-import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
-import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointLaunchException;
+import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.master.MasterException;
 import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
@@ -29,7 +29,7 @@ import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.webserver.deployment.DeployingClasses;
 
 @ServerEndpoint(value = "/{path}", encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
-public class DefaultWebSocketMaster implements MasterLifecycle {
+public class DefaultWebSocketMaster implements MasterEndpoint {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WebSocketMasterEndpoint.class);
@@ -45,7 +45,7 @@ public class DefaultWebSocketMaster implements MasterLifecycle {
 	}
 
 	@Override
-	public void start() throws EndpointLaunchException {
+	public void start() throws MasterException {
 		// TODO Auto-generated method stub
 		
 	}

@@ -8,17 +8,13 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
+import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.master.MasterException;
 import at.ac.uibk.dps.biohadoop.communication.worker.UnifiedLocalWorker;
 import at.ac.uibk.dps.biohadoop.communication.worker.WorkerException;
-import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
-import at.ac.uibk.dps.biohadoop.hadoop.Environment;
-import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointConfigureException;
-import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointLaunchException;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 
-public class LocalMasterEndpoint implements MasterLifecycle {
+public class LocalMasterEndpoint implements MasterEndpoint {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(LocalMasterEndpoint.class);
@@ -30,14 +26,14 @@ public class LocalMasterEndpoint implements MasterLifecycle {
 	@Override
 	public void configure(
 			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable)
-			throws EndpointConfigureException {
+			throws MasterException {
 		UnifiedLocalWorker<?, ?, ?> localWorker = new UnifiedLocalWorker<>();
 		try {
 			localWorker.configure(new String[] { "",
 					remoteExecutable.getCanonicalName(), "", "0" });
 			localWorkers.add(new UnifiedLocalWorker<>());
 		} catch (WorkerException e) {
-			throw new EndpointConfigureException("Could not configure local worker", e);
+			throw new MasterException("Could not configure local worker", e);
 		}
 		
 		// BiohadoopConfiguration biohadoopConfiguration = Environment
@@ -66,7 +62,7 @@ public class LocalMasterEndpoint implements MasterLifecycle {
 	}
 
 	@Override
-	public void start() throws EndpointLaunchException {
+	public void start() throws MasterException {
 		for (UnifiedLocalWorker<?, ?, ?> localGaWorker : localWorkers) {
 			executorService.submit(localGaWorker);
 		}

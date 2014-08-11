@@ -9,7 +9,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
+import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.DefaultTaskClient;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 
@@ -67,14 +67,14 @@ public class DedicatedRemoteExecutableResolver {
 			Annotation annotation) throws IllegalAccessException,
 			IllegalArgumentException, InvocationTargetException,
 			InstantiationException {
-		Class<? extends MasterLifecycle> masterClass = null;
+		Class<? extends MasterEndpoint> masterClass = null;
 		String queueName = null;
 
 		Method[] methods = annotation.annotationType().getMethods();
 		for (Method method : methods) {
 			LOG.debug("Found method {} for annotation {}", method, annotation);
 			if ("master".equals(method.getName())) {
-				masterClass = (Class<? extends MasterLifecycle>) method
+				masterClass = (Class<? extends MasterEndpoint>) method
 						.invoke(annotation);
 			}
 			if ("queueName".equals(method.getName())) {
@@ -90,7 +90,7 @@ public class DedicatedRemoteExecutableResolver {
 		}
 
 		if (masterClass != null && queueName != null) {
-			MasterLifecycle master = masterClass.newInstance();
+			MasterEndpoint master = masterClass.newInstance();
 			return new LaunchInformation(remoteExecutable, master, queueName);
 		}
 

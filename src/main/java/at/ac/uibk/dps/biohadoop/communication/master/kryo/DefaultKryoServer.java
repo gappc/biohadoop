@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.master.DedicatedKryo;
-import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
+import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.queue.DefaultTaskClient;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
@@ -17,7 +17,7 @@ import at.ac.uibk.dps.biohadoop.utils.ResourcePath;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Server;
 
-public class DefaultKryoServer implements MasterLifecycle {
+public class DefaultKryoServer implements MasterEndpoint {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DefaultKryoServer.class);
 

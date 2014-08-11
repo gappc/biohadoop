@@ -10,6 +10,6 @@ public @interface DedicatedKryo {
 
 	String queueName();
 	
-	Class<? extends MasterLifecycle> master() default DefaultKryoServer.class;
+	Class<? extends MasterEndpoint> master() default DefaultKryoServer.class;
 	
 }

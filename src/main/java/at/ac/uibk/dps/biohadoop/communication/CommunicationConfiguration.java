@@ -3,7 +3,7 @@ package at.ac.uibk.dps.biohadoop.communication;
 import java.util.List;
 import java.util.Map;
 
-import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
+import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.master.Master;
 import at.ac.uibk.dps.biohadoop.communication.worker.Worker;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;

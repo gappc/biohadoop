@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.master.DedicatedRest;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
-import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
+import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.DefaultTaskClient;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
@@ -32,7 +32,7 @@ import at.ac.uibk.dps.biohadoop.webserver.deployment.DeployingClasses;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Path("/")
-public class DefaultRestEndpoint implements MasterLifecycle {
+public class DefaultRestEndpoint implements MasterEndpoint {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(RestMasterEndpoint.class);

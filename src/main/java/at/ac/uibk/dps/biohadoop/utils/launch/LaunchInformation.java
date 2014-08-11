@@ -1,17 +1,17 @@
 package at.ac.uibk.dps.biohadoop.utils.launch;
 
-import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
+import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 
 public class LaunchInformation {
 
 	private final Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable;
-	private final MasterLifecycle master;
+	private final MasterEndpoint master;
 	private final String queueName;
 
 	public LaunchInformation(
 			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable,
-			MasterLifecycle master, String queueName) {
+			MasterEndpoint master, String queueName) {
 		this.remoteExecutable = remoteExecutable;
 		this.master = master;
 		this.queueName = queueName;
@@ -21,7 +21,7 @@ public class LaunchInformation {
 		return remoteExecutable;
 	}
 
-	public MasterLifecycle getMaster() {
+	public MasterEndpoint getMaster() {
 		return master;
 	}
 

@@ -7,7 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
+import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.master.MasterException;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
@@ -32,7 +33,7 @@ public class MasterLauncher {
 	}
 
 	// TODO: what happens if any endpoint throws exception?
-	public void startMasterEndpoints() throws EndpointException {
+	public void startMasterEndpoints() throws MasterException {
 		try {
 			LOG.info("Adding default endpoints");
 			launchInformations.addAll(DefaultRemoteExecutableResolver
@@ -51,7 +52,7 @@ public class MasterLauncher {
 			LOG.info("Configuring endpoints");
 			for (LaunchInformation launchInformation : launchInformations) {
 				LOG.debug("Configuring endpoint {}", launchInformation);
-				MasterLifecycle master = launchInformation.getMaster();
+				MasterEndpoint master = launchInformation.getMaster();
 				Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable = launchInformation.getRemoteExecutable();
 				master.configure(remoteExecutable);
 			}
@@ -62,17 +63,13 @@ public class MasterLauncher {
 			LOG.info("Starting endpoints");
 			for (LaunchInformation launchInformation : launchInformations) {
 				LOG.debug("Starting endpoint {}", launchInformation);
-				MasterLifecycle master = launchInformation.getMaster();
+				MasterEndpoint master = launchInformation.getMaster();
 				master.start();
 			}
-		} catch (EndpointConfigureException e) {
-			throw new EndpointException(e);
-		} catch (EndpointLaunchException e) {
-			throw new EndpointException(e);
 		} catch (StartServerException e) {
-			throw new EndpointException(e);
+			throw new MasterException(e);
 		} catch (ResolveDedicatedEndpointException e) {
-			throw new EndpointException(e);
+			throw new MasterException(e);
 		}
 	}
 
@@ -84,7 +81,7 @@ public class MasterLauncher {
 
 		for (LaunchInformation launchInformation : launchInformations) {
 			LOG.debug("Stopping endpoint {}", launchInformation);
-			MasterLifecycle master = launchInformation.getMaster();
+			MasterEndpoint master = launchInformation.getMaster();
 			master.stop();
 		}
 //		for (MasterLifecycle masterConnection : masterConnections) {

@@ -3,7 +3,7 @@ package at.ac.uibk.dps.biohadoop.communication.master.websocket;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
+import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface WebSocketMaster {
@@ -12,6 +12,6 @@ public @interface WebSocketMaster {
 
 	String queueName();
 	
-	Class<? extends MasterLifecycle> lifecycle() default WebSocketMasterEndpoint.class;
+	Class<? extends MasterEndpoint> lifecycle() default WebSocketMasterEndpoint.class;
 
 }

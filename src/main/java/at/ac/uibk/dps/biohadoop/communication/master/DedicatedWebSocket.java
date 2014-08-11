@@ -10,6 +10,6 @@ public @interface DedicatedWebSocket {
 
 	String queueName();
 	
-	Class<? extends MasterLifecycle> master() default WebSocketMasterEndpoint.class;
+	Class<? extends MasterEndpoint> master() default WebSocketMasterEndpoint.class;
 	
 }
