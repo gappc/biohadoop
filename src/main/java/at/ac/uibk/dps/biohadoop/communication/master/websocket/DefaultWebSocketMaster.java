@@ -1,7 +1,6 @@
 package at.ac.uibk.dps.biohadoop.communication.master.websocket;
 
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 
 import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
@@ -17,20 +16,20 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
-import at.ac.uibk.dps.biohadoop.communication.master.DedicatedWebSocket;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
+import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointLaunchException;
 import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
+import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrapper;
+import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrapperUtils;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
-import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
-import at.ac.uibk.dps.biohadoop.utils.ResourcePath;
 import at.ac.uibk.dps.biohadoop.webserver.deployment.DeployingClasses;
 
-//@ServerEndpoint(value = "/{path}", encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
-public class WebSocketMasterEndpoint implements MasterLifecycle {
+@ServerEndpoint(value = "/{path}", encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
+public class DefaultWebSocketMaster<R, T, S> implements MasterLifecycle {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WebSocketMasterEndpoint.class);
@@ -42,16 +41,21 @@ public class WebSocketMasterEndpoint implements MasterLifecycle {
 
 	@Override
 	public void configure(Class<? extends RemoteExecutable<?, ?, ?>> master) {
-		Annotation annotation = master.getAnnotation(DedicatedWebSocket.class);
-		ResourcePath.addWebSocketEntry(((DedicatedWebSocket) annotation).queueName(),
-				master);
-		DeployingClasses.addWebSocketClass(WebSocketMasterEndpoint.class);
+		DeployingClasses.addWebSocketClass(DefaultWebSocketMaster.class);
 	}
 
 	@Override
-	public void start() {
+	public void start() throws EndpointLaunchException {
+		// TODO Auto-generated method stub
+		
 	}
 
+	@Override
+	public void stop() {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	@OnOpen
 	public void open(@PathParam("path") String path, Session session) {
 		LOG.info("Opened Websocket connection to URI {}, sessionId={}",
@@ -71,8 +75,8 @@ public class WebSocketMasterEndpoint implements MasterLifecycle {
 	}
 
 	@OnMessage
-	public Message<?> onMessage(@PathParam("path") String path,
-			Message<?> inputMessage, Session session) {
+	public Message<ClassNameWrapper<T>> onMessage(@PathParam("path") String path,
+			Message<ClassNameWrapper<S>> inputMessage, Session session) {
 		if (close) {
 			LOG.info("CLOSE");
 			return new Message<>(MessageType.SHUTDOWN, null);
@@ -80,14 +84,26 @@ public class WebSocketMasterEndpoint implements MasterLifecycle {
 
 		try {
 			if (inputMessage.getType() == MessageType.REGISTRATION_REQUEST) {
-				Object registrationObject = getRegistrationObject(path);
-				return masterEndpoint.handleRegistration(registrationObject);
+				String className = (String) inputMessage.getTask().getData().getClassName();
+				Object registrationObject = getRegistrationObject(className);
+				
+				Message<T> registrationMessage = (Message<T>)masterEndpoint
+						.handleRegistration(registrationObject);
+				return ClassNameWrapperUtils.wrapMessage(registrationMessage,
+						className);
 			}
 			if (inputMessage.getType() == MessageType.WORK_INIT_REQUEST) {
-				return masterEndpoint.handleWorkInit();
+				return (Message<ClassNameWrapper<T>>)masterEndpoint.handleWorkInit();
 			}
 			if (inputMessage.getType() == MessageType.WORK_REQUEST) {
-				return masterEndpoint.handleWork(inputMessage);
+//				Message<UnifiedTask<?>> unifiedTask = (Message<UnifiedTask<?>>) inputMessage;
+//
+//				Task<?> task = new Task(unifiedTask.getPayload().getTaskId(),
+//						unifiedTask.getPayload().getData().getWrapped());
+//				Message<?> resultMessage = new Message(inputMessage.getType(),
+//						task);
+
+				return (Message<ClassNameWrapper<T>>)masterEndpoint.handleWork(inputMessage);
 			}
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
@@ -95,8 +111,11 @@ public class WebSocketMasterEndpoint implements MasterLifecycle {
 		} catch (IllegalAccessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		
+
 		// Something went wrong, try to close connection
 		try {
 			String errMsg = "Error while communicating with worker, closing communication";
@@ -131,25 +150,17 @@ public class WebSocketMasterEndpoint implements MasterLifecycle {
 		ShutdownWaitingService.unregister();
 	}
 
-	@Override
-	public void stop() {
-		LOG.info("Stopping {}",
-				ClassnameProvider.getClassname(WebSocketMasterEndpoint.class));
-	}
-
 	private void buildMasterEndpoint(String path)
 			throws InstantiationException, IllegalAccessException {
-		Class<? extends RemoteExecutable<?, ?, ?>> masterClass = ResourcePath
-				.getWebSocketEntry(path);
-		String queueName = masterClass.getAnnotation(DedicatedWebSocket.class)
-				.queueName();
-		masterEndpoint = DefaultMasterImpl.newInstance(queueName);
-		taskEndpoint = new TaskEndpointImpl<>(queueName);
+		masterEndpoint = DefaultMasterImpl
+				.newInstance(path);
+		taskEndpoint = new TaskEndpointImpl<>(path);
 	}
-	
-	private Object getRegistrationObject(String path) throws InstantiationException, IllegalAccessException {
-		Class<? extends RemoteExecutable<?, ?, ?>> masterClass = ResourcePath
-				.getWebSocketEntry(path);
+
+	private Object getRegistrationObject(String className)
+			throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+		Class<? extends RemoteExecutable<?, ?, ?>> masterClass = (Class<? extends RemoteExecutable<?, ?, ?>>) Class
+				.forName(className);
 		RemoteExecutable<?, ?, ?> master = masterClass.newInstance();
 		return master.getInitalData();
 	}

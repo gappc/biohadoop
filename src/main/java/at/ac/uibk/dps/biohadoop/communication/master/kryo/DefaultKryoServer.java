@@ -5,30 +5,44 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.communication.master.DedicatedKryo;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
+import at.ac.uibk.dps.biohadoop.queue.DefaultTaskClient;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 import at.ac.uibk.dps.biohadoop.utils.PortFinder;
+import at.ac.uibk.dps.biohadoop.utils.ResourcePath;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Server;
 
-public class KryoMasterServer implements MasterLifecycle {
+public class DefaultKryoServer implements MasterLifecycle {
 
-	private static final Logger LOG = LoggerFactory.getLogger(KryoMasterServer.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DefaultKryoServer.class);
 
 	private final Server server = new Server(64 * 1024, 64 * 1024);
 
-	private Class<? extends RemoteExecutable<?, ?, ?>> masterClass;
-	private KryoMasterEndpoint kryoServerEndpoint;
+	private String path;
+	private DefaultKryoMasterEndpoint kryoServerEndpoint;
 	
 	@Override
-	public void configure(Class<? extends RemoteExecutable<?, ?, ?>> masterClass) {
-		this.masterClass = masterClass;
-		kryoServerEndpoint = new KryoMasterEndpoint(masterClass);
+	public void configure(Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass) {
+		path = DefaultTaskClient.QUEUE_NAME;
+		if (remoteExecutableClass != null) {
+			DedicatedKryo dedicated = remoteExecutableClass
+					.getAnnotation(DedicatedKryo.class);
+			if (dedicated != null) {
+				path = dedicated.queueName();
+				LOG.info("Adding dedicated Rest resource at path {}", path);
+				ResourcePath.addRestEntry(path, remoteExecutableClass);
+			} else {
+				LOG.error("No suitable annotation for Rest resource found");
+			}
+		}
+		kryoServerEndpoint = new DefaultKryoMasterEndpoint(path);
 	}
-
+	
 	@Override
 	public void start() {
 		LOG.info("Starting Kryo server");
@@ -50,7 +64,7 @@ public class KryoMasterServer implements MasterLifecycle {
 	private void startServer() throws IOException {
 		new Thread(server).start();
 
-		String prefix = masterClass.getCanonicalName();
+		String prefix = path;
 		String host = HostInfo.getHostname();
 		
 		PortFinder.aquireBindingLock();
@@ -65,7 +79,7 @@ public class KryoMasterServer implements MasterLifecycle {
 		Kryo kryo = server.getKryo();
 		KryoObjectRegistration.register(kryo);
 
-		LOG.info("KryoServer running at " + host + ":" + port);
+		LOG.info("host: {} port: {} queue: {}", HostInfo.getHostname(), port, path);
 	}
 
 }

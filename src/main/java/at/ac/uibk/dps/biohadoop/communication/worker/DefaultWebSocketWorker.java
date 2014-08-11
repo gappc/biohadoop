@@ -25,16 +25,16 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
-import at.ac.uibk.dps.biohadoop.communication.master.Master;
+import at.ac.uibk.dps.biohadoop.communication.master.DedicatedWebSocket;
 import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketDecoder;
 import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketEncoder;
-import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketMaster;
 import at.ac.uibk.dps.biohadoop.queue.Task;
+import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ClientEndpoint(encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
-public class DefaultWebSocketWorker<T, S> {
+public class DefaultWebSocketWorker<R, T, S> {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DefaultWebSocketWorker.class);
@@ -44,7 +44,8 @@ public class DefaultWebSocketWorker<T, S> {
 	private final CountDownLatch latch = new CountDownLatch(1);
 	private final AtomicBoolean forceShutdown = new AtomicBoolean(true);
 
-	private Worker<T, S> worker;
+	private RemoteExecutable<R, T, S> worker;
+	private R registrationObject;
 	private long startTime = System.currentTimeMillis();
 	private int counter = 0;
 	private int logSteps = 1000;
@@ -53,15 +54,15 @@ public class DefaultWebSocketWorker<T, S> {
 	public DefaultWebSocketWorker() {
 	}
 
-	public DefaultWebSocketWorker(Class<? extends Worker<T, S>> workerClass)
+	public DefaultWebSocketWorker(
+			Class<? extends RemoteExecutable<R, T, S>> workerClass)
 			throws InstantiationException, IllegalAccessException {
 		worker = workerClass.newInstance();
 	}
 
 	public void run(String host, int port) throws WorkerException {
-		Class<? extends Master> master = ((WebSocketWorker) worker.getClass()
-				.getAnnotation(WebSocketWorker.class)).master();
-		String path = master.getAnnotation(WebSocketMaster.class).path();
+		String path = worker.getClass().getAnnotation(DedicatedWebSocket.class)
+				.queueName();
 		if (!path.startsWith("/")) {
 			path = "/" + path;
 		}
@@ -150,10 +151,9 @@ public class DefaultWebSocketWorker<T, S> {
 			LOG.debug("Registration successful for URI {} and sessionId {}",
 					session.getRequestURI(), session.getId());
 
-			Task<?> task = om.convertValue(message.getPayload(), Task.class);
+			Task<?> task = om.convertValue(message.getTask(), Task.class);
 
-			Object data = task.getData();
-			worker.readRegistrationObject(data);
+			registrationObject = (R) task.getData();
 
 			return new Message<Object>(MessageType.WORK_INIT_REQUEST, null);
 		}
@@ -164,10 +164,11 @@ public class DefaultWebSocketWorker<T, S> {
 					session.getRequestURI(), session.getId());
 
 			@SuppressWarnings("unchecked")
-			Task<T> inputTask = om.convertValue(message.getPayload(),
+			Task<T> inputTask = om.convertValue(message.getTask(),
 					Task.class);
 
-			S response = worker.compute(inputTask.getData());
+			S response = worker
+					.compute(inputTask.getData(), registrationObject);
 			Task<S> responseTask = new Task<S>(inputTask.getTaskId(), response);
 
 			return new Message<S>(MessageType.WORK_REQUEST, responseTask);

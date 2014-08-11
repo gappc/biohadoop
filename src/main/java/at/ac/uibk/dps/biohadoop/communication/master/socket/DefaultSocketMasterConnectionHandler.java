@@ -13,32 +13,46 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.communication.master.Master;
+import at.ac.uibk.dps.biohadoop.communication.master.DedicatedRest;
+import at.ac.uibk.dps.biohadoop.communication.master.DedicatedSocket;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
+import at.ac.uibk.dps.biohadoop.queue.DefaultTaskClient;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 import at.ac.uibk.dps.biohadoop.utils.PortFinder;
+import at.ac.uibk.dps.biohadoop.utils.ResourcePath;
 
-public class SocketMasterServerConnection implements Runnable {
+public class DefaultSocketMasterConnectionHandler implements Runnable {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(SocketMasterServerConnection.class);
+			.getLogger(DefaultSocketMasterConnectionHandler.class);
 
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();
 	private final List<Future<Integer>> futures = new ArrayList<>();
-	private final Class<? extends RemoteExecutable<?, ?, ?>> masterClass;
+	private String path;
 	
 	private volatile boolean stop;
 
-	public SocketMasterServerConnection(Class<? extends RemoteExecutable<?, ?, ?>> masterClass) {
-		this.masterClass = masterClass;
+	public DefaultSocketMasterConnectionHandler(
+			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass) {
+		path = DefaultTaskClient.QUEUE_NAME;
+		if (remoteExecutableClass != null) {
+			DedicatedSocket dedicated = remoteExecutableClass
+					.getAnnotation(DedicatedSocket.class);
+			if (dedicated != null) {
+				path = dedicated.queueName();
+				LOG.info("Adding dedicated Rest resource at path {}", path);
+				ResourcePath.addRestEntry(path, remoteExecutableClass);
+			} else {
+				LOG.error("No suitable annotation for Rest resource found");
+			}
+		}
 	}
 
 	@Override
 	public void run() {
 		try {
-			String prefix = masterClass.getCanonicalName();
 			String host = HostInfo.getHostname();
 			
 			PortFinder.aquireBindingLock();
@@ -46,11 +60,11 @@ public class SocketMasterServerConnection implements Runnable {
 			ServerSocket serverSocket = new ServerSocket(port);
 			PortFinder.releaseBindingLock();
 			
-			Environment.setPrefixed(prefix, Environment.SOCKET_HOST, host);
-			Environment.setPrefixed(prefix, Environment.SOCKET_PORT,
+			Environment.setPrefixed(path, Environment.SOCKET_HOST, host);
+			Environment.setPrefixed(path, Environment.SOCKET_PORT,
 					Integer.toString(port));
 
-			LOG.info("host: " + HostInfo.getHostname() + "  port: " + port);
+			LOG.info("host: {} port: {} queue: {}", HostInfo.getHostname(), port, path);
 
 			int socketTimeout = 2000;
 			serverSocket.setSoTimeout(socketTimeout);
@@ -58,7 +72,7 @@ public class SocketMasterServerConnection implements Runnable {
 			while (!stop) {
 				try {
 					Socket socket = serverSocket.accept();
-					SocketMasterEndpoint socketRunnable = new SocketMasterEndpoint(socket, masterClass);
+					DefaultSocketMasterEndpoint socketRunnable = new DefaultSocketMasterEndpoint(socket, path);
 					Future<Integer> future = executorService.submit(socketRunnable);
 					futures.add(future);
 				} catch (SocketTimeoutException e) {

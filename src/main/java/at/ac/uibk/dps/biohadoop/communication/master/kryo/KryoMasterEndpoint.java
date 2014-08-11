@@ -11,10 +11,12 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
+import at.ac.uibk.dps.biohadoop.communication.master.DedicatedKryo;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.communication.master.Master;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
+import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.utils.ZeroLock;
 
 import com.esotericsoftware.kryonet.Connection;
@@ -29,12 +31,12 @@ public class KryoMasterEndpoint extends Listener {
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();
 	private final ZeroLock zeroLock = new ZeroLock();
-	private final Class<? extends Master> masterClass;
+	private final Class<? extends RemoteExecutable<?, ?, ?>> masterClass;
 	private final String queueName;
 
-	public KryoMasterEndpoint(Class<? extends Master> masterClass) {
+	public KryoMasterEndpoint(Class<? extends RemoteExecutable<?, ?, ?>> masterClass) {
 		this.masterClass = masterClass;
-		queueName = masterClass.getAnnotation(KryoMaster.class).queueName();
+		queueName = masterClass.getAnnotation(DedicatedKryo.class).queueName();
 	}
 
 	public void stop() {
@@ -85,9 +87,9 @@ public class KryoMasterEndpoint extends Listener {
 					
 					if (inputMessage.getType() == MessageType.REGISTRATION_REQUEST) {
 						try {
-							Master master = masterClass.newInstance();
+							RemoteExecutable<?, ?, ?> master = masterClass.newInstance();
 							outputMessage = endpointImpl.handleRegistration(master
-									.getRegistrationObject());
+									.getInitalData());
 						} catch (InstantiationException
 								| IllegalAccessException e) {
 							LOG.error("Could net get registration object from {}", masterClass, e);
@@ -110,7 +112,7 @@ public class KryoMasterEndpoint extends Listener {
 
 	private DefaultMasterImpl buildMaster()
 			throws Exception {
-		String queueName = masterClass.getAnnotation(KryoMaster.class)
+		String queueName = masterClass.getAnnotation(DedicatedKryo.class)
 				.queueName();
 		return DefaultMasterImpl.newInstance(queueName);
 	}

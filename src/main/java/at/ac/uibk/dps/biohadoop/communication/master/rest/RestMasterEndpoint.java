@@ -16,9 +16,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
+import at.ac.uibk.dps.biohadoop.communication.master.DedicatedRest;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
-import at.ac.uibk.dps.biohadoop.communication.master.Master;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
+import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.utils.ResourcePath;
 import at.ac.uibk.dps.biohadoop.webserver.deployment.DeployingClasses;
 
@@ -27,7 +28,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@Path("/")
+//@Path("/")
 public class RestMasterEndpoint implements MasterLifecycle {
 
 	private static final Logger LOG = LoggerFactory
@@ -36,12 +37,12 @@ public class RestMasterEndpoint implements MasterLifecycle {
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
 	@Override
-	public void configure(Class<? extends Master> master) {
-		Annotation annotation = master.getAnnotation(RestMaster.class);
-		ResourcePath.addRestEntry(((RestMaster) annotation).path(), master);
-		DeployingClasses.addRestfulClass(RestMasterEndpoint.class);
+	public void configure(Class<? extends RemoteExecutable<?, ?, ?>> master) {
+//		Annotation annotation = master.getAnnotation(DedicatedRest.class);
+//		ResourcePath.addRestEntry(((DedicatedRest) annotation).path(), master);
+//		DeployingClasses.addRestfulClass(RestMasterEndpoint.class);
 	}
-
+	
 	@Override
 	public void start() {
 	}
@@ -110,9 +111,9 @@ public class RestMasterEndpoint implements MasterLifecycle {
 			throws InstantiationException, IllegalAccessException {
 		DefaultMasterImpl masterEndpoint = MASTERS.get(path);
 		if (masterEndpoint == null) {
-			Class<? extends Master> masterClass = ResourcePath
+			Class<? extends RemoteExecutable<?, ?, ?>> masterClass = ResourcePath
 					.getRestEntry(path);
-			String queueName = masterClass.getAnnotation(RestMaster.class)
+			String queueName = masterClass.getAnnotation(DedicatedRest.class)
 					.queueName();
 			masterEndpoint = DefaultMasterImpl.newInstance(queueName);
 			MASTERS.put(path, masterEndpoint);
@@ -122,19 +123,20 @@ public class RestMasterEndpoint implements MasterLifecycle {
 
 	private Object getRegistrationObject(String path)
 			throws InstantiationException, IllegalAccessException {
-		Class<? extends Master> masterClass = ResourcePath.getRestEntry(path);
-		Master master = masterClass.newInstance();
-		return master.getRegistrationObject();
+		Class<? extends RemoteExecutable<?, ?, ?>> masterClass = ResourcePath.getRestEntry(path);
+		RemoteExecutable<?, ?, ?> master = masterClass.newInstance();
+		return master.getInitalData();
 	}
 
 	private Message<?> getInputMessage(String path, String messageString)
 			throws JsonParseException, JsonMappingException, IOException {
-		Class<? extends Master> masterClass = ResourcePath.getRestEntry(path);
-		Class<?> receiveClass = masterClass.getAnnotation(RestMaster.class)
-				.receive();
-		JavaType javaType = OBJECT_MAPPER.getTypeFactory()
-				.constructParametricType(Message.class, receiveClass);
-		return OBJECT_MAPPER.readValue(messageString, javaType);
+//		Class<? extends RemoteExecutable<?, ?, ?>> masterClass = ResourcePath.getRestEntry(path);
+//		Class<?> receiveClass = masterClass.getAnnotation(DedicatedRest.class)
+//				.masterInputClass();
+//		JavaType javaType = OBJECT_MAPPER.getTypeFactory()
+//				.constructParametricType(Message.class, receiveClass);
+//		return OBJECT_MAPPER.readValue(messageString, javaType);
+		return null;
 	}
 
 }

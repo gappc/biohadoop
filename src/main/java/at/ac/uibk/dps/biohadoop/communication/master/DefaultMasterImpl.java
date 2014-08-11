@@ -43,10 +43,6 @@ public class DefaultMasterImpl {
 			throw new InstantiationError(errMsg);
 		}
 	}
-//
-//	public MasterSendReceive getEndpoint() {
-//		return endpoint;
-//	}
 
 	public Message<?> handleRegistration(Object registrationObject) {
 		LOG.info("Got registration request");
@@ -75,7 +71,7 @@ public class DefaultMasterImpl {
 		LOG.debug("Got work request");
 
 		Message<?> message = null;
-		Task<?> result = incomingMessage.getPayload();
+		Task<?> result = incomingMessage.getTask();
 		try {
 			taskEndpoint.putResult(result.getTaskId(), result.getData());
 			currentTask = taskEndpoint.getTask();

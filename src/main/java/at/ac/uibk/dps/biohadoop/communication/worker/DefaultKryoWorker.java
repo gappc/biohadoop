@@ -10,6 +10,7 @@ import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.master.kryo.KryoObjectRegistration;
 import at.ac.uibk.dps.biohadoop.queue.Task;
+import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Client;
@@ -17,19 +18,20 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
 
-public class DefaultKryoWorker<T, S> {
+public class DefaultKryoWorker<R, T, S> {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DefaultKryoWorker.class);
 
-	private final Worker<T, S> worker;
-
+	private final RemoteExecutable<R, T, S> worker;
+	private R registrationObject;
+	
 	private long startTime = System.currentTimeMillis();
 	private int counter = 0;
 	private int logSteps = 1000;
 	private CountDownLatch latch = new CountDownLatch(1);
-
-	public DefaultKryoWorker(Class<? extends Worker<T, S>> workerClass)
+	
+	public DefaultKryoWorker(Class<? extends RemoteExecutable<R, T, S>> workerClass)
 			throws InstantiationException, IllegalAccessException {
 		worker = workerClass.newInstance();
 	}
@@ -53,7 +55,7 @@ public class DefaultKryoWorker<T, S> {
 			public void received(Connection connection, Object object) {
 				if (object instanceof Message) {
 					try {
-					Message<?> inputMessage = (Message<?>) object;
+					Message<T> inputMessage = (Message<T>) object;
 
 					counter++;
 					if (counter % logSteps == 0) {
@@ -66,8 +68,7 @@ public class DefaultKryoWorker<T, S> {
 
 					if (inputMessage.getType() == MessageType.REGISTRATION_RESPONSE) {
 						LOG.info("Registration successful");
-						Object data = inputMessage.getPayload().getData();
-						worker.readRegistrationObject(data);
+						registrationObject = (R)inputMessage.getTask().getData();
 						Message<?> message = new Message<Object>(
 								MessageType.WORK_INIT_REQUEST, null);
 						connection.sendTCP(message);
@@ -77,10 +78,10 @@ public class DefaultKryoWorker<T, S> {
 							|| inputMessage.getType() == MessageType.WORK_RESPONSE) {
 						LOG.debug("WORK_INIT_RESPONSE | WORK_RESPONSE");
 
-						Task<?> inputTask = inputMessage.getPayload();
+						Task<T> inputTask = inputMessage.getTask();
 
 						@SuppressWarnings("unchecked")
-						S response = worker.compute((T) inputTask.getData());
+						S response = worker.compute(inputTask.getData(), registrationObject);
 
 						Task<S> responseTask = new Task<S>(inputTask
 								.getTaskId(), response);

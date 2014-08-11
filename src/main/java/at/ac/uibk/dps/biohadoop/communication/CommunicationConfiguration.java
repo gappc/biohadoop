@@ -6,6 +6,7 @@ import java.util.Map;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterLifecycle;
 import at.ac.uibk.dps.biohadoop.communication.master.Master;
 import at.ac.uibk.dps.biohadoop.communication.worker.Worker;
+import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.utils.ClassAsKeyDeserializer;
 import at.ac.uibk.dps.biohadoop.utils.ClassAsKeySerializer;
 
@@ -17,7 +18,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 public class CommunicationConfiguration {
 
-	private final List<Class<? extends Master>> masters;
+	private final List<Class<? extends RemoteExecutable<?, ?, ?>>> masters;
 	// TODO: Check if can be improved; At the moment: key must be String because
 	// of Json exception
 	// com.fasterxml.jackson.databind.JsonMappingException: Can not find a (Map)
@@ -28,7 +29,7 @@ public class CommunicationConfiguration {
 	private final Map<Class<? extends Worker<?, ?>>, Integer> workers;
 
 	public CommunicationConfiguration(
-			List<Class<? extends Master>> masters,
+			List<Class<? extends RemoteExecutable<?, ?, ?>>> masters,
 			Map<Class<? extends Worker<?, ?>>, Integer> workers) {
 		this.masters = masters;
 		this.workers = workers;
@@ -36,12 +37,12 @@ public class CommunicationConfiguration {
 
 	@JsonCreator
 	public static CommunicationConfiguration create(
-			@JsonProperty("masters") List<Class<? extends Master>> masters,
+			@JsonProperty("masters") List<Class<? extends RemoteExecutable<?, ?, ?>>> masters,
 			@JsonProperty("workers") Map<Class<? extends Worker<?, ?>>, Integer> workers) {
 		return new CommunicationConfiguration(masters, workers);
 	}
 
-	public List<Class<? extends Master>> getMasters() {
+	public List<Class<? extends RemoteExecutable<?, ?, ?>>> getMasters() {
 		return masters;
 	}
 

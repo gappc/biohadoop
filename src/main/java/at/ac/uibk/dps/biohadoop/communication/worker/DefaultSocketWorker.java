@@ -13,21 +13,25 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.queue.Task;
+import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
-public class DefaultSocketWorker<T, S> {
+public class DefaultSocketWorker<R, T, S> {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DefaultSocketWorker.class);
 
-	private final Worker<T, S> worker;
+	private final RemoteExecutable<R, T, S> worker;
 
 	private static String className = ClassnameProvider
 			.getClassname(DefaultSocketWorker.class);
+	
+	private R registrationObject;
+	
 	private int logSteps = 1000;
 
-	public DefaultSocketWorker(Class<? extends Worker<T, S>> workerClass)
+	public DefaultSocketWorker(Class<? extends RemoteExecutable<R, T, S>> workerClass)
 			throws InstantiationException, IllegalAccessException {
 		worker = workerClass.newInstance();
 	}
@@ -77,8 +81,7 @@ public class DefaultSocketWorker<T, S> {
 		Message<T> message = receive(is);
 		LOG.info("{} registration successful", className);
 
-		Object data = message.getPayload().getData();
-		worker.readRegistrationObject(data);
+		registrationObject = (R)message.getTask().getData();
 	}
 
 	private void doWorkInit(ObjectOutputStream os) throws IOException {
@@ -110,9 +113,9 @@ public class DefaultSocketWorker<T, S> {
 				break;
 			}
 
-			Task<T> inputTask = inputMessage.getPayload();
+			Task<T> inputTask = inputMessage.getTask();
 
-			S response = worker.compute((T) inputTask.getData());
+			S response = worker.compute(inputTask.getData(), registrationObject);
 
 			Task<S> responseTask = new Task<S>(inputTask.getTaskId(), response);
 

@@ -5,7 +5,6 @@ import java.io.IOException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -14,28 +13,29 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
-import at.ac.uibk.dps.biohadoop.communication.master.rest.RestMaster;
+import at.ac.uibk.dps.biohadoop.communication.master.DedicatedRest;
 import at.ac.uibk.dps.biohadoop.queue.Task;
+import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class DefaultRestWorker<T, S> {
+public class DefaultRestWorker<R, T, S> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DefaultRestWorker.class);
 	private static final String CLASSNAME = ClassnameProvider
 			.getClassname(DefaultRestWorker.class);
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
-	private final Worker<T, S> worker;
+	private final RemoteExecutable<R, T, S> worker;
+	private R registrationObject;
 
 	private int logSteps = 1000;
 
-	public DefaultRestWorker(Class<? extends Worker<T, S>> workerClass)
+	public DefaultRestWorker(Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass)
 			throws InstantiationException, IllegalAccessException {
-		worker = workerClass.newInstance();
+		worker = remoteExecutableClass.newInstance();
 	}
 	
 //	@Override
@@ -46,7 +46,7 @@ public class DefaultRestWorker<T, S> {
 //	}
 
 	public void run(String host, int port) throws WorkerException {
-		String path = worker.getClass().getAnnotation(RestWorker.class).master().getAnnotation(RestMaster.class).path();
+		String path = worker.getClass().getAnnotation(DedicatedRest.class).queueName();
 		if (!path.startsWith("/")) {
 			path = "/" + path;
 		}
@@ -56,10 +56,8 @@ public class DefaultRestWorker<T, S> {
 		try {
 			Message<?> registrationMessage = receiveRegistration(client, url
 					+ "/registration");
-			Object data = registrationMessage.getPayload().getData();
+			registrationObject = (R)registrationMessage.getTask().getData();
 			
-			worker.readRegistrationObject(data);
-
 			Message<T> inputMessage = receive(client, url + "/workinit");
 
 			PerformanceLogger performanceLogger = new PerformanceLogger(
@@ -74,9 +72,9 @@ public class DefaultRestWorker<T, S> {
 					break;
 				}
 
-				Task<T> inputTask = inputMessage.getPayload();
+				Task<T> inputTask = inputMessage.getTask();
 
-				S response = worker.compute((T) inputTask.getData());
+				S response = worker.compute(inputTask.getData(), registrationObject);
 
 				Task<S> responseTask = new Task<S>(inputTask.getTaskId(),
 						response);
@@ -100,24 +98,26 @@ public class DefaultRestWorker<T, S> {
 	}
 
 	private Message<T> receive(Client client, String url) throws IOException {
-		Response response = client.target(url)
-				.request(MediaType.APPLICATION_JSON).get();
-		String dataString = response.readEntity(String.class);
-		Class<?> receiveClass = worker.getClass().getAnnotation(RestWorker.class).receive();
-		JavaType javaType = objectMapper.getTypeFactory().constructParametricType(Message.class, receiveClass);
-		return objectMapper.readValue(dataString, javaType);
+//		Response response = client.target(url)
+//				.request(MediaType.APPLICATION_JSON).get();
+//		String dataString = response.readEntity(String.class);
+//		Class<?> receiveClass = worker.getClass().getAnnotation(DedicatedRest.class).workerInputClass();
+//		JavaType javaType = objectMapper.getTypeFactory().constructParametricType(Message.class, receiveClass);
+//		return objectMapper.readValue(dataString, javaType);
+		return null;
 	}
 
 	private Message<T> sendAndReceive(Message<?> message, Client client,
 			String url) throws IOException {
-		Response response = client.target(url)
-				.request(MediaType.APPLICATION_JSON)
-				.post(Entity.entity(message, MediaType.APPLICATION_JSON));
-
-		String dataString = response.readEntity(String.class);
-		
-		Class<?> receiveClass = worker.getClass().getAnnotation(RestWorker.class).receive();
-		JavaType javaType = objectMapper.getTypeFactory().constructParametricType(Message.class, receiveClass);
-		return objectMapper.readValue(dataString, javaType);
+//		Response response = client.target(url)
+//				.request(MediaType.APPLICATION_JSON)
+//				.post(Entity.entity(message, MediaType.APPLICATION_JSON));
+//
+//		String dataString = response.readEntity(String.class);
+//		
+//		Class<?> receiveClass = worker.getClass().getAnnotation(DedicatedRest.class).workerInputClass();
+//		JavaType javaType = objectMapper.getTypeFactory().constructParametricType(Message.class, receiveClass);
+//		return objectMapper.readValue(dataString, javaType);
+		return null;
 	}
 }

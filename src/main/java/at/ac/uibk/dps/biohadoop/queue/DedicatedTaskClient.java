@@ -2,35 +2,34 @@ package at.ac.uibk.dps.biohadoop.queue;
 
 import java.util.List;
 
-public class TaskClientImpl<T, S> implements TaskClient<T, S> {
+public class DedicatedTaskClient<R, T, S> implements TaskClient<T, S> {
 
-	private final String queueName;
+	private final TaskQueue<T, S> taskQueue;
 
-	public TaskClientImpl(String queueName) {
-		this.queueName = queueName;
+	public DedicatedTaskClient(String queueName) {
+		taskQueue = getTaskQueue(queueName);
 	}
 
 	@Override
 	public TaskFuture<S> add(T taskRequest)
 			throws InterruptedException {
-		return getTaskQueue().add(taskRequest);
+		return taskQueue.add(taskRequest);
 	}
 
 	@Override
 	public List<TaskFuture<S>> addAll(List<T> taskRequests)
 			throws InterruptedException {
-		return getTaskQueue().addAll(taskRequests);
+		return taskQueue.addAll(taskRequests);
 	}
 	
 	@Override
 	public List<TaskFuture<S>> addAll(T[] taskRequests)
 			throws InterruptedException {
-		// TODO Auto-generated method stub
-		return getTaskQueue().addAll(taskRequests);
+		return taskQueue.addAll(taskRequests);
 	}
 
 	@SuppressWarnings("unchecked")
-	private TaskQueue<T, S> getTaskQueue() {
+	private TaskQueue<T, S> getTaskQueue(String queueName) {
 		return (TaskQueue<T, S>) TaskQueueService.getInstance().getTaskQueue(
 				queueName);
 	}

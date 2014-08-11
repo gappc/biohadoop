@@ -2,12 +2,12 @@ package at.ac.uibk.dps.biohadoop.hadoop.launcher;
 
 import java.lang.annotation.Annotation;
 
-import at.ac.uibk.dps.biohadoop.communication.worker.KryoWorker;
-import at.ac.uibk.dps.biohadoop.communication.worker.LocalWorker;
-import at.ac.uibk.dps.biohadoop.communication.worker.RestWorker;
-import at.ac.uibk.dps.biohadoop.communication.worker.SocketWorker;
+import at.ac.uibk.dps.biohadoop.communication.master.DedicatedKryo;
+import at.ac.uibk.dps.biohadoop.communication.master.DedicatedLocal;
+import at.ac.uibk.dps.biohadoop.communication.master.DedicatedRest;
+import at.ac.uibk.dps.biohadoop.communication.master.DedicatedSocket;
+import at.ac.uibk.dps.biohadoop.communication.master.DedicatedWebSocket;
 import at.ac.uibk.dps.biohadoop.communication.worker.Worker;
-import at.ac.uibk.dps.biohadoop.communication.worker.WebSocketWorker;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 
 public class WorkerParametersResolver {
@@ -15,9 +15,9 @@ public class WorkerParametersResolver {
 	public static String getKryoWorkerParameters(
 			Class<? extends Worker<?, ?>> workerClass) throws Exception {
 		Annotation workerAnnotation = workerClass
-				.getAnnotation(KryoWorker.class);
+				.getAnnotation(DedicatedKryo.class);
 		if (workerAnnotation != null) {
-			String prefix = ((KryoWorker) workerAnnotation).master()
+			String prefix = ((DedicatedKryo) workerAnnotation).master()
 					.getCanonicalName();
 			String hostname = Environment.getPrefixed(prefix,
 					Environment.KRYO_SOCKET_HOST);
@@ -31,7 +31,7 @@ public class WorkerParametersResolver {
 	public static String getLocalWorkerParameters(
 			Class<? extends Worker<?, ?>> workerClass) throws Exception {
 		Annotation workerAnnotation = workerClass
-				.getAnnotation(LocalWorker.class);
+				.getAnnotation(DedicatedLocal.class);
 		if (workerAnnotation != null) {
 			return "EMPTY";
 		}
@@ -41,7 +41,7 @@ public class WorkerParametersResolver {
 	public static String getRestWorkerParameters(
 			Class<? extends Worker<?, ?>> workerClass) throws Exception {
 		Annotation workerAnnotation = workerClass
-				.getAnnotation(RestWorker.class);
+				.getAnnotation(DedicatedRest.class);
 		if (workerAnnotation != null) {
 			return Environment.get(Environment.HTTP_HOST) + " "
 					+ Environment.get(Environment.HTTP_PORT);
@@ -52,9 +52,9 @@ public class WorkerParametersResolver {
 	public static String getSocketWorkerParameters(
 			Class<? extends Worker<?, ?>> workerClass) throws Exception {
 		Annotation workerAnnotation = workerClass
-				.getAnnotation(SocketWorker.class);
+				.getAnnotation(DedicatedSocket.class);
 		if (workerAnnotation != null) {
-			String prefix = ((SocketWorker) workerAnnotation)
+			String prefix = ((DedicatedSocket) workerAnnotation)
 					.master().getCanonicalName();
 			String hostname = Environment.getPrefixed(prefix,
 					Environment.SOCKET_HOST);
@@ -68,7 +68,7 @@ public class WorkerParametersResolver {
 	public static String getWebSocketWorkerParameters(
 			Class<? extends Worker<?, ?>> workerClass) throws Exception {
 		Annotation workerAnnotation = workerClass
-				.getAnnotation(WebSocketWorker.class);
+				.getAnnotation(DedicatedWebSocket.class);
 		if (workerAnnotation != null) {
 			return Environment.get(Environment.HTTP_HOST) + " "
 					+ Environment.get(Environment.HTTP_PORT);
