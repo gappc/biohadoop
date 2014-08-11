@@ -23,7 +23,7 @@ import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 import at.ac.uibk.dps.biohadoop.utils.convert.ConversionException;
 
-public class UnifiedSocketWorker<R, T, S> {
+public class UnifiedSocketWorker<R, T, S> implements WorkerEndpoint {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(UnifiedSocketWorker.class);
@@ -31,17 +31,20 @@ public class UnifiedSocketWorker<R, T, S> {
 			.getClassname(UnifiedSocketWorker.class);
 
 	private final Map<String, WorkerData<R, T, S>> workerData = new ConcurrentHashMap<>();
-//	private final String path;
+	private WorkerParameters parameters;
 	private int logSteps = 1000;
 
-	public UnifiedSocketWorker(String className) throws WorkerException {
-//		path = WorkerInitializer.getSocketPath(className);
+	@Override
+	public void configure(String[] args) throws WorkerException {
+		parameters = WorkerParameters.getParameters(args);
 	}
 
-	public void run(String host, int port) throws WorkerException {
+	@Override
+	public void start() throws WorkerException {
 		try {
 			// TODO: implement timeout
-			Socket clientSocket = new Socket(host, port);
+			Socket clientSocket = new Socket(parameters.getHost(),
+					parameters.getPort());
 			ObjectOutputStream os = new ObjectOutputStream(
 					new BufferedOutputStream(clientSocket.getOutputStream()));
 			os.flush();
@@ -57,22 +60,23 @@ public class UnifiedSocketWorker<R, T, S> {
 			os.close();
 			clientSocket.close();
 		} catch (IOException e) {
-			throw new WorkerException("Could not communicate with " + host
-					+ ":" + port, e);
+			throw new WorkerException("Could not communicate with "
+					+ parameters.getHost() + ":" + parameters.getPort(), e);
 		} catch (InstantiationException | IllegalAccessException
 				| ClassNotFoundException | ConversionException e) {
 			throw new WorkerException(e);
 		}
 	}
 
-//	private void doRegistration(ObjectOutputStream os, String hostname, int port)
-//			throws IOException {
-//		LOG.debug("{} starting registration to {}:{}", className, hostname,
-//				port);
-//		Message<Object> message = new Message<Object>(
-//				MessageType.REGISTRATION_REQUEST, null);
-//		send(os, message);
-//	}
+	// private void doRegistration(ObjectOutputStream os, String hostname, int
+	// port)
+	// throws IOException {
+	// LOG.debug("{} starting registration to {}:{}", className, hostname,
+	// port);
+	// Message<Object> message = new Message<Object>(
+	// MessageType.REGISTRATION_REQUEST, null);
+	// send(os, message);
+	// }
 
 	// private void handleRegistrationResponse(ObjectInputStream is,
 	// ObjectOutputStream os) throws IOException, ClassNotFoundException,
@@ -84,12 +88,12 @@ public class UnifiedSocketWorker<R, T, S> {
 	// worker.readRegistrationObject(data);
 	// }
 
-//	private void doWorkInit(ObjectOutputStream os) throws IOException {
-//		LOG.debug("{} starting work");
-//		Message<Object> message = new Message<Object>(
-//				MessageType.WORK_INIT_REQUEST, null);
-//		send(os, message);
-//	}
+	// private void doWorkInit(ObjectOutputStream os) throws IOException {
+	// LOG.debug("{} starting work");
+	// Message<Object> message = new Message<Object>(
+	// MessageType.WORK_INIT_REQUEST, null);
+	// send(os, message);
+	// }
 
 	private void handleWork(ObjectInputStream is, ObjectOutputStream os)
 			throws IOException, ClassNotFoundException, InstantiationException,
@@ -172,7 +176,7 @@ public class UnifiedSocketWorker<R, T, S> {
 			// Message<S>(MessageType.WORK_REQUEST,
 			// responseTask);
 			send(os, outputMessage);
-			
+
 			inputMessage = receive(is);
 		}
 	}
@@ -224,4 +228,5 @@ public class UnifiedSocketWorker<R, T, S> {
 		Task<ClassNameWrapper<S>> responseTask = new Task<>(taskId, wrapper);
 		return new Message<>(MessageType.WORK_REQUEST, responseTask);
 	}
+
 }

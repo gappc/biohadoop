@@ -8,19 +8,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.communication.Message;
-import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
-import at.ac.uibk.dps.biohadoop.queue.TaskId;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrapper;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.WorkerData;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
-public class UnifiedLocalWorker<R, T, S> implements Callable<Integer> {
+public class UnifiedLocalWorker<R, T, S> implements WorkerEndpoint, Callable<Integer>  {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(UnifiedLocalWorker.class);
@@ -28,20 +25,31 @@ public class UnifiedLocalWorker<R, T, S> implements Callable<Integer> {
 			.getClassname(UnifiedLocalWorker.class);
 
 	private final Map<String, WorkerData<R, T, S>> workerDatas = new ConcurrentHashMap<>();
-	private final String path;
-//	private final Class<? extends RemoteExecutable<R, T, S>> remoteExecutable; 
 	private final AtomicBoolean stop = new AtomicBoolean(false);
 
+	private String path;
 	private int logSteps = 1000;
 
-	public UnifiedLocalWorker(String className) throws WorkerException {
-		path = WorkerInitializer.getWebSocketPath(className);
-//		try {
-//			remoteExecutableClass = (Class<? extends RemoteExecutable<R, T, S>>) Class.forName(className);
-//		} catch (ClassNotFoundException e) {
-//			throw new WorkerException("Could not find " + className);
-//		}
+	@Override
+	public void configure(String[] args) throws WorkerException {
+		WorkerParameters parameters = WorkerParameters.getParameters(args);
+		path = WorkerInitializer.getLocalPath(parameters.getRemoteExecutable());
 	}
+
+	@Override
+	public void start() throws WorkerException {
+		// TODO Auto-generated method stub
+		
+	}
+	
+//	public UnifiedLocalWorker(String className) throws WorkerException {
+//		path = WorkerInitializer.getWebSocketPath(className);
+////		try {
+////			remoteExecutableClass = (Class<? extends RemoteExecutable<R, T, S>>) Class.forName(className);
+////		} catch (ClassNotFoundException e) {
+////			throw new WorkerException("Could not find " + className);
+////		}
+//	}
 	
 //	public UnifiedLocalWorker(Class<? extends Worker<T, S>> workerClass)
 //			throws InstantiationException, IllegalAccessException {

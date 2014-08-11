@@ -1,5 +1,6 @@
 package at.ac.uibk.dps.biohadoop.communication.worker;
 
+@Deprecated
 public interface Worker<T, S> {
 
 	// TODO: throw exception

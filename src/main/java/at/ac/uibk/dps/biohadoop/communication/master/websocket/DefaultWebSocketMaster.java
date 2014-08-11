@@ -29,7 +29,7 @@ import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.webserver.deployment.DeployingClasses;
 
 @ServerEndpoint(value = "/{path}", encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
-public class DefaultWebSocketMaster<R, T, S> implements MasterLifecycle {
+public class DefaultWebSocketMaster implements MasterLifecycle {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WebSocketMasterEndpoint.class);
@@ -75,7 +75,7 @@ public class DefaultWebSocketMaster<R, T, S> implements MasterLifecycle {
 	}
 
 	@OnMessage
-	public Message<ClassNameWrapper<T>> onMessage(@PathParam("path") String path,
+	public <T, S>Message<ClassNameWrapper<T>> onMessage(@PathParam("path") String path,
 			Message<ClassNameWrapper<S>> inputMessage, Session session) {
 		if (close) {
 			LOG.info("CLOSE");

@@ -21,9 +21,9 @@ public class DefaultRemoteExecutableResolver {
 
 		LaunchInformation launchInformation = null;
 
-		launchInformation = new LaunchInformation(null, new LocalMasterEndpoint(),
-				DefaultTaskClient.QUEUE_NAME);
-		defaultEndpoints.add(launchInformation);
+//		launchInformation = new LaunchInformation(null, new LocalMasterEndpoint(),
+//				DefaultTaskClient.QUEUE_NAME);
+//		defaultEndpoints.add(launchInformation);
 		
 		launchInformation = new LaunchInformation(null, new DefaultKryoServer(),
 				DefaultTaskClient.QUEUE_NAME);

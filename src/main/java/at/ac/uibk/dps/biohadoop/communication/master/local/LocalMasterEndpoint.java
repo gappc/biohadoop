@@ -31,34 +31,38 @@ public class LocalMasterEndpoint implements MasterLifecycle {
 	public void configure(
 			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable)
 			throws EndpointConfigureException {
+		UnifiedLocalWorker<?, ?, ?> localWorker = new UnifiedLocalWorker<>();
 		try {
-			localWorkers.add(new UnifiedLocalWorker<>(null));
+			localWorker.configure(new String[] { "",
+					remoteExecutable.getCanonicalName(), "", "0" });
+			localWorkers.add(new UnifiedLocalWorker<>());
 		} catch (WorkerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new EndpointConfigureException("Could not configure local worker", e);
 		}
-//		BiohadoopConfiguration biohadoopConfiguration = Environment
-//				.getBiohadoopConfiguration();
-//		CommunicationConfiguration communicationConfiguration = biohadoopConfiguration
-//				.getCommunicationConfiguration();
-//
-//		Integer workerCount = communicationConfiguration.getWorkers().get(
-//				remoteExecutable);
-//
-//		if (workerCount != null) {
-//			try {
-//				for (int i = 0; i < workerCount; i++) {
-//					localWorkers.add(new UnifiedLocalWorker<>(remoteExecutable
-//							.getCanonicalName()));
-//				}
-//			} catch (WorkerException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//				throw new EndpointConfigureException(e);
-//			}
-//		} else {
-//			LOG.warn("No workers for local running solver found, therefor no local workers started");
-//		}
+		
+		// BiohadoopConfiguration biohadoopConfiguration = Environment
+		// .getBiohadoopConfiguration();
+		// CommunicationConfiguration communicationConfiguration =
+		// biohadoopConfiguration
+		// .getCommunicationConfiguration();
+		//
+		// Integer workerCount = communicationConfiguration.getWorkers().get(
+		// remoteExecutable);
+		//
+		// if (workerCount != null) {
+		// try {
+		// for (int i = 0; i < workerCount; i++) {
+		// localWorkers.add(new UnifiedLocalWorker<>(remoteExecutable
+		// .getCanonicalName()));
+		// }
+		// } catch (WorkerException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// throw new EndpointConfigureException(e);
+		// }
+		// } else {
+		// LOG.warn("No workers for local running solver found, therefor no local workers started");
+		// }
 	}
 
 	@Override

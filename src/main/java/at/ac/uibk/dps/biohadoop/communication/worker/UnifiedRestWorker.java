@@ -25,22 +25,27 @@ import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 import at.ac.uibk.dps.biohadoop.utils.convert.ConversionException;
 import at.ac.uibk.dps.biohadoop.utils.convert.MessageConverter;
 
-public class UnifiedRestWorker<R, T, S> {
+public class UnifiedRestWorker<R, T, S> implements WorkerEndpoint {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DefaultRestWorker.class);
 
 	private final Map<String, WorkerData<R, T, S>> workerData = new ConcurrentHashMap<>();
-	private final String path;
+	private WorkerParameters parameters;
+	private String path;
 
 	private int logSteps = 1000;
 
-	public UnifiedRestWorker(String className) throws WorkerException {
-		path = WorkerInitializer.getRestPath(className);
+	@Override
+	public void configure(String[] args) throws WorkerException {
+		parameters = WorkerParameters.getParameters(args);
+		path = WorkerInitializer.getRestPath(parameters.getRemoteExecutable());
 	}
 
-	public void run(String host, int port) throws WorkerException {
-		String url = "http://" + host + ":" + port + "/rs/" + path;
+	@Override
+	public void start() throws WorkerException {
+		String url = "http://" + parameters.getHost() + ":"
+				+ parameters.getPort() + "/rs/" + path;
 		Client client = ClientBuilder.newClient();
 
 		PerformanceLogger performanceLogger = new PerformanceLogger(
@@ -72,8 +77,8 @@ public class UnifiedRestWorker<R, T, S> {
 			}
 			LOG.info("Got shutdown");
 		} catch (IOException | ProcessingException e) {
-			throw new WorkerException("Could not communicate with " + host
-					+ ":" + port, e);
+			throw new WorkerException("Could not communicate with "
+					+ parameters.getHost() + ":" + parameters.getPort(), e);
 		} catch (InstantiationException | IllegalAccessException
 				| ClassNotFoundException | ConversionException e) {
 			throw new WorkerException(e);
@@ -133,4 +138,5 @@ public class UnifiedRestWorker<R, T, S> {
 		String dataString = response.readEntity(String.class);
 		return MessageConverter.getMessageForMethod(dataString, "compute", 0);
 	}
+
 }

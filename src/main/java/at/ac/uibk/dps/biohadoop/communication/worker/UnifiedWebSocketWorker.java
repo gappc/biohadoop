@@ -37,7 +37,7 @@ import at.ac.uibk.dps.biohadoop.unifiedcommunication.WorkerData;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
 @ClientEndpoint(encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
-public class UnifiedWebSocketWorker<R, T, S> {
+public class UnifiedWebSocketWorker<R, T, S> implements WorkerEndpoint {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(UnifiedWebSocketWorker.class);
@@ -47,24 +47,27 @@ public class UnifiedWebSocketWorker<R, T, S> {
 	private final Map<String, WorkerData<R, T, S>> workerDatas = new ConcurrentHashMap<>();
 	private final CountDownLatch latch = new CountDownLatch(1);
 	private final AtomicBoolean forceShutdown = new AtomicBoolean(true);
-	private final String path;
 	private final PerformanceLogger performanceLogger = new PerformanceLogger(
 			System.currentTimeMillis(), 0, 1000);
 
-//	private ObjectMapper om = new ObjectMapper();
-
+	private WorkerParameters parameters;
+	private String path;
 	private Message<ClassNameWrapper<T>> oldTask;
 
 	public UnifiedWebSocketWorker() {
 		path = null;
 	}
-	
-	public UnifiedWebSocketWorker(String className) throws WorkerException {
-		path = WorkerInitializer.getWebSocketPath(className);
+
+	@Override
+	public void configure(String[] args) throws WorkerException {
+		parameters = WorkerParameters.getParameters(args);
+		path = WorkerInitializer.getWebSocketPath(parameters
+				.getRemoteExecutable());
 	}
 
-	public void run(String host, int port) throws WorkerException {
-		String url = "ws://" + host + ":" + port + "/websocket/" + path;
+	public void start() throws WorkerException {
+		String url = "ws://" + parameters.getHost() + ":"
+				+ parameters.getPort() + "/websocket/" + path;
 		try {
 			configureForceShutdown();
 			WebSocketContainer container = ContainerProvider
@@ -76,8 +79,8 @@ public class UnifiedWebSocketWorker<R, T, S> {
 		} catch (DeploymentException e) {
 			throw new WorkerException("Could not deploy WebSocket", e);
 		} catch (IOException e) {
-			throw new WorkerException("Could not communicate with " + host
-					+ ":" + port, e);
+			throw new WorkerException("Could not communicate with "
+					+ parameters.getHost() + ":" + parameters.getPort(), e);
 		} catch (EncodeException e) {
 			throw new WorkerException("Could not encode data", e);
 		} catch (InterruptedException e) {
@@ -161,7 +164,7 @@ public class UnifiedWebSocketWorker<R, T, S> {
 					.forName(classString);
 			RemoteExecutable<R, T, S> remoteExecutable = className
 					.newInstance();
-			// Need conversion here as return type is none of R, T, S 
+			// Need conversion here as return type is none of R, T, S
 			WorkerData<R, T, S> workerEntry = new WorkerData<R, T, S>(
 					remoteExecutable, (R) inputMessage.getTask().getData()
 							.getWrapped());
@@ -215,7 +218,7 @@ public class UnifiedWebSocketWorker<R, T, S> {
 			RemoteExecutable<R, T, S> remoteExecutable = workerData
 					.getRemoteExecutable();
 			R initialData = workerData.getInitialData();
-			
+
 			S result = remoteExecutable.compute(data, initialData);
 
 			Message<ClassNameWrapper<?>> outputMessage = createMessage(
@@ -243,4 +246,5 @@ public class UnifiedWebSocketWorker<R, T, S> {
 				taskId, wrapper);
 		return new Message<>(MessageType.WORK_REQUEST, responseTask);
 	}
+
 }

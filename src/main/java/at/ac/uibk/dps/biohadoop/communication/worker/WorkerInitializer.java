@@ -16,23 +16,17 @@ public class WorkerInitializer {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WorkerInitializer.class);
 
-	public static String getRestPath(String className) throws WorkerException {
+	public static String getRestPath(
+			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable)
+			throws WorkerException {
 		String path = DefaultTaskClient.QUEUE_NAME;
-		if (className != null && className.length() > 0) {
-			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass;
-			try {
-				remoteExecutableClass = (Class<? extends RemoteExecutable<?, ?, ?>>) Class
-						.forName(className);
-			} catch (ClassNotFoundException e) {
-				throw new WorkerException("Could not find class " + className,
-						e);
-			}
-			DedicatedRest dedicated = remoteExecutableClass
+		if (remoteExecutable != null) {
+			DedicatedRest dedicated = remoteExecutable
 					.getAnnotation(DedicatedRest.class);
 			if (dedicated != null) {
 				path = dedicated.queueName();
 				LOG.info("Adding dedicated Rest resource at path {}", path);
-				ResourcePath.addRestEntry(path, remoteExecutableClass);
+				ResourcePath.addRestEntry(path, remoteExecutable);
 			} else {
 				LOG.error("No suitable annotation for Rest resource found");
 			}
@@ -40,24 +34,17 @@ public class WorkerInitializer {
 		return path;
 	}
 
-	public static String getWebSocketPath(String className)
+	public static String getWebSocketPath(
+			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable)
 			throws WorkerException {
 		String path = DefaultTaskClient.QUEUE_NAME;
-		if (className != null && className.length() > 0) {
-			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass;
-			try {
-				remoteExecutableClass = (Class<? extends RemoteExecutable<?, ?, ?>>) Class
-						.forName(className);
-			} catch (ClassNotFoundException e) {
-				throw new WorkerException("Could not find class " + className,
-						e);
-			}
-			DedicatedWebSocket dedicated = remoteExecutableClass
+		if (remoteExecutable != null) {
+			DedicatedWebSocket dedicated = remoteExecutable
 					.getAnnotation(DedicatedWebSocket.class);
 			if (dedicated != null) {
 				path = dedicated.queueName();
 				LOG.info("Adding dedicated Rest resource at path {}", path);
-				ResourcePath.addWebSocketEntry(path, remoteExecutableClass);
+				ResourcePath.addWebSocketEntry(path, remoteExecutable);
 			} else {
 				LOG.error("No suitable annotation for Rest resource found");
 			}
@@ -65,18 +52,12 @@ public class WorkerInitializer {
 		return path;
 	}
 
-	public static String getLocalPath(String className) throws WorkerException {
+	public static String getLocalPath(
+			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable)
+			throws WorkerException {
 		String path = DefaultTaskClient.QUEUE_NAME;
-		if (className != null && className.length() > 0) {
-			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass;
-			try {
-				remoteExecutableClass = (Class<? extends RemoteExecutable<?, ?, ?>>) Class
-						.forName(className);
-			} catch (ClassNotFoundException e) {
-				throw new WorkerException("Could not find class " + className,
-						e);
-			}
-			DedicatedLocal dedicated = remoteExecutableClass
+		if (remoteExecutable != null) {
+			DedicatedLocal dedicated = remoteExecutable
 					.getAnnotation(DedicatedLocal.class);
 			if (dedicated != null) {
 				path = dedicated.queueName();
