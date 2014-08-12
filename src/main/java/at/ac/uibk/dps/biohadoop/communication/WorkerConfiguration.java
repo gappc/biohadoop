@@ -1,7 +1,6 @@
 package at.ac.uibk.dps.biohadoop.communication;
 
 import at.ac.uibk.dps.biohadoop.communication.worker.WorkerEndpoint;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

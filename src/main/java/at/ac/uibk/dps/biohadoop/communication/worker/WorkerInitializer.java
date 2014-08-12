@@ -3,12 +3,11 @@ package at.ac.uibk.dps.biohadoop.communication.worker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedLocal;
 import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedRest;
 import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedWebSocket;
 import at.ac.uibk.dps.biohadoop.queue.DefaultTaskClient;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
-import at.ac.uibk.dps.biohadoop.utils.ResourcePath;
 
 //TODO refactor
 public class WorkerInitializer {
@@ -26,7 +25,6 @@ public class WorkerInitializer {
 			if (dedicated != null) {
 				path = dedicated.queueName();
 				LOG.info("Adding dedicated Rest resource at path {}", path);
-				ResourcePath.addRestEntry(path, remoteExecutable);
 			} else {
 				LOG.error("No suitable annotation for Rest resource found");
 			}
@@ -44,7 +42,6 @@ public class WorkerInitializer {
 			if (dedicated != null) {
 				path = dedicated.queueName();
 				LOG.info("Adding dedicated Rest resource at path {}", path);
-				ResourcePath.addWebSocketEntry(path, remoteExecutable);
 			} else {
 				LOG.error("No suitable annotation for Rest resource found");
 			}

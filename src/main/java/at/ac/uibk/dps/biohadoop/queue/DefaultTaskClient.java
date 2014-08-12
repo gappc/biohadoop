@@ -3,8 +3,8 @@ package at.ac.uibk.dps.biohadoop.queue;
 import java.util.ArrayList;
 import java.util.List;
 
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrappedTask;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
+import at.ac.uibk.dps.biohadoop.communication.ClassNameWrappedTask;
+import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 
 public class DefaultTaskClient<R, T, S> implements TaskClient<T, S> {
 

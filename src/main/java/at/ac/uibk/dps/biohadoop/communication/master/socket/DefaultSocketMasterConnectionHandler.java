@@ -13,13 +13,12 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedSocket;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.queue.DefaultTaskClient;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 import at.ac.uibk.dps.biohadoop.utils.PortFinder;
-import at.ac.uibk.dps.biohadoop.utils.ResourcePath;
 
 public class DefaultSocketMasterConnectionHandler<R, T, S> implements Runnable {
 
@@ -44,7 +43,6 @@ public class DefaultSocketMasterConnectionHandler<R, T, S> implements Runnable {
 			if (dedicated != null) {
 				path = dedicated.queueName();
 				LOG.info("Adding dedicated Rest resource at path {}", path);
-				ResourcePath.addRestEntry(path, remoteExecutableClass);
 			} else {
 				LOG.error("No suitable annotation for Rest resource found");
 			}

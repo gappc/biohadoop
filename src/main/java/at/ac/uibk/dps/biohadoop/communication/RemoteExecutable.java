@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.unifiedcommunication;
+package at.ac.uibk.dps.biohadoop.communication;
 
 public interface RemoteExecutable<R, T, S> {
 

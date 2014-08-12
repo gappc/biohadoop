@@ -5,14 +5,13 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedKryo;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.queue.DefaultTaskClient;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 import at.ac.uibk.dps.biohadoop.utils.PortFinder;
-import at.ac.uibk.dps.biohadoop.utils.ResourcePath;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Server;
@@ -24,7 +23,7 @@ public class DefaultKryoServer implements MasterEndpoint {
 	private final Server server = new Server(64 * 1024, 64 * 1024);
 
 	private String path;
-	private DefaultKryoMasterEndpoint kryoServerEndpoint;
+	private DefaultKryoMasterEndpoint<?, ?, ?> kryoServerEndpoint;
 	
 	@Override
 	public void configure(Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass) {
@@ -35,7 +34,6 @@ public class DefaultKryoServer implements MasterEndpoint {
 			if (dedicated != null) {
 				path = dedicated.queueName();
 				LOG.info("Adding dedicated Rest resource at path {}", path);
-				ResourcePath.addRestEntry(path, remoteExecutableClass);
 			} else {
 				LOG.error("No suitable annotation for Rest resource found");
 			}

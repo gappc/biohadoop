@@ -1,4 +1,6 @@
-package at.ac.uibk.dps.biohadoop.unifiedcommunication;
+package at.ac.uibk.dps.biohadoop.communication.worker;
+
+import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 
 public class WorkerData<R, T, S> {
 

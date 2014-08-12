@@ -1,7 +1,7 @@
 package at.ac.uibk.dps.biohadoop.utils.launch;
 
+import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 
 public class LaunchInformation {
 

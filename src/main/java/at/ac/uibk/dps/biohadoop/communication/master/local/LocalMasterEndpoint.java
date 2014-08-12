@@ -8,11 +8,11 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterException;
-import at.ac.uibk.dps.biohadoop.communication.worker.UnifiedLocalWorker;
+import at.ac.uibk.dps.biohadoop.communication.worker.DefaultLocalWorker;
 import at.ac.uibk.dps.biohadoop.communication.worker.WorkerException;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
 
 public class LocalMasterEndpoint implements MasterEndpoint {
 
@@ -21,17 +21,17 @@ public class LocalMasterEndpoint implements MasterEndpoint {
 
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();
-	private final List<UnifiedLocalWorker<?, ?, ?>> localWorkers = new ArrayList<>();
+	private final List<DefaultLocalWorker<?, ?, ?>> localWorkers = new ArrayList<>();
 
 	@Override
 	public void configure(
 			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable)
 			throws MasterException {
-		UnifiedLocalWorker<?, ?, ?> localWorker = new UnifiedLocalWorker<>();
+		DefaultLocalWorker<?, ?, ?> localWorker = new DefaultLocalWorker<>();
 		try {
 			localWorker.configure(new String[] { "",
 					remoteExecutable.getCanonicalName(), "", "0" });
-			localWorkers.add(new UnifiedLocalWorker<>());
+			localWorkers.add(new DefaultLocalWorker<>());
 		} catch (WorkerException e) {
 			throw new MasterException("Could not configure local worker", e);
 		}
@@ -63,7 +63,7 @@ public class LocalMasterEndpoint implements MasterEndpoint {
 
 	@Override
 	public void start() throws MasterException {
-		for (UnifiedLocalWorker<?, ?, ?> localGaWorker : localWorkers) {
+		for (DefaultLocalWorker<?, ?, ?> localGaWorker : localWorkers) {
 			executorService.submit(localGaWorker);
 		}
 		LOG.info("Local Workers started");
@@ -71,7 +71,7 @@ public class LocalMasterEndpoint implements MasterEndpoint {
 
 	@Override
 	public void stop() {
-		for (UnifiedLocalWorker<?, ?, ?> localGaWorker : localWorkers) {
+		for (DefaultLocalWorker<?, ?, ?> localGaWorker : localWorkers) {
 			localGaWorker.stop();
 		}
 		executorService.shutdown();

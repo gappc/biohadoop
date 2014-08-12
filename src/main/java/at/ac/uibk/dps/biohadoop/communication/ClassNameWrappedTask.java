@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.unifiedcommunication;
+package at.ac.uibk.dps.biohadoop.communication;
 
 import at.ac.uibk.dps.biohadoop.queue.SimpleTask;
 import at.ac.uibk.dps.biohadoop.queue.TaskId;
