@@ -192,12 +192,12 @@ public class BiohadoopClient {
 			appReport = yarnClient.getApplicationReport(appId);
 			appState = appReport.getYarnApplicationState();
 			if (count++ % 20 == 0) {
-				LOG.info("Progress: {}", appReport.getProgress());
+				LOG.info("Progress: {}, state: {}", appReport.getProgress(), appState);
 			}
 		}
 
 		LOG.info("Application {} finished with state {} at {}", appId,
-				appState, appReport.getFinishTime());
+				appReport.getFinalApplicationStatus(), appReport.getFinishTime());
 	}
 
 	private void setupAppMasterEnv(Map<String, String> appMasterEnv,
