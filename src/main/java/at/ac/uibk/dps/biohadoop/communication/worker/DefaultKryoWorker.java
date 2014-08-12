@@ -8,8 +8,10 @@ import java.util.concurrent.CountDownLatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.communication.ClassNameWrappedTask;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
+import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedKryo;
 import at.ac.uibk.dps.biohadoop.communication.master.kryo.KryoObjectRegistration;
@@ -17,9 +19,6 @@ import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLaunchException;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskId;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrappedTask;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.WorkerData;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -28,10 +27,10 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
 
-public class UnifiedKryoWorker<R, T, S> implements WorkerEndpoint {
+public class DefaultKryoWorker<R, T, S> implements WorkerEndpoint {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(UnifiedKryoWorker.class);
+			.getLogger(DefaultKryoWorker.class);
 
 	private final Map<String, WorkerData<R, T, S>> workerData = new ConcurrentHashMap<>();
 
@@ -76,7 +75,7 @@ public class UnifiedKryoWorker<R, T, S> implements WorkerEndpoint {
 						if (inputMessage.getType() == MessageType.SHUTDOWN) {
 							LOG.info(
 									"############# {} Worker stopped ###############",
-									UnifiedKryoWorker.class.getSimpleName());
+									DefaultKryoWorker.class.getSimpleName());
 							client.close();
 							latch.countDown();
 							return;

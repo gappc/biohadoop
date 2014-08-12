@@ -8,23 +8,22 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.communication.ClassNameWrappedTask;
+import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLaunchException;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrappedTask;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.WorkerData;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
-public class UnifiedLocalWorker<R, T, S> implements WorkerEndpoint,
+public class DefaultLocalWorker<R, T, S> implements WorkerEndpoint,
 		Callable<Integer> {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(UnifiedLocalWorker.class);
+			.getLogger(DefaultLocalWorker.class);
 	private static final String CLASSNAME = ClassnameProvider
-			.getClassname(UnifiedLocalWorker.class);
+			.getClassname(DefaultLocalWorker.class);
 
 	private final Map<String, WorkerData<R, T, S>> workerDatas = new ConcurrentHashMap<>();
 	private final AtomicBoolean stop = new AtomicBoolean(false);

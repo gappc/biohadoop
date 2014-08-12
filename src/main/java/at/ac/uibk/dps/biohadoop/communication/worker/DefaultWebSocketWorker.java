@@ -25,24 +25,23 @@ import javax.websocket.WebSocketContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.communication.ClassNameWrappedTask;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
+import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketDecoder;
 import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketEncoder;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLaunchException;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskId;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrappedTask;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
-import at.ac.uibk.dps.biohadoop.unifiedcommunication.WorkerData;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
 @ClientEndpoint(encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
-public class UnifiedWebSocketWorker<R, T, S> implements WorkerEndpoint {
+public class DefaultWebSocketWorker<R, T, S> implements WorkerEndpoint {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(UnifiedWebSocketWorker.class);
+			.getLogger(DefaultWebSocketWorker.class);
 
 	private static final int connectionTimeout = 5000;
 
@@ -56,7 +55,7 @@ public class UnifiedWebSocketWorker<R, T, S> implements WorkerEndpoint {
 	private String path;
 	private Message<T> oldMessage;
 
-	public UnifiedWebSocketWorker() {
+	public DefaultWebSocketWorker() {
 		path = null;
 	}
 
@@ -131,7 +130,7 @@ public class UnifiedWebSocketWorker<R, T, S> implements WorkerEndpoint {
 		LOG.info("Closed connection to URI {}, sessionId={}",
 				session.getRequestURI(), session.getId());
 		LOG.info("############# {} stopped #############",
-				UnifiedWebSocketWorker.class.getSimpleName());
+				DefaultWebSocketWorker.class.getSimpleName());
 		latch.countDown();
 	}
 
@@ -146,7 +145,7 @@ public class UnifiedWebSocketWorker<R, T, S> implements WorkerEndpoint {
 
 		if (inputMessage.getType() == MessageType.SHUTDOWN) {
 			LOG.info("############# {} Worker stopped ###############",
-					UnifiedWebSocketWorker.class.getSimpleName());
+					DefaultWebSocketWorker.class.getSimpleName());
 			session.close();
 			return null;
 		}
