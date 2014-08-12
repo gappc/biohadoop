@@ -11,13 +11,13 @@ import org.junit.Test;
 
 public class TaskQueueTest {
 
-	@Test
-	public void addPararmIsNull() throws InterruptedException {
-		TaskQueue<Integer, Integer> taskQueue = new TaskQueue<>();
-		TaskFuture<Integer> taskFuture = taskQueue.add(null);
-		assertNotNull(taskFuture);
-	}
-	
+//	@Test
+//	public void addPararmIsNull() throws InterruptedException {
+//		TaskQueue<Integer, Integer> taskQueue = new TaskQueue<>();
+//		TaskFuture<Integer> taskFuture = taskQueue.add(null);
+//		assertNotNull(taskFuture);
+//	}
+//	
 //	@Test
 //	public void addTaskRequest() throws InterruptedException {
 //		TaskQueue<Integer, Integer> taskQueue = new TaskQueue<>();

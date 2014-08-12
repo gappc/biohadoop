@@ -10,7 +10,11 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
+import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
+import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedKryo;
 import at.ac.uibk.dps.biohadoop.communication.master.kryo.KryoObjectRegistration;
+import at.ac.uibk.dps.biohadoop.hadoop.Environment;
+import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLaunchException;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskId;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrappedTask;
@@ -89,11 +93,11 @@ public class UnifiedKryoWorker<R, T, S> implements WorkerEndpoint {
 									.newInstance();
 
 							WorkerData<R, T, S> workerEntry = new WorkerData<>(
-									unifiedCommunication, (R) task
-											.getData());
+									unifiedCommunication, (R) task.getData());
 							workerData.put(classString, workerEntry);
 							inputMessage = oldMessage;
-							task = (ClassNameWrappedTask<T>)inputMessage.getTask();
+							task = (ClassNameWrappedTask<T>) inputMessage
+									.getTask();
 						}
 
 						WorkerData<R, T, S> workerEntry = workerData
@@ -101,7 +105,8 @@ public class UnifiedKryoWorker<R, T, S> implements WorkerEndpoint {
 						if (workerEntry == null) {
 							oldMessage = inputMessage;
 
-							Task<T> intialTask = new ClassNameWrappedTask<>(null, null, classString);
+							Task<T> intialTask = new ClassNameWrappedTask<>(
+									null, null, classString);
 
 							connection.sendTCP(new Message<>(
 									MessageType.REGISTRATION_REQUEST,
@@ -150,10 +155,17 @@ public class UnifiedKryoWorker<R, T, S> implements WorkerEndpoint {
 		client.sendTCP(message);
 	}
 
-	public Message<S> createMessage(TaskId taskId,
-			String classString, S data) {
-		ClassNameWrappedTask<S> task = new ClassNameWrappedTask<>(taskId, data, classString);
+	public Message<S> createMessage(TaskId taskId, String classString, S data) {
+		ClassNameWrappedTask<S> task = new ClassNameWrappedTask<>(taskId, data,
+				classString);
 		return new Message<>(MessageType.WORK_REQUEST, task);
 	}
 
+	@Override
+	public String getWorkerParameters(WorkerConfiguration workerConfiguration)
+			throws WorkerLaunchException {
+		return ParameterResolver.resolveParameter(workerConfiguration,
+				DedicatedKryo.class, Environment.KRYO_SOCKET_HOST,
+				Environment.KRYO_SOCKET_PORT);
+	}
 }

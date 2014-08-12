@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
+import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
+import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLaunchException;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskId;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrappedTask;
@@ -51,13 +53,13 @@ public class UnifiedRestWorker<R, T, S> implements WorkerEndpoint {
 		PerformanceLogger performanceLogger = new PerformanceLogger(
 				System.currentTimeMillis(), 0, logSteps);
 		try {
-			Message<T> inputMessage = receive(client, url
-					+ "/workinit");
+			Message<T> inputMessage = receive(client, url + "/workinit");
 
 			while (inputMessage.getType() != MessageType.SHUTDOWN) {
 				performanceLogger.step(LOG);
 
-				ClassNameWrappedTask<T> task = (ClassNameWrappedTask<T>)inputMessage.getTask();
+				ClassNameWrappedTask<T> task = (ClassNameWrappedTask<T>) inputMessage
+						.getTask();
 				String classString = task.getClassName();
 
 				WorkerData<R, T, S> workerEntry = getWorkerData(classString,
@@ -70,8 +72,8 @@ public class UnifiedRestWorker<R, T, S> implements WorkerEndpoint {
 
 				S result = remoteExecutable.compute(data, initalData);
 
-				Message<S> outputMessage = createMessage(
-						task.getTaskId(), classString, result);
+				Message<S> outputMessage = createMessage(task.getTaskId(),
+						classString, result);
 				inputMessage = sendAndReceive(outputMessage, client, url
 						+ "/work");
 			}
@@ -112,8 +114,7 @@ public class UnifiedRestWorker<R, T, S> implements WorkerEndpoint {
 		return workerEntry;
 	}
 
-	public Message<S> createMessage(TaskId taskId,
-			String classString, S data) {
+	public Message<S> createMessage(TaskId taskId, String classString, S data) {
 		Task<S> task = new ClassNameWrappedTask<>(taskId, data, classString);
 		return new Message<>(MessageType.WORK_REQUEST, task);
 	}
@@ -124,17 +125,25 @@ public class UnifiedRestWorker<R, T, S> implements WorkerEndpoint {
 				.request(MediaType.APPLICATION_JSON).get();
 
 		String dataString = response.readEntity(String.class);
-		return MessageConverter.getTypedMessageForMethod(dataString, "compute", 0);
+		return MessageConverter.getTypedMessageForMethod(dataString, "compute",
+				0);
 	}
 
-	private Message<T> sendAndReceive(Message<?> message,
-			Client client, String url) throws IOException, ConversionException {
+	private Message<T> sendAndReceive(Message<?> message, Client client,
+			String url) throws IOException, ConversionException {
 		Response response = client.target(url)
 				.request(MediaType.APPLICATION_JSON)
 				.post(Entity.entity(message, MediaType.APPLICATION_JSON));
 
 		String dataString = response.readEntity(String.class);
-		return MessageConverter.getTypedMessageForMethod(dataString, "compute", 0);
+		return MessageConverter.getTypedMessageForMethod(dataString, "compute",
+				0);
+	}
+
+	@Override
+	public String getWorkerParameters(WorkerConfiguration workerConfiguration)
+			throws WorkerLaunchException {
+		return ParameterResolver.resolveHttpParameter(workerConfiguration);
 	}
 
 }

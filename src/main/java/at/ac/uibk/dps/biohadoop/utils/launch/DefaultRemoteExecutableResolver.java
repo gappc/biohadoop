@@ -5,7 +5,6 @@ import java.util.List;
 
 import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.master.kryo.DefaultKryoServer;
-import at.ac.uibk.dps.biohadoop.communication.master.local.LocalMasterEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.master.rest.DefaultRestEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.master.socket.DefaultSocketConnection;
 import at.ac.uibk.dps.biohadoop.communication.master.websocket.DefaultWebSocketMaster;

@@ -38,10 +38,10 @@ public class WorkerParameters {
 			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable = null;
 			if (args[1].length() > 0) {
 				remoteExecutable = (Class<? extends RemoteExecutable<?, ?, ?>>) Class
-						.forName(args[1]);
+						.forName(args[0]);
 			}
-			String host = args[2];
-			int port = Integer.parseInt(args[3]);
+			String host = args[1];
+			int port = Integer.parseInt(args[2]);
 			return new WorkerParameters(remoteExecutable, host, port);
 		} catch (Exception e) {
 			StringBuilder sb = new StringBuilder();

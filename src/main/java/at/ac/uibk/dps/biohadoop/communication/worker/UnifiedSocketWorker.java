@@ -14,7 +14,10 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
-import at.ac.uibk.dps.biohadoop.queue.SimpleTask;
+import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
+import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedSocket;
+import at.ac.uibk.dps.biohadoop.hadoop.Environment;
+import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLaunchException;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskId;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrappedTask;
@@ -89,7 +92,8 @@ public class UnifiedSocketWorker<R, T, S> implements WorkerEndpoint {
 
 			LOG.debug("{} WORK_RESPONSE", className);
 
-			ClassNameWrappedTask<T> task = (ClassNameWrappedTask<T>)inputMessage.getTask();
+			ClassNameWrappedTask<T> task = (ClassNameWrappedTask<T>) inputMessage
+					.getTask();
 			String classString = task.getClassName();
 
 			WorkerData<R, T, S> workerEntry = getWorkerData(classString, os, is);
@@ -101,8 +105,8 @@ public class UnifiedSocketWorker<R, T, S> implements WorkerEndpoint {
 
 			S result = remoteExecutable.compute(data, initalData);
 
-			Message<S> outputMessage = createMessage(
-					task.getTaskId(), classString, result);
+			Message<S> outputMessage = createMessage(task.getTaskId(),
+					classString, result);
 
 			send(os, outputMessage);
 
@@ -111,8 +115,8 @@ public class UnifiedSocketWorker<R, T, S> implements WorkerEndpoint {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Message<T> receive(ObjectInputStream is)
-			throws IOException, ClassNotFoundException {
+	private Message<T> receive(ObjectInputStream is) throws IOException,
+			ClassNotFoundException {
 		return (Message<T>) is.readUnshared();
 	}
 
@@ -128,7 +132,8 @@ public class UnifiedSocketWorker<R, T, S> implements WorkerEndpoint {
 			InstantiationException, IllegalAccessException {
 		WorkerData<R, T, S> workerEntry = workerData.get(classString);
 		if (workerEntry == null) {
-			Task<T> intialTask = new ClassNameWrappedTask<>(null, null, classString);
+			Task<T> intialTask = new ClassNameWrappedTask<>(null, null,
+					classString);
 			Message<?> registrationRequest = new Message<>(
 					MessageType.REGISTRATION_REQUEST, intialTask);
 
@@ -148,10 +153,18 @@ public class UnifiedSocketWorker<R, T, S> implements WorkerEndpoint {
 		return workerEntry;
 	}
 
-	public Message<S> createMessage(TaskId taskId,
-			String classString, S data) {
-		ClassNameWrappedTask<S> task = new ClassNameWrappedTask<>(taskId, data, classString);
+	public Message<S> createMessage(TaskId taskId, String classString, S data) {
+		ClassNameWrappedTask<S> task = new ClassNameWrappedTask<>(taskId, data,
+				classString);
 		return new Message<>(MessageType.WORK_REQUEST, task);
+	}
+
+	@Override
+	public String getWorkerParameters(WorkerConfiguration workerConfiguration)
+			throws WorkerLaunchException {
+		return ParameterResolver.resolveParameter(workerConfiguration,
+				DedicatedSocket.class, Environment.SOCKET_HOST,
+				Environment.SOCKET_PORT);
 	}
 
 }

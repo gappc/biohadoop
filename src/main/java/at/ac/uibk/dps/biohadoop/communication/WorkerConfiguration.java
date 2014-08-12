@@ -10,15 +10,13 @@ public class WorkerConfiguration {
 
 	private final Class<? extends WorkerEndpoint> worker;
 	private final Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable;
-	private final Class<?> annotation;
 	private final Integer count;
 
 	public WorkerConfiguration(Class<? extends WorkerEndpoint> worker,
 			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable,
-			Class<?> annotation, Integer count) {
+			Integer count) {
 		this.worker = worker;
 		this.remoteExecutable = remoteExecutable;
-		this.annotation = annotation;
 		this.count = count;
 	}
 
@@ -26,10 +24,8 @@ public class WorkerConfiguration {
 	public static WorkerConfiguration create(
 			@JsonProperty("worker") Class<? extends WorkerEndpoint> worker,
 			@JsonProperty("remoteExecutable") Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable,
-			@JsonProperty("annotation") Class<?> annotation,
 			@JsonProperty("count") Integer count) {
-		return new WorkerConfiguration(worker, remoteExecutable, annotation,
-				count);
+		return new WorkerConfiguration(worker, remoteExecutable, count);
 	}
 
 	public Class<? extends WorkerEndpoint> getWorker() {
@@ -40,12 +36,18 @@ public class WorkerConfiguration {
 		return remoteExecutable;
 	}
 
-	public Class<?> getAnnotation() {
-		return annotation;
-	}
-
 	public Integer getCount() {
 		return count;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("WorkerEndpoint=").append(worker.getCanonicalName());
+		sb.append(" RemoteExecutable=").append(
+				remoteExecutable.getCanonicalName());
+		sb.append(" Count=").append(count);
+		return sb.toString();
 	}
 
 }
