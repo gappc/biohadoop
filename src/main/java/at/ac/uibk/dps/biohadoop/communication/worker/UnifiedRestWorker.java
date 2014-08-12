@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
-import at.ac.uibk.dps.biohadoop.deletable.DefaultRestWorker;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskId;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.ClassNameWrappedTask;
@@ -29,7 +28,7 @@ import at.ac.uibk.dps.biohadoop.utils.convert.MessageConverter;
 public class UnifiedRestWorker<R, T, S> implements WorkerEndpoint {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(DefaultRestWorker.class);
+			.getLogger(UnifiedRestWorker.class);
 
 	private final Map<String, WorkerData<R, T, S>> workerData = new ConcurrentHashMap<>();
 	private WorkerParameters parameters;

@@ -1,53 +1,39 @@
 package at.ac.uibk.dps.biohadoop.communication;
 
 import java.util.List;
-import java.util.Map;
 
-import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
-import at.ac.uibk.dps.biohadoop.deletable.Master;
-import at.ac.uibk.dps.biohadoop.deletable.Worker;
 import at.ac.uibk.dps.biohadoop.unifiedcommunication.RemoteExecutable;
-import at.ac.uibk.dps.biohadoop.utils.ClassAsKeyDeserializer;
-import at.ac.uibk.dps.biohadoop.utils.ClassAsKeySerializer;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 public class CommunicationConfiguration {
 
 	private final List<Class<? extends RemoteExecutable<?, ?, ?>>> masters;
-	// TODO: Check if can be improved; At the moment: key must be String because
-	// of Json exception
-	// com.fasterxml.jackson.databind.JsonMappingException: Can not find a (Map)
-	// Key deserializer for type [simple type, class
-	// java.lang.Class<at.ac.uibk.dps.biohadoop.connection.WorkerConnection>]
-	@JsonSerialize(keyUsing = ClassAsKeySerializer.class)
-	@JsonDeserialize(keyUsing = ClassAsKeyDeserializer.class)
-	private final Map<Class<? extends Worker<?, ?>>, Integer> workers;
+//	@JsonSerialize(keyUsing = ClassAsKeySerializer.class)
+//	@JsonDeserialize(keyUsing = ClassAsKeyDeserializer.class)
+	private final List<WorkerConfiguration> workerConfigurations;
 
 	public CommunicationConfiguration(
 			List<Class<? extends RemoteExecutable<?, ?, ?>>> masters,
-			Map<Class<? extends Worker<?, ?>>, Integer> workers) {
+			List<WorkerConfiguration> workerConfigurations) {
 		this.masters = masters;
-		this.workers = workers;
+		this.workerConfigurations = workerConfigurations;
 	}
 
 	@JsonCreator
 	public static CommunicationConfiguration create(
 			@JsonProperty("masters") List<Class<? extends RemoteExecutable<?, ?, ?>>> masters,
-			@JsonProperty("workers") Map<Class<? extends Worker<?, ?>>, Integer> workers) {
-		return new CommunicationConfiguration(masters, workers);
+			@JsonProperty("workerConfigurations") List<WorkerConfiguration> workerConfigurations) {
+		return new CommunicationConfiguration(masters, workerConfigurations);
 	}
 
 	public List<Class<? extends RemoteExecutable<?, ?, ?>>> getMasters() {
 		return masters;
 	}
 
-	public Map<Class<? extends Worker<?, ?>>, Integer> getWorkers() {
-		return workers;
+	public List<WorkerConfiguration> getWorkerConfigurations() {
+		return workerConfigurations;
 	}
 
 }

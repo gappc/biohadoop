@@ -21,7 +21,6 @@ import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedRest;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.communication.master.HandleMessageException;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
-import at.ac.uibk.dps.biohadoop.deletable.RestMasterEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.DefaultTaskClient;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
@@ -39,7 +38,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class DefaultRestEndpoint<R, T, S> implements MasterEndpoint {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(RestMasterEndpoint.class);
+			.getLogger(DefaultRestEndpoint.class);
 	private static final Map<String, DefaultMasterImpl<?, ?, ?>> MASTERS = new ConcurrentHashMap<>();
 
 	public void configure(
