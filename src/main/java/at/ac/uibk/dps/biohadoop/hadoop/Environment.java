@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Environment {
 
+	public static final String DEFAULT_PREFIX = "DEFAULT_PREFIX";
 	public static final String HTTP_HOST = "HTTP_HOST";
 	public static final String HTTP_PORT = "HTTP_PORT";
 	public static final String SOCKET_HOST = "SOCKET_HOST";
@@ -19,13 +20,13 @@ public class Environment {
 	private Environment() {
 	}
 
-	public static String get(String key) {
-		return environment.get(key);
-	}
-
-	public static String set(String key, String value) {
-		return environment.put(key, value);
-	}
+//	public static String get(String key) {
+//		return environment.get(key);
+//	}
+//
+//	public static String set(String key, String value) {
+//		return environment.put(key, value);
+//	}
 
 	public static String getPrefixed(String prefix, String key) {
 		return environment.get(prefix + "_" + key);

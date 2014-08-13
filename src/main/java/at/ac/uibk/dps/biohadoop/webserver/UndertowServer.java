@@ -33,8 +33,8 @@ public class UndertowServer {
 
 		final String host = HostInfo.getHostname();
 		final int port = HostInfo.getPort(30000);
-		Environment.set(Environment.HTTP_HOST, host);
-		Environment.set(Environment.HTTP_PORT, Integer.toString(port));
+		Environment.setPrefixed(Environment.DEFAULT_PREFIX, Environment.HTTP_HOST, host);
+		Environment.setPrefixed(Environment.DEFAULT_PREFIX, Environment.HTTP_PORT, Integer.toString(port));
 
 		try {
 			undertow = Undertow.builder().addHttpListener(port, host)

@@ -38,6 +38,14 @@ public class DefaultSocketWorker<R, T, S> implements WorkerEndpoint {
 	private int logSteps = 1000;
 
 	@Override
+	public String buildLaunchArguments(WorkerConfiguration workerConfiguration)
+			throws WorkerLaunchException {
+		return ParameterConstructor.resolveParameter(workerConfiguration,
+				DedicatedSocket.class, Environment.SOCKET_HOST,
+				Environment.SOCKET_PORT);
+	}
+	
+	@Override
 	public void configure(String[] args) throws WorkerException {
 		parameters = WorkerParameters.getParameters(args);
 	}
@@ -156,14 +164,6 @@ public class DefaultSocketWorker<R, T, S> implements WorkerEndpoint {
 		ClassNameWrappedTask<S> task = new ClassNameWrappedTask<>(taskId, data,
 				classString);
 		return new Message<>(MessageType.WORK_REQUEST, task);
-	}
-
-	@Override
-	public String getWorkerParameters(WorkerConfiguration workerConfiguration)
-			throws WorkerLaunchException {
-		return ParameterResolver.resolveParameter(workerConfiguration,
-				DedicatedSocket.class, Environment.SOCKET_HOST,
-				Environment.SOCKET_PORT);
 	}
 
 }

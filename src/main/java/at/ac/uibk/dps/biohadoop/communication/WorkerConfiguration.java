@@ -41,10 +41,13 @@ public class WorkerConfiguration {
 
 	@Override
 	public String toString() {
+		String workerClass = worker != null ? worker.getCanonicalName() : null;
+		String remoteExecutableClass = remoteExecutable != null ? remoteExecutable
+				.getCanonicalName() : null;
+
 		StringBuilder sb = new StringBuilder();
-		sb.append("WorkerEndpoint=").append(worker.getCanonicalName());
-		sb.append(" RemoteExecutable=").append(
-				remoteExecutable.getCanonicalName());
+		sb.append("WorkerEndpoint=").append(workerClass);
+		sb.append(" RemoteExecutable=").append(remoteExecutableClass);
 		sb.append(" Count=").append(count);
 		return sb.toString();
 	}

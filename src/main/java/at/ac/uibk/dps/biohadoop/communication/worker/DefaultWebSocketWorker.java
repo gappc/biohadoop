@@ -56,13 +56,18 @@ public class DefaultWebSocketWorker<R, T, S> implements WorkerEndpoint {
 	private Message<T> oldMessage;
 
 	public DefaultWebSocketWorker() {
-		path = null;
 	}
 
 	@Override
+	public String buildLaunchArguments(WorkerConfiguration workerConfiguration)
+			throws WorkerLaunchException {
+		return ParameterConstructor.resolveHttpParameter(workerConfiguration);
+	}
+	
+	@Override
 	public void configure(String[] args) throws WorkerException {
 		parameters = WorkerParameters.getParameters(args);
-		path = WorkerInitializer.getWebSocketPath(parameters
+		path = PathConstructor.getWebSocketPath(parameters
 				.getRemoteExecutable());
 	}
 
@@ -174,35 +179,11 @@ public class DefaultWebSocketWorker<R, T, S> implements WorkerEndpoint {
 					classString);
 			return new Message<>(MessageType.REGISTRATION_REQUEST, intialTask);
 		}
-		//
-		// if (inputMessage.getType() == MessageType.REGISTRATION_RESPONSE) {
-		// LOG.debug("Registration successful for URI {} and sessionId {}",
-		// session.getRequestURI(), session.getId());
-		//
-		// Task<?> task = om.convertValue(inputMessage.getTask(),
-		// Task.class);
-		//
-		// Object data = task.getData();
-		// // worker.readRegistrationObject(data);
-		//
-		// // return new Message<Object>(MessageType.WORK_INIT_REQUEST, null);
-		// inputMessage = oldTask;
-		// }
 
 		if (inputMessage.getType() == MessageType.WORK_INIT_RESPONSE
 				|| inputMessage.getType() == MessageType.WORK_RESPONSE) {
 			LOG.debug("{} for URI {} and sessionId {}", inputMessage.getType(),
 					session.getRequestURI(), session.getId());
-
-			// @SuppressWarnings("unchecked")
-			// Task<ClassNameWrapper<T>> inputTask = om.convertValue(
-			// inputMessage.getTask(), Task.class);
-
-			// S response = workerEntry
-			// .getRemoteExecutable().compute(inputTask.getData()
-			// .getWrapped(), workerEntry.getInitialData());
-			// Task<S> responseTask = new Task<S>(inputTask.getTaskId(),
-			// response);
 
 			T data = task.getData();
 
@@ -234,12 +215,6 @@ public class DefaultWebSocketWorker<R, T, S> implements WorkerEndpoint {
 		ClassNameWrappedTask<?> task = new ClassNameWrappedTask<>(taskId, data,
 				classString);
 		return new Message<>(MessageType.WORK_REQUEST, task);
-	}
-
-	@Override
-	public String getWorkerParameters(WorkerConfiguration workerConfiguration)
-			throws WorkerLaunchException {
-		return ParameterResolver.resolveHttpParameter(workerConfiguration);
 	}
 
 }

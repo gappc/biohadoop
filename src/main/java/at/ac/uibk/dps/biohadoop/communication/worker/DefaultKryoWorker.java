@@ -41,6 +41,14 @@ public class DefaultKryoWorker<R, T, S> implements WorkerEndpoint {
 	private Message<T> oldMessage;
 
 	@Override
+	public String buildLaunchArguments(WorkerConfiguration workerConfiguration)
+			throws WorkerLaunchException {
+		return ParameterConstructor.resolveParameter(workerConfiguration,
+				DedicatedKryo.class, Environment.KRYO_SOCKET_HOST,
+				Environment.KRYO_SOCKET_PORT);
+	}
+	
+	@Override
 	public void configure(String[] args) throws WorkerException {
 		parameters = WorkerParameters.getParameters(args);
 	}
@@ -160,11 +168,4 @@ public class DefaultKryoWorker<R, T, S> implements WorkerEndpoint {
 		return new Message<>(MessageType.WORK_REQUEST, task);
 	}
 
-	@Override
-	public String getWorkerParameters(WorkerConfiguration workerConfiguration)
-			throws WorkerLaunchException {
-		return ParameterResolver.resolveParameter(workerConfiguration,
-				DedicatedKryo.class, Environment.KRYO_SOCKET_HOST,
-				Environment.KRYO_SOCKET_PORT);
-	}
 }

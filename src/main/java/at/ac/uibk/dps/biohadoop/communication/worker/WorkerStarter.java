@@ -26,6 +26,7 @@ public class WorkerStarter {
 		} catch (ClassNotFoundException | InstantiationException
 				| IllegalAccessException | WorkerException e) {
 			LOG.error("Error while starting Worker {}", args[0], e);
+			System.exit(1);;
 		}
 
 		LOG.info("Worker finished");

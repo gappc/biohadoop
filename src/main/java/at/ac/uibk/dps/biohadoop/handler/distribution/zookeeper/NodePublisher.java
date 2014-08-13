@@ -103,8 +103,8 @@ public class NodePublisher {
 	}
 
 	private NodeData getNodeData() {
-		String host = Environment.get(Environment.HTTP_HOST);
-		String port = Environment.get(Environment.HTTP_PORT);
+		String host = Environment.getPrefixed(Environment.DEFAULT_PREFIX, Environment.HTTP_HOST);
+		String port = Environment.getPrefixed(Environment.DEFAULT_PREFIX, Environment.HTTP_PORT);
 
 		// TODO hardcoding http as protocol is a bad idea
 		StringBuilder distributionResourceUrl = new StringBuilder();

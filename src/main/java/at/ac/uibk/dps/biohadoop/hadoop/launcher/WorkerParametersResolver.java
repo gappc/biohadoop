@@ -31,8 +31,13 @@ public class WorkerParametersResolver {
 				.getWorkerConfigurations()) {
 			for (int i = 0; i < workerConfiguration.getCount(); i++) {
 				String workerParameter = getWorkerParameters(workerConfiguration);
-				workerParameters.add(workerParameter);
-				LOG.info("{}", workerParameter);
+				if (workerParameter != null) {
+					LOG.debug("Adding worker parameters {}", workerParameter);
+					workerParameters.add(workerParameter);
+				}
+				else {
+					LOG.warn("Ignoring empty worker parameters for configuration {}", workerConfiguration);
+				}
 			}
 		}
 		return workerParameters;
@@ -44,7 +49,7 @@ public class WorkerParametersResolver {
 		try {
 			WorkerEndpoint workerEndpoint = workerConfiguration.getWorker()
 					.newInstance();
-			return workerEndpoint.getWorkerParameters(workerConfiguration);
+			return workerEndpoint.buildLaunchArguments(workerConfiguration);
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new WorkerLaunchException(
 					"Could net get worker parameters for WorkerConfiguration: "

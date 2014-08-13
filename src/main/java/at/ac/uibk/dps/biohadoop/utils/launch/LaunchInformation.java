@@ -9,6 +9,8 @@ public class LaunchInformation {
 	private final MasterEndpoint master;
 	private final String queueName;
 
+	// TODO sort parameters to the following order: master, remoteExecutable,
+	// queueName
 	public LaunchInformation(
 			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable,
 			MasterEndpoint master, String queueName) {
@@ -32,8 +34,9 @@ public class LaunchInformation {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("RemoteExecutable: ")
-				.append(remoteExecutable.getCanonicalName()).append("Class=")
+		sb.append("RemoteExecutable=")
+				.append(remoteExecutable.getCanonicalName())
+				.append(", MasterEndpoint=")
 				.append(master.getClass().getCanonicalName())
 				.append(", queueName=").append(queueName);
 		return sb.toString();

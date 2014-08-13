@@ -7,27 +7,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CommunicationConfiguration {
 
-	private final List<Class<? extends RemoteExecutable<?, ?, ?>>> masters;
-//	@JsonSerialize(keyUsing = ClassAsKeySerializer.class)
-//	@JsonDeserialize(keyUsing = ClassAsKeyDeserializer.class)
+	private final List<MasterConfiguration> dedicatedMasters;
 	private final List<WorkerConfiguration> workerConfigurations;
 
 	public CommunicationConfiguration(
-			List<Class<? extends RemoteExecutable<?, ?, ?>>> masters,
+			List<MasterConfiguration> dedicatedMasters,
 			List<WorkerConfiguration> workerConfigurations) {
-		this.masters = masters;
+		this.dedicatedMasters = dedicatedMasters;
 		this.workerConfigurations = workerConfigurations;
 	}
 
 	@JsonCreator
 	public static CommunicationConfiguration create(
-			@JsonProperty("masters") List<Class<? extends RemoteExecutable<?, ?, ?>>> masters,
+			@JsonProperty("dedicatedMasters") List<MasterConfiguration> dedicatedMasters,
 			@JsonProperty("workerConfigurations") List<WorkerConfiguration> workerConfigurations) {
-		return new CommunicationConfiguration(masters, workerConfigurations);
+		return new CommunicationConfiguration(dedicatedMasters, workerConfigurations);
 	}
 
-	public List<Class<? extends RemoteExecutable<?, ?, ?>>> getMasters() {
-		return masters;
+	public List<MasterConfiguration> getDedicatedMasters() {
+		return dedicatedMasters;
 	}
 
 	public List<WorkerConfiguration> getWorkerConfigurations() {

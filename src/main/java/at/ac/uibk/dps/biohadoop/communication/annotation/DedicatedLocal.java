@@ -4,13 +4,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
-import at.ac.uibk.dps.biohadoop.communication.master.local.LocalMasterEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.master.local.DefaultLocalMasterEndpoint;
 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DedicatedLocal {
 
 	String queueName();
 	
-	Class<? extends MasterEndpoint> master() default LocalMasterEndpoint.class;
+	Class<? extends MasterEndpoint> master() default DefaultLocalMasterEndpoint.class;
 	
 }

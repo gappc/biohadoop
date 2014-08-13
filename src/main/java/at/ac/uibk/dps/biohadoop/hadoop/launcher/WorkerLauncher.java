@@ -148,6 +148,7 @@ public class WorkerLauncher {
 
 					SolverService solverService = SolverService.getInstance();
 
+					boolean hasErrors = false;
 					int completedContainers = 0;
 					while (completedContainers < containerCount) {
 						float progress = solverService.getOverallProgress();
@@ -157,14 +158,28 @@ public class WorkerLauncher {
 							++completedContainers;
 							LOG.info("Completed container {} with status {}",
 									completedContainers, status);
+							if (status.getExitStatus() != 0) {
+								hasErrors = true;
+								LOG.error(
+										"Container {} exited with a non-zero exit code {} ",
+										completedContainers,
+										status.getExitStatus());
+							}
 						}
 						Thread.sleep(100);
 					}
 					rmClient.allocate(1.0f);
 
-					LOG.info("All containers completed, unregister with ResourceManager");
-					rmClient.unregisterApplicationMaster(
-							FinalApplicationStatus.SUCCEEDED, "", "");
+					if (!hasErrors) {
+						LOG.info("All containers completed, unregister with ResourceManager");
+						rmClient.unregisterApplicationMaster(
+								FinalApplicationStatus.SUCCEEDED, "", "");
+					}
+					else {
+						LOG.info("All containers completed but some had non-zero exit code, unregister with ResourceManager");
+						rmClient.unregisterApplicationMaster(
+								FinalApplicationStatus.FAILED, "", "");
+					}
 				} catch (Exception e) {
 					LOG.error("******** Application error ***********", e);
 				}

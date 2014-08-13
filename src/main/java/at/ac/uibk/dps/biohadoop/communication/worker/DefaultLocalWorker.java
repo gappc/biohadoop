@@ -31,10 +31,16 @@ public class DefaultLocalWorker<R, T, S> implements WorkerEndpoint,
 	private String path;
 	private int logSteps = 1000;
 
+	// TODO check for correct implementation
+	@Override
+	public String buildLaunchArguments(WorkerConfiguration workerConfiguration) throws WorkerLaunchException {
+		return null;
+	}
+	
 	@Override
 	public void configure(String[] args) throws WorkerException {
 		WorkerParameters parameters = WorkerParameters.getParameters(args);
-		path = WorkerInitializer.getLocalPath(parameters.getRemoteExecutable());
+		path = PathConstructor.getLocalPath(parameters.getRemoteExecutable());
 	}
 
 	@Override
@@ -45,10 +51,9 @@ public class DefaultLocalWorker<R, T, S> implements WorkerEndpoint,
 
 	@Override
 	public Integer call() {
-		LOG.info("############# {} started ##############", CLASSNAME);
+		LOG.info("############# {} started for queue {} ##############", CLASSNAME, path);
 
 		TaskEndpoint<T, S> taskEndpoint = new TaskEndpointImpl<>(path);
-		boolean registrationInit = false;
 
 		PerformanceLogger performanceLogger = new PerformanceLogger(
 				System.currentTimeMillis(), 0, logSteps);
@@ -117,12 +122,6 @@ public class DefaultLocalWorker<R, T, S> implements WorkerEndpoint,
 
 		return new WorkerData<>(remoteExecutable,
 				remoteExecutable.getInitalData());
-	}
-
-	// TODO check for correct implementation
-	@Override
-	public String getWorkerParameters(WorkerConfiguration workerConfiguration) throws WorkerLaunchException {
-		return null;
 	}
 
 }

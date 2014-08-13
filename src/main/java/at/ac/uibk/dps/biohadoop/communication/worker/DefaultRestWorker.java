@@ -38,9 +38,15 @@ public class DefaultRestWorker<R, T, S> implements WorkerEndpoint {
 	private int logSteps = 1000;
 
 	@Override
+	public String buildLaunchArguments(WorkerConfiguration workerConfiguration)
+			throws WorkerLaunchException {
+		return ParameterConstructor.resolveHttpParameter(workerConfiguration);
+	}
+	
+	@Override
 	public void configure(String[] args) throws WorkerException {
 		parameters = WorkerParameters.getParameters(args);
-		path = WorkerInitializer.getRestPath(parameters.getRemoteExecutable());
+		path = PathConstructor.getRestPath(parameters.getRemoteExecutable());
 	}
 
 	@Override
@@ -137,12 +143,6 @@ public class DefaultRestWorker<R, T, S> implements WorkerEndpoint {
 		String dataString = response.readEntity(String.class);
 		return MessageConverter.getTypedMessageForMethod(dataString, "compute",
 				0);
-	}
-
-	@Override
-	public String getWorkerParameters(WorkerConfiguration workerConfiguration)
-			throws WorkerLaunchException {
-		return ParameterResolver.resolveHttpParameter(workerConfiguration);
 	}
 
 }

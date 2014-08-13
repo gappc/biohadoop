@@ -10,10 +10,10 @@ import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedWebSocket;
 import at.ac.uibk.dps.biohadoop.queue.DefaultTaskClient;
 
 //TODO refactor
-public class WorkerInitializer {
+public class PathConstructor {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(WorkerInitializer.class);
+			.getLogger(PathConstructor.class);
 
 	public static String getRestPath(
 			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable)

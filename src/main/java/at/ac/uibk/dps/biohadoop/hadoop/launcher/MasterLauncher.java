@@ -40,10 +40,8 @@ public class MasterLauncher {
 					.getDefaultEndpoints(communicationConfiguration));
 
 			LOG.info("Adding dedicated endpoints");
-			List<Class<? extends RemoteExecutable<?, ?, ?>>> remoteExecutables = communicationConfiguration
-					.getMasters();
 			launchInformations.addAll(DedicatedRemoteExecutableResolver
-					.getDedicatedEndpoints(remoteExecutables));
+					.getDedicatedEndpoints(communicationConfiguration));
 
 			if (launchInformations.size() == 0) {
 				LOG.warn("No usable endpoints found, maybe default endpoints are overwritten in config file?");
