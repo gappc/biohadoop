@@ -1,7 +1,7 @@
 package at.ac.uibk.dps.biohadoop.solver;
 
 public enum SolverState {
-	NEW,
-	RUNNING,
-	FINISHED
+	
+	NEW, RUNNING, SUCCEEDED, FAILED
+	
 }
