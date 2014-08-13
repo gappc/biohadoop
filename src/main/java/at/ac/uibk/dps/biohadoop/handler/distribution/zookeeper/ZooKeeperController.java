@@ -70,7 +70,7 @@ public class ZooKeeperController {
 		SolverService solverService = SolverService.getInstance();
 		SolverConfiguration solverConfiguration = solverService
 				.getSolverConfiguration(solverId);
-		Class<? extends Algorithm<?, ?>> algorithmType = solverConfiguration
+		Class<? extends Algorithm<?>> algorithmType = solverConfiguration
 				.getAlgorithm();
 
 		StringBuilder sb = new StringBuilder().append(SOLVER_PATH).append("/")

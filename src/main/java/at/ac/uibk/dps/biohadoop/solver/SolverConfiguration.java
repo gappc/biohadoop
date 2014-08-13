@@ -13,13 +13,13 @@ public class SolverConfiguration {
 
 	private final String name;
 	private final AlgorithmConfiguration algorithmConfiguration;
-	private final Class<? extends Algorithm<?, ?>> algorithm;
+	private final Class<? extends Algorithm<?>> algorithm;
 	private final List<HandlerConfiguration> handlerConfigurations;
 
 	// TODO check if builder pattern is better suited
 	public SolverConfiguration(String name,
 			AlgorithmConfiguration algorithmConfiguration,
-			Class<? extends Algorithm<?, ?>> algorithm,
+			Class<? extends Algorithm<?>> algorithm,
 			List<HandlerConfiguration> handlerConfigurations) {
 		this.name = name;
 		this.algorithmConfiguration = algorithmConfiguration;
@@ -31,7 +31,7 @@ public class SolverConfiguration {
 	public static SolverConfiguration create(
 			@JsonProperty("name") String name,
 			@JsonProperty("algorithmConfiguration") AlgorithmConfiguration algorithmConfiguration,
-			@JsonProperty("algorithm") Class<? extends Algorithm<?, ?>> algorithm,
+			@JsonProperty("algorithm") Class<? extends Algorithm<?>> algorithm,
 			@JsonProperty("handlerConfiguration") List<HandlerConfiguration> handlerConfigurations) {
 		return new SolverConfiguration(name, algorithmConfiguration,
 				algorithm, handlerConfigurations);
@@ -45,7 +45,7 @@ public class SolverConfiguration {
 		return algorithmConfiguration;
 	}
 
-	public Class<? extends Algorithm<?, ?>> getAlgorithm() {
+	public Class<? extends Algorithm<?>> getAlgorithm() {
 		return algorithm;
 	}
 
