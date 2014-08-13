@@ -74,9 +74,6 @@ public class MasterLauncher {
 	// TODO: what happens if any endpoint throws exception?
 	public void stopMasterEndpoints() throws Exception {
 		LOG.info("Stopping endpoints");
-		
-		ShutdownWaitingService.setFinished();
-
 		for (LaunchInformation launchInformation : launchInformations) {
 			LOG.debug("Stopping endpoint {}", launchInformation);
 			MasterEndpoint master = launchInformation.getMaster();
