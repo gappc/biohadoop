@@ -63,7 +63,7 @@ public class DefaultWebSocketWorker<R, T, S> implements WorkerEndpoint {
 			throws WorkerLaunchException {
 		return ParameterConstructor.resolveHttpParameter(workerConfiguration);
 	}
-	
+
 	@Override
 	public void configure(String[] args) throws WorkerException {
 		parameters = WorkerParameters.getParameters(args);
@@ -96,23 +96,31 @@ public class DefaultWebSocketWorker<R, T, S> implements WorkerEndpoint {
 
 	}
 
-	private void configureForceShutdown() {
+	private void configureForceShutdown() throws InterruptedException {
 		ExecutorService executorService = Executors.newCachedThreadPool();
-		executorService.submit(new Callable<Integer>() {
+		executorService.submit(new Callable<Object>() {
 			@Override
-			public Integer call() throws WorkerException {
+			public Object call() throws WorkerException {
 				try {
 					Thread.sleep(connectionTimeout);
 					if (forceShutdown.get()) {
+						// TODO remove comment
 						LOG.error("Forcing shutdown due to initial connection timeout");
-						System.exit(0);
+						System.exit(1);
+//						throw new WorkerException(
+//								"Forcing shutdown due to initial connection timeout");
 					}
 				} catch (InterruptedException e) {
+					// TODO remove comment
 					LOG.error(
 							"Got interrupted while waiting for connection timeout",
 							e);
+					System.exit(1);
+//					throw new WorkerException(
+//							"Got interrupted while waiting for connection timeout",
+//							e);
 				}
-				return 0;
+				return null;
 			}
 		});
 		executorService.shutdown();

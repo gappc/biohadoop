@@ -19,13 +19,13 @@ import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLaunchException;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskId;
+import at.ac.uibk.dps.biohadoop.utils.KryoRegistrator;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
-import com.esotericsoftware.minlog.Log;
 
 public class DefaultKryoWorker<R, T, S> implements WorkerEndpoint {
 
@@ -47,7 +47,7 @@ public class DefaultKryoWorker<R, T, S> implements WorkerEndpoint {
 				DedicatedKryo.class, Environment.KRYO_SOCKET_HOST,
 				Environment.KRYO_SOCKET_PORT);
 	}
-	
+
 	@Override
 	public void configure(String[] args) throws WorkerException {
 		parameters = WorkerParameters.getParameters(args);
@@ -55,8 +55,6 @@ public class DefaultKryoWorker<R, T, S> implements WorkerEndpoint {
 
 	@Override
 	public void start() throws WorkerException {
-		Log.set(Log.LEVEL_DEBUG);
-
 		final Client client = new Client(64 * 1024, 64 * 1024);
 		client.start();
 		try {
@@ -67,7 +65,7 @@ public class DefaultKryoWorker<R, T, S> implements WorkerEndpoint {
 		}
 
 		Kryo kryo = client.getKryo();
-		KryoObjectRegistration.register(kryo);
+		registerObjects(kryo);
 
 		final PerformanceLogger performanceLogger = new PerformanceLogger(
 				System.currentTimeMillis(), 0, logSteps);
@@ -138,9 +136,8 @@ public class DefaultKryoWorker<R, T, S> implements WorkerEndpoint {
 
 							connection.sendTCP(outputMessage);
 						}
-
 					} catch (Exception e) {
-						e.printStackTrace();
+						LOG.error("Got error", e);
 					}
 				}
 			}
@@ -153,6 +150,33 @@ public class DefaultKryoWorker<R, T, S> implements WorkerEndpoint {
 		} catch (InterruptedException e) {
 			throw new WorkerException(
 					"Error while waiting for worker to finish", e);
+		}
+	}
+
+	private void registerObjects(Kryo kryo) throws WorkerException {
+		KryoObjectRegistration.registerDefaultObjects(kryo);
+		Map<String, String> properties = Environment
+				.getBiohadoopConfiguration().getProperties();
+		if (properties != null) {
+			String kryoRegistratorClassName = properties
+					.get(KryoRegistrator.KRYO_REGISTRATOR);
+			if (kryoRegistratorClassName != null) {
+				LOG.info("Registering additional objects for Kryo serialization");
+				try {
+					KryoRegistrator kryoRegistrator = (KryoRegistrator) Class
+							.forName(kryoRegistratorClassName).newInstance();
+
+					KryoObjectRegistration.registerTypes(kryo,
+							kryoRegistrator.getRegistrationObjects());
+					KryoObjectRegistration.registerTypes(kryo, kryoRegistrator
+							.getRegistrationObjectsWithSerializer());
+				} catch (InstantiationException | IllegalAccessException
+						| ClassNotFoundException e) {
+					throw new WorkerException(
+							"Could not register objects for Kryo serialization, KryoRegistrator="
+									+ kryoRegistratorClassName, e);
+				}
+			}
 		}
 	}
 

@@ -23,10 +23,9 @@ public class WorkerStarter {
 			WorkerEndpoint workerEndpoint = workerEndpointClass.newInstance();
 			workerEndpoint.configure(args);
 			workerEndpoint.start();
-		} catch (ClassNotFoundException | InstantiationException
-				| IllegalAccessException | WorkerException e) {
-			LOG.error("Error while starting Worker {}", args[0], e);
-			System.exit(1);;
+		} catch (Exception e) {
+			LOG.error("Error while runnig Worker {}, exiting with status code 1", args[0], e);
+			System.exit(1);
 		}
 
 		LOG.info("Worker finished");

@@ -16,17 +16,15 @@ import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.communication.master.HandleMessageException;
-import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
+import at.ac.uibk.dps.biohadoop.communication.master.MasterException;
+import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
 
-public class DefaultSocketConnection<R, T, S> implements Callable<Integer> {
+public class DefaultSocketConnection<R, T, S> implements Callable<Object> {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DefaultSocketConnection.class);
 
-	private final String className = ClassnameProvider
-			.getClassname(DefaultSocketConnection.class);
 	private final Socket socket;
-	private final Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass;
 	private final String path;
 
 	private ObjectOutputStream os = null;
@@ -37,13 +35,12 @@ public class DefaultSocketConnection<R, T, S> implements Callable<Integer> {
 	public DefaultSocketConnection(Socket socket,
 			Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass,
 			String path) {
-		this.remoteExecutableClass = remoteExecutableClass;
 		this.socket = socket;
 		this.path = path;
 	}
 
 	@Override
-	public Integer call() {
+	public Object call() throws MasterException {
 		DefaultMasterImpl<R, T, S> masterEndpoint = null;
 		try {
 			LOG.info("Opened Socket on server");
@@ -56,34 +53,17 @@ public class DefaultSocketConnection<R, T, S> implements Callable<Integer> {
 
 			masterEndpoint = buildMaster();
 
-			while (!close) {
+			while (!close && !ShutdownWaitingService.isFinished()) {
 				Message<S> inputMessage = receive();
-				Message<T> outputMessage = masterEndpoint.handleMessage(inputMessage);
-//				if (inputMessage.getType() == MessageType.REGISTRATION_REQUEST) {
-//					outputMessage = handleRegistration(masterEndpoint,
-//							inputMessage);
-//				}
-//				if (inputMessage.getType() == MessageType.WORK_INIT_REQUEST) {
-//					outputMessage = masterEndpoint.handleWorkInit();
-//				}
-//				if (inputMessage.getType() == MessageType.WORK_REQUEST) {
-//					outputMessage = masterEndpoint.handleWork(inputMessage);
-//				}
+				Message<T> outputMessage = masterEndpoint
+						.handleMessage(inputMessage);
 				send(outputMessage);
 			}
-		} catch (IOException e) {
-			LOG.error("Error while running {}", className, e);
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (HandleMessageException e) {
+		} catch (IOException | InstantiationException | IllegalAccessException
+				| ClassNotFoundException | HandleMessageException e) {
+			// TODO remove logging
 			LOG.error("Could not handle worker request", e);
+			throw new MasterException("Could not handle worker request", e);
 		} finally {
 			if (os != null) {
 				try {
@@ -100,23 +80,6 @@ public class DefaultSocketConnection<R, T, S> implements Callable<Integer> {
 				}
 			}
 		}
-		return 0;
-	}
-
-	private Message<?> handleRegistration(DefaultMasterImpl masterEndpoint,
-			Message<?> inputMessage) throws InstantiationException,
-			IllegalAccessException, IOException, ClassNotFoundException {
-
-//		ClassNameWrapper<String> wrapper = (ClassNameWrapper<String>) inputMessage
-//				.getTask().getData();
-//		String className = wrapper.getWrapped();
-//
-//		Object registrationObject = getRegistrationObject(className);
-//
-//		Message<?> registrationMessage = masterEndpoint
-//				.handleRegistration(registrationObject);
-//		return ClassNameWrapperUtils
-//				.wrapMessage(registrationMessage, className);
 		return null;
 	}
 
@@ -138,17 +101,8 @@ public class DefaultSocketConnection<R, T, S> implements Callable<Integer> {
 		}
 	}
 
-	private DefaultMasterImpl<R, T, S> buildMaster() throws InstantiationException,
-			IllegalAccessException {
+	private DefaultMasterImpl<R, T, S> buildMaster()
+			throws InstantiationException, IllegalAccessException {
 		return new DefaultMasterImpl<R, T, S>(path);
-	}
-
-	private Object getRegistrationObject(String className)
-			throws InstantiationException, IllegalAccessException,
-			ClassNotFoundException {
-		Class<? extends RemoteExecutable<?, ?, ?>> masterClass = (Class<? extends RemoteExecutable<?, ?, ?>>) Class
-				.forName(className);
-		RemoteExecutable<?, ?, ?> master = masterClass.newInstance();
-		return master.getInitalData();
 	}
 }

@@ -19,36 +19,55 @@ import com.esotericsoftware.kryo.Serializer;
 
 public class KryoObjectRegistration {
 
-	private static final List<Class<? extends Serializable>> OBJECTS = new CopyOnWriteArrayList<>(
-			Arrays.asList(String[].class, Class.class, Message.class,
-					MessageType.class, Object[].class, double[][].class,
-					double[].class, int[].class, SimpleTask.class,
-					ClassNameWrappedTask.class, TaskId.class, Double[][].class,
-					Double[].class));
-	private static final Map<Class<?>, Serializer<?>> OBJECTS_WITH_SERIALIZER = new ConcurrentHashMap<>();
+	private static final List<Class<? extends Serializable>> DEFAULT_OBJECTS = new CopyOnWriteArrayList<>(
+			Arrays.asList(char[].class, char[][].class, int[].class,
+					int[][].class, float[].class, float[][].class,
+					double[].class, double[][].class, Character[].class,
+					Character[][].class, Integer[].class, Integer[][].class,
+					Float[].class, Float[][].class, Double[].class,
+					Double[][].class, String[].class, String[][].class,
+					Object[].class, Class.class, TaskId.class,
+					SimpleTask.class, ClassNameWrappedTask.class,
+					Message.class, MessageType.class));
+
+	private static final Map<Class<?>, Serializer<?>> DEFAULT_OBJECTS_WITH_SERIALIZER = new ConcurrentHashMap<>();
 
 	static {
-		OBJECTS_WITH_SERIALIZER.put(UUID.class, new UUIDSerializer());
+		DEFAULT_OBJECTS_WITH_SERIALIZER.put(UUID.class, new UUIDSerializer());
 	}
 
 	private KryoObjectRegistration() {
 	}
 
-	public static void register(Kryo kryo) {
-		for (Class<?> type : OBJECTS) {
+	public static void registerDefaultObjects(Kryo kryo) {
+		for (Class<?> type : DEFAULT_OBJECTS) {
 			kryo.register(type);
 		}
-		for (Class<?> type : OBJECTS_WITH_SERIALIZER.keySet()) {
-			kryo.register(type, OBJECTS_WITH_SERIALIZER.get(type));
+		for (Class<?> type : DEFAULT_OBJECTS_WITH_SERIALIZER.keySet()) {
+			kryo.register(type, DEFAULT_OBJECTS_WITH_SERIALIZER.get(type));
 		}
 	}
 
-	public static void addRegistration(Class<? extends Serializable> type) {
-		OBJECTS.add(type);
+	public static void registerType(Kryo kryo,
+			Class<? extends Serializable> type) {
+		kryo.register(type);
 	}
 
-	public static void addRegistration(Class<? extends Serializable> type,
-			Serializer<?> serializer) {
-		OBJECTS_WITH_SERIALIZER.put(type, serializer);
+	public static void registerTypes(Kryo kryo,
+			List<Class<? extends Object>> types) {
+		if (types != null) {
+			for (Class<? extends Object> type : types) {
+				kryo.register(type);
+			}
+		}
+	}
+
+	public static void registerTypes(Kryo kryo,
+			Map<Class<? extends Object>, Serializer<?>> types) {
+		if (types != null) {
+			for (Class<? extends Object> type : types.keySet()) {
+				kryo.register(type, types.get(type));
+			}
+		}
 	}
 }

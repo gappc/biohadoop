@@ -22,7 +22,7 @@ public class ParameterConstructor {
 		String remoteExecutableClassName = getRemoteExecutableClassName(workerConfiguration);
 
 		return workerConfiguration.getWorker().getCanonicalName() + " "
-				+ remoteExecutableClassName + " " + hostname + " " + port;
+				+ remoteExecutableClassName + " " + hostname + " " + port + " " + Environment.getBiohadoopConfigurationPath();
 	}
 
 	public static String resolveParameter(
@@ -36,7 +36,7 @@ public class ParameterConstructor {
 		String remoteExecutableClassName = getRemoteExecutableClassName(workerConfiguration);
 
 		return workerConfiguration.getWorker().getCanonicalName() + " "
-				+ remoteExecutableClassName + " " + hostname + " " + port;
+				+ remoteExecutableClassName + " " + hostname + " " + port + " " + Environment.getBiohadoopConfigurationPath();
 	}
 
 	private static String getEnvironmentData(

@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
-import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.communication.master.HandleMessageException;
@@ -33,53 +32,60 @@ public class DefaultWebSocketEndpoint<R, T, S> implements MasterEndpoint {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DefaultWebSocketEndpoint.class);
 
-	private Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass;
 	private TaskEndpoint<?, ?> taskEndpoint;
 	private DefaultMasterImpl<R, T, S> masterEndpoint;
 	private boolean close = false;
 
 	@Override
-	public void configure(Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass) {
-		this.remoteExecutableClass = remoteExecutableClass;
+	public void configure(
+			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass) {
 		DeployingClasses.addWebSocketClass(DefaultWebSocketEndpoint.class);
 	}
 
 	@Override
 	public void start() throws MasterException {
-		// TODO Auto-generated method stub
-		
+		// Nothing to do
 	}
 
 	@Override
 	public void stop() {
-		// TODO Auto-generated method stub
-		
+		// Nothing to do
 	}
-	
+
 	@OnOpen
 	public void open(@PathParam("path") String path, Session session) {
 		LOG.info("Opened Websocket connection to URI {}, sessionId={}",
 				session.getRequestURI(), session.getId());
+//		if (ShutdownWaitingService.isFinished()) {
+//			String errMsg = "All computations finished, new connections not accepted";
+//			try {
+//				LOG.info(errMsg);
+//				session.close(new CloseReason(
+//						CloseReason.CloseCodes.NORMAL_CLOSURE, errMsg));
+//			} catch (IOException e) {
+//				LOG.error("Error while closing session ({})", errMsg, e);
+//			}
+//		}
 		ShutdownWaitingService.register();
 
 		session.getRequestURI();
-		try {
-			buildMasterEndpoint(null, path);
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		buildMasterEndpoint(path);
 	}
 
 	@OnMessage
 	public Message<T> onMessage(@PathParam("path") String path,
 			Message<S> inputMessage, Session session) {
-		if (close) {
-			LOG.info("CLOSE");
-			return new Message<>(MessageType.SHUTDOWN, null);
+		if (close || ShutdownWaitingService.isFinished()) {
+			String errMsg = "All computations finished, new connections not accepted";
+			try {
+				LOG.info(errMsg);
+				session.close(new CloseReason(
+						CloseReason.CloseCodes.NORMAL_CLOSURE, errMsg));
+			} catch (IOException e) {
+				LOG.error("Error while closing session ({})", errMsg, e);
+			}
+			return null;
+//			return new Message<>(MessageType.SHUTDOWN, null);
 		}
 
 		try {
@@ -120,18 +126,9 @@ public class DefaultWebSocketEndpoint<R, T, S> implements MasterEndpoint {
 		ShutdownWaitingService.unregister();
 	}
 
-	private void buildMasterEndpoint(Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass, String path)
-			throws InstantiationException, IllegalAccessException {
+	private void buildMasterEndpoint(String path) {
 		masterEndpoint = new DefaultMasterImpl<>(path);
 		taskEndpoint = new TaskEndpointImpl<>(path);
-	}
-
-	private Object getRegistrationObject(String className)
-			throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-		Class<? extends RemoteExecutable<?, ?, ?>> masterClass = (Class<? extends RemoteExecutable<?, ?, ?>>) Class
-				.forName(className);
-		RemoteExecutable<?, ?, ?> master = masterClass.newInstance();
-		return master.getInitalData();
 	}
 
 }

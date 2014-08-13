@@ -1,6 +1,5 @@
 package at.ac.uibk.dps.biohadoop.communication.master.kryo;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,9 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
-import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
+import at.ac.uibk.dps.biohadoop.communication.master.MasterException;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.utils.ZeroLock;
@@ -31,13 +30,11 @@ public class DefaultKryoConnection<R, T, S> extends Listener {
 			.newCachedThreadPool();
 	private final ZeroLock zeroLock = new ZeroLock();
 
-	private final Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass;
 	private final String queueName;
 
 	public DefaultKryoConnection(
 			Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass,
 			String path) {
-		this.remoteExecutableClass = remoteExecutableClass;
 		this.queueName = path;
 	}
 
@@ -63,7 +60,7 @@ public class DefaultKryoConnection<R, T, S> extends Listener {
 
 	public void disconnected(Connection connection) {
 		zeroLock.decrement();
-		DefaultMasterImpl masterEndpoint = masters.get(connection);
+		DefaultMasterImpl<R, T, S> masterEndpoint = masters.get(connection);
 		masters.remove(masterEndpoint);
 		Task<?> task = masterEndpoint.getCurrentTask();
 		if (task != null) {
@@ -78,24 +75,24 @@ public class DefaultKryoConnection<R, T, S> extends Listener {
 	public void received(final Connection connection, final Object object) {
 		if (object instanceof Message) {
 
-			executorService.submit(new Callable<Integer>() {
+			executorService.submit(new Callable<Object>() {
 
 				@Override
-				public Integer call() {
+				public Object call() throws MasterException {
 					try {
 						DefaultMasterImpl<R, T, S> masterEndpoint = masters
 								.get(connection);
 
+						@SuppressWarnings("unchecked")
 						Message<S> inputMessage = (Message<S>) object;
 						Message<T> outputMessage = masterEndpoint.handleMessage(inputMessage);
 
 						connection.sendTCP(outputMessage);
 
-						return 0;
+						return null;
 					} catch (Exception e) {
-						LOG.error("Error", e);
+						throw new MasterException("Error in communication", e);
 					}
-					return 1;
 				}
 			});
 		}
@@ -103,34 +100,7 @@ public class DefaultKryoConnection<R, T, S> extends Listener {
 
 	private DefaultMasterImpl<R, T, S> buildMaster()
 			throws Exception {
-		// String queueName = masterClass.getAnnotation(KryoMaster.class)
-		// .queueName();
 		return new DefaultMasterImpl<R, T, S>(queueName);
-	}
-
-	private Object getRegistrationObject(String className)
-			throws InstantiationException, IllegalAccessException,
-			ClassNotFoundException {
-		Class<? extends RemoteExecutable<?, ?, ?>> masterClass = (Class<? extends RemoteExecutable<?, ?, ?>>) Class
-				.forName(className);
-		RemoteExecutable<?, ?, ?> master = masterClass.newInstance();
-		return master.getInitalData();
-	}
-
-	private Message<?> handleRegistration(DefaultMasterImpl masterEndpoint,
-			Message<?> inputMessage) throws InstantiationException,
-			IllegalAccessException, IOException, ClassNotFoundException {
-//		ClassNameWrapper<String> wrapper = (ClassNameWrapper<String>) inputMessage
-//				.getTask().getData();
-//		String className = wrapper.getWrapped();
-//
-//		Object registrationObject = getRegistrationObject(className);
-//
-//		Message<?> registrationMessage = masterEndpoint
-//				.handleRegistration(registrationObject);
-//		return ClassNameWrapperUtils
-//				.wrapMessage(registrationMessage, className);
-		return null;
 	}
 
 }

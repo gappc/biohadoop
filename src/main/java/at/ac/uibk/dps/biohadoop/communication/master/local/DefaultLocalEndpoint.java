@@ -31,9 +31,7 @@ public class DefaultLocalEndpoint implements MasterEndpoint {
 			if (remoteExecutable != null) {
 				remoteExecutableClassName = remoteExecutable.getCanonicalName();
 			}
-			localWorker.configure(new String[] {
-					DefaultLocalWorker.class.getCanonicalName(),
-					remoteExecutableClassName, "", "0" });
+			localWorker.configure(new String[] { remoteExecutableClassName });
 		} catch (WorkerException e) {
 			throw new MasterException("Could not configure local worker", e);
 		}

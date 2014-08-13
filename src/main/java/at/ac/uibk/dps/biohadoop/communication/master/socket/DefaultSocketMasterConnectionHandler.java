@@ -27,7 +27,7 @@ public class DefaultSocketMasterConnectionHandler<R, T, S> implements Runnable {
 
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();
-	private final List<Future<Integer>> futures = new ArrayList<>();
+	private final List<Future<Object>> futures = new ArrayList<>();
 	private Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass;
 	private String path;
 	
@@ -72,7 +72,7 @@ public class DefaultSocketMasterConnectionHandler<R, T, S> implements Runnable {
 				try {
 					Socket socket = serverSocket.accept();
 					DefaultSocketConnection<R, T, S> socketRunnable = new DefaultSocketConnection<>(socket, remoteExecutableClass, path);
-					Future<Integer> future = executorService.submit(socketRunnable);
+					Future<Object> future = executorService.submit(socketRunnable);
 					futures.add(future);
 				} catch (SocketTimeoutException e) {
 					LOG.debug("Socket timeout after {} ms", socketTimeout, e);
@@ -87,7 +87,7 @@ public class DefaultSocketMasterConnectionHandler<R, T, S> implements Runnable {
 	public void stop() {
 		LOG.info("Shutting down");
 		stop = true;
-		for (Future<Integer> future : futures) {
+		for (Future<Object> future : futures) {
 			future.cancel(true);
 		}
 		executorService.shutdown();

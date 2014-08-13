@@ -1,6 +1,13 @@
 package at.ac.uibk.dps.biohadoop.communication.worker;
 
+import java.util.Arrays;
+
+import org.apache.hadoop.yarn.conf.YarnConfiguration;
+
 import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
+import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
+import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfigurationReader;
+import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 
 public class WorkerParameters {
 
@@ -17,7 +24,7 @@ public class WorkerParameters {
 		this.host = host;
 		this.port = port;
 	}
-	
+
 	public Class<? extends WorkerEndpoint> getWorkerEnpoint() {
 		return workerEnpoint;
 	}
@@ -32,6 +39,24 @@ public class WorkerParameters {
 
 	public int getPort() {
 		return port;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static Class<? extends RemoteExecutable<?, ?, ?>> getLocalParameters(
+			String[] args) throws WorkerException {
+		if (args == null || args.length == 0) {
+			throw new WorkerException("Parameters are null");
+		}
+		if (args[0] == null || "".equals(args[0])) {
+			return null;
+		}
+		try {
+			return (Class<? extends RemoteExecutable<?, ?, ?>>) Class
+					.forName(args[0]);
+		} catch (ClassNotFoundException e) {
+			throw new WorkerException("Could not parse parameters "
+					+ Arrays.toString(args), e);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -53,14 +78,18 @@ public class WorkerParameters {
 			}
 			String host = args[2];
 			int port = Integer.parseInt(args[3]);
-			return new WorkerParameters(workerEndpoint, remoteExecutable, host, port);
+
+			BiohadoopConfiguration biohadoopConfiguration = BiohadoopConfigurationReader
+					.readBiohadoopConfiguration(new YarnConfiguration(),
+							args[4]);
+			Environment.setBiohadoopConfiguration(biohadoopConfiguration);
+			Environment.setBiohadoopConfigurationPath(args[4]);
+
+			return new WorkerParameters(workerEndpoint, remoteExecutable, host,
+					port);
 		} catch (Exception e) {
-			StringBuilder sb = new StringBuilder();
-			for (String arg : args) {
-				sb.append(arg).append(" ");
-			}
 			throw new WorkerException("Could not parse parameters "
-					+ sb.toString(), e);
+					+ Arrays.toString(args), e);
 		}
 	}
 }
