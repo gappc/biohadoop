@@ -72,7 +72,7 @@ public class SolverLauncher {
 
 		// Register default handlers
 		handlerService.registerHandler(solverId, new ProgressHandler());
-		
+
 		try {
 			if (solverConfig.getHandlerConfigurations() != null) {
 				// Register dynamic handlers
@@ -110,19 +110,19 @@ public class SolverLauncher {
 						HandlerConstants.ALGORITHM_START, null);
 
 				Object parameter = solverConfig.getAlgorithmConfiguration();
-				Algorithm<?, ?> algorithm = solverConfig.getAlgorithm()
-						.newInstance();
+				Algorithm<Object> algorithm = (Algorithm<Object>) solverConfig
+						.getAlgorithm().newInstance();
 
 				SolverService.getInstance().setSolverState(solverId,
 						SolverState.RUNNING);
 
-				((Algorithm<Object, ?>) algorithm).compute(solverId, parameter);
+				algorithm.compute(solverId, parameter);
 
 				handlerClientImpl.invokeHandlers(
 						HandlerConstants.ALGORITHM_STOP, null);
 
 				SolverService.getInstance().setSolverState(solverId,
-						SolverState.FINISHED);
+						SolverState.SUCCEEDED);
 
 				LOG.info("Finished solver {} with solverId {}",
 						solverConfig.getName(), solverId);
