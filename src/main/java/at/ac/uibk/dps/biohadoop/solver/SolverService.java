@@ -64,7 +64,8 @@ public class SolverService {
 			break;
 		case RUNNING:
 			break;
-		case FINISHED:
+		case SUCCEEDED:
+		case FAILED:
 			counter.decrementAndGet();
 			if (counter.compareAndSet(0, 0)) {
 				LOG.info("All algorithms terminated");
