@@ -28,10 +28,10 @@ import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.webserver.deployment.DeployingClasses;
 
 @ServerEndpoint(value = "/{path}", encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
-public class DefaultWebSocketMaster<R, T, S> implements MasterEndpoint {
+public class DefaultWebSocketEndpoint<R, T, S> implements MasterEndpoint {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(DefaultWebSocketMaster.class);
+			.getLogger(DefaultWebSocketEndpoint.class);
 
 	private Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass;
 	private TaskEndpoint<?, ?> taskEndpoint;
@@ -41,7 +41,7 @@ public class DefaultWebSocketMaster<R, T, S> implements MasterEndpoint {
 	@Override
 	public void configure(Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass) {
 		this.remoteExecutableClass = remoteExecutableClass;
-		DeployingClasses.addWebSocketClass(DefaultWebSocketMaster.class);
+		DeployingClasses.addWebSocketClass(DefaultWebSocketEndpoint.class);
 	}
 
 	@Override

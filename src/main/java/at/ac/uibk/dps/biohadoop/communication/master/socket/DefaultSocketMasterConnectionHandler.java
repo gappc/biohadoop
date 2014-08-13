@@ -71,7 +71,7 @@ public class DefaultSocketMasterConnectionHandler<R, T, S> implements Runnable {
 			while (!stop) {
 				try {
 					Socket socket = serverSocket.accept();
-					DefaultSocketMasterEndpoint<R, T, S> socketRunnable = new DefaultSocketMasterEndpoint<>(socket, remoteExecutableClass, path);
+					DefaultSocketConnection<R, T, S> socketRunnable = new DefaultSocketConnection<>(socket, remoteExecutableClass, path);
 					Future<Integer> future = executorService.submit(socketRunnable);
 					futures.add(future);
 				} catch (SocketTimeoutException e) {

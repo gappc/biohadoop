@@ -16,14 +16,14 @@ import at.ac.uibk.dps.biohadoop.utils.PortFinder;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Server;
 
-public class DefaultKryoServer implements MasterEndpoint {
+public class DefaultKryoEndpoint implements MasterEndpoint {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DefaultKryoServer.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DefaultKryoEndpoint.class);
 
 	private final Server server = new Server(64 * 1024, 64 * 1024);
 
 	private String path;
-	private DefaultKryoMasterEndpoint<?, ?, ?> kryoServerEndpoint;
+	private DefaultKryoConnection<?, ?, ?> kryoServerEndpoint;
 	
 	@Override
 	public void configure(Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass) {
@@ -38,7 +38,7 @@ public class DefaultKryoServer implements MasterEndpoint {
 				LOG.error("No suitable annotation for Rest resource found");
 			}
 		}
-		kryoServerEndpoint = new DefaultKryoMasterEndpoint(remoteExecutableClass, path);
+		kryoServerEndpoint = new DefaultKryoConnection(remoteExecutableClass, path);
 	}
 	
 	@Override

@@ -21,10 +21,10 @@ import at.ac.uibk.dps.biohadoop.utils.ZeroLock;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
-public class DefaultKryoMasterEndpoint<R, T, S> extends Listener {
+public class DefaultKryoConnection<R, T, S> extends Listener {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(DefaultKryoMasterEndpoint.class);
+			.getLogger(DefaultKryoConnection.class);
 
 	private final Map<Connection, DefaultMasterImpl<R, T, S>> masters = new ConcurrentHashMap<>();
 	private final ExecutorService executorService = Executors
@@ -34,7 +34,7 @@ public class DefaultKryoMasterEndpoint<R, T, S> extends Listener {
 	private final Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass;
 	private final String queueName;
 
-	public DefaultKryoMasterEndpoint(
+	public DefaultKryoConnection(
 			Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass,
 			String path) {
 		this.remoteExecutableClass = remoteExecutableClass;

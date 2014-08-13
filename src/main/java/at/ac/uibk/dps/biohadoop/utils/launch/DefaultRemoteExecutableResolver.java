@@ -5,11 +5,11 @@ import java.util.List;
 
 import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.master.kryo.DefaultKryoServer;
-import at.ac.uibk.dps.biohadoop.communication.master.local.DefaultLocalMasterEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.master.kryo.DefaultKryoEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.master.local.DefaultLocalEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.master.rest.DefaultRestEndpoint;
-import at.ac.uibk.dps.biohadoop.communication.master.socket.DefaultSocketConnection;
-import at.ac.uibk.dps.biohadoop.communication.master.websocket.DefaultWebSocketMaster;
+import at.ac.uibk.dps.biohadoop.communication.master.socket.DefaultSocketEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.master.websocket.DefaultWebSocketEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.worker.DefaultLocalWorker;
 import at.ac.uibk.dps.biohadoop.queue.DefaultTaskClient;
 
@@ -26,7 +26,7 @@ public class DefaultRemoteExecutableResolver {
 		defaultEndpoints.addAll(getLocalEndpoints(communicationConfiguration));
 
 		launchInformation = new LaunchInformation(null,
-				new DefaultKryoServer(), DefaultTaskClient.QUEUE_NAME);
+				new DefaultKryoEndpoint(), DefaultTaskClient.QUEUE_NAME);
 		defaultEndpoints.add(launchInformation);
 
 		launchInformation = new LaunchInformation(null,
@@ -34,11 +34,11 @@ public class DefaultRemoteExecutableResolver {
 		defaultEndpoints.add(launchInformation);
 
 		launchInformation = new LaunchInformation(null,
-				new DefaultSocketConnection(), DefaultTaskClient.QUEUE_NAME);
+				new DefaultSocketEndpoint(), DefaultTaskClient.QUEUE_NAME);
 		defaultEndpoints.add(launchInformation);
 
 		launchInformation = new LaunchInformation(null,
-				new DefaultWebSocketMaster(), DefaultTaskClient.QUEUE_NAME);
+				new DefaultWebSocketEndpoint(), DefaultTaskClient.QUEUE_NAME);
 		defaultEndpoints.add(launchInformation);
 
 		return defaultEndpoints;
@@ -55,7 +55,7 @@ public class DefaultRemoteExecutableResolver {
 				Integer count = workerConfiguration.getCount();
 				for (int i = 0; i < count; i++) {
 					launchInformations.add(new LaunchInformation(null,
-							new DefaultLocalMasterEndpoint(),
+							new DefaultLocalEndpoint(),
 							DefaultTaskClient.QUEUE_NAME));
 				}
 			}

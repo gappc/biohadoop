@@ -12,10 +12,10 @@ import at.ac.uibk.dps.biohadoop.communication.master.MasterException;
 import at.ac.uibk.dps.biohadoop.communication.worker.DefaultLocalWorker;
 import at.ac.uibk.dps.biohadoop.communication.worker.WorkerException;
 
-public class DefaultLocalMasterEndpoint implements MasterEndpoint {
+public class DefaultLocalEndpoint implements MasterEndpoint {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(DefaultLocalMasterEndpoint.class);
+			.getLogger(DefaultLocalEndpoint.class);
 
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();

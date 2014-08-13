@@ -14,7 +14,7 @@ import at.ac.uibk.dps.biohadoop.communication.MasterConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
-import at.ac.uibk.dps.biohadoop.communication.master.local.DefaultLocalMasterEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.master.local.DefaultLocalEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.worker.DefaultLocalWorker;
 
 public class DedicatedRemoteExecutableResolver {
@@ -92,7 +92,7 @@ public class DedicatedRemoteExecutableResolver {
 	}
 
 	private static boolean isLocalMaster(LaunchInformation launchInformation) {
-		return DefaultLocalMasterEndpoint.class.equals(launchInformation
+		return DefaultLocalEndpoint.class.equals(launchInformation
 				.getMaster().getClass());
 	}
 
