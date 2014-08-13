@@ -104,7 +104,7 @@ public class WorkerLauncher {
 						.newRecord(ContainerLaunchContext.class);
 
 				String clientCommand = String
-						.format("$JAVA_HOME/bin/java -Xmx128M %s %s configFilename 1>%s/stdout 2>%s/stderr",
+						.format("$JAVA_HOME/bin/java -Xmx128M %s %s 1>%s/stdout 2>%s/stderr",
 								WorkerStarter.class.getCanonicalName(),
 								workerParameters.get(0),
 								ApplicationConstants.LOG_DIR_EXPANSION_VAR,
