@@ -11,6 +11,7 @@ import at.ac.uibk.dps.biohadoop.hadoop.launcher.MasterLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.SolverLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WeldLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLauncher;
+import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
 import at.ac.uibk.dps.biohadoop.queue.TaskQueueService;
 import at.ac.uibk.dps.biohadoop.solver.SolverId;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
@@ -48,6 +49,7 @@ public class BiohadoopApplicationMaster {
 		BiohadoopConfiguration biohadoopConfiguration = BiohadoopConfigurationReader
 				.readBiohadoopConfiguration(yarnConfiguration, args[0]);
 		Environment.setBiohadoopConfiguration(biohadoopConfiguration);
+		Environment.setBiohadoopConfigurationPath(args[0]);
 
 		WeldLauncher.startWeld();
 		
@@ -69,8 +71,13 @@ public class BiohadoopApplicationMaster {
 			SolverId solverId = solver.get();
 			LOG.info("Finished solver with id {}", solverId);
 		}
-
+		LOG.info("All solvers finished");
+		ShutdownWaitingService.setFinished();
+		
+		LOG.info("Stopping all queues");
 		TaskQueueService.getInstance().stopAllTaskQueues();
+		
+		LOG.info("Stopping all communication");
 		masterLauncher.stopMasterEndpoints();
 		
 		WeldLauncher.stopWeld();

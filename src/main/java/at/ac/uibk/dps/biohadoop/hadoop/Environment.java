@@ -16,17 +16,18 @@ public class Environment {
 	private static final Map<String, String> environment = new ConcurrentHashMap<>();
 	
 	private static BiohadoopConfiguration biohadoopConfiguration;
+	private static String biohadoopConfigurationPath;
 
 	private Environment() {
 	}
 
-//	public static String get(String key) {
-//		return environment.get(key);
-//	}
-//
-//	public static String set(String key, String value) {
-//		return environment.put(key, value);
-//	}
+	public static String get(String key) {
+		return environment.get(key);
+	}
+
+	public static String set(String key, String value) {
+		return environment.put(key, value);
+	}
 
 	public static String getPrefixed(String prefix, String key) {
 		return environment.get(prefix + "_" + key);
@@ -45,4 +46,13 @@ public class Environment {
 		Environment.biohadoopConfiguration = biohadoopConfiguration;
 	}
 
+	public static String getBiohadoopConfigurationPath() {
+		return biohadoopConfigurationPath;
+	}
+
+	public static void setBiohadoopConfigurationPath(
+			String biohadoopConfigurationPath) {
+		Environment.biohadoopConfigurationPath = biohadoopConfigurationPath;
+	}
+	
 }
