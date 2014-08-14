@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.ClassNameWrappedTask;
+import at.ac.uibk.dps.biohadoop.communication.ConnectionProperties;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
@@ -54,13 +55,14 @@ public class DefaultKryoWorker<R, T, S> implements WorkerEndpoint {
 	}
 
 	@Override
-	public void start() throws WorkerException {
+	public void start() throws WorkerException, ConnectionRefusedException {
 		final Client client = new Client(64 * 1024, 64 * 1024);
 		client.start();
 		try {
-			client.connect(10000, parameters.getHost(), parameters.getPort());
+			client.connect(ConnectionProperties.CONNECTION_TIMEOUT,
+					parameters.getHost(), parameters.getPort());
 		} catch (IOException e) {
-			throw new WorkerException("Could not communicate with "
+			throw new ConnectionRefusedException("Could not communicate with "
 					+ parameters.getHost() + ":" + parameters.getPort(), e);
 		}
 

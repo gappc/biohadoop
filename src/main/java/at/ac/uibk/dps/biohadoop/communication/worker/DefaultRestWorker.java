@@ -42,7 +42,7 @@ public class DefaultRestWorker<R, T, S> implements WorkerEndpoint {
 			throws WorkerLaunchException {
 		return ParameterConstructor.resolveHttpParameter(workerConfiguration);
 	}
-	
+
 	@Override
 	public void configure(String[] args) throws WorkerException {
 		parameters = WorkerParameters.getParameters(args);
@@ -50,9 +50,10 @@ public class DefaultRestWorker<R, T, S> implements WorkerEndpoint {
 	}
 
 	@Override
-	public void start() throws WorkerException {
+	public void start() throws WorkerException, ConnectionRefusedException {
 		String url = "http://" + parameters.getHost() + ":"
 				+ parameters.getPort() + "/rs/" + path;
+		// TODO add timeout handling
 		Client client = ClientBuilder.newClient();
 
 		PerformanceLogger performanceLogger = new PerformanceLogger(
@@ -84,7 +85,7 @@ public class DefaultRestWorker<R, T, S> implements WorkerEndpoint {
 			}
 			LOG.info("Got shutdown");
 		} catch (IOException | ProcessingException e) {
-			throw new WorkerException("Could not communicate with "
+			throw new ConnectionRefusedException("Could not communicate with "
 					+ parameters.getHost() + ":" + parameters.getPort(), e);
 		} catch (InstantiationException | IllegalAccessException
 				| ClassNotFoundException | ConversionException e) {
