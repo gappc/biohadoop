@@ -111,7 +111,7 @@ public class WorkerLauncher {
 								ApplicationConstants.LOG_DIR_EXPANSION_VAR);
 
 				workerParameters.remove(0);
-				LOG.info("Client command: " + clientCommand);
+				LOG.info("Client command for container {}: {}", container.getId(), clientCommand);
 				ctx.setCommands(Collections.singletonList(clientCommand));
 
 				String libPath = "hdfs://master:54310/biohadoop/lib/";
@@ -153,16 +153,17 @@ public class WorkerLauncher {
 					while (completedContainers < containerCount) {
 						float progress = solverService.getOverallProgress();
 						AllocateResponse response = rmClient.allocate(progress);
+						LOG.error("Waiting for {} containers", containerCount - completedContainers);
 						for (ContainerStatus status : response
 								.getCompletedContainersStatuses()) {
 							++completedContainers;
 							LOG.info("Completed container {} with status {}",
-									completedContainers, status);
-							if (status.getExitStatus() != 0) {
+									status.getContainerId(), status);
+							if (status.getExitStatus() == 1) {
 								hasErrors = true;
 								LOG.error(
-										"Container {} exited with a non-zero exit code {} ",
-										completedContainers,
+										"Container {} exited with an exit code of {} ",
+										status.getContainerId(),
 										status.getExitStatus());
 							}
 						}
