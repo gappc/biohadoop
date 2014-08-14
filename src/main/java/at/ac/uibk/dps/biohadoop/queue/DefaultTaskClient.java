@@ -27,33 +27,38 @@ public class DefaultTaskClient<R, T, S> implements TaskClient<T, S> {
 				.getCanonicalName();
 	}
 
-	public TaskFuture<S> add(T data) throws InterruptedException {
-		Task<T> task = new ClassNameWrappedTask<>(TaskId.newInstance(), data,
+	public TaskFuture<S> add(T data) throws TaskException {
+		return submitTask(data);
+	}
+
+	public List<TaskFuture<S>> addAll(List<T> datas) throws TaskException {
+		List<TaskFuture<S>> taskFutures = new ArrayList<TaskFuture<S>>();
+		for (T data : datas) {
+			TaskFuture<S> taskFuture = submitTask(data);
+			taskFutures.add(taskFuture);
+		}
+		return taskFutures;
+	}
+
+	public List<TaskFuture<S>> addAll(T[] datas) throws TaskException {
+		List<TaskFuture<S>> taskFutures = new ArrayList<TaskFuture<S>>();
+		for (T data : datas) {
+			TaskFuture<S> taskFuture = submitTask(data);
+			taskFutures.add(taskFuture);
+		}
+		return taskFutures;
+	}
+
+	private TaskFuture<S> submitTask(T data) throws TaskException {
+		TaskId taskId = TaskId.newInstance();
+		Task<T> task = new ClassNameWrappedTask<>(taskId, data,
 				remoteExecutableclassName);
-		return taskQueue.add(task);
-	}
-
-	public List<TaskFuture<S>> addAll(List<T> datas)
-			throws InterruptedException {
-		List<TaskFuture<S>> taskFutures = new ArrayList<TaskFuture<S>>();
-		for (T data : datas) {
-			Task<T> task = new ClassNameWrappedTask<>(TaskId.newInstance(),
-					data, remoteExecutableclassName);
-			TaskFuture<S> taskFuture = taskQueue.add(task);
-			taskFutures.add(taskFuture);
+		try {
+			return taskQueue.add(task);
+		} catch (InterruptedException e) {
+			throw new TaskException("Could not add Task " + taskId
+					+ " for data " + data, e);
 		}
-		return taskFutures;
-	}
-
-	public List<TaskFuture<S>> addAll(T[] datas) throws InterruptedException {
-		List<TaskFuture<S>> taskFutures = new ArrayList<TaskFuture<S>>();
-		for (T data : datas) {
-			Task<T> task = new ClassNameWrappedTask<>(TaskId.newInstance(),
-					data, remoteExecutableclassName);
-			TaskFuture<S> taskFuture = taskQueue.add(task);
-			taskFutures.add(taskFuture);
-		}
-		return taskFutures;
 	}
 
 }

@@ -8,7 +8,7 @@ public class TaskCompletionService {
 	}
 
 	public static <T> void awaitAll(List<TaskFuture<T>> taskFutures)
-			throws InterruptedException {
+			throws TaskException {
 		for (TaskFuture<T> taskFuture : taskFutures) {
 			taskFuture.get();
 		}

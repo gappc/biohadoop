@@ -9,8 +9,12 @@ public class TaskFutureImpl<T> implements TaskFuture<T> {
 	private final CountDownLatch latch = new CountDownLatch(1);
 	
 	@Override
-	public T get() throws InterruptedException {
-		latch.await();
+	public T get() throws TaskException {
+		try {
+			latch.await();
+		} catch (InterruptedException e) {
+			throw new TaskException("Error while waiting for TaskFuture to complete", e);
+		}
 		return data;
 	}
 	

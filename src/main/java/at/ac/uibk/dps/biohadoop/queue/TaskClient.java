@@ -5,12 +5,12 @@ import java.util.List;
 public interface TaskClient<T, S> {
 
 	public TaskFuture<S> add(T data)
-			throws InterruptedException;
+			throws TaskException;
 
 	public List<TaskFuture<S>> addAll(List<T> datas)
-			throws InterruptedException;
+			throws TaskException;
 	
 	public List<TaskFuture<S>> addAll(T[] datas)
-			throws InterruptedException;
+			throws TaskException;
 	
 }

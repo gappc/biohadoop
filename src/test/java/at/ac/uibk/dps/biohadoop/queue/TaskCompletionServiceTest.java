@@ -5,7 +5,7 @@ import org.junit.Test;
 public class TaskCompletionServiceTest {
 
 	@Test(expected = NullPointerException.class)
-	public void awaitAllParamIsNull() throws InterruptedException {
+	public void awaitAllParamIsNull() throws TaskException {
 		TaskCompletionService.awaitAll(null);
 	}
 
