@@ -39,6 +39,7 @@ public class DefaultLocalEndpoint implements MasterEndpoint {
 
 	@Override
 	public void start() throws MasterException {
+		// TODO must catch WorkerExecption
 		executorService.submit(localWorker);
 		LOG.info("Local Workers started");
 	}
