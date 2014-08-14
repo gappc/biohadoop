@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.ClassNameWrappedTask;
+import at.ac.uibk.dps.biohadoop.communication.ConnectionProperties;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
@@ -30,6 +31,7 @@ public class DefaultSocketWorker<R, T, S> implements WorkerEndpoint {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DefaultSocketWorker.class);
+	
 	private static String className = ClassnameProvider
 			.getClassname(DefaultSocketWorker.class);
 
@@ -51,11 +53,12 @@ public class DefaultSocketWorker<R, T, S> implements WorkerEndpoint {
 	}
 
 	@Override
-	public void start() throws WorkerException {
+	public void start() throws WorkerException, ConnectionRefusedException {
 		try {
 			// TODO: implement timeout
 			Socket clientSocket = new Socket(parameters.getHost(),
 					parameters.getPort());
+			clientSocket.setSoTimeout(ConnectionProperties.CONNECTION_TIMEOUT);
 			ObjectOutputStream os = new ObjectOutputStream(
 					new BufferedOutputStream(clientSocket.getOutputStream()));
 			os.flush();
@@ -68,7 +71,7 @@ public class DefaultSocketWorker<R, T, S> implements WorkerEndpoint {
 			os.close();
 			clientSocket.close();
 		} catch (IOException e) {
-			throw new WorkerException("Could not communicate with "
+			throw new ConnectionRefusedException("Could not communicate with "
 					+ parameters.getHost() + ":" + parameters.getPort(), e);
 		} catch (InstantiationException | IllegalAccessException
 				| ClassNotFoundException | ConversionException e) {

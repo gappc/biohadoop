@@ -23,12 +23,19 @@ public class WorkerStarter {
 			WorkerEndpoint workerEndpoint = workerEndpointClass.newInstance();
 			workerEndpoint.configure(args);
 			workerEndpoint.start();
+		} catch(ConnectionRefusedException e) {
+			LOG.error(
+					"Error while connecting to Master for Worker {}, exiting with status code 2",
+					args[0], e);
+			System.exit(2);
 		} catch (Exception e) {
-			LOG.error("Error while runnig Worker {}, exiting with status code 1", args[0], e);
+			LOG.error(
+					"Error while runnig Worker {}, exiting with status code 1",
+					args[0], e);
 			System.exit(1);
 		}
 
 		LOG.info("Worker finished");
+		System.exit(0);
 	}
-
 }

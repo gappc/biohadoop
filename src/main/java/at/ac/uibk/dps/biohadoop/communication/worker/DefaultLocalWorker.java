@@ -18,7 +18,7 @@ import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
 public class DefaultLocalWorker<R, T, S> implements WorkerEndpoint,
-		Callable<Integer> {
+		Callable<Object> {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DefaultLocalWorker.class);
@@ -50,7 +50,7 @@ public class DefaultLocalWorker<R, T, S> implements WorkerEndpoint,
 	}
 
 	@Override
-	public Integer call() {
+	public Object call() throws WorkerException {
 		LOG.info("############# {} started for queue {} ##############", CLASSNAME, path);
 
 		TaskEndpoint<T, S> taskEndpoint = new TaskEndpointImpl<>(path);
@@ -76,10 +76,6 @@ public class DefaultLocalWorker<R, T, S> implements WorkerEndpoint,
 					workerDatas.put(className, workerData);
 				}
 
-				// if (!registrationInit) {
-				// doRegistrationInit();
-				// registrationInit = true;
-				// }
 				RemoteExecutable<R, T, S> remoteExecutable = workerData
 						.getRemoteExecutable();
 				R initialData = workerData.getInitialData();
@@ -89,27 +85,16 @@ public class DefaultLocalWorker<R, T, S> implements WorkerEndpoint,
 
 				taskEndpoint.storeResult(task.getTaskId(), result);
 			} catch (InterruptedException e) {
-				LOG.debug("Got InterruptedException, stopping work");
-			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new WorkerException("Got InterruptedException, stopping work", e);
+			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+				throw new WorkerException("Error while execution, stopping work", e);
 			}
 		}
-		return 0;
+		return null;
 	}
 
 	public void stop() {
 		stop.set(true);
-	}
-
-	public void run(String host, int port) throws WorkerException {
-		LOG.error("run");
 	}
 
 	private WorkerData<R, T, S> getInitialData(String className)
