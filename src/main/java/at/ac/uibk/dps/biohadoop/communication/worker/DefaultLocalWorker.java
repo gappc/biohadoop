@@ -59,7 +59,7 @@ public class DefaultLocalWorker<R, T, S> implements WorkerEndpoint,
 				System.currentTimeMillis(), 0, logSteps);
 		while (!stop.get()) {
 			try {
-				performanceLogger.step(LOG);
+//				performanceLogger.step(LOG);
 
 				ClassNameWrappedTask<T> task = (ClassNameWrappedTask<T>) taskEndpoint
 						.getTask();

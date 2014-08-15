@@ -6,7 +6,7 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 
 import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
-import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfigurationReader;
+import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfigurationUtil;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 
 public class WorkerParameters {
@@ -79,8 +79,8 @@ public class WorkerParameters {
 			String host = args[2];
 			int port = Integer.parseInt(args[3]);
 
-			BiohadoopConfiguration biohadoopConfiguration = BiohadoopConfigurationReader
-					.readBiohadoopConfiguration(new YarnConfiguration(),
+			BiohadoopConfiguration biohadoopConfiguration = BiohadoopConfigurationUtil
+					.read(new YarnConfiguration(),
 							args[4]);
 			Environment.setBiohadoopConfiguration(biohadoopConfiguration);
 			Environment.setBiohadoopConfigurationPath(args[4]);

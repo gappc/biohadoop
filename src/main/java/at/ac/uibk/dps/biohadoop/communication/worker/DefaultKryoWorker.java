@@ -96,11 +96,11 @@ public class DefaultKryoWorker<R, T, S> implements WorkerEndpoint {
 						if (inputMessage.getType() == MessageType.REGISTRATION_RESPONSE) {
 							Class<? extends RemoteExecutable<R, T, S>> className = (Class<? extends RemoteExecutable<R, T, S>>) Class
 									.forName(classString);
-							RemoteExecutable<R, T, S> unifiedCommunication = className
+							RemoteExecutable<R, T, S> remoteExecutable = className
 									.newInstance();
 
 							WorkerData<R, T, S> workerEntry = new WorkerData<>(
-									unifiedCommunication, (R) task.getData());
+									remoteExecutable, (R) task.getData());
 							workerData.put(classString, workerEntry);
 							inputMessage = oldMessage;
 							task = (ClassNameWrappedTask<T>) inputMessage
@@ -158,7 +158,7 @@ public class DefaultKryoWorker<R, T, S> implements WorkerEndpoint {
 	private void registerObjects(Kryo kryo) throws WorkerException {
 		KryoObjectRegistration.registerDefaultObjects(kryo);
 		Map<String, String> properties = Environment
-				.getBiohadoopConfiguration().getProperties();
+				.getBiohadoopConfiguration().getGlobalProperties();
 		if (properties != null) {
 			String kryoRegistratorClassName = properties
 					.get(KryoRegistrator.KRYO_REGISTRATOR);
