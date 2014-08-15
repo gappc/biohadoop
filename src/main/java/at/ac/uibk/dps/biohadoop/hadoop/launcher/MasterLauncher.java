@@ -32,7 +32,6 @@ public class MasterLauncher {
 		communicationConfiguration = config.getCommunicationConfiguration();
 	}
 
-	// TODO: what happens if any endpoint throws exception?
 	public void startMasterEndpoints() throws MasterException {
 		try {
 			LOG.info("Adding default endpoints");
