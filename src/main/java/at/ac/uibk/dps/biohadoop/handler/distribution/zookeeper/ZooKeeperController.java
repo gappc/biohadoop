@@ -12,13 +12,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.algorithm.Algorithm;
-import at.ac.uibk.dps.biohadoop.handler.distribution.DistributionException;
-import at.ac.uibk.dps.biohadoop.handler.distribution.ZooKeeperConfiguration;
+import at.ac.uibk.dps.biohadoop.handler.distribution.IslandModelException;
 import at.ac.uibk.dps.biohadoop.solver.SolverConfiguration;
 import at.ac.uibk.dps.biohadoop.solver.SolverId;
 import at.ac.uibk.dps.biohadoop.solver.SolverService;
 
 public class ZooKeeperController {
+	
+	public static final String ZOOKEEPER_HOSTNAME = "ZOOKEEPER_HOSTNAME";
+	public static final String ZOOKEEPER_PORT = "ZOOKEEPER_PORT";
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ZooKeeperController.class);
@@ -30,14 +32,12 @@ public class ZooKeeperController {
 
 	// TODO check if other design is better suited (because of large
 	// constructor)
-	public ZooKeeperController(
-			ZooKeeperConfiguration globalDistributionConfiguration,
-			SolverId solverId) throws DistributionException {
+	public ZooKeeperController(SolverId solverId, String hostname, String port)
+			throws IslandModelException {
 
 		this.solverId = solverId;
 		final CountDownLatch latch = new CountDownLatch(1);
-		final String url = globalDistributionConfiguration.getHost() + ":"
-				+ globalDistributionConfiguration.getPort();
+		final String url = hostname + ":" + port;
 
 		// Connect to ZooKeeper
 		try {
@@ -51,7 +51,7 @@ public class ZooKeeperController {
 
 			latch.await();
 		} catch (InterruptedException | IOException e) {
-			throw new DistributionException(
+			throw new IslandModelException(
 					"Error while connecting to ZooKeeper at " + url, e);
 		}
 
@@ -61,16 +61,16 @@ public class ZooKeeperController {
 			registrationProvider = new RegistrationProvider(zooKeeper);
 			registrationProvider.registerNode(fullPath, solverId);
 		} catch (IOException | KeeperException | InterruptedException e) {
-			throw new DistributionException(
+			throw new IslandModelException(
 					"Error while registering to ZooKeeper at " + url, e);
 		}
 	}
-	
+
 	private String getFullPath() {
 		SolverService solverService = SolverService.getInstance();
 		SolverConfiguration solverConfiguration = solverService
 				.getSolverConfiguration(solverId);
-		Class<? extends Algorithm<?>> algorithmType = solverConfiguration
+		Class<? extends Algorithm> algorithmType = solverConfiguration
 				.getAlgorithm();
 
 		StringBuilder sb = new StringBuilder().append(SOLVER_PATH).append("/")

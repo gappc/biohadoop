@@ -6,6 +6,6 @@ import at.ac.uibk.dps.biohadoop.handler.distribution.zookeeper.NodeData;
 
 public interface RemoteResultGetter {
 
-	public Object getBestRemoteResult(List<NodeData> nodesData) throws DistributionException;
+	public Object getBestRemoteResult(List<NodeData> nodesData) throws IslandModelException;
 	
 }

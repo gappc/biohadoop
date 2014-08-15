@@ -10,7 +10,8 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.datastore.DataProvider;
+import at.ac.uibk.dps.biohadoop.datastore.DataClient;
+import at.ac.uibk.dps.biohadoop.datastore.DataOptions;
 import at.ac.uibk.dps.biohadoop.solver.SolverData;
 import at.ac.uibk.dps.biohadoop.solver.SolverId;
 
@@ -29,7 +30,7 @@ public class DistributionResource {
 	@GET
 	@Path("{solverId}")
 	public Response getSolverData(@PathParam("solverId") SolverId solverId) {
-		SolverData<?> solverData = DataProvider.getSolverData(solverId);
+		SolverData<?> solverData = DataClient.getData(solverId, DataOptions.SOLVER_DATA);
 		if (solverData == null) {
 			return Response.noContent().build();
 		} else {
@@ -40,7 +41,7 @@ public class DistributionResource {
 	@GET
 	@Path("{solverId}/typed")
 	public Response getTypedSolverData(@PathParam("solverId") SolverId solverId) {
-		SolverData<?> solverData = DataProvider.getSolverData(solverId);
+		SolverData<?> solverData = DataClient.getData(solverId, DataOptions.SOLVER_DATA);
 		if (solverData == null) {
 			return Response.noContent().build();
 		} else {

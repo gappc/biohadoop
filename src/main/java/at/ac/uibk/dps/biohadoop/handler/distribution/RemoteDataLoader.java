@@ -33,10 +33,10 @@ public class RemoteDataLoader {
 	
 
 	public SolverData<?> getSolverData(NodeData nodeData)
-			throws DistributionException {
+			throws IslandModelException {
 		if (nodeData == null) {
 			LOG.error(NO_SUITABLE_NODE);
-			throw new DistributionException(NO_SUITABLE_NODE);
+			throw new IslandModelException(NO_SUITABLE_NODE);
 		}
 
 		String path = nodeData.getUrl() + "/" + nodeData.getSolverId()
@@ -51,25 +51,25 @@ public class RemoteDataLoader {
 					SolverData.class);
 			if (solverData == null) {
 				LOG.error("No remote data found at {}", path);
-				throw new DistributionException("No remote data found at "
+				throw new IslandModelException("No remote data found at "
 						+ path);
 			} else {
 				return solverData;
 			}
 		} catch (ProcessingException e) {
 			LOG.error("Could not get remote data from {}", path, e);
-			throw new DistributionException(e);
+			throw new IslandModelException(e);
 		} catch (IOException e) {
 			LOG.error("Error while deserialization of resource {}", path, e);
-			throw new DistributionException(e);
+			throw new IslandModelException(e);
 		}
 	}
 
 	public List<SolverData<?>> getSolverDatas(List<NodeData> nodesData)
-			throws DistributionException {
+			throws IslandModelException {
 		if (nodesData == null || nodesData.isEmpty()) {
 			LOG.error(NO_SUITABLE_NODE);
-			throw new DistributionException(NO_SUITABLE_NODE);
+			throw new IslandModelException(NO_SUITABLE_NODE);
 		}
 
 		List<SolverData<?>> solverDatas = new ArrayList<>();
@@ -91,10 +91,10 @@ public class RemoteDataLoader {
 				}
 			} catch (ProcessingException e) {
 				LOG.error("Could not get remote data from {}", path, e);
-				throw new DistributionException(e);
+				throw new IslandModelException(e);
 			} catch (IOException e) {
 				LOG.error("Error while deserialization of resource {}", path, e);
-				throw new DistributionException(e);
+				throw new IslandModelException(e);
 			}
 		}
 		return solverDatas;
