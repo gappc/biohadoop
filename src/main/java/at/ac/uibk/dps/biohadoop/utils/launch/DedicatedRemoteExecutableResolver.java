@@ -74,6 +74,9 @@ public class DedicatedRemoteExecutableResolver {
 		Annotation annotation = remoteExecutableClass
 				.getAnnotation(annotationClass);
 		if (annotation == null) {
+			LOG.error("Annotation {} not found on {}",
+					annotationClass.getCanonicalName(),
+					remoteExecutableClass.getCanonicalName());
 			return null;
 		}
 
@@ -92,8 +95,8 @@ public class DedicatedRemoteExecutableResolver {
 	}
 
 	private static boolean isLocalMaster(LaunchInformation launchInformation) {
-		return DefaultLocalEndpoint.class.equals(launchInformation
-				.getMaster().getClass());
+		return DefaultLocalEndpoint.class.equals(launchInformation.getMaster()
+				.getClass());
 	}
 
 	private static List<LaunchInformation> handleLocalMaster(
