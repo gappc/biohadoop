@@ -91,7 +91,7 @@ public class DefaultKryoEndpoint implements MasterEndpoint {
 	private void registerObjects(Kryo kryo) throws MasterException {
 		KryoObjectRegistration.registerDefaultObjects(kryo);
 		Map<String, String> properties = Environment
-				.getBiohadoopConfiguration().getProperties();
+				.getBiohadoopConfiguration().getGlobalProperties();
 		if (properties != null) {
 			String kryoRegistratorClassName = properties
 					.get(KryoRegistrator.KRYO_REGISTRATOR);

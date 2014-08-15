@@ -46,8 +46,8 @@ public class BiohadoopApplicationMaster {
 	}
 
 	public void run(String[] args) throws Exception {
-		BiohadoopConfiguration biohadoopConfiguration = BiohadoopConfigurationReader
-				.readBiohadoopConfiguration(yarnConfiguration, args[0]);
+		BiohadoopConfiguration biohadoopConfiguration = BiohadoopConfigurationUtil
+				.read(yarnConfiguration, args[0]);
 		Environment.setBiohadoopConfiguration(biohadoopConfiguration);
 		Environment.setBiohadoopConfigurationPath(args[0]);
 
