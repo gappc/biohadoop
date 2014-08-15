@@ -5,8 +5,12 @@ import java.util.TimeZone;
 import org.xnio.Option;
 import org.xnio.Options;
 
+import at.ac.uibk.dps.biohadoop.solver.SolverData;
+
 public final class DataOptions {
 
+	public static final Option<SolverData> SOLVER_DATA = Option.simple(
+			Options.class, "SOLVER_DATA", SolverData.class);
 	public static final Option<Boolean> COMPUTATION_RESUMED = Option.simple(
 			Options.class, "COMPUTATION_RESUMED", Boolean.class);
 	public static final Option<Object> DATA = Option.simple(Options.class,
