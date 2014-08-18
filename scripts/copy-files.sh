@@ -24,6 +24,9 @@ DEST_IP=172.17.0.100
 # Set Biohadoop home directory
 BIOHADOOP_PROJECT_HOME=$DIR/..
 
+# Set Biohadoop version
+BIOHADOOP_CURRENT=biohadoop-*.jar
+
 # Set remote lib dirs
 LIB_TMP_DIR=/tmp/lib
 LIB_HDFS_DIR=/biohadoop/lib
