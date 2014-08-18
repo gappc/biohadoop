@@ -4,7 +4,7 @@ biohadoop
 Biohadoop is a framework that provides the capabilities to run parallel algorithms on [Apache Hadoop](http://hadoop.apache.org/). It leverages the algorithm authors from the burden of writing a Hadoop program and provides services that can be used to offload compute intensive work to local threads and remote machines using a simple interface.
 
 ## Quickstart
-The quickstart uses a pre-configured Hadoop environment from[https://github.com/gappc/docker-biohadoop](https://github.com/gappc/docker-biohadoop) and the examples from [https://github.com/gappc/biohadoop-algorithms](https://github.com/gappc/biohadoop-algorithms). The requrements are Docker > 1.0 and Maven with MVN_HOME set to the correct path.
+The quickstart uses a pre-configured Hadoop environment from [https://github.com/gappc/docker-biohadoop](https://github.com/gappc/docker-biohadoop) and the examples from [https://github.com/gappc/biohadoop-algorithms](https://github.com/gappc/biohadoop-algorithms). The requirements are an installed gnome-terminal (provided by default in Ubuntu), Docker > 1.0 and Maven with MVN_HOME set to the correct path.
 
 Build and start environment with one master and two slave nodes:
 ```
@@ -26,7 +26,7 @@ $ git clone https://github.com/gappc/biohadoop-algorithms
 $ ./biohadoop/scripts/copy-algorithms.sh
 ```
 
-Run the Echo example:
+Run the Echo example in Hadoop (use this command in the red terminal - if there is no red terminal, please check [https://github.com/gappc/docker-biohadoop](https://github.com/gappc/docker-biohadoop)):
 ```
 yarn jar /tmp/lib/biohadoop-0.0.5-SNAPSHOT.jar at.ac.uibk.dps.biohadoop.hadoop.BiohadoopClient /biohadoop/conf/biohadoop-echo.json
 ```
