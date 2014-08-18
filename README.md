@@ -6,7 +6,7 @@ Biohadoop is a framework that provides the capabilities to run parallel algorith
 ## Quickstart
 The quickstart uses a pre-configured Hadoop environment from [https://github.com/gappc/docker-biohadoop](https://github.com/gappc/docker-biohadoop) and the examples from [https://github.com/gappc/biohadoop-algorithms](https://github.com/gappc/biohadoop-algorithms). The requirements are an installed gnome-terminal (provided by default in Ubuntu), Docker > 1.0 and Maven with MVN_HOME set to the correct path.
 
-Build and start environment with one master and two slave nodes:
+Build and start environment with one master and two slave nodes (the master node is started inside a red gnome-terminal window):
 ```
 $ git clone https://github.com/gappc/docker-biohadoop.git
 $ sudo docker build -t="docker-biohadoop" ./docker-biohadoop
@@ -17,13 +17,15 @@ $ ./docker-biohadoop/scripts/docker-run-hadoop.sh 2
 Build and copy Biohadoop to Hadoop environment:
 ```
 $ git clone https://github.com/gappc/biohadoop
+$ chmod +x ./biohadoop/scripts/*.sh
 $ ./biohadoop/scripts/copy-files.sh
 ```
 
 Build and copy example algorithms to Hadoop environment:
 ```
 $ git clone https://github.com/gappc/biohadoop-algorithms
-$ ./biohadoop/scripts/copy-algorithms.sh
+$ chmod +x ./biohadoop-algorithms/scripts/*.sh
+$ ./biohadoop-algorithms/scripts/copy-algorithms.sh
 ```
 
 Run the Echo example in Hadoop (use this command in the red terminal - if there is no red terminal, please check [https://github.com/gappc/docker-biohadoop](https://github.com/gappc/docker-biohadoop)):
@@ -47,11 +49,14 @@ $ scripts/copy-files.sh
 ```
 
 ## Running
-Biohadoop must be started with one argument, which is the location of the configuration file
-
-To start Biohadoop in a Hadoop environment, give the full path to the Biohadoop JAR file, set `at.ac.uibk.dps.biohadoop.hadoop.BiohadoopClient` as the class to start, and provide a valid HDFS location to a configuration path, e.g.
+To start Biohadoop in a Hadoop environment, provide the full path to the Biohadoop JAR file, set `at.ac.uibk.dps.biohadoop.hadoop.BiohadoopClient` as the class to start, and provide a valid location to a configuration file, e.g.
 ```
-$ yarn jar $PATH_TO_BIOHADOOP/biohadoop-0.0.5-SNAPSHOT.jar at.ac.uibk.dps.biohadoop.hadoop.BiohadoopClient /biohadoop/conf/biohadoop-ga.json
+$ yarn jar $PATH_TO_BIOHADOOP/biohadoop-0.0.5-SNAPSHOT.jar at.ac.uibk.dps.biohadoop.hadoop.BiohadoopClient /biohadoop/conf/biohadoop-echo.json
+```
+
+To start Biohadoop as a standalone application, set the flag `local` provide the full path to the Biohadoop JAR file, set `at.ac.uibk.dps.biohadoop.hadoop.BiohadoopClient` as the class to start, and provide a valid location to a configuration file, e.g.
+```
+$ java jar $PATH_TO_BIOHADOOP/biohadoop-0.0.5-SNAPSHOT.jar -Dlocal at.ac.uibk.dps.biohadoop.hadoop.BiohadoopClient /biohadoop/conf/biohadoop-echo.json
 ```
 
 ## Examples
