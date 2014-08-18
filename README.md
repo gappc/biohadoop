@@ -16,14 +16,14 @@ $ ./docker-biohadoop/scripts/docker-run-hadoop.sh 2
 
 Build and copy Biohadoop to Hadoop environment:
 ```
-$ git clone https://github.com/gappc/biohadoop
+$ git clone https://github.com/gappc/biohadoop.git
 $ chmod +x ./biohadoop/scripts/*.sh
 $ ./biohadoop/scripts/copy-files.sh
 ```
 
 Build and copy example algorithms to Hadoop environment:
 ```
-$ git clone https://github.com/gappc/biohadoop-algorithms
+$ git clone https://github.com/gappc/biohadoop-algorithms.git
 $ chmod +x ./biohadoop-algorithms/scripts/*.sh
 $ ./biohadoop-algorithms/scripts/copy-algorithms.sh
 ```
