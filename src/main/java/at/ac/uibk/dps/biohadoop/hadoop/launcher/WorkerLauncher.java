@@ -153,7 +153,7 @@ public class WorkerLauncher {
 					while (completedContainers < containerCount) {
 						float progress = solverService.getOverallProgress();
 						AllocateResponse response = rmClient.allocate(progress);
-						LOG.error("Waiting for {} containers", containerCount - completedContainers);
+						LOG.debug("Waiting for {} containers", containerCount - completedContainers);
 						for (ContainerStatus status : response
 								.getCompletedContainersStatuses()) {
 							++completedContainers;
