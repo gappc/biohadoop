@@ -52,7 +52,7 @@ public class BiohadoopApplicationMaster {
 		Environment.setBiohadoopConfigurationPath(args[0]);
 
 		WeldLauncher.startWeld();
-		
+
 		MasterLauncher masterLauncher = new MasterLauncher(
 				biohadoopConfiguration);
 		masterLauncher.startMasterEndpoints();
@@ -66,20 +66,20 @@ public class BiohadoopApplicationMaster {
 		} else {
 			WorkerLauncher.pretendToLaunchWorkers(biohadoopConfiguration);
 		}
-		
+
 		for (Future<SolverId> solver : solvers) {
 			SolverId solverId = solver.get();
 			LOG.info("Finished solver with id {}", solverId);
 		}
 		LOG.info("All solvers finished");
 		ShutdownWaitingService.setFinished();
-		
+
 		LOG.info("Stopping all queues");
 		TaskQueueService.getInstance().stopAllTaskQueues();
-		
+
 		LOG.info("Stopping all communication");
 		masterLauncher.stopMasterEndpoints();
-		
+
 		WeldLauncher.stopWeld();
 	}
 
@@ -92,7 +92,8 @@ public class BiohadoopApplicationMaster {
 			throw new IllegalArgumentException();
 		}
 		if (!HdfsUtil.exists(yarnConfiguration, args[0])) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Configuration file " + args[0]
+					+ " could not be found");
 		}
 	}
 
