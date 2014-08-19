@@ -86,6 +86,9 @@ public class DefaultRestEndpoint<R, T, S> implements MasterEndpoint {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Message<T> workinit(@PathParam("path") String path) {
 		DefaultMasterImpl masterEndpoint = MASTERS.get(path);
+		if (masterEndpoint == null) {
+			return new Message<>(MessageType.ERROR, null);
+		}
 		Message<T> inputMessage = new Message<>(MessageType.WORK_INIT_REQUEST, null);
 		try {
 			return masterEndpoint.handleMessage(inputMessage);
