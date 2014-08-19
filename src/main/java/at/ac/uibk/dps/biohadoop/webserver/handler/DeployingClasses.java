@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.webserver.deployment;
+package at.ac.uibk.dps.biohadoop.webserver.handler;
 
 import java.util.List;
 import java.util.Map;

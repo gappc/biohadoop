@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.webserver.deployment;
+package at.ac.uibk.dps.biohadoop.webserver.handler;
 
 import static io.undertow.servlet.Servlets.servlet;
 import io.undertow.server.HttpHandler;

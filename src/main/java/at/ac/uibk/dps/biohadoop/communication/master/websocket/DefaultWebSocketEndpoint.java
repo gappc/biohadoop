@@ -26,7 +26,7 @@ import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.queue.TaskException;
-import at.ac.uibk.dps.biohadoop.webserver.deployment.DeployingClasses;
+import at.ac.uibk.dps.biohadoop.webserver.handler.DeployingClasses;
 
 @ServerEndpoint(value = "/{path}", encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
 public class DefaultWebSocketEndpoint<R, T, S> implements MasterEndpoint {

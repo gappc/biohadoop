@@ -16,9 +16,9 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.handler.distribution.DistributionResource;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
-import at.ac.uibk.dps.biohadoop.webserver.deployment.DeployingClasses;
-import at.ac.uibk.dps.biohadoop.webserver.deployment.ResteasyHandler;
-import at.ac.uibk.dps.biohadoop.webserver.deployment.WebSocketHandler;
+import at.ac.uibk.dps.biohadoop.webserver.handler.DeployingClasses;
+import at.ac.uibk.dps.biohadoop.webserver.handler.ResteasyHandler;
+import at.ac.uibk.dps.biohadoop.webserver.handler.WebSocketHandler;
 
 public class UndertowServer {
 

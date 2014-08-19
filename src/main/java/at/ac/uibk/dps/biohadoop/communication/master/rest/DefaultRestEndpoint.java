@@ -30,7 +30,7 @@ import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.queue.TaskException;
 import at.ac.uibk.dps.biohadoop.utils.convert.ConversionException;
 import at.ac.uibk.dps.biohadoop.utils.convert.MessageConverter;
-import at.ac.uibk.dps.biohadoop.webserver.deployment.DeployingClasses;
+import at.ac.uibk.dps.biohadoop.webserver.handler.DeployingClasses;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
