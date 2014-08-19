@@ -24,8 +24,10 @@ import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.communication.master.HandleMessageException;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.DefaultTaskClient;
+import at.ac.uibk.dps.biohadoop.queue.ShutdownException;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
+import at.ac.uibk.dps.biohadoop.queue.TaskException;
 import at.ac.uibk.dps.biohadoop.utils.convert.ConversionException;
 import at.ac.uibk.dps.biohadoop.utils.convert.MessageConverter;
 import at.ac.uibk.dps.biohadoop.webserver.deployment.DeployingClasses;
@@ -130,8 +132,10 @@ public class DefaultRestEndpoint<R, T, S> implements MasterEndpoint {
 
 			TaskEndpoint<?, ?> taskEndpoint = new TaskEndpointImpl<>(queueName);
 			taskEndpoint.reschedule(rescheduleMessage.getTask().getTaskId());
-		} catch (IOException | InterruptedException e) {
+		} catch (IOException e) {
 			LOG.error("Could not reschedule task", e);
+		} catch (TaskException | ShutdownException e) {
+			LOG.error("Error while rescheduling task", e);
 		}
 	}
 

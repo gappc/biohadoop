@@ -13,8 +13,10 @@ import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterException;
+import at.ac.uibk.dps.biohadoop.queue.ShutdownException;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
+import at.ac.uibk.dps.biohadoop.queue.TaskException;
 import at.ac.uibk.dps.biohadoop.utils.ZeroLock;
 
 import com.esotericsoftware.kryonet.Connection;
@@ -66,8 +68,8 @@ public class DefaultKryoConnection<R, T, S> extends Listener {
 		if (task != null) {
 			try {
 				new TaskEndpointImpl<>(queueName).reschedule(task.getTaskId());
-			} catch (InterruptedException e) {
-				LOG.error("Could not reschedule task at {}", task);
+			} catch (TaskException | ShutdownException e) {
+				LOG.error("Error while rescheduling task", e);
 			}
 		}
 	}

@@ -7,9 +7,11 @@ import at.ac.uibk.dps.biohadoop.communication.ClassNameWrappedTask;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
+import at.ac.uibk.dps.biohadoop.queue.ShutdownException;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
+import at.ac.uibk.dps.biohadoop.queue.TaskException;
 import at.ac.uibk.dps.biohadoop.queue.TaskId;
 
 public class DefaultMasterImpl<R, T, S> {
@@ -30,7 +32,7 @@ public class DefaultMasterImpl<R, T, S> {
 		case NONE:
 			break;
 		case REGISTRATION_REQUEST:
-			return (Message<T>)getInitialData(inputMessage);
+			return (Message<T>) getInitialData(inputMessage);
 		case WORK_INIT_REQUEST:
 			return getWorkResponse();
 		case WORK_REQUEST:
@@ -70,9 +72,12 @@ public class DefaultMasterImpl<R, T, S> {
 		Task<S> task = inputMessage.getTask();
 		try {
 			taskEndpoint.storeResult(task.getTaskId(), task.getData());
-		} catch (InterruptedException e) {
+		} catch (TaskException e) {
 			throw new HandleMessageException(
 					"Error while storing result for message {}" + inputMessage);
+		} catch (ShutdownException e) {
+			throw new HandleMessageException(
+					"Got ShutdownException, assuming this means to stop stopping work");
 		}
 	}
 
@@ -80,8 +85,8 @@ public class DefaultMasterImpl<R, T, S> {
 		try {
 			Task<T> task = taskEndpoint.getTask();
 			return new Message<>(MessageType.WORK_INIT_RESPONSE, task);
-		} catch (InterruptedException e) {
-			LOG.debug("Got InterruptedException, stopping work");
+		} catch (TaskException | ShutdownException e) {
+			LOG.debug("Got TaskException, assuming this means to stop stopping work");
 			currentTask = null;
 			return new Message<>(MessageType.SHUTDOWN, null);
 		}

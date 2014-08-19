@@ -21,9 +21,11 @@ import at.ac.uibk.dps.biohadoop.communication.master.HandleMessageException;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterException;
 import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
+import at.ac.uibk.dps.biohadoop.queue.ShutdownException;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
+import at.ac.uibk.dps.biohadoop.queue.TaskException;
 import at.ac.uibk.dps.biohadoop.webserver.deployment.DeployingClasses;
 
 @ServerEndpoint(value = "/{path}", encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
@@ -56,16 +58,17 @@ public class DefaultWebSocketEndpoint<R, T, S> implements MasterEndpoint {
 	public void open(@PathParam("path") String path, Session session) {
 		LOG.info("Opened Websocket connection to URI {}, sessionId={}",
 				session.getRequestURI(), session.getId());
-//		if (ShutdownWaitingService.isFinished()) {
-//			String errMsg = "All computations finished, new connections not accepted";
-//			try {
-//				LOG.info(errMsg);
-//				session.close(new CloseReason(
-//						CloseReason.CloseCodes.NORMAL_CLOSURE, errMsg));
-//			} catch (IOException e) {
-//				LOG.error("Error while closing session ({})", errMsg, e);
-//			}
-//		}
+		// if (ShutdownWaitingService.isFinished()) {
+		// String errMsg =
+		// "All computations finished, new connections not accepted";
+		// try {
+		// LOG.info(errMsg);
+		// session.close(new CloseReason(
+		// CloseReason.CloseCodes.NORMAL_CLOSURE, errMsg));
+		// } catch (IOException e) {
+		// LOG.error("Error while closing session ({})", errMsg, e);
+		// }
+		// }
 		ShutdownWaitingService.register();
 
 		session.getRequestURI();
@@ -85,7 +88,7 @@ public class DefaultWebSocketEndpoint<R, T, S> implements MasterEndpoint {
 				LOG.error("Error while closing session ({})", errMsg, e);
 			}
 			return null;
-//			return new Message<>(MessageType.SHUTDOWN, null);
+			// return new Message<>(MessageType.SHUTDOWN, null);
 		}
 
 		try {
@@ -104,25 +107,32 @@ public class DefaultWebSocketEndpoint<R, T, S> implements MasterEndpoint {
 	}
 
 	@OnClose
-	public void onClose(Session session) throws InterruptedException {
+	public void onClose(Session session) {
 		LOG.info("Closed Websocket connection to URI {}, sessionId={}",
 				session.getRequestURI(), session.getId());
 		Task<?> currentTask = masterEndpoint.getCurrentTask();
 		if (currentTask != null) {
-			taskEndpoint.reschedule(currentTask.getTaskId());
+			try {
+				taskEndpoint.reschedule(currentTask.getTaskId());
+			} catch (TaskException | ShutdownException e) {
+				LOG.error("Error while closing WebSocket", e);
+			}
 		}
 		close = true;
 		ShutdownWaitingService.unregister();
 	}
 
 	@OnError
-	public void onError(Session session, Throwable t)
-			throws InterruptedException {
+	public void onError(Session session, Throwable t) {
 		Task<?> currentTask = masterEndpoint.getCurrentTask();
 		LOG.error(
 				"Websocket error for URI {} and sessionId {}, affected task: {} ",
 				session.getRequestURI(), session.getId(), currentTask, t);
-		taskEndpoint.reschedule(currentTask.getTaskId());
+		try {
+			taskEndpoint.reschedule(currentTask.getTaskId());
+		} catch (TaskException | ShutdownException e) {
+			LOG.error("Error while handling WebSocket error", e);
+		}
 		ShutdownWaitingService.unregister();
 	}
 
