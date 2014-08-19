@@ -11,20 +11,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TaskQueue<T, S>  {
+public class TaskQueue<T, S> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TaskQueue.class);
-	
+
 	private final BlockingQueue<Task<T>> queue = new LinkedBlockingQueue<>();
 	private final Map<TaskId, TaskQueueEntry<T, S>> workingSet = new ConcurrentHashMap<>();
 	private final Map<Thread, Thread> waitingThreads = new ConcurrentHashMap<>();
 	private final AtomicBoolean stop = new AtomicBoolean(false);
-	
-	public TaskFuture<S> add(Task<T> task)
-			throws InterruptedException {
+
+	public TaskFuture<S> add(Task<T> task) throws InterruptedException {
 		LOG.debug("Adding task {}", task);
 		TaskFutureImpl<S> taskFutureImpl = new TaskFutureImpl<>();
-		TaskQueueEntry<T, S> taskQueueEntry = new TaskQueueEntry<>(task, taskFutureImpl);
+		TaskQueueEntry<T, S> taskQueueEntry = new TaskQueueEntry<>(task,
+				taskFutureImpl);
 		workingSet.put(task.getTaskId(), taskQueueEntry);
 		queue.put(task);
 		LOG.debug("Task {} was put to queue", task);
@@ -52,7 +52,7 @@ public class TaskQueue<T, S>  {
 		}
 		return taskFutures;
 	}
-	
+
 	public Task<T> getTask() throws InterruptedException {
 		if (stop.get()) {
 			Thread.currentThread().interrupt();
@@ -63,19 +63,29 @@ public class TaskQueue<T, S>  {
 		return task;
 	}
 
-	public void storeResult(TaskId taskId, S data) throws InterruptedException {
+	public void storeResult(TaskId taskId, S data) throws InterruptedException,
+			TaskException {
 		LOG.debug("Putting result for task {}", taskId);
 		TaskQueueEntry<T, S> taskQueueEntry = workingSet.remove(taskId);
+		if (taskQueueEntry == null) {
+			throw new TaskException("Could not store result for task " + taskId
+					+ ", because the task id is not known");
+		}
 		TaskFutureImpl<S> taskFutureImpl = taskQueueEntry.getTaskFutureImpl();
 		taskFutureImpl.set(data);
 	}
-	
-	public void reschedule(TaskId taskId) throws InterruptedException {
+
+	public void reschedule(TaskId taskId) throws InterruptedException,
+			TaskException {
 		LOG.info("Rescheduling task {}", taskId);
 		TaskQueueEntry<T, S> taskQueueEntry = workingSet.get(taskId);
+		if (taskQueueEntry == null) {
+			throw new TaskException("Could not store result for task " + taskId
+					+ ", because the task id is not known");
+		}
 		queue.put(taskQueueEntry.getTask());
 	}
-	
+
 	public void stopQueue() {
 		stop.set(true);
 		LOG.info("Interrupting all waiting Threads");
