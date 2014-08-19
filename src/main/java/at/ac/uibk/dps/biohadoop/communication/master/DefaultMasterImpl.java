@@ -39,6 +39,7 @@ public class DefaultMasterImpl<R, T, S> {
 			storeResult(inputMessage);
 			return getWorkResponse();
 		default:
+			currentTask = null;
 			return new Message<>(MessageType.ERROR, null);
 		}
 		String errMsg = "Could not handle request with message " + inputMessage;
@@ -84,6 +85,7 @@ public class DefaultMasterImpl<R, T, S> {
 	private Message<T> getWorkResponse() {
 		try {
 			Task<T> task = taskEndpoint.getTask();
+			currentTask = task;
 			return new Message<>(MessageType.WORK_INIT_RESPONSE, task);
 		} catch (TaskException | ShutdownException e) {
 			LOG.debug("Got TaskException, assuming this means to stop stopping work");
