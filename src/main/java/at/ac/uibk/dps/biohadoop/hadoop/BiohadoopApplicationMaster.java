@@ -1,12 +1,14 @@
 package at.ac.uibk.dps.biohadoop.hadoop;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.algorithm.AlgorithmException;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.MasterLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.SolverLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WeldLauncher;
@@ -68,8 +70,16 @@ public class BiohadoopApplicationMaster {
 		}
 
 		for (Future<SolverId> solver : solvers) {
-			SolverId solverId = solver.get();
-			LOG.info("Finished solver with id {}", solverId);
+			try {
+				SolverId solverId = solver.get();
+				LOG.info("Finished solver with id {}", solverId);
+			} catch (ExecutionException e) {
+				Throwable cause = e.getCause();
+				if (cause != null
+						&& cause.getClass() == AlgorithmException.class) {
+					LOG.error("Error while running Algorithm", cause);
+				}
+			}
 		}
 		LOG.info("All solvers finished");
 		ShutdownWaitingService.setFinished();
