@@ -8,7 +8,6 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.algorithm.AlgorithmException;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.MasterLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.SolverLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WeldLauncher;
@@ -70,15 +69,14 @@ public class BiohadoopApplicationMaster {
 		}
 
 		for (Future<SolverId> solver : solvers) {
+			SolverId solverId = null;
 			try {
-				SolverId solverId = solver.get();
+				solverId = solver.get();
 				LOG.info("Finished solver with id {}", solverId);
 			} catch (ExecutionException e) {
-				Throwable cause = e.getCause();
-				if (cause != null
-						&& cause.getClass() == AlgorithmException.class) {
-					LOG.error("Error while running Algorithm", cause);
-				}
+				// TODO add counter to detect errors and set Biohadoops result
+				// accordingly?
+				LOG.error("Error while running Algorithm", e.getCause());
 			}
 		}
 		LOG.info("All solvers finished");
