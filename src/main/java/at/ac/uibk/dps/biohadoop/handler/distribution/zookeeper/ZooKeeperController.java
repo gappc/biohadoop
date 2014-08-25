@@ -2,11 +2,14 @@ package at.ac.uibk.dps.biohadoop.handler.distribution.zookeeper;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +21,7 @@ import at.ac.uibk.dps.biohadoop.solver.SolverId;
 import at.ac.uibk.dps.biohadoop.solver.SolverService;
 
 public class ZooKeeperController {
-	
+
 	public static final String ZOOKEEPER_HOSTNAME = "ZOOKEEPER_HOSTNAME";
 	public static final String ZOOKEEPER_PORT = "ZOOKEEPER_PORT";
 
@@ -26,35 +29,42 @@ public class ZooKeeperController {
 			.getLogger(ZooKeeperController.class);
 
 	private static final String SOLVER_PATH = "/biohadoop/solvers";
-	private final ZooKeeper zooKeeper;
+	private static final int TIMEOUT_SEC = 5;
+
 	private final RegistrationProvider registrationProvider;
 	private final SolverId solverId;
 
-	// TODO check if other design is better suited (because of large
-	// constructor)
 	public ZooKeeperController(SolverId solverId, String hostname, String port)
 			throws IslandModelException {
 
 		this.solverId = solverId;
-		final CountDownLatch latch = new CountDownLatch(1);
 		final String url = hostname + ":" + port;
 
 		// Connect to ZooKeeper
+		ZooKeeper zooKeeper = null;
+		ZooKeeperConnector zkConnector = null;
 		try {
-			zooKeeper = new ZooKeeper(url, 2000, new Watcher() {
-				@Override
-				public void process(WatchedEvent arg0) {
-					LOG.info("Connection to ZooKeeper successful");
-					latch.countDown();
-				}
-			});
+			zkConnector = new ZooKeeperConnector();
+			zooKeeper = zkConnector.initialize(url);
 
-			latch.await();
-		} catch (InterruptedException | IOException e) {
-			throw new IslandModelException(
-					"Error while connecting to ZooKeeper at " + url, e);
+			ExecutorService executor = Executors.newFixedThreadPool(1);
+			Future<Object> zkFuture = executor.submit(zkConnector);
+			executor.shutdown();
+			zkFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS);
+		} catch (IOException | InterruptedException | ExecutionException
+				| TimeoutException e) {
+			String errMsg = null;
+			if (e.getClass() == TimeoutException.class) {
+				errMsg = "Timeout after " + TIMEOUT_SEC
+						+ " seconds while trying to connect to ZooKeeper at "
+						+ url;
+			} else {
+				errMsg = "Error while connecting to ZooKeeper at " + url;
+			}
+			zkConnector.unblock();
+			throw new IslandModelException(errMsg, e);
 		}
-
+		
 		try {
 			String fullPath = getFullPath();
 
