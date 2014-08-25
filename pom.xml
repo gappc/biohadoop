@@ -10,6 +10,7 @@
 		<hadoop.version>2.4.1</hadoop.version>
 		<undertow.websocket.version>1.0.15.Final</undertow.websocket.version>
 		<resteasy.version>3.0.8.Final</resteasy.version>
+		<metrics.version>3.0.1</metrics.version>
 	</properties>
 
 	<build>
@@ -148,11 +149,8 @@
 			<artifactId>kryonet</artifactId>
 			<version>2.22.0-RC1</version>
 		</dependency>
-<!-- 		<dependency>
-			<groupId>de.javakaffee</groupId>
-			<artifactId>kryo-serializers</artifactId>
-			<version>0.27</version>
-		</dependency> -->
+		<!-- <dependency> <groupId>de.javakaffee</groupId> <artifactId>kryo-serializers</artifactId> 
+			<version>0.27</version> </dependency> -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
@@ -162,6 +160,11 @@
 			<groupId>org.jboss.weld.se</groupId>
 			<artifactId>weld-se-core</artifactId>
 			<version>2.2.2.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>com.codahale.metrics</groupId>
+			<artifactId>metrics-core</artifactId>
+			<version>${metrics.version}</version>
 		</dependency>
 	</dependencies>
 </project>

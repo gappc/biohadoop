@@ -7,14 +7,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.metrics.Metrics;
+
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
+
 public class SolverService {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SolverService.class);
 
 	private static final SolverService SOLVER_MANAGER = new SolverService();
-	private Map<SolverId, Solver> solvers = new ConcurrentHashMap<>();
-	private AtomicInteger counter = new AtomicInteger();
+
+	private final Map<SolverId, Solver> solvers = new ConcurrentHashMap<>();
+	private final AtomicInteger counter = new AtomicInteger();
+	private final Counter metricsSolverCounter = Metrics.getInstance().counter(
+			MetricRegistry.name(SolverService.class, "solvers"));
 
 	private SolverService() {
 	}
@@ -27,6 +35,7 @@ public class SolverService {
 		SolverId solverId = SolverId.newInstance();
 		solvers.put(solverId, solver);
 		counter.incrementAndGet();
+		metricsSolverCounter.inc();
 		return solverId;
 	}
 
@@ -39,7 +48,7 @@ public class SolverService {
 		Solver solver = solvers.get(solverId);
 		solver.setProgress(progress);
 	}
-	
+
 	public float getOverallProgress() {
 		float progress = 0;
 		int solverCount = solvers.size();

@@ -11,6 +11,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.metrics.Metrics;
+
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.MetricRegistry;
+
 /**
  * A queue that can be used to add tasks for asynchronous computation. The tasks
  * can then be consumed by e.g. Master Endpoints, which send them to waiting
@@ -34,6 +40,19 @@ public class TaskQueue<T, S> {
 	private final Map<TaskId, TaskQueueEntry<T, S>> workingSet = new ConcurrentHashMap<>();
 	private final Map<Thread, Thread> waitingThreads = new ConcurrentHashMap<>();
 	private final AtomicBoolean stop = new AtomicBoolean(false);
+	private final Counter queueSizeCounter = Metrics.getInstance().counter(
+			MetricRegistry.name(TaskQueue.class, this + "-queue-size"));
+
+	public TaskQueue() {
+		Metrics.getInstance().register(
+				MetricRegistry.name(TaskQueue.class, "waiting threads"),
+				new Gauge<Integer>() {
+					@Override
+					public Integer getValue() {
+						return waitingThreads.size();
+					}
+				});
+	}
 
 	/**
 	 * Submit a task, to the Task system, where it can be distributed to the
@@ -54,6 +73,7 @@ public class TaskQueue<T, S> {
 				taskFutureImpl);
 		workingSet.put(task.getTaskId(), taskQueueEntry);
 		queue.put(task);
+		queueSizeCounter.inc();
 		LOG.debug("Task {} was put to queue", task);
 		return taskFutureImpl;
 	}
@@ -139,6 +159,7 @@ public class TaskQueue<T, S> {
 		waitingThreads.put(Thread.currentThread(), Thread.currentThread());
 		Task<T> task = queue.take();
 		waitingThreads.remove(Thread.currentThread());
+		queueSizeCounter.dec();
 		return task;
 	}
 
@@ -187,6 +208,7 @@ public class TaskQueue<T, S> {
 					+ ", because the task id is not known");
 		}
 		queue.put(taskQueueEntry.getTask());
+		queueSizeCounter.inc();
 	}
 
 	/**
@@ -203,4 +225,5 @@ public class TaskQueue<T, S> {
 			thread.interrupt();
 		}
 	}
+
 }
