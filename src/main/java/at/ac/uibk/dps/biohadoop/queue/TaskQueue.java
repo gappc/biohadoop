@@ -11,10 +11,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.communication.ClassNameWrappedTask;
 import at.ac.uibk.dps.biohadoop.metrics.Metrics;
 
 import com.codahale.metrics.Counter;
-import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 
 /**
@@ -32,27 +32,16 @@ import com.codahale.metrics.MetricRegistry;
  * @param <S>
  *            Type of the result of an asynchronous computation
  */
-public class TaskQueue<T, S> {
+public class TaskQueue<R, T, S> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TaskQueue.class);
 
 	private final BlockingQueue<Task<T>> queue = new LinkedBlockingQueue<>();
-	private final Map<TaskId, TaskQueueEntry<T, S>> workingSet = new ConcurrentHashMap<>();
+	private final Map<TaskId, TaskQueueEntry<R, T, S>> workingSet = new ConcurrentHashMap<>();
 	private final Map<Thread, Thread> waitingThreads = new ConcurrentHashMap<>();
 	private final AtomicBoolean stop = new AtomicBoolean(false);
 	private final Counter queueSizeCounter = Metrics.getInstance().counter(
 			MetricRegistry.name(TaskQueue.class, this + "-queue-size"));
-
-	public TaskQueue() {
-		Metrics.getInstance().register(
-				MetricRegistry.name(TaskQueue.class, "waiting threads"),
-				new Gauge<Integer>() {
-					@Override
-					public Integer getValue() {
-						return waitingThreads.size();
-					}
-				});
-	}
 
 	/**
 	 * Submit a task, to the Task system, where it can be distributed to the
@@ -66,11 +55,27 @@ public class TaskQueue<T, S> {
 	 * @throws InterruptedException
 	 *             if adding data to the queue was not possible
 	 */
-	public TaskFuture<S> add(Task<T> task) throws InterruptedException {
-		LOG.debug("Adding task {}", task);
+	// public TaskFuture<S> add(Task<T> task) throws InterruptedException {
+	// LOG.debug("Adding task {}", task);
+	// TaskFutureImpl<S> taskFutureImpl = new TaskFutureImpl<>();
+	// TaskQueueEntry<T, S> taskQueueEntry = new TaskQueueEntry<>(task,
+	// taskFutureImpl);
+	// workingSet.put(task.getTaskId(), taskQueueEntry);
+	// queue.put(task);
+	// queueSizeCounter.inc();
+	// LOG.debug("Task {} was put to queue", task);
+	// return taskFutureImpl;
+	// }
+
+	public TaskFuture<S> add(T data, String remoteExecutableClassName,
+			R initialData) throws InterruptedException {
+		TaskId taskId = TaskId.newInstance();
+		LOG.debug("Adding task {}", taskId);
+		Task<T> task = new ClassNameWrappedTask<>(taskId, data,
+				remoteExecutableClassName);
 		TaskFutureImpl<S> taskFutureImpl = new TaskFutureImpl<>();
-		TaskQueueEntry<T, S> taskQueueEntry = new TaskQueueEntry<>(task,
-				taskFutureImpl);
+		TaskQueueEntry<R, T, S> taskQueueEntry = new TaskQueueEntry<>(task,
+				taskFutureImpl, initialData);
 		workingSet.put(task.getTaskId(), taskQueueEntry);
 		queue.put(task);
 		queueSizeCounter.inc();
@@ -99,12 +104,14 @@ public class TaskQueue<T, S> {
 	 *             it is not possible to tell which elements of the list have
 	 *             been submitted when the exception occurs.
 	 */
-	public List<TaskFuture<S>> addAll(List<Task<T>> tasks)
+	public List<TaskFuture<S>> addAll(List<T> datas,
+			String remoteExecutableClassName, R initialData)
 			throws InterruptedException {
-		LOG.debug("Adding list of tasks with size {}", tasks.size());
+		LOG.debug("Adding list of tasks with size {}", datas.size());
 		List<TaskFuture<S>> taskFutures = new ArrayList<>();
-		for (Task<T> task : tasks) {
-			TaskFuture<S> taskFutureImpl = add(task);
+		for (T data : datas) {
+			TaskFuture<S> taskFutureImpl = add(data, remoteExecutableClassName,
+					initialData);
 			taskFutures.add(taskFutureImpl);
 		}
 		return taskFutures;
@@ -131,12 +138,14 @@ public class TaskQueue<T, S> {
 	 *             it is not possible to tell which elements of the array have
 	 *             been submitted when the exception occurs.
 	 */
-	public List<TaskFuture<S>> addAll(Task<T>[] tasks)
+	public List<TaskFuture<S>> addAll(T[] datas,
+			String remoteExecutableClassName, R initialData)
 			throws InterruptedException {
-		LOG.debug("Adding list of tasks with size {}", tasks.length);
+		LOG.debug("Adding list of tasks with size {}", datas.length);
 		List<TaskFuture<S>> taskFutures = new ArrayList<>();
-		for (Task<T> task : tasks) {
-			TaskFuture<S> taskFutureImpl = add(task);
+		for (T data : datas) {
+			TaskFuture<S> taskFutureImpl = add(data, remoteExecutableClassName,
+					initialData);
 			taskFutures.add(taskFutureImpl);
 		}
 		return taskFutures;
@@ -162,6 +171,17 @@ public class TaskQueue<T, S> {
 		queueSizeCounter.dec();
 		return task;
 	}
+	
+	public R getInitialData(TaskId taskId) throws TaskException {
+		if (taskId == null) {
+			throw new TaskException("TaskId can not be null");
+		}
+		TaskQueueEntry<R, T, S> entry = workingSet.get(taskId);
+		if (entry == null) {
+			throw new TaskException("Could not find initial data for task " + taskId);
+		}
+		return entry.getInitialData();
+	}
 
 	/**
 	 * Forwards the result of an asynchronous computation to the corresponding
@@ -179,7 +199,7 @@ public class TaskQueue<T, S> {
 	 */
 	public void storeResult(TaskId taskId, S data) throws TaskException {
 		LOG.debug("Putting result for task {}", taskId);
-		TaskQueueEntry<T, S> taskQueueEntry = workingSet.remove(taskId);
+		TaskQueueEntry<R, T, S> taskQueueEntry = workingSet.remove(taskId);
 		if (taskQueueEntry == null) {
 			throw new TaskException("Could not store result for task " + taskId
 					+ ", because the task id is not known");
@@ -202,7 +222,7 @@ public class TaskQueue<T, S> {
 	public void reschedule(TaskId taskId) throws InterruptedException,
 			TaskException {
 		LOG.info("Rescheduling task {}", taskId);
-		TaskQueueEntry<T, S> taskQueueEntry = workingSet.get(taskId);
+		TaskQueueEntry<R, T, S> taskQueueEntry = workingSet.get(taskId);
 		if (taskQueueEntry == null) {
 			throw new TaskException("Could not store result for task " + taskId
 					+ ", because the task id is not known");

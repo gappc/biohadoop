@@ -12,7 +12,7 @@ package at.ac.uibk.dps.biohadoop.queue;
  * @param <S>
  *            The result type of an asynchronous computation
  */
-public interface TaskEndpoint<T, S> {
+public interface TaskEndpoint<R, T, S> {
 
 	/**
 	 * Get a task
@@ -26,6 +26,8 @@ public interface TaskEndpoint<T, S> {
 	 */
 	public Task<T> getTask() throws TaskException, ShutdownException;
 
+	public R getInitialData(TaskId taskId) throws TaskException;
+	
 	/**
 	 * Stores the result of an asynchronous computation. If the taskId is
 	 * unknown, a {@link TaskException} should be raised.

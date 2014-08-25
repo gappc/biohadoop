@@ -34,7 +34,7 @@ public class DefaultWebSocketEndpoint<R, T, S> implements MasterEndpoint {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DefaultWebSocketEndpoint.class);
 
-	private TaskEndpoint<?, ?> taskEndpoint;
+	private TaskEndpoint<?, ?, ?> taskEndpoint;
 	private DefaultMasterImpl<R, T, S> masterEndpoint;
 	private boolean close = false;
 

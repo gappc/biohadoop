@@ -20,8 +20,14 @@ public class DefaultTaskClient<R, T, S> implements TaskClient<T, S> {
 
 	public static final String QUEUE_NAME = "UNIFIED_QUEUE";
 
-	private final TaskQueue<T, S> taskQueue;
-	private final String remoteExecutableclassName;
+	private final TaskQueue<R, T, S> taskQueue;
+	private final String remoteExecutableClassName;
+	private final R initialData;
+
+	public DefaultTaskClient(
+			Class<? extends RemoteExecutable<R, T, S>> communicationClass) {
+		this(communicationClass, QUEUE_NAME, null);
+	}
 
 	/**
 	 * Creates a <tt>DefaultTaskClient</tt>, that is capable of adding tasks to
@@ -32,8 +38,9 @@ public class DefaultTaskClient<R, T, S> implements TaskClient<T, S> {
 	 *            defines the class that is used to compute the result of a task
 	 */
 	public DefaultTaskClient(
-			Class<? extends RemoteExecutable<R, T, S>> communicationClass) {
-		this(communicationClass, QUEUE_NAME);
+			Class<? extends RemoteExecutable<R, T, S>> communicationClass,
+			R initialData) {
+		this(communicationClass, QUEUE_NAME, initialData);
 	}
 
 	/**
@@ -52,11 +59,14 @@ public class DefaultTaskClient<R, T, S> implements TaskClient<T, S> {
 	 */
 	public DefaultTaskClient(
 			Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass,
-			String queueName) {
-		taskQueue = TaskQueueService.getInstance().<T, S> getTaskQueue(
+			String queueName, R initialData) {
+		taskQueue = TaskQueueService.getInstance().<R, T, S> getTaskQueue(
 				queueName);
-		this.remoteExecutableclassName = remoteExecutableClass
+		this.remoteExecutableClassName = remoteExecutableClass
 				.getCanonicalName();
+		// TODO copy object to prevent user from (accidentially) changing the
+		// initialData after DefaultTaskClient is constructed
+		this.initialData = initialData;
 	}
 
 	public TaskFuture<S> add(T data) throws TaskException {
@@ -94,15 +104,23 @@ public class DefaultTaskClient<R, T, S> implements TaskClient<T, S> {
 	 * @throws TaskException
 	 *             if interrupted during task submission
 	 */
+	// private TaskFuture<S> submitTask(T data) throws TaskException {
+	// TaskId taskId = TaskId.newInstance();
+	// Task<T> task = new ClassNameWrappedTask<>(taskId, data,
+	// remoteExecutableclassName);
+	// try {
+	// return taskQueue.add(task);
+	// } catch (InterruptedException e) {
+	// throw new TaskException("Could not add Task " + taskId
+	// + " for data " + data, e);
+	// }
+	// }
+
 	private TaskFuture<S> submitTask(T data) throws TaskException {
-		TaskId taskId = TaskId.newInstance();
-		Task<T> task = new ClassNameWrappedTask<>(taskId, data,
-				remoteExecutableclassName);
 		try {
-			return taskQueue.add(task);
+			return taskQueue.add(data, remoteExecutableClassName, initialData);
 		} catch (InterruptedException e) {
-			throw new TaskException("Could not add Task " + taskId
-					+ " for data " + data, e);
+			throw new TaskException("Could not add Task", e);
 		}
 	}
 

@@ -31,7 +31,7 @@ public class DefaultSocketWorker<R, T, S> implements WorkerEndpoint {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DefaultSocketWorker.class);
-	
+
 	private static String className = ClassnameProvider
 			.getClassname(DefaultSocketWorker.class);
 
@@ -46,7 +46,7 @@ public class DefaultSocketWorker<R, T, S> implements WorkerEndpoint {
 				DedicatedSocket.class, Environment.SOCKET_HOST,
 				Environment.SOCKET_PORT);
 	}
-	
+
 	@Override
 	public void configure(String[] args) throws WorkerException {
 		parameters = WorkerParameters.getParameters(args);
@@ -106,7 +106,7 @@ public class DefaultSocketWorker<R, T, S> implements WorkerEndpoint {
 					.getTask();
 			String classString = task.getClassName();
 
-			WorkerData<R, T, S> workerEntry = getWorkerData(classString, os, is);
+			WorkerData<R, T, S> workerEntry = getWorkerData(task, os, is);
 
 			RemoteExecutable<R, T, S> remoteExecutable = workerEntry
 					.getRemoteExecutable();
@@ -136,13 +136,14 @@ public class DefaultSocketWorker<R, T, S> implements WorkerEndpoint {
 		os.flush();
 	}
 
-	private WorkerData<R, T, S> getWorkerData(String classString,
+	private WorkerData<R, T, S> getWorkerData(ClassNameWrappedTask<T> task,
 			ObjectOutputStream os, ObjectInputStream is)
 			throws ClassNotFoundException, IOException, ConversionException,
 			InstantiationException, IllegalAccessException {
+		String classString = task.getClassName();
 		WorkerData<R, T, S> workerEntry = workerData.get(classString);
 		if (workerEntry == null) {
-			Task<T> intialTask = new ClassNameWrappedTask<>(null, null,
+			Task<T> intialTask = new ClassNameWrappedTask<>(task.getTaskId(), null,
 					classString);
 			Message<?> registrationRequest = new Message<>(
 					MessageType.REGISTRATION_REQUEST, intialTask);

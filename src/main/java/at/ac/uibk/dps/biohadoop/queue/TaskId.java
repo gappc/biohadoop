@@ -19,6 +19,10 @@ public class TaskId implements Serializable {
 	private TaskId() {
 		this.id = UUID.randomUUID();
 	}
+	
+	private TaskId(String taskId) {
+		this.id = UUID.fromString(taskId);
+	}
 
 	/**
 	 * Creates a new TaskId object with a random id
@@ -27,6 +31,10 @@ public class TaskId implements Serializable {
 	 */
 	public static TaskId newInstance() {
 		return new TaskId();
+	}
+	
+	public static TaskId newInstance(String taskId) {
+		return new TaskId(taskId);
 	}
 
 	/**

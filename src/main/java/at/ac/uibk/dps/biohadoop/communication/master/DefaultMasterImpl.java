@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.communication.ClassNameWrappedTask;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
-import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.queue.ShutdownException;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
@@ -19,7 +18,7 @@ public class DefaultMasterImpl<R, T, S> {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DefaultMasterImpl.class);
 
-	private final TaskEndpoint<T, S> taskEndpoint;
+	private final TaskEndpoint<R, T, S> taskEndpoint;
 	private Task<T> currentTask = null;
 
 	public DefaultMasterImpl(String queueName) {
@@ -52,17 +51,17 @@ public class DefaultMasterImpl<R, T, S> {
 		LOG.info("Got registration request");
 		currentTask = null;
 		try {
+			TaskId taskId = inputMessage.getTask().getTaskId();
+			R initialData = readInitialData(taskId);
 			String className = ((ClassNameWrappedTask<T>) inputMessage
 					.getTask()).getClassName();
-			Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass = (Class<? extends RemoteExecutable<R, T, S>>) Class
-					.forName(className);
-
-			R initialData = readInitialData(remoteExecutableClass);
-			Task<R> task = new ClassNameWrappedTask<>(TaskId.newInstance(),
-					initialData, remoteExecutableClass.getCanonicalName());
+			// Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass
+			// = (Class<? extends RemoteExecutable<R, T, S>>) Class
+			// .forName(className);
+			Task<R> task = new ClassNameWrappedTask<>(taskId, initialData,
+					className);
 			return new Message<>(MessageType.REGISTRATION_RESPONSE, task);
-		} catch (InstantiationException | IllegalAccessException
-				| ClassNotFoundException e) {
+		} catch (TaskException e) {
 			throw new HandleMessageException("Could not get initial data", e);
 		}
 
@@ -94,12 +93,8 @@ public class DefaultMasterImpl<R, T, S> {
 		}
 	}
 
-	private R readInitialData(
-			Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass)
-			throws InstantiationException, IllegalAccessException,
-			ClassNotFoundException {
-		RemoteExecutable<R, T, S> master = remoteExecutableClass.newInstance();
-		return master.getInitalData();
+	private R readInitialData(TaskId taskId) throws TaskException {
+		return taskEndpoint.getInitialData(taskId);
 	}
 
 	public Task<T> getCurrentTask() {

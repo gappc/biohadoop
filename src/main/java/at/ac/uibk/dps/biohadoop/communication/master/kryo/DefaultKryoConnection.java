@@ -77,6 +77,7 @@ public class DefaultKryoConnection<R, T, S> extends Listener {
 	public void received(final Connection connection, final Object object) {
 		if (object instanceof Message) {
 
+			// TODO SEVERE: Exception is swallowed!!!
 			executorService.submit(new Callable<Object>() {
 
 				@Override
@@ -87,7 +88,8 @@ public class DefaultKryoConnection<R, T, S> extends Listener {
 
 						@SuppressWarnings("unchecked")
 						Message<S> inputMessage = (Message<S>) object;
-						Message<T> outputMessage = masterEndpoint.handleMessage(inputMessage);
+						Message<T> outputMessage = masterEndpoint
+								.handleMessage(inputMessage);
 
 						connection.sendTCP(outputMessage);
 
@@ -100,8 +102,7 @@ public class DefaultKryoConnection<R, T, S> extends Listener {
 		}
 	}
 
-	private DefaultMasterImpl<R, T, S> buildMaster()
-			throws Exception {
+	private DefaultMasterImpl<R, T, S> buildMaster() throws Exception {
 		return new DefaultMasterImpl<R, T, S>(queueName);
 	}
 

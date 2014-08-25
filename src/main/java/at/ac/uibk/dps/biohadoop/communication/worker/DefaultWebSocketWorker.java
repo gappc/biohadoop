@@ -165,7 +165,7 @@ public class DefaultWebSocketWorker<R, T, S> implements WorkerEndpoint {
 			WorkerData<R, T, S> workerData = workerDatas.get(classString);
 			if (workerData == null) {
 				oldMessage = inputMessage;
-				Task<T> intialTask = new ClassNameWrappedTask<>(null, null,
+				Task<T> intialTask = new ClassNameWrappedTask<>(task.getTaskId(), null,
 						classString);
 				return new Message<>(MessageType.REGISTRATION_REQUEST,
 						intialTask);

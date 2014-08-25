@@ -28,6 +28,7 @@ import at.ac.uibk.dps.biohadoop.queue.ShutdownException;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.queue.TaskException;
+import at.ac.uibk.dps.biohadoop.queue.TaskId;
 import at.ac.uibk.dps.biohadoop.utils.convert.ConversionException;
 import at.ac.uibk.dps.biohadoop.utils.convert.MessageConverter;
 import at.ac.uibk.dps.biohadoop.webserver.handler.DeployingClasses;
@@ -67,11 +68,12 @@ public class DefaultRestEndpoint<R, T, S> implements MasterEndpoint {
 	}
 
 	@GET
-	@Path("{path}/initialdata/{classname}")
+	@Path("{path}/initialdata/{className}/{taskId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Message<T> getInitialData(@PathParam("path") String path,
-			@PathParam("classname") String className) {
-		Message<T> inputMessage = new Message<>(MessageType.REGISTRATION_REQUEST, new ClassNameWrappedTask<T>(null, null, className));
+			@PathParam("className") String className, @PathParam("taskId") String taskIdString) {
+		TaskId taskId = TaskId.newInstance(taskIdString);
+		Message<T> inputMessage = new Message<>(MessageType.REGISTRATION_REQUEST, new ClassNameWrappedTask<T>(taskId, null, className));
 		try {
 			DefaultMasterImpl masterEndpoint = MASTERS.get(path);
 			return masterEndpoint.handleMessage(inputMessage);
@@ -118,22 +120,13 @@ public class DefaultRestEndpoint<R, T, S> implements MasterEndpoint {
 		return null;
 	}
 
-	private Object getInitialData(String className)
-			throws InstantiationException, IllegalAccessException,
-			ClassNotFoundException {
-		Class<? extends RemoteExecutable<?, ?, ?>> masterClass = (Class<? extends RemoteExecutable<?, ?, ?>>) Class
-				.forName(className);
-		RemoteExecutable<?, ?, ?> master = masterClass.newInstance();
-		return master.getInitalData();
-	}
-
 	private void tryReschedule(String queueName, String message) {
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			Message<?> rescheduleMessage = objectMapper.readValue(message,
 					Message.class);
 
-			TaskEndpoint<?, ?> taskEndpoint = new TaskEndpointImpl<>(queueName);
+			TaskEndpoint<?, ?, ?> taskEndpoint = new TaskEndpointImpl<>(queueName);
 			taskEndpoint.reschedule(rescheduleMessage.getTask().getTaskId());
 		} catch (IOException e) {
 			LOG.error("Could not reschedule task", e);

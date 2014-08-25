@@ -12,10 +12,10 @@ package at.ac.uibk.dps.biohadoop.queue;
  * @param <S>
  *            The result type of an asynchronous computation
  */
-public class TaskEndpointImpl<T, S> implements TaskEndpoint<T, S> {
+public class TaskEndpointImpl<R, T, S> implements TaskEndpoint<R, T, S> {
 
 	private final String queueName;
-	private final TaskQueue<T, S> taskQueue;
+	private final TaskQueue<R, T, S> taskQueue;
 
 	/**
 	 * Creates an instance of {@link TaskEndpointImpl}, that can be used to get
@@ -26,7 +26,7 @@ public class TaskEndpointImpl<T, S> implements TaskEndpoint<T, S> {
 	 */
 	public TaskEndpointImpl(String queueName) {
 		this.queueName = queueName;
-		this.taskQueue = TaskQueueService.getInstance().<T, S> getTaskQueue(
+		this.taskQueue = TaskQueueService.getInstance().<R, T, S> getTaskQueue(
 				queueName);
 	}
 
@@ -45,6 +45,10 @@ public class TaskEndpointImpl<T, S> implements TaskEndpoint<T, S> {
 		}
 	}
 
+	public R getInitialData(TaskId taskId) throws TaskException {
+		return taskQueue.getInitialData(taskId);
+	}
+	
 	@Override
 	public void storeResult(TaskId taskId, S data) throws TaskException,
 			ShutdownException {

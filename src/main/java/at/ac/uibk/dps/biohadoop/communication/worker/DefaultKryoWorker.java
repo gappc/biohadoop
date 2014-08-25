@@ -113,7 +113,7 @@ public class DefaultKryoWorker<R, T, S> implements WorkerEndpoint {
 							oldMessage = inputMessage;
 
 							Task<T> intialTask = new ClassNameWrappedTask<>(
-									null, null, classString);
+									task.getTaskId(), null, classString);
 
 							connection.sendTCP(new Message<>(
 									MessageType.REGISTRATION_REQUEST,

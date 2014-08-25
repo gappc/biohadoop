@@ -58,7 +58,7 @@ public class DefaultLocalWorker<R, T, S> implements WorkerEndpoint,
 		LOG.info("############# {} started for queue {} ##############",
 				CLASSNAME, path);
 
-		TaskEndpoint<T, S> taskEndpoint = new TaskEndpointImpl<>(path);
+		TaskEndpoint<R, T, S> taskEndpoint = new TaskEndpointImpl<>(path);
 
 		PerformanceLogger performanceLogger = new PerformanceLogger(
 				System.currentTimeMillis(), 0, logSteps);
@@ -77,7 +77,7 @@ public class DefaultLocalWorker<R, T, S> implements WorkerEndpoint,
 				String className = task.getClassName();
 				WorkerData<R, T, S> workerData = workerDatas.get(className);
 				if (workerData == null) {
-					workerData = getInitialData(className);
+					workerData = getInitialData(taskEndpoint, task);
 					workerDatas.put(className, workerData);
 				}
 
@@ -105,16 +105,17 @@ public class DefaultLocalWorker<R, T, S> implements WorkerEndpoint,
 		stop.set(true);
 	}
 
-	private WorkerData<R, T, S> getInitialData(String className)
+	private WorkerData<R, T, S> getInitialData(TaskEndpoint<R, T, S> taskEndpoint, ClassNameWrappedTask<T> task)
 			throws ClassNotFoundException, InstantiationException,
-			IllegalAccessException {
+			IllegalAccessException, TaskException {
+		String className = task.getClassName();
 		Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass = (Class<? extends RemoteExecutable<R, T, S>>) Class
 				.forName(className);
 		RemoteExecutable<R, T, S> remoteExecutable = remoteExecutableClass
 				.newInstance();
 
-		return new WorkerData<>(remoteExecutable,
-				remoteExecutable.getInitalData());
+		R initialData = taskEndpoint.getInitialData(task.getTaskId());
+		return new WorkerData<>(remoteExecutable, initialData);
 	}
 
 }

@@ -68,7 +68,7 @@ public class DefaultRestWorker<R, T, S> implements WorkerEndpoint {
 						.getTask();
 				String classString = task.getClassName();
 
-				WorkerData<R, T, S> workerEntry = getWorkerData(classString,
+				WorkerData<R, T, S> workerEntry = getWorkerData(task,
 						client, url);
 
 				RemoteExecutable<R, T, S> remoteExecutable = workerEntry
@@ -93,10 +93,11 @@ public class DefaultRestWorker<R, T, S> implements WorkerEndpoint {
 		}
 	}
 
-	private WorkerData<R, T, S> getWorkerData(String classString,
+	private WorkerData<R, T, S> getWorkerData(ClassNameWrappedTask<T> task,
 			Client client, String baseUrl) throws ClassNotFoundException,
 			IOException, ConversionException, InstantiationException,
 			IllegalAccessException {
+		String classString = task.getClassName();
 		WorkerData<R, T, S> workerEntry = workerData.get(classString);
 		if (workerEntry == null) {
 			Class<? extends RemoteExecutable<R, T, S>> className = (Class<? extends RemoteExecutable<R, T, S>>) Class
@@ -104,14 +105,14 @@ public class DefaultRestWorker<R, T, S> implements WorkerEndpoint {
 			RemoteExecutable<R, T, S> remoteExecutable = className
 					.newInstance();
 
-			String url = baseUrl + "/initialdata/"
-					+ className.getCanonicalName();
+			String url = baseUrl + "/initialdata/" + classString + "/"
+					+ task.getTaskId();
 			Response response = client.target(url)
 					.request(MediaType.APPLICATION_JSON).get();
 			String dataString = response.readEntity(String.class);
 
 			Message<R> registrationMessage = MessageConverter
-					.getTypedMessageForMethod(dataString, "getInitalData", -1);
+					.getTypedMessageForMethod(dataString, "compute", 1);
 			R initialData = registrationMessage.getTask().getData();
 			workerEntry = new WorkerData<R, T, S>(remoteExecutable, initialData);
 

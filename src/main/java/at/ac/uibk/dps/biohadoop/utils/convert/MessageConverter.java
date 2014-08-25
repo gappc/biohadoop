@@ -40,7 +40,7 @@ public class MessageConverter {
 			String className = ((TextNode) node.findValue("className"))
 					.asText();
 
-			String key = className + methodName;
+			String key = className + methodName + pos;
 
 			JavaType javaType = types.get(key);
 

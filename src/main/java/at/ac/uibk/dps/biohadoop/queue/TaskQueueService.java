@@ -21,7 +21,7 @@ public class TaskQueueService {
 			.getLogger(TaskQueueService.class);
 	private static final TaskQueueService TASK_QUEUE_MANAGER = new TaskQueueService();
 
-	private final Map<String, TaskQueue<?, ?>> queues = new ConcurrentHashMap<>();
+	private final Map<String, TaskQueue<?, ?, ?>> queues = new ConcurrentHashMap<>();
 	private final AtomicBoolean isFinished = new AtomicBoolean(false);
 	private final Object monitor = new Object();
 
@@ -45,18 +45,22 @@ public class TaskQueueService {
 	 * @param name
 	 * @return
 	 */
-	public <T, S>TaskQueue<T, S> getTaskQueue(String name) {
+	public <R, T, S>TaskQueue<R, T, S> getTaskQueue(String name) {
 		LOG.debug("Getting queue with name {}", name);
-		TaskQueue<T, S> queue = (TaskQueue<T, S>) queues.get(name);
+		TaskQueue<R, T, S> queue = (TaskQueue<R, T, S>) queues.get(name);
 		if (queue == null) {
 			synchronized (monitor) {
-				queue = (TaskQueue<T, S>) queues.get(name);
+				queue = (TaskQueue<R, T, S>) queues.get(name);
 				if (queue == null) {
 					if (isFinished.get()) {
 						LOG.error("Could not instanciate new queue with name {}, because got already the signal to stop all queues");
 					} else {
+//						try {
+							queue = (TaskQueue<R, T, S>) new TaskQueue<Object, Object, Object>();
+//						} catch (Exception e) {
+//							LOG.error("FUCKK", e);
+//						}
 						LOG.info("Instanciated new queue with name {}", name);
-						queue = (TaskQueue<T, S>) new TaskQueue<Object, Object>();
 						queues.put(name, queue);
 					}
 				}

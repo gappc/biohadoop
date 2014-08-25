@@ -12,14 +12,16 @@ package at.ac.uibk.dps.biohadoop.queue;
  * @param <S>
  *            Type of the result of an asynchronous computation
  */
-public class TaskQueueEntry<T, S> {
+public class TaskQueueEntry<R, T, S> {
 
 	private final Task<T> task;
 	private final TaskFutureImpl<S> taskFuture;
+	private final R initialData;
 
-	public TaskQueueEntry(Task<T> task, TaskFutureImpl<S> taskFuture) {
+	public TaskQueueEntry(Task<T> task, TaskFutureImpl<S> taskFuture, R initalData) {
 		this.task = task;
 		this.taskFuture = taskFuture;
+		this.initialData = initalData;
 	}
 
 	public Task<T> getTask() {
@@ -28,6 +30,10 @@ public class TaskQueueEntry<T, S> {
 
 	public TaskFutureImpl<S> getTaskFutureImpl() {
 		return taskFuture;
+	}
+
+	public R getInitialData() {
+		return initialData;
 	}
 
 }
