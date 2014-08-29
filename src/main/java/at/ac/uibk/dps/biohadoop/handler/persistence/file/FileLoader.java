@@ -5,12 +5,12 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Map;
 
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.solver.SolverConfiguration;
 import at.ac.uibk.dps.biohadoop.solver.SolverData;
 import at.ac.uibk.dps.biohadoop.solver.SolverId;
 import at.ac.uibk.dps.biohadoop.utils.HdfsUtil;
@@ -27,32 +27,20 @@ public class FileLoader {
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
 	public static SolverData<?> load(SolverId solverId,
-			SolverConfiguration solverConfiguration)
-			throws FileLoadException {
+			Map<String, String> properties) throws FileLoadException {
 
-		String path = solverConfiguration.getProperties().get(FILE_LOAD_PATH);
+		String path = properties.get(FILE_LOAD_PATH);
 		if (path == null) {
 			throw new FileLoadException("Value for property " + FILE_LOAD_PATH
 					+ " not declared");
 		}
 
-		String onStartup = solverConfiguration.getProperties().get(
-				FILE_LOAD_ON_STARTUP);
+		String onStartup = properties.get(FILE_LOAD_ON_STARTUP);
 		boolean isOnStartup = Boolean.parseBoolean(onStartup);
 
 		if (isOnStartup) {
 			LOG.info("Loading data for solver {}", solverId);
 			return load(solverId, path);
-//			DataClient dataClient = new DataClientImpl(solverId);
-//			dataClient.setData(DataOptions.COMPUTATION_RESUMED, true);
-//			dataClient.setData(DataOptions.DATA, solverData.getData());
-//			dataClient.setData(DataOptions.FITNESS, solverData.getFitness());
-//			dataClient.setData(DataOptions.ITERATION_START,
-//					solverData.getIteration());
-//			dataClient
-//					.setData(DataOptions.TIMESTAMP, solverData.getTimestamp());
-//			dataClient.setData(DataOptions.TIMEZONE, solverData.getTimezone());
-//			LOG.info("Successful loading data for solver {}", solverId);
 		}
 		return null;
 	}

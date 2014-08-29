@@ -3,12 +3,12 @@ package at.ac.uibk.dps.biohadoop.handler.persistence.file;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Map;
 
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.solver.SolverConfiguration;
 import at.ac.uibk.dps.biohadoop.solver.SolverData;
 import at.ac.uibk.dps.biohadoop.solver.SolverId;
 import at.ac.uibk.dps.biohadoop.utils.HdfsUtil;
@@ -24,11 +24,10 @@ public class FileSaver {
 
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-	public static void save(SolverId solverId,
-			SolverConfiguration solverConfiguration, SolverData<?> solverData)
-			throws FileSaveException {
+	public static void save(SolverId solverId, Map<String, String> properties,
+			SolverData<?> solverData) throws FileSaveException {
 
-		String path = solverConfiguration.getProperties().get(FILE_SAVE_PATH);
+		String path = properties.get(FILE_SAVE_PATH);
 		if (path == null) {
 			throw new FileSaveException("Value for property " + FILE_SAVE_PATH
 					+ " not declared");
@@ -62,7 +61,7 @@ public class FileSaver {
 			}
 
 			LOG.info("Persisting data for solver {} to {}", solverId, fullPath);
-			
+
 			OutputStream os = HdfsUtil.createFile(yarnConfiguration, fullPath);
 			BufferedOutputStream bos = new BufferedOutputStream(os);
 			OBJECT_MAPPER.writeValue(bos, solverData);

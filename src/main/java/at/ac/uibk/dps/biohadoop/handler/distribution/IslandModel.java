@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.handler.distribution.zookeeper.NodeData;
 import at.ac.uibk.dps.biohadoop.handler.distribution.zookeeper.ZooKeeperController;
-import at.ac.uibk.dps.biohadoop.solver.SolverConfiguration;
 import at.ac.uibk.dps.biohadoop.solver.SolverData;
 import at.ac.uibk.dps.biohadoop.solver.SolverId;
 
@@ -25,42 +24,17 @@ public class IslandModel {
 
 	private static final Map<SolverId, ZooKeeperController> zooKeeperControllers = new HashMap<>();
 
-	public static void initialize(SolverId solverId) throws IslandModelException {
+	public static void initialize(SolverId solverId)
+			throws IslandModelException {
 		getZooKeeperController(solverId);
 	}
-	
+
 	public static Object merge(SolverId solverId,
-			SolverConfiguration solverConfiguration, SolverData<?> solverData)
+			Map<String, String> properties, SolverData<?> solverData)
 			throws IslandModelException {
-//		String hostname = Environment.getBiohadoopConfiguration()
-//				.getGlobalProperties()
-//				.get(ZooKeeperController.ZOOKEEPER_HOSTNAME);
-//		if (hostname == null) {
-//			throw new IslandModelException(
-//					"Could not read ZooKeeper hostname from global properties");
-//		}
-//
-//		String port = Environment.getBiohadoopConfiguration()
-//				.getGlobalProperties().get(ZooKeeperController.ZOOKEEPER_PORT);
-//		if (port == null) {
-//			throw new IslandModelException(
-//					"Could not read ZooKeeper port from global properties");
-//		}
-
 		ZooKeeperController zooKeeperController = getZooKeeperController(solverId);
-		RemoteResultGetter remoteResultGetter = getRemoteResultGetter(solverConfiguration);
-		DataMerger<Object> dataMerger = (DataMerger<Object>) getDataMerger(solverConfiguration);
-
-//		
-//		synchronized (zooKeeperControllers) {
-//			zooKeeperController = zooKeeperControllers.get(solverId);
-//			if (zooKeeperController == null) {
-//				zooKeeperController = new ZooKeeperController(solverId,
-//						hostname, port);
-//				zooKeeperControllers.put(solverId, zooKeeperController);
-//			}
-//		}
-
+		RemoteResultGetter remoteResultGetter = getRemoteResultGetter(properties);
+		DataMerger<Object> dataMerger = (DataMerger<Object>) getDataMerger(properties);
 		LOG.info("Merging data for solver {}", solverId);
 		List<NodeData> nodeDatas = zooKeeperController
 				.getSuitableRemoteNodesData();
@@ -75,7 +49,7 @@ public class IslandModel {
 
 		return mergedData;
 	}
-	
+
 	private static ZooKeeperController getZooKeeperController(SolverId solverId)
 			throws IslandModelException {
 		String hostname = Environment.getBiohadoopConfiguration()
@@ -85,14 +59,14 @@ public class IslandModel {
 			throw new IslandModelException(
 					"Could not read ZooKeeper hostname from global properties");
 		}
-		
+
 		String port = Environment.getBiohadoopConfiguration()
 				.getGlobalProperties().get(ZooKeeperController.ZOOKEEPER_PORT);
 		if (port == null) {
 			throw new IslandModelException(
 					"Could not read ZooKeeper port from global properties");
 		}
-		
+
 		ZooKeeperController zooKeeperController = null;
 		synchronized (zooKeeperControllers) {
 			zooKeeperController = zooKeeperControllers.get(solverId);
@@ -102,16 +76,14 @@ public class IslandModel {
 				zooKeeperControllers.put(solverId, zooKeeperController);
 			}
 		}
-		
-		return zooKeeperController; 
+
+		return zooKeeperController;
 	}
 
-	private static DataMerger<?> getDataMerger(
-			SolverConfiguration solverConfiguration)
+	private static DataMerger<?> getDataMerger(Map<String, String> properties)
 			throws IslandModelException {
 		try {
-			String dataMergerClass = solverConfiguration.getProperties().get(
-					ISLAND_DATA_MERGER);
+			String dataMergerClass = properties.get(ISLAND_DATA_MERGER);
 			if (dataMergerClass == null) {
 				throw new IslandModelException(
 						"DataMerger for Island model is null, property "
@@ -128,11 +100,10 @@ public class IslandModel {
 	}
 
 	private static RemoteResultGetter getRemoteResultGetter(
-			SolverConfiguration solverConfiguration)
-			throws IslandModelException {
+			Map<String, String> properties) throws IslandModelException {
 		try {
-			String remoteResultGetterClass = solverConfiguration
-					.getProperties().get(ISLAND_DATA_REMOTE_RESULT_GETTER);
+			String remoteResultGetterClass = properties
+					.get(ISLAND_DATA_REMOTE_RESULT_GETTER);
 			if (remoteResultGetterClass == null) {
 				throw new IslandModelException(
 						"RemoteResultGetter for Island model is null, property "
