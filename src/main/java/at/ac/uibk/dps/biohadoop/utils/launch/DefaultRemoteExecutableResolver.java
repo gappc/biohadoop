@@ -11,7 +11,7 @@ import at.ac.uibk.dps.biohadoop.communication.master.rest.DefaultRestEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.master.socket.DefaultSocketEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.master.websocket.DefaultWebSocketEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.worker.DefaultLocalWorker;
-import at.ac.uibk.dps.biohadoop.queue.DefaultTaskClient;
+import at.ac.uibk.dps.biohadoop.queue.SimpleTaskSubmitter;
 
 public class DefaultRemoteExecutableResolver {
 
@@ -26,19 +26,19 @@ public class DefaultRemoteExecutableResolver {
 		defaultEndpoints.addAll(getLocalEndpoints(communicationConfiguration));
 
 		launchInformation = new LaunchInformation(null,
-				new DefaultKryoEndpoint(), DefaultTaskClient.QUEUE_NAME);
+				new DefaultKryoEndpoint(), SimpleTaskSubmitter.QUEUE_NAME);
 		defaultEndpoints.add(launchInformation);
 
 		launchInformation = new LaunchInformation(null,
-				new DefaultRestEndpoint(), DefaultTaskClient.QUEUE_NAME);
+				new DefaultRestEndpoint(), SimpleTaskSubmitter.QUEUE_NAME);
 		defaultEndpoints.add(launchInformation);
 
 		launchInformation = new LaunchInformation(null,
-				new DefaultSocketEndpoint(), DefaultTaskClient.QUEUE_NAME);
+				new DefaultSocketEndpoint(), SimpleTaskSubmitter.QUEUE_NAME);
 		defaultEndpoints.add(launchInformation);
 
 		launchInformation = new LaunchInformation(null,
-				new DefaultWebSocketEndpoint(), DefaultTaskClient.QUEUE_NAME);
+				new DefaultWebSocketEndpoint(), SimpleTaskSubmitter.QUEUE_NAME);
 		defaultEndpoints.add(launchInformation);
 
 		return defaultEndpoints;
@@ -56,7 +56,7 @@ public class DefaultRemoteExecutableResolver {
 				for (int i = 0; i < count; i++) {
 					launchInformations.add(new LaunchInformation(null,
 							new DefaultLocalEndpoint(),
-							DefaultTaskClient.QUEUE_NAME));
+							SimpleTaskSubmitter.QUEUE_NAME));
 				}
 			}
 		}

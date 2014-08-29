@@ -3,7 +3,7 @@ package at.ac.uibk.dps.biohadoop.queue;
 import java.util.List;
 
 /**
- * A <tt>TaskClient</tt> is the main entry point to Biohadoops Task system. It
+ * A <tt>TaskSubmitter</tt> is the main entry point to Biohadoops task system. It
  * provides methods to initialize the asynchronous computation of tasks.
  * 
  * @author Christian Gapp
@@ -14,10 +14,10 @@ import java.util.List;
  *            The result type for the {@link TaskFuture}, that is returned by
  *            this add() and addAll() methods
  */
-public interface TaskClient<T, S> {
+public interface TaskSubmitter<T, S> {
 
 	/**
-	 * Submit a piece of work, consisting of a chunk of data, to the Task
+	 * Submit a piece of work, consisting of a chunk of data, to the task
 	 * system, where it can be distributed to the workers for asynchronous
 	 * computation.
 	 * 

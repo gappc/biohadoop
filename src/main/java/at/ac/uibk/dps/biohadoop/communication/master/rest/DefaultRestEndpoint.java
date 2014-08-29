@@ -23,7 +23,7 @@ import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedRest;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.communication.master.HandleMessageException;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
-import at.ac.uibk.dps.biohadoop.queue.DefaultTaskClient;
+import at.ac.uibk.dps.biohadoop.queue.SimpleTaskSubmitter;
 import at.ac.uibk.dps.biohadoop.queue.ShutdownException;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
 import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
@@ -45,7 +45,7 @@ public class DefaultRestEndpoint<R, T, S> implements MasterEndpoint {
 
 	public void configure(
 			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass) {
-		String path = DefaultTaskClient.QUEUE_NAME;
+		String path = SimpleTaskSubmitter.QUEUE_NAME;
 		if (remoteExecutableClass != null) {
 			DedicatedRest dedicated = remoteExecutableClass
 					.getAnnotation(DedicatedRest.class);

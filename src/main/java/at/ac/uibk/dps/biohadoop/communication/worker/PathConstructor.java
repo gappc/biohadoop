@@ -7,7 +7,7 @@ import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedLocal;
 import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedRest;
 import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedWebSocket;
-import at.ac.uibk.dps.biohadoop.queue.DefaultTaskClient;
+import at.ac.uibk.dps.biohadoop.queue.SimpleTaskSubmitter;
 
 //TODO refactor
 public class PathConstructor {
@@ -18,7 +18,7 @@ public class PathConstructor {
 	public static String getRestPath(
 			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable)
 			throws WorkerException {
-		String path = DefaultTaskClient.QUEUE_NAME;
+		String path = SimpleTaskSubmitter.QUEUE_NAME;
 		if (remoteExecutable != null) {
 			DedicatedRest dedicated = remoteExecutable
 					.getAnnotation(DedicatedRest.class);
@@ -35,7 +35,7 @@ public class PathConstructor {
 	public static String getWebSocketPath(
 			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable)
 			throws WorkerException {
-		String path = DefaultTaskClient.QUEUE_NAME;
+		String path = SimpleTaskSubmitter.QUEUE_NAME;
 		if (remoteExecutable != null) {
 			DedicatedWebSocket dedicated = remoteExecutable
 					.getAnnotation(DedicatedWebSocket.class);
@@ -52,7 +52,7 @@ public class PathConstructor {
 	public static String getLocalPath(
 			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable)
 			throws WorkerException {
-		String path = DefaultTaskClient.QUEUE_NAME;
+		String path = SimpleTaskSubmitter.QUEUE_NAME;
 		if (remoteExecutable != null) {
 			DedicatedLocal dedicated = remoteExecutable
 					.getAnnotation(DedicatedLocal.class);

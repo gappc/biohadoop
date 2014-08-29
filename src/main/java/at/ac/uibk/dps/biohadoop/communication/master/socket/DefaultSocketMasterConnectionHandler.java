@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedSocket;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
-import at.ac.uibk.dps.biohadoop.queue.DefaultTaskClient;
+import at.ac.uibk.dps.biohadoop.queue.SimpleTaskSubmitter;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 import at.ac.uibk.dps.biohadoop.utils.PortFinder;
 
@@ -36,7 +36,7 @@ public class DefaultSocketMasterConnectionHandler<R, T, S> implements Runnable {
 	public DefaultSocketMasterConnectionHandler(
 			Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass) {
 		this.remoteExecutableClass = remoteExecutableClass;
-		path = DefaultTaskClient.QUEUE_NAME;
+		path = SimpleTaskSubmitter.QUEUE_NAME;
 		if (remoteExecutableClass != null) {
 			DedicatedSocket dedicated = remoteExecutableClass
 					.getAnnotation(DedicatedSocket.class);

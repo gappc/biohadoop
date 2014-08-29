@@ -8,7 +8,7 @@ import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLaunchException;
-import at.ac.uibk.dps.biohadoop.queue.DefaultTaskClient;
+import at.ac.uibk.dps.biohadoop.queue.SimpleTaskSubmitter;
 
 public class ParameterConstructor {
 
@@ -80,7 +80,7 @@ public class ParameterConstructor {
 	private static String getPrefix(WorkerConfiguration workerConfiguration,
 			Class<? extends Annotation> annotation)
 			throws WorkerLaunchException {
-		String prefix = DefaultTaskClient.QUEUE_NAME;
+		String prefix = SimpleTaskSubmitter.QUEUE_NAME;
 		Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass = workerConfiguration
 				.getRemoteExecutable();
 		try {

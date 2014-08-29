@@ -11,7 +11,7 @@ import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedKryo;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterException;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
-import at.ac.uibk.dps.biohadoop.queue.DefaultTaskClient;
+import at.ac.uibk.dps.biohadoop.queue.SimpleTaskSubmitter;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 import at.ac.uibk.dps.biohadoop.utils.KryoRegistrator;
 import at.ac.uibk.dps.biohadoop.utils.PortFinder;
@@ -32,7 +32,7 @@ public class DefaultKryoEndpoint implements MasterEndpoint {
 	@Override
 	public void configure(
 			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass) {
-		path = DefaultTaskClient.QUEUE_NAME;
+		path = SimpleTaskSubmitter.QUEUE_NAME;
 		if (remoteExecutableClass != null) {
 			DedicatedKryo dedicated = remoteExecutableClass
 					.getAnnotation(DedicatedKryo.class);

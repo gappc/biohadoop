@@ -3,7 +3,7 @@ package at.ac.uibk.dps.biohadoop.queue;
 /**
  * A task, that is used by Biohadoop's Task system. Methods are provided to get
  * the {@link TaskId} and the wrapped data, that is submitted to the Task system
- * by an algorithm author through a {@link TaskClient}.
+ * by an algorithm author through a {@link TaskSubmitter}.
  * 
  * @author Christian Gapp
  *
@@ -20,7 +20,7 @@ public interface Task<T> {
 
 	/**
 	 * Gets the wrapped data for this task, that is submitted to the Task system
-	 * by an algorithm author through a {@link TaskClient}. Tihs data is also
+	 * by an algorithm author through a {@link TaskSubmitter}. Tihs data is also
 	 * send to the Worker Endpoints for their computation.
 	 * 
 	 * @return the wrapped data
