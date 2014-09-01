@@ -17,7 +17,7 @@ import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
  */
 public class SimpleTaskSubmitter<R, T, S> implements TaskSubmitter<T, S> {
 
-	public static final String QUEUE_NAME = "UNIFIED_QUEUE";
+	public static final String QUEUE_NAME = "SHARED_QUEUE";
 
 	private final TaskQueue<R, T, S> taskQueue;
 	private final String remoteExecutableClassName;
