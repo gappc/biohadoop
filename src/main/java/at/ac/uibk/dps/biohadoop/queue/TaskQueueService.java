@@ -81,6 +81,7 @@ public class TaskQueueService {
 			for (String queueName : queues.keySet()) {
 				LOG.info("Stopping queue {}", queueName);
 				queues.get(queueName).stopQueue();
+				queues.remove(queueName);
 			}
 		}
 	}
