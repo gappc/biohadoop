@@ -24,6 +24,9 @@ DEST_IP=172.17.0.100
 # Set Biohadoop home directory
 BIOHADOOP_PROJECT_HOME=$DIR/..
 
+# Set Biohadoop version
+BIOHADOOP_CURRENT=biohadoop-*.jar
+
 # Set remote lib dirs
 LIB_TMP_DIR=/tmp/lib
 LIB_HDFS_DIR=/biohadoop/lib
@@ -40,7 +43,7 @@ function build {
 
 function copyLibRemote {
   echo "Copying libs to remote FS"
-  scp -r $BIOHADOOP_PROJECT_HOME/target/$BIOHADOOP_CURRENT $DEST_USER@$DEST_IP:$LIB_TMP_DIR
+  scp $BIOHADOOP_PROJECT_HOME/target/$BIOHADOOP_CURRENT $DEST_USER@$DEST_IP:$LIB_TMP_DIR
   
   echo "Copying libs from remote FS to remote HDFS"
   ssh $DEST_USER@$DEST_IP "/opt/hadoop/current/bin/hdfs dfs -copyFromLocal -f $LIB_TMP_DIR/$BIOHADOOP_CURRENT $LIB_HDFS_DIR/$BIOHADOOP_CURRENT"

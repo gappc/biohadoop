@@ -39,14 +39,6 @@ function build {
     echo "Error while building Biohadoop"
     exit 1
   fi
-  
-  echo "Copy Biohadoop dependencies to project dir"
-  $MVN_HOME/bin/mvn -f $BIOHADOOP_PROJECT_HOME dependency:copy-dependencies
-  if [ "$?" -ne 0 ]
-  then
-    echo "Error while copying Biohadoop dependencies"
-    exit 1
-  fi
 }
 
 function copyLibRemote {
@@ -54,7 +46,7 @@ function copyLibRemote {
   ssh $DEST_USER@$DEST_IP "mkdir -p $LIB_TMP_DIR"
   ssh $DEST_USER@$DEST_IP "rm $LIB_TMP_DIR/*"
   scp -r $BIOHADOOP_PROJECT_HOME/target/dependency/* $DEST_USER@$DEST_IP:$LIB_TMP_DIR
-  scp -r $BIOHADOOP_PROJECT_HOME/target/$BIOHADOOP_CURRENT $DEST_USER@$DEST_IP:$LIB_TMP_DIR
+  scp $BIOHADOOP_PROJECT_HOME/target/$BIOHADOOP_CURRENT $DEST_USER@$DEST_IP:$LIB_TMP_DIR
 
   echo "Copying libs from remote FS to remote HDFS"
   ssh $DEST_USER@$DEST_IP "/opt/hadoop/current/bin/hdfs dfs -rm -r $LIB_HDFS_DIR"
