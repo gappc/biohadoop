@@ -1,6 +1,5 @@
 package at.ac.uibk.dps.biohadoop.hadoop;
 
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +11,7 @@ import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.worker.WorkerEndpoint;
+import at.ac.uibk.dps.biohadoop.queue.SimpleTaskSubmitter;
 import at.ac.uibk.dps.biohadoop.solver.SolverConfiguration;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -26,8 +26,7 @@ public class BiohadoopConfiguration {
 	private final CommunicationConfiguration communicationConfiguration;
 	private final Map<String, String> globalProperties;
 
-	public BiohadoopConfiguration(
-			List<String> includePaths,
+	public BiohadoopConfiguration(List<String> includePaths,
 			List<SolverConfiguration> solverConfigurations,
 			CommunicationConfiguration communicationConfiguration,
 			Map<String, String> globalProperties) {
@@ -62,7 +61,7 @@ public class BiohadoopConfiguration {
 	public Map<String, String> getGlobalProperties() {
 		return globalProperties;
 	}
-	
+
 	public static class Builder {
 		private List<String> libPaths = new ArrayList<>();
 		private List<SolverConfiguration> solverConfigurations = new ArrayList<>();;
@@ -79,31 +78,33 @@ public class BiohadoopConfiguration {
 			solverConfigurations.add(solverConfiguration);
 			return this;
 		}
-		
+
 		public Builder addDedicatedMaster(
 				Class<? extends MasterEndpoint> dedicatedMaster,
 				Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable,
-				Class<? extends Annotation> annotation) {
+				String queueName) {
 			MasterConfiguration masterConfiguration = new MasterConfiguration(
-					dedicatedMaster, remoteExecutable, annotation);
+					dedicatedMaster, remoteExecutable, queueName);
 			dedicatedMasters.add(masterConfiguration);
 			return this;
 		}
-		
-		public Builder addWorker(Class<? extends WorkerEndpoint> worker, int count) {
-			addDedicatedWorker(worker, null, count);
+
+		public Builder addWorker(Class<? extends WorkerEndpoint> worker,
+				int count) {
+			addDedicatedWorker(worker, SimpleTaskSubmitter.QUEUE_NAME, count);
 			return this;
 		}
 
-		public Builder addDedicatedWorker(Class<? extends WorkerEndpoint> worker,
-				Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable,
+		public Builder addDedicatedWorker(
+				Class<? extends WorkerEndpoint> worker,
+				String queueName,
 				int count) {
 			WorkerConfiguration workerConfiguration = new WorkerConfiguration(
-					worker, remoteExecutable, count);
+					worker, queueName, count);
 			workerConfigurations.add(workerConfiguration);
 			return this;
 		}
-		
+
 		public Builder addGobalProperty(String key, String value) {
 			globalProperties.put(key, value);
 			return this;

@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
-import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterException;
 import at.ac.uibk.dps.biohadoop.queue.ShutdownException;
@@ -34,10 +33,8 @@ public class DefaultKryoConnection<R, T, S> extends Listener {
 
 	private final String queueName;
 
-	public DefaultKryoConnection(
-			Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass,
-			String path) {
-		this.queueName = path;
+	public DefaultKryoConnection(String queueName) {
+		this.queueName = queueName;
 	}
 
 	public void stop() {

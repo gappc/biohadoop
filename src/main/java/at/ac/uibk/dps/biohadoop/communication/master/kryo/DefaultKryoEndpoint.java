@@ -6,12 +6,9 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
-import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedKryo;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterException;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
-import at.ac.uibk.dps.biohadoop.queue.SimpleTaskSubmitter;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 import at.ac.uibk.dps.biohadoop.utils.KryoRegistrator;
 import at.ac.uibk.dps.biohadoop.utils.PortFinder;
@@ -26,25 +23,13 @@ public class DefaultKryoEndpoint implements MasterEndpoint {
 
 	private final Server server = new Server(64 * 1024, 64 * 1024);
 
-	private String path;
+	private String queueName;
 	private DefaultKryoConnection<?, ?, ?> kryoServerEndpoint;
 
 	@Override
-	public void configure(
-			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass) {
-		path = SimpleTaskSubmitter.QUEUE_NAME;
-		if (remoteExecutableClass != null) {
-			DedicatedKryo dedicated = remoteExecutableClass
-					.getAnnotation(DedicatedKryo.class);
-			if (dedicated != null) {
-				path = dedicated.queueName();
-				LOG.info("Adding dedicated Rest resource at path {}", path);
-			} else {
-				LOG.error("No suitable annotation for Rest resource found");
-			}
-		}
-		kryoServerEndpoint = new DefaultKryoConnection(remoteExecutableClass,
-				path);
+	public void configure(String queueName) {
+		this.queueName = queueName;
+		kryoServerEndpoint = new DefaultKryoConnection<>(queueName);
 	}
 
 	@Override
@@ -64,7 +49,7 @@ public class DefaultKryoEndpoint implements MasterEndpoint {
 	private void startServer() throws MasterException {
 		new Thread(server).start();
 
-		String prefix = path;
+		String prefix = queueName;
 		String host = HostInfo.getHostname();
 
 		PortFinder.aquireBindingLock();
@@ -85,7 +70,7 @@ public class DefaultKryoEndpoint implements MasterEndpoint {
 		registerObjects(kryo);
 
 		LOG.info("host: {} port: {} queue: {}", HostInfo.getHostname(), port,
-				path);
+				queueName);
 	}
 
 	private void registerObjects(Kryo kryo) throws MasterException {

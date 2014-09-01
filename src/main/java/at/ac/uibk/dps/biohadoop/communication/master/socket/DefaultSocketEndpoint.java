@@ -6,7 +6,6 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 
 public class DefaultSocketEndpoint implements MasterEndpoint {
@@ -17,11 +16,11 @@ public class DefaultSocketEndpoint implements MasterEndpoint {
 	private final ExecutorService executorService = Executors
 			.newFixedThreadPool(1);
 	
-	private DefaultSocketMasterConnectionHandler socketServerConnection;
+	private DefaultSocketMasterConnectionHandler<?, ?, ?> socketServerConnection;
 
 	@Override
-	public void configure(Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass) {
-		socketServerConnection = new DefaultSocketMasterConnectionHandler(remoteExecutableClass);
+	public void configure(String queueName) {
+		socketServerConnection = new DefaultSocketMasterConnectionHandler<>(queueName);
 	}
 	
 	@Override

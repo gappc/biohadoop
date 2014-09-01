@@ -14,7 +14,6 @@ import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedKryo;
 import at.ac.uibk.dps.biohadoop.communication.master.kryo.KryoObjectRegistration;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLaunchException;
@@ -45,8 +44,7 @@ public class DefaultKryoWorker<R, T, S> implements WorkerEndpoint {
 	public String buildLaunchArguments(WorkerConfiguration workerConfiguration)
 			throws WorkerLaunchException {
 		return ParameterConstructor.resolveParameter(workerConfiguration,
-				DedicatedKryo.class, Environment.KRYO_SOCKET_HOST,
-				Environment.KRYO_SOCKET_PORT);
+				Environment.KRYO_SOCKET_HOST, Environment.KRYO_SOCKET_PORT);
 	}
 
 	@Override

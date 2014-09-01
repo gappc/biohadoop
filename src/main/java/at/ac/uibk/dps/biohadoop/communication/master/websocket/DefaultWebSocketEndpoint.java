@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
-import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.communication.master.HandleMessageException;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
@@ -39,8 +38,7 @@ public class DefaultWebSocketEndpoint<R, T, S> implements MasterEndpoint {
 	private boolean close = false;
 
 	@Override
-	public void configure(
-			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass) {
+	public void configure(String queueName) {
 		DeployingClasses.addWebSocketClass(DefaultWebSocketEndpoint.class);
 	}
 
@@ -58,17 +56,6 @@ public class DefaultWebSocketEndpoint<R, T, S> implements MasterEndpoint {
 	public void open(@PathParam("path") String path, Session session) {
 		LOG.info("Opened Websocket connection to URI {}, sessionId={}",
 				session.getRequestURI(), session.getId());
-		// if (ShutdownWaitingService.isFinished()) {
-		// String errMsg =
-		// "All computations finished, new connections not accepted";
-		// try {
-		// LOG.info(errMsg);
-		// session.close(new CloseReason(
-		// CloseReason.CloseCodes.NORMAL_CLOSURE, errMsg));
-		// } catch (IOException e) {
-		// LOG.error("Error while closing session ({})", errMsg, e);
-		// }
-		// }
 		ShutdownWaitingService.register();
 
 		session.getRequestURI();
@@ -88,7 +75,6 @@ public class DefaultWebSocketEndpoint<R, T, S> implements MasterEndpoint {
 				LOG.error("Error while closing session ({})", errMsg, e);
 			}
 			return null;
-			// return new Message<>(MessageType.SHUTDOWN, null);
 		}
 
 		try {

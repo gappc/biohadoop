@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterException;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
@@ -50,8 +49,8 @@ public class MasterLauncher {
 			for (LaunchInformation launchInformation : launchInformations) {
 				LOG.debug("Configuring endpoint {}", launchInformation);
 				MasterEndpoint master = launchInformation.getMaster();
-				Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable = launchInformation.getRemoteExecutable();
-				master.configure(remoteExecutable);
+				String queueName = launchInformation.getQueueName();
+				master.configure(queueName);
 			}
 
 			undertowServer = new UndertowServer();
@@ -78,11 +77,6 @@ public class MasterLauncher {
 			MasterEndpoint master = launchInformation.getMaster();
 			master.stop();
 		}
-//		for (MasterLifecycle masterConnection : masterConnections) {
-//			LOG.debug("Stopping master endpoint {}", masterConnection
-//					.getClass().getCanonicalName());
-//			masterConnection.stop();
-//		}
 		ShutdownWaitingService.await();
 		undertowServer.stop();
 	}

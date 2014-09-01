@@ -30,7 +30,7 @@ public class DefaultRemoteExecutableResolver {
 		defaultEndpoints.add(launchInformation);
 
 		launchInformation = new LaunchInformation(null,
-				new DefaultRestEndpoint(), SimpleTaskSubmitter.QUEUE_NAME);
+				new DefaultRestEndpoint<>(), SimpleTaskSubmitter.QUEUE_NAME);
 		defaultEndpoints.add(launchInformation);
 
 		launchInformation = new LaunchInformation(null,
@@ -38,7 +38,7 @@ public class DefaultRemoteExecutableResolver {
 		defaultEndpoints.add(launchInformation);
 
 		launchInformation = new LaunchInformation(null,
-				new DefaultWebSocketEndpoint(), SimpleTaskSubmitter.QUEUE_NAME);
+				new DefaultWebSocketEndpoint<>(), SimpleTaskSubmitter.QUEUE_NAME);
 		defaultEndpoints.add(launchInformation);
 
 		return defaultEndpoints;
@@ -50,8 +50,7 @@ public class DefaultRemoteExecutableResolver {
 		for (WorkerConfiguration workerConfiguration : communicationConfiguration
 				.getWorkerConfigurations()) {
 			if (DefaultLocalWorker.class
-					.equals(workerConfiguration.getWorker())
-					&& workerConfiguration.getRemoteExecutable() == null) {
+					.equals(workerConfiguration.getWorker())) {
 				Integer count = workerConfiguration.getCount();
 				for (int i = 0; i < count; i++) {
 					launchInformations.add(new LaunchInformation(null,

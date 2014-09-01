@@ -42,9 +42,7 @@ public class DefaultLocalWorker<R, T, S> implements WorkerEndpoint,
 
 	@Override
 	public void configure(String[] args) throws WorkerException {
-		Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass = WorkerParameters
-				.getLocalParameters(args);
-		path = PathConstructor.getLocalPath(remoteExecutableClass);
+		path = args[0];
 	}
 
 	@Override

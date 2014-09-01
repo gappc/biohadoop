@@ -1,7 +1,5 @@
 package at.ac.uibk.dps.biohadoop.communication;
 
-import java.lang.annotation.Annotation;
-
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -11,22 +9,22 @@ public class MasterConfiguration {
 
 	private final Class<? extends MasterEndpoint> master;
 	private final Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable;
-	private final Class<? extends Annotation> annotation;
+	private String queueName;
 
 	public MasterConfiguration(Class<? extends MasterEndpoint> master,
 			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable,
-			Class<? extends Annotation> annotation) {
+			String queueName) {
 		this.master = master;
 		this.remoteExecutable = remoteExecutable;
-		this.annotation = annotation;
+		this.queueName = queueName;
 	}
 
 	@JsonCreator
 	public static MasterConfiguration create(
 			@JsonProperty("master") Class<? extends MasterEndpoint> master,
 			@JsonProperty("remoteExecutable") Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable,
-			@JsonProperty("annotation") Class<? extends Annotation> annotation) {
-		return new MasterConfiguration(master, remoteExecutable, annotation);
+			@JsonProperty("queueName") String queueName) {
+		return new MasterConfiguration(master, remoteExecutable, queueName);
 	}
 
 	public Class<? extends MasterEndpoint> getMaster() {
@@ -37,8 +35,12 @@ public class MasterConfiguration {
 		return remoteExecutable;
 	}
 
-	public Class<? extends Annotation> getAnnotation() {
-		return annotation;
+	public String getQueueName() {
+		return queueName;
+	}
+
+	public void setQueueName(String queueName) {
+		this.queueName = queueName;
 	}
 
 	@Override
@@ -50,7 +52,7 @@ public class MasterConfiguration {
 		StringBuilder sb = new StringBuilder();
 		sb.append("MasterEndpoint=").append(masterClass);
 		sb.append(" RemoteExecutable=").append(remoteExecutableClass);
-		sb.append(" Annotation=").append(annotation);
+		sb.append(" queueName=").append(queueName);
 		return sb.toString();
 	}
 

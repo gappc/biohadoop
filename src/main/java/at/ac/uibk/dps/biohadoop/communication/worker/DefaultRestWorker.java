@@ -46,7 +46,7 @@ public class DefaultRestWorker<R, T, S> implements WorkerEndpoint {
 	@Override
 	public void configure(String[] args) throws WorkerException {
 		parameters = WorkerParameters.getParameters(args);
-		path = PathConstructor.getRestPath(parameters.getRemoteExecutable());
+		path = parameters.getQueueName();
 	}
 
 	@Override

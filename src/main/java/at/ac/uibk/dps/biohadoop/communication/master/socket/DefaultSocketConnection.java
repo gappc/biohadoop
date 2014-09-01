@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
-import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
 import at.ac.uibk.dps.biohadoop.communication.master.HandleMessageException;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterException;
@@ -32,9 +31,7 @@ public class DefaultSocketConnection<R, T, S> implements Callable<Object> {
 	private int counter = 0;
 	private boolean close = false;
 
-	public DefaultSocketConnection(Socket socket,
-			Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass,
-			String path) {
+	public DefaultSocketConnection(Socket socket, String path) {
 		this.socket = socket;
 		this.path = path;
 	}

@@ -8,31 +8,31 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class WorkerConfiguration {
 
 	private final Class<? extends WorkerEndpoint> worker;
-	private final Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable;
+	private final String queueName;
 	private final Integer count;
 
 	public WorkerConfiguration(Class<? extends WorkerEndpoint> worker,
-			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable,
+			String queueName,
 			Integer count) {
 		this.worker = worker;
-		this.remoteExecutable = remoteExecutable;
+		this.queueName = queueName;
 		this.count = count;
 	}
 
 	@JsonCreator
 	public static WorkerConfiguration create(
 			@JsonProperty("worker") Class<? extends WorkerEndpoint> worker,
-			@JsonProperty("remoteExecutable") Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable,
+			@JsonProperty("queueName") String queueName,
 			@JsonProperty("count") Integer count) {
-		return new WorkerConfiguration(worker, remoteExecutable, count);
+		return new WorkerConfiguration(worker, queueName, count);
 	}
 
 	public Class<? extends WorkerEndpoint> getWorker() {
 		return worker;
 	}
 
-	public Class<? extends RemoteExecutable<?, ?, ?>> getRemoteExecutable() {
-		return remoteExecutable;
+	public String getQueueName() {
+		return queueName;
 	}
 
 	public Integer getCount() {
@@ -42,12 +42,10 @@ public class WorkerConfiguration {
 	@Override
 	public String toString() {
 		String workerClass = worker != null ? worker.getCanonicalName() : null;
-		String remoteExecutableClass = remoteExecutable != null ? remoteExecutable
-				.getCanonicalName() : null;
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("WorkerEndpoint=").append(workerClass);
-		sb.append(" RemoteExecutable=").append(remoteExecutableClass);
+		sb.append(" QueueName=").append(queueName);
 		sb.append(" Count=").append(count);
 		return sb.toString();
 	}

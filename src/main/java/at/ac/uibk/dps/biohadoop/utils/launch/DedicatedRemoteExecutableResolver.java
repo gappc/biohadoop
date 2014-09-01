@@ -1,8 +1,6 @@
 package at.ac.uibk.dps.biohadoop.utils.launch;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +23,7 @@ public class DedicatedRemoteExecutableResolver {
 	public static List<LaunchInformation> getDedicatedEndpoints(
 			CommunicationConfiguration communicationConfiguration)
 			throws ResolveDedicatedEndpointException {
+		LOG.debug("Resolving dedicated endpoints");
 		List<LaunchInformation> finalLaunchInformations = new ArrayList<>();
 		for (MasterConfiguration dedicatedMasterConfiguration : communicationConfiguration
 				.getDedicatedMasters()) {
@@ -60,7 +59,7 @@ public class DedicatedRemoteExecutableResolver {
 			InvocationTargetException, InstantiationException {
 		if (dedicatedMasterConfiguration.getMaster() == null
 				|| dedicatedMasterConfiguration.getRemoteExecutable() == null
-				|| dedicatedMasterConfiguration.getAnnotation() == null) {
+				|| dedicatedMasterConfiguration.getQueueName() == null) {
 			return null;
 		}
 
@@ -68,25 +67,7 @@ public class DedicatedRemoteExecutableResolver {
 				.getMaster();
 		Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass = dedicatedMasterConfiguration
 				.getRemoteExecutable();
-		Class<? extends Annotation> annotationClass = dedicatedMasterConfiguration
-				.getAnnotation();
-
-		Annotation annotation = remoteExecutableClass
-				.getAnnotation(annotationClass);
-		if (annotation == null) {
-			LOG.error("Annotation {} not found on {}",
-					annotationClass.getCanonicalName(),
-					remoteExecutableClass.getCanonicalName());
-			return null;
-		}
-
-		Method queueNameMethod = annotationClass.getMethod("queueName",
-				new Class[] {});
-		if (queueNameMethod == null) {
-			return null;
-		}
-		String queueName = (String) queueNameMethod.invoke(annotation,
-				new Object[] {});
+		String queueName = dedicatedMasterConfiguration.getQueueName();
 
 		MasterEndpoint masterEndpoint = masterEndpointClass.newInstance();
 
@@ -111,11 +92,7 @@ public class DedicatedRemoteExecutableResolver {
 				.getWorkerConfigurations()) {
 			boolean isLocalWorkerEndpoint = DefaultLocalWorker.class
 					.equals(workerConfiguration.getWorker());
-			boolean remoteExecutablesMatch = workerConfiguration
-					.getRemoteExecutable() != null
-					&& workerConfiguration.getRemoteExecutable().equals(
-							launchInformation.getRemoteExecutable());
-			if (isLocalWorkerEndpoint && remoteExecutablesMatch) {
+			if (isLocalWorkerEndpoint) {
 				Integer count = workerConfiguration.getCount();
 				for (int i = 0; i < count; i++) {
 					finalLaunchInformations.add(launchInformation);
@@ -124,44 +101,4 @@ public class DedicatedRemoteExecutableResolver {
 		}
 		return finalLaunchInformations;
 	}
-
-	// private static List<LaunchInformation> handleLocalMasters(
-	// CommunicationConfiguration communicationConfiguration,
-	// List<LaunchInformation> launchInformations) {
-	// List<LaunchInformation> finalLaunchInformations = new
-	// ArrayList<LaunchInformation>();
-	// for (Iterator<LaunchInformation> iterator = launchInformations
-	// .iterator(); iterator.hasNext();) {
-	// LaunchInformation launchInformation = iterator.next();
-	// boolean isLocalMasterEndpoint = LocalMasterEndpoint.class
-	// .equals(launchInformation.getMaster().getClass());
-	// boolean hasRemoteExecutable = launchInformation
-	// .getRemoteExecutable() != null;
-	// if (isLocalMasterEndpoint && hasRemoteExecutable) {
-	// boolean isConfigured = false;
-	// for (WorkerConfiguration workerConfiguration : communicationConfiguration
-	// .getWorkerConfigurations()) {
-	// boolean isLocalWorkerEndpoint = DefaultLocalWorker.class
-	// .equals(workerConfiguration.getWorker());
-	// boolean remoteExecutablesMatch = workerConfiguration
-	// .getRemoteExecutable() != null
-	// && workerConfiguration.getRemoteExecutable()
-	// .equals(launchInformation
-	// .getRemoteExecutable());
-	// if (isLocalWorkerEndpoint && remoteExecutablesMatch) {
-	// isConfigured = true;
-	// Integer count = workerConfiguration.getCount();
-	// for (int i = 0; i < count - 1; i++) {
-	// finalLaunchInformations.add(launchInformation);
-	// }
-	// }
-	// }
-	// if (!isConfigured) {
-	// iterator.remove();
-	// }
-	// }
-	// }
-	// finalLaunchInformations.addAll(launchInformations);
-	// return finalLaunchInformations;
-	// }
 }

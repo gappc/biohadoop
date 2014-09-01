@@ -67,8 +67,7 @@ public class DefaultWebSocketWorker<R, T, S> implements WorkerEndpoint {
 	@Override
 	public void configure(String[] args) throws WorkerException {
 		parameters = WorkerParameters.getParameters(args);
-		path = PathConstructor.getWebSocketPath(parameters
-				.getRemoteExecutable());
+		path = parameters.getQueueName();
 	}
 
 	public void start() throws WorkerException, ConnectionRefusedException {

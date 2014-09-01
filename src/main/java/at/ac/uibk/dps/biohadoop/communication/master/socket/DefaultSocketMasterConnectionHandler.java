@@ -13,10 +13,7 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
-import at.ac.uibk.dps.biohadoop.communication.annotation.DedicatedSocket;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
-import at.ac.uibk.dps.biohadoop.queue.SimpleTaskSubmitter;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 import at.ac.uibk.dps.biohadoop.utils.PortFinder;
 
@@ -28,25 +25,12 @@ public class DefaultSocketMasterConnectionHandler<R, T, S> implements Runnable {
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();
 	private final List<Future<Object>> futures = new ArrayList<>();
-	private Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass;
-	private String path;
+	private String queueName;
 	
 	private volatile boolean stop;
 
-	public DefaultSocketMasterConnectionHandler(
-			Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass) {
-		this.remoteExecutableClass = remoteExecutableClass;
-		path = SimpleTaskSubmitter.QUEUE_NAME;
-		if (remoteExecutableClass != null) {
-			DedicatedSocket dedicated = remoteExecutableClass
-					.getAnnotation(DedicatedSocket.class);
-			if (dedicated != null) {
-				path = dedicated.queueName();
-				LOG.info("Adding dedicated Rest resource at path {}", path);
-			} else {
-				LOG.error("No suitable annotation for Rest resource found");
-			}
-		}
+	public DefaultSocketMasterConnectionHandler(String queueName) {
+		this.queueName = queueName;
 	}
 
 	@Override
@@ -59,11 +43,11 @@ public class DefaultSocketMasterConnectionHandler<R, T, S> implements Runnable {
 			ServerSocket serverSocket = new ServerSocket(port);
 			PortFinder.releaseBindingLock();
 			
-			Environment.setPrefixed(path, Environment.SOCKET_HOST, host);
-			Environment.setPrefixed(path, Environment.SOCKET_PORT,
+			Environment.setPrefixed(queueName, Environment.SOCKET_HOST, host);
+			Environment.setPrefixed(queueName, Environment.SOCKET_PORT,
 					Integer.toString(port));
 
-			LOG.info("host: {} port: {} queue: {}", HostInfo.getHostname(), port, path);
+			LOG.info("host: {} port: {} queue: {}", HostInfo.getHostname(), port, queueName);
 
 			int socketTimeout = 2000;
 			serverSocket.setSoTimeout(socketTimeout);
@@ -71,7 +55,7 @@ public class DefaultSocketMasterConnectionHandler<R, T, S> implements Runnable {
 			while (!stop) {
 				try {
 					Socket socket = serverSocket.accept();
-					DefaultSocketConnection<R, T, S> socketRunnable = new DefaultSocketConnection<>(socket, remoteExecutableClass, path);
+					DefaultSocketConnection<R, T, S> socketRunnable = new DefaultSocketConnection<>(socket, queueName);
 					Future<Object> future = executorService.submit(socketRunnable);
 					futures.add(future);
 				} catch (SocketTimeoutException e) {

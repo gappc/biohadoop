@@ -12,15 +12,15 @@ import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 public class WorkerParameters {
 
 	private final Class<? extends WorkerEndpoint> workerEnpoint;
-	private final Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable;
+	private final String queueName;
 	private final String host;
 	private final int port;
 
 	private WorkerParameters(Class<? extends WorkerEndpoint> workerEnpoint,
-			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable,
+			String queueName,
 			String host, int port) {
 		this.workerEnpoint = workerEnpoint;
-		this.remoteExecutable = remoteExecutable;
+		this.queueName = queueName;
 		this.host = host;
 		this.port = port;
 	}
@@ -29,8 +29,8 @@ public class WorkerParameters {
 		return workerEnpoint;
 	}
 
-	public Class<? extends RemoteExecutable<?, ?, ?>> getRemoteExecutable() {
-		return remoteExecutable;
+	public String getQueueName() {
+		return queueName;
 	}
 
 	public String getHost() {
@@ -71,10 +71,9 @@ public class WorkerParameters {
 				workerEndpoint = (Class<? extends WorkerEndpoint>) Class
 						.forName(args[0]);
 			}
-			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable = null;
+			String queueName = null;
 			if (args[1].length() > 0) {
-				remoteExecutable = (Class<? extends RemoteExecutable<?, ?, ?>>) Class
-						.forName(args[1]);
+				queueName = args[1];
 			}
 			String host = args[2];
 			int port = Integer.parseInt(args[3]);
@@ -85,7 +84,7 @@ public class WorkerParameters {
 			Environment.setBiohadoopConfiguration(biohadoopConfiguration);
 			Environment.setBiohadoopConfigurationPath(args[4]);
 
-			return new WorkerParameters(workerEndpoint, remoteExecutable, host,
+			return new WorkerParameters(workerEndpoint, queueName, host,
 					port);
 		} catch (Exception e) {
 			throw new WorkerException("Could not parse parameters "
