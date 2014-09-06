@@ -40,9 +40,9 @@ public class DefaultRestEndpoint<R, T, S> implements MasterEndpoint {
 			.getLogger(DefaultRestEndpoint.class);
 	private static final Map<String, DefaultMasterImpl<?, ?, ?>> MASTERS = new ConcurrentHashMap<>();
 
-	public void configure(String queueName) {
-		DefaultMasterImpl<?, ?, ?> master = new DefaultMasterImpl<>(queueName);
-		MASTERS.put(queueName, master);
+	public void configure(String settingName) {
+		DefaultMasterImpl<?, ?, ?> master = new DefaultMasterImpl<>(settingName);
+		MASTERS.put(settingName, master);
 		DeployingClasses.addRestfulClass(DefaultRestEndpoint.class);
 	}
 
@@ -113,14 +113,14 @@ public class DefaultRestEndpoint<R, T, S> implements MasterEndpoint {
 		return (DefaultMasterImpl<R, T, S>) MASTERS.get(path);
 	}
 
-	private void tryReschedule(String queueName, String message) {
+	private void tryReschedule(String settingName, String message) {
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			Message<?> rescheduleMessage = objectMapper.readValue(message,
 					Message.class);
 
 			TaskEndpoint<?, ?, ?> taskEndpoint = new TaskEndpointImpl<>(
-					queueName);
+					settingName);
 			taskEndpoint.reschedule(rescheduleMessage.getTask().getTaskId());
 		} catch (IOException e) {
 			LOG.error("Could not reschedule task", e);

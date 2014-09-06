@@ -38,7 +38,7 @@ public class DefaultWebSocketEndpoint<R, T, S> implements MasterEndpoint {
 	private boolean close = false;
 
 	@Override
-	public void configure(String queueName) {
+	public void configure(String settingName) {
 		DeployingClasses.addWebSocketClass(DefaultWebSocketEndpoint.class);
 	}
 

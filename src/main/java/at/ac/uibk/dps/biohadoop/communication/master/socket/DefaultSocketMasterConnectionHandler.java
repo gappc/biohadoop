@@ -25,12 +25,12 @@ public class DefaultSocketMasterConnectionHandler<R, T, S> implements Runnable {
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();
 	private final List<Future<Object>> futures = new ArrayList<>();
-	private String queueName;
+	private String settingName;
 	
 	private volatile boolean stop;
 
-	public DefaultSocketMasterConnectionHandler(String queueName) {
-		this.queueName = queueName;
+	public DefaultSocketMasterConnectionHandler(String settingName) {
+		this.settingName = settingName;
 	}
 
 	@Override
@@ -43,11 +43,11 @@ public class DefaultSocketMasterConnectionHandler<R, T, S> implements Runnable {
 			ServerSocket serverSocket = new ServerSocket(port);
 			PortFinder.releaseBindingLock();
 			
-			Environment.setPrefixed(queueName, Environment.SOCKET_HOST, host);
-			Environment.setPrefixed(queueName, Environment.SOCKET_PORT,
+			Environment.setPrefixed(settingName, Environment.SOCKET_HOST, host);
+			Environment.setPrefixed(settingName, Environment.SOCKET_PORT,
 					Integer.toString(port));
 
-			LOG.info("host: {} port: {} queue: {}", HostInfo.getHostname(), port, queueName);
+			LOG.info("host: {} port: {} setting: {}", HostInfo.getHostname(), port, settingName);
 
 			int socketTimeout = 2000;
 			serverSocket.setSoTimeout(socketTimeout);
@@ -55,7 +55,7 @@ public class DefaultSocketMasterConnectionHandler<R, T, S> implements Runnable {
 			while (!stop) {
 				try {
 					Socket socket = serverSocket.accept();
-					DefaultSocketConnection<R, T, S> socketRunnable = new DefaultSocketConnection<>(socket, queueName);
+					DefaultSocketConnection<R, T, S> socketRunnable = new DefaultSocketConnection<>(socket, settingName);
 					Future<Object> future = executorService.submit(socketRunnable);
 					futures.add(future);
 				} catch (SocketTimeoutException e) {

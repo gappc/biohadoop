@@ -21,8 +21,8 @@ public class DefaultMasterImpl<R, T, S> {
 	private final TaskEndpoint<R, T, S> taskEndpoint;
 	private Task<T> currentTask = null;
 
-	public DefaultMasterImpl(String queueName) {
-		taskEndpoint = new TaskEndpointImpl<>(queueName);
+	public DefaultMasterImpl(String settingName) {
+		taskEndpoint = new TaskEndpointImpl<>(settingName);
 	}
 
 	public Message<T> handleMessage(Message<S> inputMessage)

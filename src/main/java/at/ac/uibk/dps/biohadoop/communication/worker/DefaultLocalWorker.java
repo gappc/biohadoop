@@ -30,7 +30,7 @@ public class DefaultLocalWorker<R, T, S> implements WorkerEndpoint,
 	private final Map<String, WorkerData<R, T, S>> workerDatas = new ConcurrentHashMap<>();
 	private final AtomicBoolean stop = new AtomicBoolean(false);
 
-	private String path;
+	private String settingName;
 	private int logSteps = 1000;
 
 	// TODO check for correct implementation
@@ -42,7 +42,7 @@ public class DefaultLocalWorker<R, T, S> implements WorkerEndpoint,
 
 	@Override
 	public void configure(String[] args) throws WorkerException {
-		path = args[0];
+		settingName = args[0];
 	}
 
 	@Override
@@ -53,10 +53,10 @@ public class DefaultLocalWorker<R, T, S> implements WorkerEndpoint,
 
 	@Override
 	public Object call() throws WorkerException {
-		LOG.info("############# {} started for queue {} ##############",
-				CLASSNAME, path);
+		LOG.info("############# {} started for setting {} ##############",
+				CLASSNAME, settingName);
 
-		TaskEndpoint<R, T, S> taskEndpoint = new TaskEndpointImpl<>(path);
+		TaskEndpoint<R, T, S> taskEndpoint = new TaskEndpointImpl<>(settingName);
 
 		PerformanceLogger performanceLogger = new PerformanceLogger(
 				System.currentTimeMillis(), 0, logSteps);

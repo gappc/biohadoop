@@ -49,8 +49,8 @@ public class MasterLauncher {
 			for (LaunchInformation launchInformation : launchInformations) {
 				LOG.debug("Configuring endpoint {}", launchInformation);
 				MasterEndpoint master = launchInformation.getMaster();
-				String queueName = launchInformation.getQueueName();
-				master.configure(queueName);
+				String settingName = launchInformation.getSettingName();
+				master.configure(settingName);
 			}
 
 			undertowServer = new UndertowServer();

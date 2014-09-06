@@ -1,7 +1,7 @@
 package at.ac.uibk.dps.biohadoop.queue;
 
 /**
- * Simple POJO that represents A single entry for a task queue map. Usually,
+ * Simple POJO that represents a single entry for a task queue map. Usually,
  * this map is used as a store for currently submitted tasks
  * 
  * @author Christian Gapp

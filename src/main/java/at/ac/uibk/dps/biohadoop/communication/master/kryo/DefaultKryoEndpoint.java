@@ -23,13 +23,13 @@ public class DefaultKryoEndpoint implements MasterEndpoint {
 
 	private final Server server = new Server(64 * 1024, 64 * 1024);
 
-	private String queueName;
+	private String settingName;
 	private DefaultKryoConnection<?, ?, ?> kryoServerEndpoint;
 
 	@Override
-	public void configure(String queueName) {
-		this.queueName = queueName;
-		kryoServerEndpoint = new DefaultKryoConnection<>(queueName);
+	public void configure(String settingName) {
+		this.settingName = settingName;
+		kryoServerEndpoint = new DefaultKryoConnection<>(settingName);
 	}
 
 	@Override
@@ -49,7 +49,7 @@ public class DefaultKryoEndpoint implements MasterEndpoint {
 	private void startServer() throws MasterException {
 		new Thread(server).start();
 
-		String prefix = queueName;
+		String prefix = settingName;
 		String host = HostInfo.getHostname();
 
 		PortFinder.aquireBindingLock();
@@ -69,8 +69,8 @@ public class DefaultKryoEndpoint implements MasterEndpoint {
 		Kryo kryo = server.getKryo();
 		registerObjects(kryo);
 
-		LOG.info("host: {} port: {} queue: {}", HostInfo.getHostname(), port,
-				queueName);
+		LOG.info("host: {} port: {} setting: {}", HostInfo.getHostname(), port,
+				settingName);
 	}
 
 	private void registerObjects(Kryo kryo) throws MasterException {

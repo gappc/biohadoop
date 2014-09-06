@@ -19,10 +19,12 @@ import com.codahale.metrics.MetricRegistry;
 
 /**
  * A queue that can be used to add tasks for asynchronous computation. The tasks
- * can then be consumed by e.g. Master Endpoints, which send them to waiting
- * Worker Endpoints and return their result. Methods are provided to add tasks
- * to the internal queue, to get them out of the queue, to return the result of
- * an asynchronous computation, to reschedule a task and to stop the queue.
+ * can then be consumed by e.g. master endpoints, which send them to waiting
+ * worker endpoints. The worker endpoints return the results to the master
+ * endpoints, which use the method {@link #storeResult(TaskId, Object)} to store
+ * the result. Methods are provided to add tasks to the internal queue, to get
+ * them out of the queue, to return the result of an asynchronous computation,
+ * to reschedule a task and to stop the queue.
  * 
  * @author Christian Gapp
  *
@@ -44,29 +46,24 @@ public class TaskQueue<R, T, S> {
 			MetricRegistry.name(TaskQueue.class, this + "-queue-size"));
 
 	/**
-	 * Submit a task, to the Task system, where it can be distributed to the
-	 * workers for asynchronous computation. This method blocks, if the
-	 * underlying queue is full.
+	 * Add a task to the task queue to make it available for asynchronous
+	 * computation by a worker endpoint. This method blocks, if the underlying
+	 * queue is full.
 	 * 
-	 * @param task
-	 *            that should be distributed for asynchronous computation
+	 * @param data
+	 *            that should be added to the task queue. This data is send to a
+	 *            waiting worker endpoint for computation
+	 * @param remoteExecutableClassName
+	 *            defines the class that should be used by a worker endpoint to
+	 *            compute the result for this data
+	 * @param initialData
+	 *            is send to a worker endpoint the first time it encounters this
+	 *            remoteExecutableClassName
 	 * @return {@link TaskFuture} that represents the result of the asynchronous
 	 *         computation
 	 * @throws InterruptedException
 	 *             if adding data to the queue was not possible
 	 */
-	// public TaskFuture<S> add(Task<T> task) throws InterruptedException {
-	// LOG.debug("Adding task {}", task);
-	// TaskFutureImpl<S> taskFutureImpl = new TaskFutureImpl<>();
-	// TaskQueueEntry<T, S> taskQueueEntry = new TaskQueueEntry<>(task,
-	// taskFutureImpl);
-	// workingSet.put(task.getTaskId(), taskQueueEntry);
-	// queue.put(task);
-	// queueSizeCounter.inc();
-	// LOG.debug("Task {} was put to queue", task);
-	// return taskFutureImpl;
-	// }
-
 	public TaskFuture<S> add(T data, String remoteExecutableClassName,
 			R initialData) throws InterruptedException {
 		TaskId taskId = TaskId.newInstance();
@@ -84,8 +81,8 @@ public class TaskQueue<R, T, S> {
 	}
 
 	/**
-	 * Submit a list of tasks to the Task system, where they can be distributed
-	 * to the workers for asynchronous computation. This method may throw an
+	 * Submit a list of tasks to the task queue, to make them available for
+	 * asynchronous computation by worker endpoints. This method may throw an
 	 * exception at the submission of each element of the list. The tasks of the
 	 * list, that were submitted until that point are accepted and will be
 	 * distributed, the remaining tasks of the list are not submitted. In the
@@ -93,9 +90,15 @@ public class TaskQueue<R, T, S> {
 	 * submitted and which not. If no exception is thrown, all tasks have been
 	 * submitted. This method blocks, if the underlying queue is full.
 	 * 
-	 * @param tasks
-	 *            list of {@link Task}, that should be distributed for
-	 *            asynchronous computation
+	 * @param datas
+	 *            that should be added to the task queue. This datas are send to
+	 *            waiting worker endpoints for computation
+	 * @param remoteExecutableClassName
+	 *            defines the class that should be used by a worker endpoint to
+	 *            compute the result for this data
+	 * @param initialData
+	 *            is send to a worker endpoint the first time it encounters this
+	 *            remoteExecutableClassName
 	 * @return list of {@link TaskFuture} that represents the results of the
 	 *         asynchronous computation. Exactly one element is returned for
 	 *         each element in the input list.
@@ -118,18 +121,24 @@ public class TaskQueue<R, T, S> {
 	}
 
 	/**
-	 * Submit an array of tasks to the Task system, where they can be
-	 * distributed to the workers for asynchronous computation. This method may
-	 * throw an exception at the submission of each element of the array. The
-	 * tasks of the array, that were submitted until that point are accepted and
-	 * will be distributed, the remaining tasks of the array are not submitted.
-	 * In the case of an exception, there is no way to tell which tasks have
-	 * been submitted and which not. If no exception is thrown, all tasks have
-	 * been submitted. This method blocks, if the underlying queue is full.
+	 * Submit an array of tasks to the task queue, to make them available for
+	 * asynchronous computation by worker endpoints. This method may throw an
+	 * exception at the submission of each element of the array. The tasks of
+	 * the array, that were submitted until that point are accepted and will be
+	 * distributed, the remaining tasks of the array are not submitted. In the
+	 * case of an exception, there is no way to tell which tasks have been
+	 * submitted and which not. If no exception is thrown, all tasks have been
+	 * submitted. This method blocks, if the underlying queue is full.
 	 * 
-	 * @param tasks
-	 *            array of {@link Task}, that should be distributed for
-	 *            asynchronous computation
+	 * @param datas
+	 *            that should be added to the task queue. This datas are send to
+	 *            waiting worker endpoints for computation
+	 * @param remoteExecutableClassName
+	 *            defines the class that should be used by a worker endpoint to
+	 *            compute the result for this data
+	 * @param initialData
+	 *            is send to a worker endpoint the first time it encounters this
+	 *            remoteExecutableClassName
 	 * @return list of {@link TaskFuture} that represents the results of the
 	 *         asynchronous computation. Exactly one element is returned for
 	 *         each element in the input array.
@@ -171,14 +180,27 @@ public class TaskQueue<R, T, S> {
 		queueSizeCounter.dec();
 		return task;
 	}
-	
+
+	/**
+	 * Gets the <tt>initialData</tt> that was submitted along with the task,
+	 * identified by <tt>taskId</tt>. If the <tt>taskId</tt> is unknown, a
+	 * {@link TaskException} is thrown.
+	 * 
+	 * @param taskId
+	 *            is the unique identifier of a task
+	 * @return the <tt>initialData</tt> that was submitted along with the task,
+	 *         identified by <tt>taskId</tt>
+	 * @throws TaskException
+	 *             if the <tt>taskId<tt> is unknown
+	 */
 	public R getInitialData(TaskId taskId) throws TaskException {
 		if (taskId == null) {
 			throw new TaskException("TaskId can not be null");
 		}
 		TaskQueueEntry<R, T, S> entry = workingSet.get(taskId);
 		if (entry == null) {
-			throw new TaskException("Could not find initial data for task " + taskId);
+			throw new TaskException("Could not find initial data for task "
+					+ taskId);
 		}
 		return entry.getInitialData();
 	}

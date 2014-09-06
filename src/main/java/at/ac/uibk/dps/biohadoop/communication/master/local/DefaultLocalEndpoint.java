@@ -21,11 +21,11 @@ public class DefaultLocalEndpoint implements MasterEndpoint {
 	private DefaultLocalWorker<?, ?, ?> localWorker;
 
 	@Override
-	public void configure(String queueName)
+	public void configure(String settingName)
 			throws MasterException {
 		localWorker = new DefaultLocalWorker<>();
 		try {
-			localWorker.configure(new String[] { queueName });
+			localWorker.configure(new String[] { settingName });
 		} catch (WorkerException e) {
 			throw new MasterException("Could not configure local worker", e);
 		}

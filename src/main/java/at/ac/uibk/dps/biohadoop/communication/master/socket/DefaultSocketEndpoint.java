@@ -19,8 +19,8 @@ public class DefaultSocketEndpoint implements MasterEndpoint {
 	private DefaultSocketMasterConnectionHandler<?, ?, ?> socketServerConnection;
 
 	@Override
-	public void configure(String queueName) {
-		socketServerConnection = new DefaultSocketMasterConnectionHandler<>(queueName);
+	public void configure(String settingName) {
+		socketServerConnection = new DefaultSocketMasterConnectionHandler<>(settingName);
 	}
 	
 	@Override

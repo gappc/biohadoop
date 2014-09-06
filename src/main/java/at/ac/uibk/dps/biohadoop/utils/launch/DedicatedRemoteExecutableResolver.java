@@ -59,7 +59,7 @@ public class DedicatedRemoteExecutableResolver {
 			InvocationTargetException, InstantiationException {
 		if (dedicatedMasterConfiguration.getMaster() == null
 				|| dedicatedMasterConfiguration.getRemoteExecutable() == null
-				|| dedicatedMasterConfiguration.getQueueName() == null) {
+				|| dedicatedMasterConfiguration.getSettingName() == null) {
 			return null;
 		}
 
@@ -67,12 +67,12 @@ public class DedicatedRemoteExecutableResolver {
 				.getMaster();
 		Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass = dedicatedMasterConfiguration
 				.getRemoteExecutable();
-		String queueName = dedicatedMasterConfiguration.getQueueName();
+		String settingName = dedicatedMasterConfiguration.getSettingName();
 
 		MasterEndpoint masterEndpoint = masterEndpointClass.newInstance();
 
 		return new LaunchInformation(remoteExecutableClass, masterEndpoint,
-				queueName);
+				settingName);
 	}
 
 	private static boolean isLocalMaster(LaunchInformation launchInformation) {

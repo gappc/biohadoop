@@ -26,19 +26,19 @@ public class DefaultRemoteExecutableResolver {
 		defaultEndpoints.addAll(getLocalEndpoints(communicationConfiguration));
 
 		launchInformation = new LaunchInformation(null,
-				new DefaultKryoEndpoint(), SimpleTaskSubmitter.QUEUE_NAME);
+				new DefaultKryoEndpoint(), SimpleTaskSubmitter.SETTING_NAME);
 		defaultEndpoints.add(launchInformation);
 
 		launchInformation = new LaunchInformation(null,
-				new DefaultRestEndpoint<>(), SimpleTaskSubmitter.QUEUE_NAME);
+				new DefaultRestEndpoint<>(), SimpleTaskSubmitter.SETTING_NAME);
 		defaultEndpoints.add(launchInformation);
 
 		launchInformation = new LaunchInformation(null,
-				new DefaultSocketEndpoint(), SimpleTaskSubmitter.QUEUE_NAME);
+				new DefaultSocketEndpoint(), SimpleTaskSubmitter.SETTING_NAME);
 		defaultEndpoints.add(launchInformation);
 
 		launchInformation = new LaunchInformation(null,
-				new DefaultWebSocketEndpoint<>(), SimpleTaskSubmitter.QUEUE_NAME);
+				new DefaultWebSocketEndpoint<>(), SimpleTaskSubmitter.SETTING_NAME);
 		defaultEndpoints.add(launchInformation);
 
 		return defaultEndpoints;
@@ -55,7 +55,7 @@ public class DefaultRemoteExecutableResolver {
 				for (int i = 0; i < count; i++) {
 					launchInformations.add(new LaunchInformation(null,
 							new DefaultLocalEndpoint(),
-							SimpleTaskSubmitter.QUEUE_NAME));
+							SimpleTaskSubmitter.SETTING_NAME));
 				}
 			}
 		}

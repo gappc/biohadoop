@@ -7,16 +7,16 @@ public class LaunchInformation {
 
 	private final Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable;
 	private final MasterEndpoint master;
-	private final String queueName;
+	private final String settingName;
 
 	// TODO sort parameters to the following order: master, remoteExecutable,
-	// queueName
+	// settingName
 	public LaunchInformation(
 			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable,
-			MasterEndpoint master, String queueName) {
+			MasterEndpoint master, String settingName) {
 		this.remoteExecutable = remoteExecutable;
 		this.master = master;
-		this.queueName = queueName;
+		this.settingName = settingName;
 	}
 
 	public Class<? extends RemoteExecutable<?, ?, ?>> getRemoteExecutable() {
@@ -27,8 +27,8 @@ public class LaunchInformation {
 		return master;
 	}
 
-	public String getQueueName() {
-		return queueName;
+	public String getSettingName() {
+		return settingName;
 	}
 
 	@Override
@@ -38,7 +38,7 @@ public class LaunchInformation {
 				.append(remoteExecutable.getCanonicalName())
 				.append(", MasterEndpoint=")
 				.append(master.getClass().getCanonicalName())
-				.append(", queueName=").append(queueName);
+				.append(", setting name=").append(settingName);
 		return sb.toString();
 	}
 

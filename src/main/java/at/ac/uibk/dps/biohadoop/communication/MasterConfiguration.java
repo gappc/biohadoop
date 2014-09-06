@@ -9,22 +9,22 @@ public class MasterConfiguration {
 
 	private final Class<? extends MasterEndpoint> master;
 	private final Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable;
-	private String queueName;
+	private String settingName;
 
 	public MasterConfiguration(Class<? extends MasterEndpoint> master,
 			Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable,
-			String queueName) {
+			String settingName) {
 		this.master = master;
 		this.remoteExecutable = remoteExecutable;
-		this.queueName = queueName;
+		this.settingName = settingName;
 	}
 
 	@JsonCreator
 	public static MasterConfiguration create(
 			@JsonProperty("master") Class<? extends MasterEndpoint> master,
 			@JsonProperty("remoteExecutable") Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable,
-			@JsonProperty("queueName") String queueName) {
-		return new MasterConfiguration(master, remoteExecutable, queueName);
+			@JsonProperty("settingName") String settingName) {
+		return new MasterConfiguration(master, remoteExecutable, settingName);
 	}
 
 	public Class<? extends MasterEndpoint> getMaster() {
@@ -35,12 +35,12 @@ public class MasterConfiguration {
 		return remoteExecutable;
 	}
 
-	public String getQueueName() {
-		return queueName;
+	public String getSettingName() {
+		return settingName;
 	}
 
-	public void setQueueName(String queueName) {
-		this.queueName = queueName;
+	public void setSettingName(String settingName) {
+		this.settingName = settingName;
 	}
 
 	@Override
@@ -52,7 +52,7 @@ public class MasterConfiguration {
 		StringBuilder sb = new StringBuilder();
 		sb.append("MasterEndpoint=").append(masterClass);
 		sb.append(" RemoteExecutable=").append(remoteExecutableClass);
-		sb.append(" queueName=").append(queueName);
+		sb.append(" setting name=").append(settingName);
 		return sb.toString();
 	}
 

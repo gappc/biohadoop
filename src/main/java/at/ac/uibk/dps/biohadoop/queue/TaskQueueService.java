@@ -45,7 +45,7 @@ public class TaskQueueService {
 	 * @param name
 	 * @return
 	 */
-	public <R, T, S>TaskQueue<R, T, S> getTaskQueue(String name) {
+	public <R, T, S> TaskQueue<R, T, S> getTaskQueue(String name) {
 		LOG.debug("Getting queue with name {}", name);
 		TaskQueue<R, T, S> queue = (TaskQueue<R, T, S>) queues.get(name);
 		if (queue == null) {
@@ -55,11 +55,7 @@ public class TaskQueueService {
 					if (isFinished.get()) {
 						LOG.error("Could not instanciate new queue with name {}, because got already the signal to stop all queues");
 					} else {
-//						try {
-							queue = (TaskQueue<R, T, S>) new TaskQueue<Object, Object, Object>();
-//						} catch (Exception e) {
-//							LOG.error("FUCKK", e);
-//						}
+						queue = (TaskQueue<R, T, S>) new TaskQueue<Object, Object, Object>();
 						LOG.info("Instanciated new queue with name {}", name);
 						queues.put(name, queue);
 					}

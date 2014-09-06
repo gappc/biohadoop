@@ -82,25 +82,25 @@ public class BiohadoopConfiguration {
 		public Builder addDedicatedMaster(
 				Class<? extends MasterEndpoint> dedicatedMaster,
 				Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable,
-				String queueName) {
+				String settingName) {
 			MasterConfiguration masterConfiguration = new MasterConfiguration(
-					dedicatedMaster, remoteExecutable, queueName);
+					dedicatedMaster, remoteExecutable, settingName);
 			dedicatedMasters.add(masterConfiguration);
 			return this;
 		}
 
 		public Builder addWorker(Class<? extends WorkerEndpoint> worker,
 				int count) {
-			addDedicatedWorker(worker, SimpleTaskSubmitter.QUEUE_NAME, count);
+			addDedicatedWorker(worker, SimpleTaskSubmitter.SETTING_NAME, count);
 			return this;
 		}
 
 		public Builder addDedicatedWorker(
 				Class<? extends WorkerEndpoint> worker,
-				String queueName,
+				String settingName,
 				int count) {
 			WorkerConfiguration workerConfiguration = new WorkerConfiguration(
-					worker, queueName, count);
+					worker, settingName, count);
 			workerConfigurations.add(workerConfiguration);
 			return this;
 		}

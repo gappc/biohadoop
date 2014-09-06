@@ -1,33 +1,35 @@
 package at.ac.uibk.dps.biohadoop.queue;
 
 /**
- * Base implementation for {@link TaskEndpoint}. It provides methods to get the
- * tasks, to store the results and to reschedule already existing tasks. Uses
- * {@link TaskQueue} as its task source and result destination.
+ * Base implementation for {@link TaskEndpoint}. It provides methods to consume
+ * tasks from a task queue, to store the results and to reschedule already
+ * existing tasks. Uses {@link TaskQueue} as its task source and result
+ * destination.
  * 
  * @author Christian Gapp
  *
  * @param <T>
- *            The type of data, that is read out of the task queue
+ *            The type of data, that is consumed from the task queue
  * @param <S>
  *            The result type of an asynchronous computation
  */
 public class TaskEndpointImpl<R, T, S> implements TaskEndpoint<R, T, S> {
 
-	private final String queueName;
+	private final String settingName;
 	private final TaskQueue<R, T, S> taskQueue;
 
 	/**
 	 * Creates an instance of {@link TaskEndpointImpl}, that can be used to get
 	 * data out of the named {@link TaskQueue}
 	 * 
-	 * @param queueName
-	 *            the name of the {@link TaskQueue}
+	 * @param settingName
+	 *            the name of the setting, which corresponds to the name of the
+	 *            {@link TaskQueue}
 	 */
-	public TaskEndpointImpl(String queueName) {
-		this.queueName = queueName;
+	public TaskEndpointImpl(String settingName) {
+		this.settingName = settingName;
 		this.taskQueue = TaskQueueService.getInstance().<R, T, S> getTaskQueue(
-				queueName);
+				settingName);
 	}
 
 	/**
@@ -41,14 +43,14 @@ public class TaskEndpointImpl<R, T, S> implements TaskEndpoint<R, T, S> {
 			return taskQueue.getTask();
 		} catch (InterruptedException e) {
 			throw new ShutdownException("Error while getting task from queue "
-					+ queueName);
+					+ settingName);
 		}
 	}
 
 	public R getInitialData(TaskId taskId) throws TaskException {
 		return taskQueue.getInitialData(taskId);
 	}
-	
+
 	@Override
 	public void storeResult(TaskId taskId, S data) throws TaskException,
 			ShutdownException {
@@ -56,7 +58,7 @@ public class TaskEndpointImpl<R, T, S> implements TaskEndpoint<R, T, S> {
 			taskQueue.storeResult(taskId, data);
 		} catch (TaskException e) {
 			throw new ShutdownException("Error while storing task " + taskId
-					+ " to queue " + queueName);
+					+ " to queue " + settingName);
 		}
 	}
 
@@ -67,7 +69,7 @@ public class TaskEndpointImpl<R, T, S> implements TaskEndpoint<R, T, S> {
 			taskQueue.reschedule(taskId);
 		} catch (InterruptedException e) {
 			throw new ShutdownException("Error while rescheduling task "
-					+ taskId + " to queue " + queueName);
+					+ taskId + " to queue " + settingName);
 		}
 	}
 }

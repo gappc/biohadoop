@@ -31,10 +31,10 @@ public class DefaultKryoConnection<R, T, S> extends Listener {
 			.newCachedThreadPool();
 	private final ZeroLock zeroLock = new ZeroLock();
 
-	private final String queueName;
+	private final String settingName;
 
-	public DefaultKryoConnection(String queueName) {
-		this.queueName = queueName;
+	public DefaultKryoConnection(String settingName) {
+		this.settingName = settingName;
 	}
 
 	public void stop() {
@@ -64,7 +64,7 @@ public class DefaultKryoConnection<R, T, S> extends Listener {
 		Task<?> task = masterEndpoint.getCurrentTask();
 		if (task != null) {
 			try {
-				new TaskEndpointImpl<>(queueName).reschedule(task.getTaskId());
+				new TaskEndpointImpl<>(settingName).reschedule(task.getTaskId());
 			} catch (TaskException | ShutdownException e) {
 				LOG.error("Error while rescheduling task", e);
 			}
@@ -100,7 +100,7 @@ public class DefaultKryoConnection<R, T, S> extends Listener {
 	}
 
 	private DefaultMasterImpl<R, T, S> buildMaster() throws Exception {
-		return new DefaultMasterImpl<R, T, S>(queueName);
+		return new DefaultMasterImpl<R, T, S>(settingName);
 	}
 
 }

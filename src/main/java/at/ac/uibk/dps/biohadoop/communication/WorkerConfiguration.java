@@ -8,31 +8,31 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class WorkerConfiguration {
 
 	private final Class<? extends WorkerEndpoint> worker;
-	private final String queueName;
+	private final String settingName;
 	private final Integer count;
 
 	public WorkerConfiguration(Class<? extends WorkerEndpoint> worker,
-			String queueName,
+			String settingName,
 			Integer count) {
 		this.worker = worker;
-		this.queueName = queueName;
+		this.settingName = settingName;
 		this.count = count;
 	}
 
 	@JsonCreator
 	public static WorkerConfiguration create(
 			@JsonProperty("worker") Class<? extends WorkerEndpoint> worker,
-			@JsonProperty("queueName") String queueName,
+			@JsonProperty("settingName") String settingName,
 			@JsonProperty("count") Integer count) {
-		return new WorkerConfiguration(worker, queueName, count);
+		return new WorkerConfiguration(worker, settingName, count);
 	}
 
 	public Class<? extends WorkerEndpoint> getWorker() {
 		return worker;
 	}
 
-	public String getQueueName() {
-		return queueName;
+	public String getSettingName() {
+		return settingName;
 	}
 
 	public Integer getCount() {
@@ -45,7 +45,7 @@ public class WorkerConfiguration {
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("WorkerEndpoint=").append(workerClass);
-		sb.append(" QueueName=").append(queueName);
+		sb.append(" setting name=").append(settingName);
 		sb.append(" Count=").append(count);
 		return sb.toString();
 	}
