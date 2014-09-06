@@ -7,7 +7,6 @@ import java.util.Map;
 
 import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.MasterConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.worker.WorkerEndpoint;
@@ -81,10 +80,9 @@ public class BiohadoopConfiguration {
 
 		public Builder addDedicatedMaster(
 				Class<? extends MasterEndpoint> dedicatedMaster,
-				Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutable,
 				String settingName) {
 			MasterConfiguration masterConfiguration = new MasterConfiguration(
-					dedicatedMaster, remoteExecutable, settingName);
+					dedicatedMaster, settingName);
 			dedicatedMasters.add(masterConfiguration);
 			return this;
 		}

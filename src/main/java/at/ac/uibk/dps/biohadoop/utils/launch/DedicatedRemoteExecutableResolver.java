@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.MasterConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
 import at.ac.uibk.dps.biohadoop.communication.master.local.DefaultLocalEndpoint;
@@ -58,21 +57,17 @@ public class DedicatedRemoteExecutableResolver {
 			IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException, InstantiationException {
 		if (dedicatedMasterConfiguration.getMaster() == null
-				|| dedicatedMasterConfiguration.getRemoteExecutable() == null
 				|| dedicatedMasterConfiguration.getSettingName() == null) {
 			return null;
 		}
 
 		Class<? extends MasterEndpoint> masterEndpointClass = dedicatedMasterConfiguration
 				.getMaster();
-		Class<? extends RemoteExecutable<?, ?, ?>> remoteExecutableClass = dedicatedMasterConfiguration
-				.getRemoteExecutable();
 		String settingName = dedicatedMasterConfiguration.getSettingName();
 
 		MasterEndpoint masterEndpoint = masterEndpointClass.newInstance();
 
-		return new LaunchInformation(remoteExecutableClass, masterEndpoint,
-				settingName);
+		return new LaunchInformation(masterEndpoint, settingName);
 	}
 
 	private static boolean isLocalMaster(LaunchInformation launchInformation) {
