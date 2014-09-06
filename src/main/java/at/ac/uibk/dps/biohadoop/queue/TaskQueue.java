@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +40,6 @@ public class TaskQueue<R, T, S> {
 	private final BlockingQueue<Task<T>> queue = new LinkedBlockingQueue<>();
 	private final Map<TaskId, TaskQueueEntry<R, T, S>> workingSet = new ConcurrentHashMap<>();
 	private final Map<Thread, Thread> waitingThreads = new ConcurrentHashMap<>();
-	private final AtomicBoolean stop = new AtomicBoolean(false);
 	private final Counter queueSizeCounter = Metrics.getInstance().counter(
 			MetricRegistry.name(TaskQueue.class, this + "-queue-size"));
 
@@ -171,9 +169,6 @@ public class TaskQueue<R, T, S> {
 	 *             if getting a task from the underlying queue is interrupted
 	 */
 	public Task<T> getTask() throws InterruptedException {
-		if (stop.get()) {
-			Thread.currentThread().interrupt();
-		}
 		waitingThreads.put(Thread.currentThread(), Thread.currentThread());
 		Task<T> task = queue.take();
 		waitingThreads.remove(Thread.currentThread());
@@ -260,12 +255,38 @@ public class TaskQueue<R, T, S> {
 	 * {@link #reschedule(TaskId)}, {@link #storeResult(TaskId, Object)}
 	 */
 	public void stopQueue() {
-		stop.set(true);
 		LOG.info("Interrupting all waiting Threads");
-		for (Thread thread : waitingThreads.keySet()) {
-			LOG.debug("Interrupting {}", thread);
-			thread.interrupt();
-		}
+		forceShutdown();
+	}
+
+	/**
+	 * Starts a daemon thread that goes into an infinite loop to interrupt all
+	 * waiting threads. This is necessary, as we keep no state of worker
+	 * endpoints and it is possible, that a worker endpoint blocks on the
+	 * {@link #getTask()} method, which would prevent the system from shutting
+	 * down.
+	 */
+	private void forceShutdown() {
+		Thread shutdownForcer = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while (true) {
+					for (Thread thread : waitingThreads.keySet()) {
+						LOG.debug("Interrupting {}", thread);
+						thread.interrupt();
+					}
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
+						LOG.error(
+								"Got interrupted while waiting for next round of forceful shutdown",
+								e);
+					}
+				}
+			}
+		}, "TaskQueue-ShutdownForcer");
+		shutdownForcer.setDaemon(true);
+		shutdownForcer.start();
 	}
 
 }
