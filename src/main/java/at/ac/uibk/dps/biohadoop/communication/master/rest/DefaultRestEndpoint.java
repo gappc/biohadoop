@@ -62,13 +62,15 @@ public class DefaultRestEndpoint<R, T, S> implements MasterEndpoint {
 		Message<S> inputMessage = new Message<>(
 				MessageType.REGISTRATION_REQUEST, new ClassNameWrappedTask<S>(
 						taskId, null, className));
+
+		Message<T> outputMessage = null;
 		try {
 			DefaultMasterImpl<R, T, S> masterEndpoint = getMasterEndpoint(path);
-			return masterEndpoint.handleMessage(inputMessage);
+			outputMessage = masterEndpoint.handleMessage(inputMessage);
 		} catch (HandleMessageException e) {
 			LOG.error("Could not handle worker request {}", inputMessage, e);
 		}
-		return null;
+		return outputMessage;
 	}
 
 	@GET
@@ -81,12 +83,14 @@ public class DefaultRestEndpoint<R, T, S> implements MasterEndpoint {
 		}
 		Message<S> inputMessage = new Message<>(MessageType.WORK_INIT_REQUEST,
 				null);
+
+		Message<T> outputMessage = null;
 		try {
-			return masterEndpoint.handleMessage(inputMessage);
+			outputMessage = masterEndpoint.handleMessage(inputMessage);
 		} catch (HandleMessageException e) {
 			LOG.error("Could not handle worker request {}", inputMessage, e);
 		}
-		return null;
+		return outputMessage;
 	}
 
 	@POST
@@ -94,10 +98,11 @@ public class DefaultRestEndpoint<R, T, S> implements MasterEndpoint {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Message<T> work(@PathParam("path") String path, String message) {
 		DefaultMasterImpl<R, T, S> masterEndpoint = getMasterEndpoint(path);
+		Message<T> outputMessage = null;
 		try {
 			Message<S> inputMessage = MessageConverter
 					.getTypedMessageForMethod(message, "compute", -1);
-			return masterEndpoint.handleMessage(inputMessage);
+			outputMessage = masterEndpoint.handleMessage(inputMessage);
 		} catch (ConversionException e) {
 			LOG.error("Error while converting String to Message", e);
 			tryReschedule(path, message);
@@ -105,7 +110,7 @@ public class DefaultRestEndpoint<R, T, S> implements MasterEndpoint {
 			LOG.error("Could not handle worker request {}", message, e);
 			tryReschedule(path, message);
 		}
-		return null;
+		return outputMessage;
 	}
 
 	@SuppressWarnings("unchecked")
