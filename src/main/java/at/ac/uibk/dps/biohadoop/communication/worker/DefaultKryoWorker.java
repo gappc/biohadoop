@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.ClassNameWrappedTask;
+import at.ac.uibk.dps.biohadoop.communication.ComputeException;
 import at.ac.uibk.dps.biohadoop.communication.ConnectionProperties;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
@@ -70,9 +71,11 @@ public class DefaultKryoWorker<R, T, S> implements WorkerEndpoint {
 		final PerformanceLogger performanceLogger = new PerformanceLogger(
 				System.currentTimeMillis(), 0, logSteps);
 
+		// TODO SEVERE: how to handle errors?
 		client.addListener(new Listener() {
 			public void received(Connection connection, Object object) {
 				if (object instanceof Message) {
+					String classString = null;
 					try {
 						Message<T> inputMessage = (Message<T>) object;
 
@@ -89,7 +92,7 @@ public class DefaultKryoWorker<R, T, S> implements WorkerEndpoint {
 
 						ClassNameWrappedTask<T> task = (ClassNameWrappedTask<T>) inputMessage
 								.getTask();
-						String classString = task.getClassName();
+						classString = task.getClassName();
 
 						if (inputMessage.getType() == MessageType.REGISTRATION_RESPONSE) {
 							Class<? extends RemoteExecutable<R, T, S>> className = (Class<? extends RemoteExecutable<R, T, S>>) Class
@@ -136,8 +139,13 @@ public class DefaultKryoWorker<R, T, S> implements WorkerEndpoint {
 
 							connection.sendTCP(outputMessage);
 						}
-					} catch (Exception e) {
-						LOG.error("Got error", e);
+					} catch (ClassNotFoundException | InstantiationException
+							| IllegalAccessException e) {
+						LOG.error(
+								"Could not instanciate RemoteExecutable class {}",
+								classString, e);
+					} catch (ComputeException e) {
+						LOG.error("Error while computing result", e);
 					}
 				}
 			}

@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.ClassNameWrappedTask;
+import at.ac.uibk.dps.biohadoop.communication.ComputeException;
 import at.ac.uibk.dps.biohadoop.communication.ConnectionProperties;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
@@ -76,7 +77,8 @@ public class DefaultWebSocketWorker<R, T, S> implements WorkerEndpoint {
 		try {
 			final WebSocketContainer container = ContainerProvider
 					.getWebSocketContainer();
-			container.setDefaultMaxSessionIdleTimeout(ConnectionProperties.CONNECTION_TIMEOUT);
+			container
+					.setDefaultMaxSessionIdleTimeout(ConnectionProperties.CONNECTION_TIMEOUT);
 
 			final DefaultWebSocketWorker<R, T, S> self = this;
 			ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -86,7 +88,8 @@ public class DefaultWebSocketWorker<R, T, S> implements WorkerEndpoint {
 					return container.connectToServer(self, URI.create(url));
 				}
 			});
-			Session session = future.get(ConnectionProperties.CONNECTION_TIMEOUT,
+			Session session = future.get(
+					ConnectionProperties.CONNECTION_TIMEOUT,
 					TimeUnit.MILLISECONDS);
 			workInit(session);
 			latch.await();
@@ -130,7 +133,9 @@ public class DefaultWebSocketWorker<R, T, S> implements WorkerEndpoint {
 	}
 
 	@OnMessage
-	public Message<?> onMessage(Message<T> inputMessage, Session session) throws WorkerException {
+	public Message<?> onMessage(Message<T> inputMessage, Session session)
+			throws WorkerException {
+		String classString = null;
 		try {
 			performanceLogger.step(LOG);
 
@@ -146,7 +151,7 @@ public class DefaultWebSocketWorker<R, T, S> implements WorkerEndpoint {
 
 			ClassNameWrappedTask<T> task = ((ClassNameWrappedTask<T>) inputMessage
 					.getTask());
-			String classString = task.getClassName();
+			classString = task.getClassName();
 
 			if (inputMessage.getType() == MessageType.REGISTRATION_RESPONSE) {
 				Class<? extends RemoteExecutable<R, T, S>> className = (Class<? extends RemoteExecutable<R, T, S>>) Class
@@ -164,8 +169,8 @@ public class DefaultWebSocketWorker<R, T, S> implements WorkerEndpoint {
 			WorkerData<R, T, S> workerData = workerDatas.get(classString);
 			if (workerData == null) {
 				oldMessage = inputMessage;
-				Task<T> intialTask = new ClassNameWrappedTask<>(task.getTaskId(), null,
-						classString);
+				Task<T> intialTask = new ClassNameWrappedTask<>(
+						task.getTaskId(), null, classString);
 				return new Message<>(MessageType.REGISTRATION_REQUEST,
 						intialTask);
 			}
@@ -192,9 +197,19 @@ public class DefaultWebSocketWorker<R, T, S> implements WorkerEndpoint {
 
 			LOG.error("SHOULD NOT BE HERE");
 			return null;
-		} catch (Exception e) {
-			LOG.error("Unexpected Exception", e);
-			throw new WorkerException("Unexpected Exception", e);
+		} catch (IOException e) {
+			LOG.error("Error during communication", e);
+			throw new WorkerException("Error during communication", e);
+		} catch (ClassNotFoundException | InstantiationException
+				| IllegalAccessException e) {
+			LOG.error("Could not instanciate RemoteExecutable class {}",
+					classString, e);
+			throw new WorkerException(
+					"Could not instanciate RemoteExecutable class "
+							+ classString, e);
+		} catch (ComputeException e) {
+			LOG.error("Error while computing result", e);
+			throw new WorkerException("Error while computing result", e);
 		}
 	}
 

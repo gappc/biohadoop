@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.ClassNameWrappedTask;
+import at.ac.uibk.dps.biohadoop.communication.ComputeException;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
@@ -68,8 +69,8 @@ public class DefaultRestWorker<R, T, S> implements WorkerEndpoint {
 						.getTask();
 				String classString = task.getClassName();
 
-				WorkerData<R, T, S> workerEntry = getWorkerData(task,
-						client, url);
+				WorkerData<R, T, S> workerEntry = getWorkerData(task, client,
+						url);
 
 				RemoteExecutable<R, T, S> remoteExecutable = workerEntry
 						.getRemoteExecutable();
@@ -90,6 +91,9 @@ public class DefaultRestWorker<R, T, S> implements WorkerEndpoint {
 		} catch (InstantiationException | IllegalAccessException
 				| ClassNotFoundException | ConversionException e) {
 			throw new WorkerException(e);
+		} catch (ComputeException e) {
+			throw new WorkerException(
+					"Error while computing result, stopping work", e);
 		}
 	}
 

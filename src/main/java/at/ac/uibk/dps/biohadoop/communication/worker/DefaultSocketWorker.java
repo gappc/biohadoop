@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.ClassNameWrappedTask;
+import at.ac.uibk.dps.biohadoop.communication.ComputeException;
 import at.ac.uibk.dps.biohadoop.communication.ConnectionProperties;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
@@ -74,12 +75,15 @@ public class DefaultSocketWorker<R, T, S> implements WorkerEndpoint {
 		} catch (InstantiationException | IllegalAccessException
 				| ClassNotFoundException | ConversionException e) {
 			throw new WorkerException(e);
+		} catch (ComputeException e) {
+			throw new WorkerException(
+					"Error while computing result, stopping work", e);
 		}
 	}
 
 	private void handleWork(ObjectInputStream is, ObjectOutputStream os)
 			throws IOException, ClassNotFoundException, InstantiationException,
-			IllegalAccessException, ConversionException {
+			IllegalAccessException, ConversionException, ComputeException {
 		PerformanceLogger performanceLogger = new PerformanceLogger(
 				System.currentTimeMillis(), 0, logSteps);
 		int counter = 0;
