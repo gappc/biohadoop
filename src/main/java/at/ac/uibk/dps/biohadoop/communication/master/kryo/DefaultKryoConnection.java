@@ -62,13 +62,7 @@ public class DefaultKryoConnection<R, T, S> extends Listener {
 		DefaultMasterImpl<R, T, S> masterEndpoint = masters.get(connection);
 		masters.remove(masterEndpoint);
 		Task<?> task = masterEndpoint.getCurrentTask();
-		if (task != null) {
-			try {
-				new TaskEndpointImpl<>(settingName).reschedule(task.getTaskId());
-			} catch (TaskException | ShutdownException e) {
-				LOG.error("Error while rescheduling task", e);
-			}
-		}
+		reschedule(task);
 	}
 
 	public void received(final Connection connection, final Object object) {
@@ -87,11 +81,12 @@ public class DefaultKryoConnection<R, T, S> extends Listener {
 						Message<S> inputMessage = (Message<S>) object;
 						Message<T> outputMessage = masterEndpoint
 								.handleMessage(inputMessage);
-
+						
 						connection.sendTCP(outputMessage);
 
 						return null;
 					} catch (Exception e) {
+						LOG.error("Error in communication", e);
 						throw new MasterException("Error in communication", e);
 					}
 				}
@@ -101,6 +96,19 @@ public class DefaultKryoConnection<R, T, S> extends Listener {
 
 	private DefaultMasterImpl<R, T, S> buildMaster() throws Exception {
 		return new DefaultMasterImpl<R, T, S>(settingName);
+	}
+	
+	private void reschedule(Task<?> task) {
+		if (task == null) {
+			LOG.error("Could not reschedule null task");
+			return;
+		}
+		try {
+			LOG.info("Trying to reschedule task {}", task);
+			new TaskEndpointImpl<>(settingName).reschedule(task.getTaskId());
+		} catch (TaskException | ShutdownException e) {
+			LOG.error("Error while rescheduling task", e);
+		}
 	}
 
 }

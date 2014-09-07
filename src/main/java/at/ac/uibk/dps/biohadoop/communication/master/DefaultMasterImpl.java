@@ -49,15 +49,11 @@ public class DefaultMasterImpl<R, T, S> {
 	private Message<R> getInitialData(Message<S> inputMessage)
 			throws HandleMessageException {
 		LOG.info("Got registration request");
-		currentTask = null;
 		try {
 			TaskId taskId = inputMessage.getTask().getTaskId();
 			R initialData = readInitialData(taskId);
 			String className = ((ClassNameWrappedTask<T>) inputMessage
 					.getTask()).getClassName();
-			// Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass
-			// = (Class<? extends RemoteExecutable<R, T, S>>) Class
-			// .forName(className);
 			Task<R> task = new ClassNameWrappedTask<>(taskId, initialData,
 					className);
 			return new Message<>(MessageType.REGISTRATION_RESPONSE, task);
