@@ -2,6 +2,8 @@ package at.ac.uibk.dps.biohadoop.communication;
 
 import java.util.List;
 
+import at.ac.uibk.dps.biohadoop.communication.adapter.AdapterConfiguration;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
