@@ -27,10 +27,10 @@ import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 import at.ac.uibk.dps.biohadoop.utils.convert.ConversionException;
 import at.ac.uibk.dps.biohadoop.utils.convert.MessageConverter;
 
-public class DefaultRestWorker<R, T, S> implements WorkerEndpoint {
+public class RestWorker<R, T, S> implements Worker {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(DefaultRestWorker.class);
+			.getLogger(RestWorker.class);
 
 	private final Map<String, WorkerData<R, T, S>> workerData = new ConcurrentHashMap<>();
 	private WorkerParameters parameters;

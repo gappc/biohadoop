@@ -7,25 +7,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CommunicationConfiguration {
 
-	private final List<MasterConfiguration> dedicatedMasters;
+	private final List<AdapterConfiguration> dedicatedAdapters;
 	private final List<WorkerConfiguration> workerConfigurations;
 
 	public CommunicationConfiguration(
-			List<MasterConfiguration> dedicatedMasters,
+			List<AdapterConfiguration> dedicatedAdapters,
 			List<WorkerConfiguration> workerConfigurations) {
-		this.dedicatedMasters = dedicatedMasters;
+		this.dedicatedAdapters = dedicatedAdapters;
 		this.workerConfigurations = workerConfigurations;
 	}
 
 	@JsonCreator
 	public static CommunicationConfiguration create(
-			@JsonProperty("dedicatedMasters") List<MasterConfiguration> dedicatedMasters,
+			@JsonProperty("dedicatedAdapters") List<AdapterConfiguration> dedicatedAdapters,
 			@JsonProperty("workerConfigurations") List<WorkerConfiguration> workerConfigurations) {
-		return new CommunicationConfiguration(dedicatedMasters, workerConfigurations);
+		return new CommunicationConfiguration(dedicatedAdapters, workerConfigurations);
 	}
 
-	public List<MasterConfiguration> getDedicatedMasters() {
-		return dedicatedMasters;
+	public List<AdapterConfiguration> getDedicatedAdapters() {
+		return dedicatedAdapters;
 	}
 
 	public List<WorkerConfiguration> getWorkerConfigurations() {

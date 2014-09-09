@@ -40,7 +40,7 @@ public class ParameterConstructor {
 		String value = null;
 		int count = 0;
 		// Need to do some polling, as requested values may be empty, e.g. when
-		// socket master hasn't started -> host/port binding takes some time
+		// socket adapter hasn't started -> host/port binding takes some time
 		while ((value = Environment.getPrefixed(prefix, key)) == null) {
 			count++;
 			if (count == 10) {
@@ -53,7 +53,7 @@ public class ParameterConstructor {
 								+ value
 								+ " after "
 								+ count
-								+ "retries, maybe master is not configured/started? WorkerConfiguration: "
+								+ "retries, maybe adapter is not configured/started? WorkerConfiguration: "
 								+ workerConfiguration);
 			}
 			try {

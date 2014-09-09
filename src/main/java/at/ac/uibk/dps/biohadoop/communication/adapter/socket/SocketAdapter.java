@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master.socket;
+package at.ac.uibk.dps.biohadoop.communication.adapter.socket;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -6,21 +6,21 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.adapter.Adapter;
 
-public class DefaultSocketEndpoint implements MasterEndpoint {
+public class SocketAdapter implements Adapter {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(DefaultSocketEndpoint.class);
+			.getLogger(SocketAdapter.class);
 
 	private final ExecutorService executorService = Executors
 			.newFixedThreadPool(1);
 	
-	private DefaultSocketMasterConnectionHandler<?, ?, ?> socketServerConnection;
+	private SocketConnectionHandler<?, ?, ?> socketServerConnection;
 
 	@Override
 	public void configure(String settingName) {
-		socketServerConnection = new DefaultSocketMasterConnectionHandler<>(settingName);
+		socketServerConnection = new SocketConnectionHandler<>(settingName);
 	}
 	
 	@Override

@@ -13,20 +13,19 @@ import at.ac.uibk.dps.biohadoop.communication.ComputeException;
 import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLaunchException;
-import at.ac.uibk.dps.biohadoop.queue.ShutdownException;
-import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
-import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.queue.TaskException;
+import at.ac.uibk.dps.biohadoop.queue.TaskQueue;
+import at.ac.uibk.dps.biohadoop.queue.TaskQueueService;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
-public class DefaultLocalWorker<R, T, S> implements WorkerEndpoint,
+public class LocalWorker<R, T, S> implements Worker,
 		Callable<Object> {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(DefaultLocalWorker.class);
+			.getLogger(LocalWorker.class);
 	private static final String CLASSNAME = ClassnameProvider
-			.getClassname(DefaultLocalWorker.class);
+			.getClassname(LocalWorker.class);
 
 	private final Map<String, WorkerData<R, T, S>> workerDatas = new ConcurrentHashMap<>();
 	private final AtomicBoolean stop = new AtomicBoolean(false);
@@ -57,7 +56,8 @@ public class DefaultLocalWorker<R, T, S> implements WorkerEndpoint,
 		LOG.info("############# {} started for setting {} ##############",
 				CLASSNAME, settingName);
 
-		TaskEndpoint<R, T, S> taskEndpoint = new TaskEndpointImpl<>(settingName);
+		TaskQueue<R, T, S> taskQueue = TaskQueueService.getInstance()
+				.getTaskQueue(settingName);
 
 		PerformanceLogger performanceLogger = new PerformanceLogger(
 				System.currentTimeMillis(), 0, logSteps);
@@ -65,7 +65,7 @@ public class DefaultLocalWorker<R, T, S> implements WorkerEndpoint,
 			try {
 				// performanceLogger.step(LOG);
 
-				ClassNameWrappedTask<T> task = (ClassNameWrappedTask<T>) taskEndpoint
+				ClassNameWrappedTask<T> task = (ClassNameWrappedTask<T>) taskQueue
 						.getTask();
 				if (task == null) {
 					LOG.info("############# {} Worker stopped ###############",
@@ -76,7 +76,7 @@ public class DefaultLocalWorker<R, T, S> implements WorkerEndpoint,
 				String className = task.getClassName();
 				WorkerData<R, T, S> workerData = workerDatas.get(className);
 				if (workerData == null) {
-					workerData = getInitialData(taskEndpoint, task);
+					workerData = getInitialData(taskQueue, task);
 					workerDatas.put(className, workerData);
 				}
 
@@ -87,8 +87,9 @@ public class DefaultLocalWorker<R, T, S> implements WorkerEndpoint,
 				T data = task.getData();
 				S result = remoteExecutable.compute(data, initialData);
 
-				taskEndpoint.storeResult(task.getTaskId(), result);
-			} catch (ShutdownException e) {
+				taskQueue.storeResult(task.getTaskId(), result);
+			} catch (InterruptedException e) {
+				// InterruptedException means to shutdown
 				throw new WorkerException(
 						"Got ShutdownException, stopping work", e);
 			} catch (InstantiationException | IllegalAccessException
@@ -107,16 +108,16 @@ public class DefaultLocalWorker<R, T, S> implements WorkerEndpoint,
 		stop.set(true);
 	}
 
-	private WorkerData<R, T, S> getInitialData(TaskEndpoint<R, T, S> taskEndpoint, ClassNameWrappedTask<T> task)
-			throws ClassNotFoundException, InstantiationException,
-			IllegalAccessException, TaskException {
+	private WorkerData<R, T, S> getInitialData(TaskQueue<R, T, S> taskQueue,
+			ClassNameWrappedTask<T> task) throws ClassNotFoundException,
+			InstantiationException, IllegalAccessException, TaskException {
 		String className = task.getClassName();
 		Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass = (Class<? extends RemoteExecutable<R, T, S>>) Class
 				.forName(className);
 		RemoteExecutable<R, T, S> remoteExecutable = remoteExecutableClass
 				.newInstance();
 
-		R initialData = taskEndpoint.getInitialData(task.getTaskId());
+		R initialData = taskQueue.getInitialData(task.getTaskId());
 		return new WorkerData<>(remoteExecutable, initialData);
 	}
 

@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master.socket;
+package at.ac.uibk.dps.biohadoop.communication.adapter.socket;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -13,15 +13,15 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
-import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
-import at.ac.uibk.dps.biohadoop.communication.master.HandleMessageException;
-import at.ac.uibk.dps.biohadoop.communication.master.MasterException;
+import at.ac.uibk.dps.biohadoop.communication.adapter.AdapterException;
+import at.ac.uibk.dps.biohadoop.communication.adapter.TaskConsumer;
+import at.ac.uibk.dps.biohadoop.communication.adapter.HandleMessageException;
 import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
 
-public class DefaultSocketConnection<R, T, S> implements Callable<Object> {
+public class SocketConnection<R, T, S> implements Callable<Object> {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(DefaultSocketConnection.class);
+			.getLogger(SocketConnection.class);
 
 	private final Socket socket;
 	private final String path;
@@ -31,14 +31,14 @@ public class DefaultSocketConnection<R, T, S> implements Callable<Object> {
 	private int counter = 0;
 	private boolean close = false;
 
-	public DefaultSocketConnection(Socket socket, String path) {
+	public SocketConnection(Socket socket, String path) {
 		this.socket = socket;
 		this.path = path;
 	}
 
 	@Override
-	public Object call() throws MasterException {
-		DefaultMasterImpl<R, T, S> masterEndpoint = null;
+	public Object call() throws AdapterException {
+		TaskConsumer<R, T, S> taskConsumer = null;
 		try {
 			LOG.info("Opened Socket on server");
 
@@ -48,19 +48,18 @@ public class DefaultSocketConnection<R, T, S> implements Callable<Object> {
 			is = new ObjectInputStream(new BufferedInputStream(
 					socket.getInputStream()));
 
-			masterEndpoint = buildMaster();
+			taskConsumer = new TaskConsumer<R, T, S>(path);
 
 			while (!close && !ShutdownWaitingService.isFinished()) {
 				Message<S> inputMessage = receive();
-				Message<T> outputMessage = masterEndpoint
+				Message<T> outputMessage = taskConsumer
 						.handleMessage(inputMessage);
 				send(outputMessage);
 			}
-		} catch (IOException | InstantiationException | IllegalAccessException
-				| ClassNotFoundException | HandleMessageException e) {
+		} catch (IOException | ClassNotFoundException | HandleMessageException e) {
 			// TODO remove logging
 			LOG.error("Could not handle worker request", e);
-			throw new MasterException("Could not handle worker request", e);
+			throw new AdapterException("Could not handle worker request", e);
 		} finally {
 			if (os != null) {
 				try {
@@ -96,10 +95,5 @@ public class DefaultSocketConnection<R, T, S> implements Callable<Object> {
 		if (message.getType() == MessageType.SHUTDOWN) {
 			close = true;
 		}
-	}
-
-	private DefaultMasterImpl<R, T, S> buildMaster()
-			throws InstantiationException, IllegalAccessException {
-		return new DefaultMasterImpl<R, T, S>(path);
 	}
 }

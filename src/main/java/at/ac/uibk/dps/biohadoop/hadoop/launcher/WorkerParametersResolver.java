@@ -1,8 +1,5 @@
 package at.ac.uibk.dps.biohadoop.hadoop.launcher;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,11 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.worker.WorkerEndpoint;
-import at.ac.uibk.dps.biohadoop.hadoop.Environment;
-import at.ac.uibk.dps.biohadoop.queue.SimpleTaskSubmitter;
+import at.ac.uibk.dps.biohadoop.communication.worker.Worker;
 
 public class WorkerParametersResolver {
 
@@ -47,9 +41,9 @@ public class WorkerParametersResolver {
 			WorkerConfiguration workerConfiguration)
 			throws WorkerLaunchException {
 		try {
-			WorkerEndpoint workerEndpoint = workerConfiguration.getWorker()
+			Worker worker = workerConfiguration.getWorker()
 					.newInstance();
-			return workerEndpoint.buildLaunchArguments(workerConfiguration);
+			return worker.buildLaunchArguments(workerConfiguration);
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new WorkerLaunchException(
 					"Could net get worker parameters for WorkerConfiguration: "

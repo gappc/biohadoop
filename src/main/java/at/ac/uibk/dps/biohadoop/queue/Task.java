@@ -20,8 +20,8 @@ public interface Task<T> {
 
 	/**
 	 * Gets the wrapped data for this task, that is submitted to the Task system
-	 * by an algorithm author through a {@link TaskSubmitter}. Tihs data is also
-	 * send to the Worker Endpoints for their computation.
+	 * by an algorithm author through a {@link TaskSubmitter}. This data is also
+	 * send to the workers for their computation.
 	 * 
 	 * @return the wrapped data
 	 */

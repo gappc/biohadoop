@@ -8,33 +8,33 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.MasterConfiguration;
+import at.ac.uibk.dps.biohadoop.communication.AdapterConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
-import at.ac.uibk.dps.biohadoop.communication.master.local.DefaultLocalEndpoint;
-import at.ac.uibk.dps.biohadoop.communication.worker.DefaultLocalWorker;
+import at.ac.uibk.dps.biohadoop.communication.adapter.Adapter;
+import at.ac.uibk.dps.biohadoop.communication.adapter.local.LocalAdapter;
+import at.ac.uibk.dps.biohadoop.communication.worker.LocalWorker;
 
 public class DedicatedRemoteExecutableResolver {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DedicatedRemoteExecutableResolver.class);
 
-	public static List<LaunchInformation> getDedicatedEndpoints(
+	public static List<LaunchInformation> getDedicatedAdapters(
 			CommunicationConfiguration communicationConfiguration)
-			throws ResolveDedicatedEndpointException {
-		LOG.debug("Resolving dedicated endpoints");
+			throws ResolveDedicatedAdapterException {
+		LOG.debug("Resolving dedicated adapters");
 		List<LaunchInformation> finalLaunchInformations = new ArrayList<>();
-		for (MasterConfiguration dedicatedMasterConfiguration : communicationConfiguration
-				.getDedicatedMasters()) {
+		for (AdapterConfiguration dedicatedAdapterConfiguration : communicationConfiguration
+				.getDedicatedAdapters()) {
 			try {
-				LaunchInformation launchInformation = getLaunchInformation(dedicatedMasterConfiguration);
+				LaunchInformation launchInformation = getLaunchInformation(dedicatedAdapterConfiguration);
 				if (launchInformation == null) {
-					throw new ResolveDedicatedEndpointException(
-							"MasterConfiguration not complete: "
-									+ dedicatedMasterConfiguration);
+					throw new ResolveDedicatedAdapterException(
+							"AdapterConfiguration not complete: "
+									+ dedicatedAdapterConfiguration);
 				}
-				if (isLocalMaster(launchInformation)) {
-					List<LaunchInformation> localLaunchInformations = handleLocalMaster(
+				if (isLocalAdapter(launchInformation)) {
+					List<LaunchInformation> localLaunchInformations = handleLocalAdapter(
 							communicationConfiguration, launchInformation);
 					finalLaunchInformations.addAll(localLaunchInformations);
 				} else {
@@ -43,39 +43,39 @@ public class DedicatedRemoteExecutableResolver {
 			} catch (IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | InstantiationException
 					| NoSuchMethodException | SecurityException e) {
-				throw new ResolveDedicatedEndpointException(
-						"Error while getting LaunchInformation for MasterConfiguration "
-								+ dedicatedMasterConfiguration, e);
+				throw new ResolveDedicatedAdapterException(
+						"Error while getting LaunchInformation for AdapterConfiguration "
+								+ dedicatedAdapterConfiguration, e);
 			}
 		}
 		return finalLaunchInformations;
 	}
 
 	private static LaunchInformation getLaunchInformation(
-			MasterConfiguration dedicatedMasterConfiguration)
+			AdapterConfiguration dedicatedAdapterConfiguration)
 			throws NoSuchMethodException, SecurityException,
 			IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException, InstantiationException {
-		if (dedicatedMasterConfiguration.getMaster() == null
-				|| dedicatedMasterConfiguration.getSettingName() == null) {
+		if (dedicatedAdapterConfiguration.getAdapter() == null
+				|| dedicatedAdapterConfiguration.getSettingName() == null) {
 			return null;
 		}
 
-		Class<? extends MasterEndpoint> masterEndpointClass = dedicatedMasterConfiguration
-				.getMaster();
-		String settingName = dedicatedMasterConfiguration.getSettingName();
+		Class<? extends Adapter> adapterClass = dedicatedAdapterConfiguration
+				.getAdapter();
+		String settingName = dedicatedAdapterConfiguration.getSettingName();
 
-		MasterEndpoint masterEndpoint = masterEndpointClass.newInstance();
+		Adapter adapter = adapterClass.newInstance();
 
-		return new LaunchInformation(masterEndpoint, settingName);
+		return new LaunchInformation(adapter, settingName);
 	}
 
-	private static boolean isLocalMaster(LaunchInformation launchInformation) {
-		return DefaultLocalEndpoint.class.equals(launchInformation.getMaster()
+	private static boolean isLocalAdapter(LaunchInformation launchInformation) {
+		return LocalAdapter.class.equals(launchInformation.getAdapter()
 				.getClass());
 	}
 
-	private static List<LaunchInformation> handleLocalMaster(
+	private static List<LaunchInformation> handleLocalAdapter(
 			CommunicationConfiguration communicationConfiguration,
 			LaunchInformation launchInformation) {
 		List<LaunchInformation> finalLaunchInformations = new ArrayList<>();
@@ -85,9 +85,9 @@ public class DedicatedRemoteExecutableResolver {
 
 		for (WorkerConfiguration workerConfiguration : communicationConfiguration
 				.getWorkerConfigurations()) {
-			boolean isLocalWorkerEndpoint = DefaultLocalWorker.class
+			boolean isLocalWorker = LocalWorker.class
 					.equals(workerConfiguration.getWorker());
-			if (isLocalWorkerEndpoint) {
+			if (isLocalWorker) {
 				Integer count = workerConfiguration.getCount();
 				for (int i = 0; i < count; i++) {
 					finalLaunchInformations.add(launchInformation);

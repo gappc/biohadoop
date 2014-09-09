@@ -15,7 +15,7 @@ import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.master.kryo.KryoObjectRegistration;
+import at.ac.uibk.dps.biohadoop.communication.adapter.kryo.KryoObjectRegistration;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLaunchException;
 import at.ac.uibk.dps.biohadoop.queue.Task;
@@ -28,10 +28,10 @@ import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
-public class DefaultKryoWorker<R, T, S> implements WorkerEndpoint {
+public class KryoWorker<R, T, S> implements Worker {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(DefaultKryoWorker.class);
+			.getLogger(KryoWorker.class);
 
 	private final Map<String, WorkerData<R, T, S>> workerData = new ConcurrentHashMap<>();
 
@@ -84,7 +84,7 @@ public class DefaultKryoWorker<R, T, S> implements WorkerEndpoint {
 						if (inputMessage.getType() == MessageType.SHUTDOWN) {
 							LOG.info(
 									"############# {} Worker stopped ###############",
-									DefaultKryoWorker.class.getSimpleName());
+									KryoWorker.class.getSimpleName());
 							client.close();
 							latch.countDown();
 							return;

@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master.websocket;
+package at.ac.uibk.dps.biohadoop.communication.adapter.websocket;
 
 import java.io.IOException;
 
@@ -15,35 +15,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
-import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
-import at.ac.uibk.dps.biohadoop.communication.master.HandleMessageException;
-import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
-import at.ac.uibk.dps.biohadoop.communication.master.MasterException;
+import at.ac.uibk.dps.biohadoop.communication.adapter.Adapter;
+import at.ac.uibk.dps.biohadoop.communication.adapter.AdapterException;
+import at.ac.uibk.dps.biohadoop.communication.adapter.HandleMessageException;
+import at.ac.uibk.dps.biohadoop.communication.adapter.TaskConsumer;
 import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
 import at.ac.uibk.dps.biohadoop.queue.ShutdownException;
 import at.ac.uibk.dps.biohadoop.queue.Task;
-import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
-import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
-import at.ac.uibk.dps.biohadoop.queue.TaskException;
 import at.ac.uibk.dps.biohadoop.webserver.handler.DeployingClasses;
 
 @ServerEndpoint(value = "/{path}", encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
-public class DefaultWebSocketEndpoint<R, T, S> implements MasterEndpoint {
+public class WebSocketAdapter<R, T, S> implements Adapter {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(DefaultWebSocketEndpoint.class);
+			.getLogger(WebSocketAdapter.class);
 
-	private TaskEndpoint<?, ?, ?> taskEndpoint;
-	private DefaultMasterImpl<R, T, S> masterEndpoint;
+	private TaskConsumer<R, T, S> taskConsumer;
 	private boolean close = false;
 
 	@Override
 	public void configure(String settingName) {
-		DeployingClasses.addWebSocketClass(DefaultWebSocketEndpoint.class);
+		DeployingClasses.addWebSocketClass(WebSocketAdapter.class);
 	}
 
 	@Override
-	public void start() throws MasterException {
+	public void start() throws AdapterException {
 		// Nothing to do
 	}
 
@@ -59,7 +55,7 @@ public class DefaultWebSocketEndpoint<R, T, S> implements MasterEndpoint {
 		ShutdownWaitingService.register();
 
 		session.getRequestURI();
-		buildMasterEndpoint(path);
+		taskConsumer = new TaskConsumer<>(path);
 	}
 
 	@OnMessage
@@ -78,7 +74,7 @@ public class DefaultWebSocketEndpoint<R, T, S> implements MasterEndpoint {
 		}
 
 		try {
-			return masterEndpoint.handleMessage(inputMessage);
+			return taskConsumer.handleMessage(inputMessage);
 		} catch (HandleMessageException e) {
 			String errMsg = "Could not handle worker request";
 			LOG.error(errMsg, e);
@@ -96,12 +92,14 @@ public class DefaultWebSocketEndpoint<R, T, S> implements MasterEndpoint {
 	public void onClose(Session session) {
 		LOG.info("Closed Websocket connection to URI {}, sessionId={}",
 				session.getRequestURI(), session.getId());
-		Task<?> currentTask = masterEndpoint.getCurrentTask();
+		Task<?> currentTask = taskConsumer.getCurrentTask();
 		if (currentTask != null) {
 			try {
-				taskEndpoint.reschedule(currentTask.getTaskId());
-			} catch (TaskException | ShutdownException e) {
-				LOG.error("Error while closing WebSocket", e);
+				taskConsumer.reschedule(currentTask.getTaskId());
+			} catch (ShutdownException e) {
+				LOG.error(
+						"Error while rescheduling task {}, got ShutdownException",
+						currentTask.getTaskId(), e);
 			}
 		}
 		close = true;
@@ -110,21 +108,18 @@ public class DefaultWebSocketEndpoint<R, T, S> implements MasterEndpoint {
 
 	@OnError
 	public void onError(Session session, Throwable t) {
-		Task<?> currentTask = masterEndpoint.getCurrentTask();
+		Task<?> currentTask = taskConsumer.getCurrentTask();
 		LOG.error(
 				"Websocket error for URI {} and sessionId {}, affected task: {} ",
 				session.getRequestURI(), session.getId(), currentTask, t);
 		try {
-			taskEndpoint.reschedule(currentTask.getTaskId());
-		} catch (TaskException | ShutdownException e) {
-			LOG.error("Error while handling WebSocket error", e);
+			taskConsumer.reschedule(currentTask.getTaskId());
+		} catch (ShutdownException e) {
+			LOG.error(
+					"Error while handling WebSocket error, could not reschedule task {}, got ShutdownException",
+					currentTask.getTaskId(), e);
 		}
 		ShutdownWaitingService.unregister();
-	}
-
-	private void buildMasterEndpoint(String path) {
-		masterEndpoint = new DefaultMasterImpl<>(path);
-		taskEndpoint = new TaskEndpointImpl<>(path);
 	}
 
 }

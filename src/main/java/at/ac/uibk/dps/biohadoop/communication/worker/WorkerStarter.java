@@ -18,14 +18,14 @@ public class WorkerStarter {
 
 		try {
 			@SuppressWarnings("unchecked")
-			Class<? extends WorkerEndpoint> workerEndpointClass = (Class<? extends WorkerEndpoint>) Class
+			Class<? extends Worker> workerClass = (Class<? extends Worker>) Class
 					.forName(args[0]);
-			WorkerEndpoint workerEndpoint = workerEndpointClass.newInstance();
-			workerEndpoint.configure(args);
-			workerEndpoint.start();
+			Worker worker = workerClass.newInstance();
+			worker.configure(args);
+			worker.start();
 		} catch(ConnectionRefusedException e) {
 			LOG.error(
-					"Error while connecting to Master for Worker {}, exiting with status code 2",
+					"Error while connecting to Adapter for Worker {}, exiting with status code 2",
 					args[0], e);
 			System.exit(2);
 		} catch (Exception e) {

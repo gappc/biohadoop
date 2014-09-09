@@ -27,11 +27,11 @@ public class SimpleTaskSubmitter<R, T, S> implements TaskSubmitter<T, S> {
 	 * Creates a <tt>SimpleTaskSubmitter</tt>, that is capable of adding tasks
 	 * to the default task setting "DEFAULT_SETTING" with a queue named
 	 * "DEFAULT_SETTING". The class defined by <tt>communicationClass</tt> is
-	 * used when computing the result on a worker endpoint.
+	 * used when computing the result on a worker.
 	 * 
 	 * @param communicationClass
 	 *            defines the class that is used to compute the result of a task
-	 *            on a worker endpoint
+	 *            on a worker
 	 */
 	public SimpleTaskSubmitter(
 			Class<? extends RemoteExecutable<R, T, S>> communicationClass) {
@@ -42,15 +42,15 @@ public class SimpleTaskSubmitter<R, T, S> implements TaskSubmitter<T, S> {
 	 * Creates a <tt>SimpleTaskSubmitter</tt>, that is capable of adding tasks
 	 * to the default task setting "DEFAULT_SETTING" with a queue named
 	 * "DEFAULT_SETTING". The class defined by <tt>communicationClass</tt> is
-	 * used when computing the result on a worker endpoint. The
-	 * <tt>initialData</tt> is send to a worker endpoint when it first
-	 * encounters the <tt>communicationClass</tt> type of work.
+	 * used when computing the result on a worker. The <tt>initialData</tt> is
+	 * send to a worker when it first encounters the <tt>communicationClass</tt>
+	 * type of work.
 	 * 
 	 * @param communicationClass
 	 *            defines the class that is used to compute the result of a task
-	 *            on a worker endpoint
+	 *            on a worker
 	 * @param initialData
-	 *            is send to a worker endpoint when it first encounters the
+	 *            is send to a worker when it first encounters the
 	 *            <tt>communicationClass</tt> type of work.
 	 */
 	public SimpleTaskSubmitter(
@@ -64,19 +64,19 @@ public class SimpleTaskSubmitter<R, T, S> implements TaskSubmitter<T, S> {
 	 * to the task setting, that is identified by <tt>settingName</tt>. If the
 	 * <tt>settingName</tt> differs from the default task setting name
 	 * "DEFAULT_SETTING", it is considered a dedicated setting. Its jobs can
-	 * only be handled by master and worker endpoints, that are also part of
-	 * this setting. If you would like to use the default setting, consider
-	 * using {@link #SimpleTaskSubmitter(Class)}. The class defined by
+	 * only be handled by adapters and workers, that are also part of this
+	 * setting. If you would like to use the default setting, consider using
+	 * {@link #SimpleTaskSubmitter(Class)}. The class defined by
 	 * <tt>communicationClass</tt> is used when computing the result of a task
-	 * on a worker endpoint.
+	 * on a worker.
 	 * 
 	 * @param remoteExecutableClass
 	 *            defines the class that is used to compute the result of a task
-	 *            on a worker endpoint
+	 *            on a worker
 	 * @param settingName
 	 *            defines the name of the dedicated setting
 	 * @param initialData
-	 *            is send to a worker endpoint when it first encounters the
+	 *            is send to a worker when it first encounters the
 	 *            <tt>communicationClass</tt> type of work.
 	 */
 	public SimpleTaskSubmitter(

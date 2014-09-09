@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master.kryo;
+package at.ac.uibk.dps.biohadoop.communication.adapter.kryo;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -10,30 +10,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.Message;
-import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
-import at.ac.uibk.dps.biohadoop.communication.master.MasterException;
+import at.ac.uibk.dps.biohadoop.communication.adapter.AdapterException;
+import at.ac.uibk.dps.biohadoop.communication.adapter.TaskConsumer;
 import at.ac.uibk.dps.biohadoop.queue.ShutdownException;
 import at.ac.uibk.dps.biohadoop.queue.Task;
-import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
-import at.ac.uibk.dps.biohadoop.queue.TaskException;
 import at.ac.uibk.dps.biohadoop.utils.ZeroLock;
 
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
-public class DefaultKryoConnection<R, T, S> extends Listener {
+public class KryoConnection<R, T, S> extends Listener {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(DefaultKryoConnection.class);
+			.getLogger(KryoConnection.class);
 
-	private final Map<Connection, DefaultMasterImpl<R, T, S>> masters = new ConcurrentHashMap<>();
+	private final Map<Connection, TaskConsumer<R, T, S>> taskConsumers = new ConcurrentHashMap<>();
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();
 	private final ZeroLock zeroLock = new ZeroLock();
 
 	private final String settingName;
 
-	public DefaultKryoConnection(String settingName) {
+	public KryoConnection(String settingName) {
 		this.settingName = settingName;
 	}
 
@@ -49,8 +47,9 @@ public class DefaultKryoConnection<R, T, S> extends Listener {
 
 	public void connected(Connection connection) {
 		try {
-			DefaultMasterImpl<R, T, S> masterEndpoint = buildMaster();
-			masters.put(connection, masterEndpoint);
+			TaskConsumer<R, T, S> taskConsumer = new TaskConsumer<R, T, S>(
+					settingName);
+			taskConsumers.put(connection, taskConsumer);
 			zeroLock.increment();
 		} catch (Exception e) {
 			LOG.error("Could not start connection", e);
@@ -59,10 +58,9 @@ public class DefaultKryoConnection<R, T, S> extends Listener {
 
 	public void disconnected(Connection connection) {
 		zeroLock.decrement();
-		DefaultMasterImpl<R, T, S> masterEndpoint = masters.get(connection);
-		masters.remove(masterEndpoint);
-		Task<?> task = masterEndpoint.getCurrentTask();
-		reschedule(task);
+		TaskConsumer<R, T, S> taskConsumer = taskConsumers.get(connection);
+		taskConsumers.remove(taskConsumer);
+		rescheduleCurrentTask(taskConsumer);
 	}
 
 	public void received(final Connection connection, final Object object) {
@@ -72,42 +70,41 @@ public class DefaultKryoConnection<R, T, S> extends Listener {
 			executorService.submit(new Callable<Object>() {
 
 				@Override
-				public Object call() throws MasterException {
+				public Object call() throws AdapterException {
 					try {
-						DefaultMasterImpl<R, T, S> masterEndpoint = masters
+						TaskConsumer<R, T, S> taskConsumer = taskConsumers
 								.get(connection);
 
 						@SuppressWarnings("unchecked")
 						Message<S> inputMessage = (Message<S>) object;
-						Message<T> outputMessage = masterEndpoint
+						Message<T> outputMessage = taskConsumer
 								.handleMessage(inputMessage);
-						
+
 						connection.sendTCP(outputMessage);
 
 						return null;
 					} catch (Exception e) {
 						LOG.error("Error in communication", e);
-						throw new MasterException("Error in communication", e);
+						throw new AdapterException("Error in communication", e);
 					}
 				}
 			});
 		}
 	}
 
-	private DefaultMasterImpl<R, T, S> buildMaster() throws Exception {
-		return new DefaultMasterImpl<R, T, S>(settingName);
-	}
-	
-	private void reschedule(Task<?> task) {
+	private void rescheduleCurrentTask(TaskConsumer<?, ?, ?> taskConsumer) {
+		Task<?> task = taskConsumer.getCurrentTask();
 		if (task == null) {
 			LOG.error("Could not reschedule null task");
 			return;
 		}
 		try {
 			LOG.info("Trying to reschedule task {}", task);
-			new TaskEndpointImpl<>(settingName).reschedule(task.getTaskId());
-		} catch (TaskException | ShutdownException e) {
-			LOG.error("Error while rescheduling task", e);
+			taskConsumer.reschedule(task.getTaskId());
+		} catch (ShutdownException e) {
+			LOG.error(
+					"Error while rescheduling task {}, got ShutdownException",
+					task, e);
 		}
 	}
 

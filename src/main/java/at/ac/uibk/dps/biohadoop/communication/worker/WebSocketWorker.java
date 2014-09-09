@@ -34,18 +34,18 @@ import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
 import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketDecoder;
-import at.ac.uibk.dps.biohadoop.communication.master.websocket.WebSocketEncoder;
+import at.ac.uibk.dps.biohadoop.communication.adapter.websocket.WebSocketDecoder;
+import at.ac.uibk.dps.biohadoop.communication.adapter.websocket.WebSocketEncoder;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLaunchException;
 import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskId;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
 @ClientEndpoint(encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
-public class DefaultWebSocketWorker<R, T, S> implements WorkerEndpoint {
+public class WebSocketWorker<R, T, S> implements Worker {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(DefaultWebSocketWorker.class);
+			.getLogger(WebSocketWorker.class);
 
 	private final Map<String, WorkerData<R, T, S>> workerDatas = new ConcurrentHashMap<>();
 	private final CountDownLatch latch = new CountDownLatch(1);
@@ -56,7 +56,7 @@ public class DefaultWebSocketWorker<R, T, S> implements WorkerEndpoint {
 	private String path;
 	private Message<T> oldMessage;
 
-	public DefaultWebSocketWorker() {
+	public WebSocketWorker() {
 	}
 
 	@Override
@@ -80,7 +80,7 @@ public class DefaultWebSocketWorker<R, T, S> implements WorkerEndpoint {
 			container
 					.setDefaultMaxSessionIdleTimeout(ConnectionProperties.CONNECTION_TIMEOUT);
 
-			final DefaultWebSocketWorker<R, T, S> self = this;
+			final WebSocketWorker<R, T, S> self = this;
 			ExecutorService executor = Executors.newSingleThreadExecutor();
 			Future<Session> future = executor.submit(new Callable<Session>() {
 				@Override
@@ -128,7 +128,7 @@ public class DefaultWebSocketWorker<R, T, S> implements WorkerEndpoint {
 		LOG.info("Closed connection to URI {}, sessionId={}",
 				session.getRequestURI(), session.getId());
 		LOG.info("############# {} stopped #############",
-				DefaultWebSocketWorker.class.getSimpleName());
+				WebSocketWorker.class.getSimpleName());
 		latch.countDown();
 	}
 
@@ -144,7 +144,7 @@ public class DefaultWebSocketWorker<R, T, S> implements WorkerEndpoint {
 
 			if (inputMessage.getType() == MessageType.SHUTDOWN) {
 				LOG.info("############# {} Worker stopped ###############",
-						DefaultWebSocketWorker.class.getSimpleName());
+						WebSocketWorker.class.getSimpleName());
 				session.close();
 				return null;
 			}

@@ -8,7 +8,7 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.hadoop.launcher.MasterLauncher;
+import at.ac.uibk.dps.biohadoop.hadoop.launcher.AdapterLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.SolverLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WeldLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLauncher;
@@ -54,9 +54,9 @@ public class BiohadoopApplicationMaster {
 
 		WeldLauncher.startWeld();
 
-		MasterLauncher masterLauncher = new MasterLauncher(
+		AdapterLauncher adapterLauncher = new AdapterLauncher(
 				biohadoopConfiguration);
-		masterLauncher.startMasterEndpoints();
+		adapterLauncher.startAdapters();
 
 		List<Future<SolverId>> solvers = SolverLauncher
 				.launchSolver(biohadoopConfiguration);
@@ -86,7 +86,7 @@ public class BiohadoopApplicationMaster {
 		TaskQueueService.getInstance().stopAllTaskQueues();
 
 		LOG.info("Stopping all communication");
-		masterLauncher.stopMasterEndpoints();
+		adapterLauncher.stopAdapters();
 
 		WeldLauncher.stopWeld();
 	}

@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master.socket;
+package at.ac.uibk.dps.biohadoop.communication.adapter.socket;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -17,10 +17,10 @@ import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 import at.ac.uibk.dps.biohadoop.utils.PortFinder;
 
-public class DefaultSocketMasterConnectionHandler<R, T, S> implements Runnable {
+public class SocketConnectionHandler<R, T, S> implements Runnable {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(DefaultSocketMasterConnectionHandler.class);
+			.getLogger(SocketConnectionHandler.class);
 
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();
@@ -29,7 +29,7 @@ public class DefaultSocketMasterConnectionHandler<R, T, S> implements Runnable {
 	
 	private volatile boolean stop;
 
-	public DefaultSocketMasterConnectionHandler(String settingName) {
+	public SocketConnectionHandler(String settingName) {
 		this.settingName = settingName;
 	}
 
@@ -55,7 +55,7 @@ public class DefaultSocketMasterConnectionHandler<R, T, S> implements Runnable {
 			while (!stop) {
 				try {
 					Socket socket = serverSocket.accept();
-					DefaultSocketConnection<R, T, S> socketRunnable = new DefaultSocketConnection<>(socket, settingName);
+					SocketConnection<R, T, S> socketRunnable = new SocketConnection<>(socket, settingName);
 					Future<Object> future = executorService.submit(socketRunnable);
 					futures.add(future);
 				} catch (SocketTimeoutException e) {

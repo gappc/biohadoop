@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.MasterConfiguration;
+import at.ac.uibk.dps.biohadoop.communication.AdapterConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
-import at.ac.uibk.dps.biohadoop.communication.worker.WorkerEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.adapter.Adapter;
+import at.ac.uibk.dps.biohadoop.communication.worker.Worker;
 import at.ac.uibk.dps.biohadoop.queue.SimpleTaskSubmitter;
 import at.ac.uibk.dps.biohadoop.solver.SolverConfiguration;
 
@@ -64,7 +64,7 @@ public class BiohadoopConfiguration {
 	public static class Builder {
 		private List<String> libPaths = new ArrayList<>();
 		private List<SolverConfiguration> solverConfigurations = new ArrayList<>();;
-		private List<MasterConfiguration> dedicatedMasters = new ArrayList<>();
+		private List<AdapterConfiguration> dedicatedAdapters = new ArrayList<>();
 		private List<WorkerConfiguration> workerConfigurations = new ArrayList<>();
 		private Map<String, String> globalProperties = new HashMap<>();
 
@@ -78,23 +78,23 @@ public class BiohadoopConfiguration {
 			return this;
 		}
 
-		public Builder addDedicatedMaster(
-				Class<? extends MasterEndpoint> dedicatedMaster,
+		public Builder addDedicatedAdapter(
+				Class<? extends Adapter> dedicatedAdapter,
 				String settingName) {
-			MasterConfiguration masterConfiguration = new MasterConfiguration(
-					dedicatedMaster, settingName);
-			dedicatedMasters.add(masterConfiguration);
+			AdapterConfiguration adapterConfiguration = new AdapterConfiguration(
+					dedicatedAdapter, settingName);
+			dedicatedAdapters.add(adapterConfiguration);
 			return this;
 		}
 
-		public Builder addWorker(Class<? extends WorkerEndpoint> worker,
+		public Builder addWorker(Class<? extends Worker> worker,
 				int count) {
 			addDedicatedWorker(worker, SimpleTaskSubmitter.SETTING_NAME, count);
 			return this;
 		}
 
 		public Builder addDedicatedWorker(
-				Class<? extends WorkerEndpoint> worker,
+				Class<? extends Worker> worker,
 				String settingName,
 				int count) {
 			WorkerConfiguration workerConfiguration = new WorkerConfiguration(
@@ -110,7 +110,7 @@ public class BiohadoopConfiguration {
 
 		public BiohadoopConfiguration build() {
 			CommunicationConfiguration communicationConfiguration = new CommunicationConfiguration(
-					dedicatedMasters, workerConfigurations);
+					dedicatedAdapters, workerConfigurations);
 			return new BiohadoopConfiguration(libPaths, solverConfigurations,
 					communicationConfiguration, globalProperties);
 		}

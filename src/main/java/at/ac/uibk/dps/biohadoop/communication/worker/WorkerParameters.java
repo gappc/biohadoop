@@ -11,12 +11,12 @@ import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 
 public class WorkerParameters {
 
-	private final Class<? extends WorkerEndpoint> workerEnpoint;
+	private final Class<? extends Worker> workerEnpoint;
 	private final String settingName;
 	private final String host;
 	private final int port;
 
-	private WorkerParameters(Class<? extends WorkerEndpoint> workerEnpoint,
+	private WorkerParameters(Class<? extends Worker> workerEnpoint,
 			String settingName,
 			String host, int port) {
 		this.workerEnpoint = workerEnpoint;
@@ -25,7 +25,7 @@ public class WorkerParameters {
 		this.port = port;
 	}
 
-	public Class<? extends WorkerEndpoint> getWorkerEnpoint() {
+	public Class<? extends Worker> getWorkerEnpoint() {
 		return workerEnpoint;
 	}
 
@@ -66,9 +66,9 @@ public class WorkerParameters {
 			throw new WorkerException("Parameters are null");
 		}
 		try {
-			Class<? extends WorkerEndpoint> workerEndpoint = null;
+			Class<? extends Worker> workerClass = null;
 			if (args[0].length() > 0) {
-				workerEndpoint = (Class<? extends WorkerEndpoint>) Class
+				workerClass = (Class<? extends Worker>) Class
 						.forName(args[0]);
 			}
 			String settingName = null;
@@ -84,7 +84,7 @@ public class WorkerParameters {
 			Environment.setBiohadoopConfiguration(biohadoopConfiguration);
 			Environment.setBiohadoopConfigurationPath(args[4]);
 
-			return new WorkerParameters(workerEndpoint, settingName, host,
+			return new WorkerParameters(workerClass, settingName, host,
 					port);
 		} catch (Exception e) {
 			throw new WorkerException("Could not parse parameters "

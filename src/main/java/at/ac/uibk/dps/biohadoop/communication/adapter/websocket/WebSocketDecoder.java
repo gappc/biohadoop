@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master.websocket;
+package at.ac.uibk.dps.biohadoop.communication.adapter.websocket;
 
 import java.io.IOException;
 

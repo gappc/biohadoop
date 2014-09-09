@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master.kryo;
+package at.ac.uibk.dps.biohadoop.communication.adapter.kryo;
 
 import java.io.IOException;
 import java.util.Map;
@@ -6,8 +6,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
-import at.ac.uibk.dps.biohadoop.communication.master.MasterException;
+import at.ac.uibk.dps.biohadoop.communication.adapter.Adapter;
+import at.ac.uibk.dps.biohadoop.communication.adapter.AdapterException;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 import at.ac.uibk.dps.biohadoop.utils.KryoRegistrator;
@@ -16,37 +16,37 @@ import at.ac.uibk.dps.biohadoop.utils.PortFinder;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Server;
 
-public class DefaultKryoEndpoint implements MasterEndpoint {
+public class KryoAdapter implements Adapter {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(DefaultKryoEndpoint.class);
+			.getLogger(KryoAdapter.class);
 
 	private final Server server = new Server(64 * 1024, 64 * 1024);
 
 	private String settingName;
-	private DefaultKryoConnection<?, ?, ?> kryoServerEndpoint;
+	private KryoConnection<?, ?, ?> kryoConnection;
 
 	@Override
 	public void configure(String settingName) {
 		this.settingName = settingName;
-		kryoServerEndpoint = new DefaultKryoConnection<>(settingName);
+		kryoConnection = new KryoConnection<>(settingName);
 	}
 
 	@Override
-	public void start() throws MasterException {
+	public void start() throws AdapterException {
 		LOG.info("Starting Kryo server");
 		startServer();
-		server.addListener(kryoServerEndpoint);
+		server.addListener(kryoConnection);
 	}
 
 	@Override
 	public void stop() {
 		LOG.info("KryoServer waiting to shut down");
-		kryoServerEndpoint.stop();
+		kryoConnection.stop();
 		server.stop();
 	}
 
-	private void startServer() throws MasterException {
+	private void startServer() throws AdapterException {
 		new Thread(server).start();
 
 		String prefix = settingName;
@@ -57,7 +57,7 @@ public class DefaultKryoEndpoint implements MasterEndpoint {
 		try {
 			server.bind(port);
 		} catch (IOException e) {
-			throw new MasterException("Could not bin zu server " + host + ":"
+			throw new AdapterException("Could not bin zu server " + host + ":"
 					+ port);
 		}
 		PortFinder.releaseBindingLock();
@@ -73,7 +73,7 @@ public class DefaultKryoEndpoint implements MasterEndpoint {
 				settingName);
 	}
 
-	private void registerObjects(Kryo kryo) throws MasterException {
+	private void registerObjects(Kryo kryo) throws AdapterException {
 		KryoObjectRegistration.registerDefaultObjects(kryo);
 		Map<String, String> properties = Environment
 				.getBiohadoopConfiguration().getGlobalProperties();
@@ -92,7 +92,7 @@ public class DefaultKryoEndpoint implements MasterEndpoint {
 							.getRegistrationObjectsWithSerializer());
 				} catch (InstantiationException | IllegalAccessException
 						| ClassNotFoundException | NoClassDefFoundError e) {
-					throw new MasterException(
+					throw new AdapterException(
 							"Could not register objects for Kryo serialization, KryoRegistrator="
 									+ kryoRegistratorClassName, e);
 				}

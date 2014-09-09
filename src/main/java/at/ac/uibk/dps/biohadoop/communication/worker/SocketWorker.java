@@ -27,13 +27,13 @@ import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 import at.ac.uibk.dps.biohadoop.utils.convert.ConversionException;
 
-public class DefaultSocketWorker<R, T, S> implements WorkerEndpoint {
+public class SocketWorker<R, T, S> implements Worker {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(DefaultSocketWorker.class);
+			.getLogger(SocketWorker.class);
 
 	private static String className = ClassnameProvider
-			.getClassname(DefaultSocketWorker.class);
+			.getClassname(SocketWorker.class);
 
 	private final Map<String, WorkerData<R, T, S>> workerData = new ConcurrentHashMap<>();
 	private WorkerParameters parameters;

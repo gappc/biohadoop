@@ -5,57 +5,57 @@ import java.util.List;
 
 import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.master.kryo.DefaultKryoEndpoint;
-import at.ac.uibk.dps.biohadoop.communication.master.local.DefaultLocalEndpoint;
-import at.ac.uibk.dps.biohadoop.communication.master.rest.DefaultRestEndpoint;
-import at.ac.uibk.dps.biohadoop.communication.master.socket.DefaultSocketEndpoint;
-import at.ac.uibk.dps.biohadoop.communication.master.websocket.DefaultWebSocketEndpoint;
-import at.ac.uibk.dps.biohadoop.communication.worker.DefaultLocalWorker;
+import at.ac.uibk.dps.biohadoop.communication.adapter.kryo.KryoAdapter;
+import at.ac.uibk.dps.biohadoop.communication.adapter.local.LocalAdapter;
+import at.ac.uibk.dps.biohadoop.communication.adapter.rest.RestAdapter;
+import at.ac.uibk.dps.biohadoop.communication.adapter.socket.SocketAdapter;
+import at.ac.uibk.dps.biohadoop.communication.adapter.websocket.WebSocketAdapter;
+import at.ac.uibk.dps.biohadoop.communication.worker.LocalWorker;
 import at.ac.uibk.dps.biohadoop.queue.SimpleTaskSubmitter;
 
 public class DefaultRemoteExecutableResolver {
 
 	// TODO Consider CommunicationConfiguration, such that default values can be
 	// overridden
-	public static List<LaunchInformation> getDefaultEndpoints(
+	public static List<LaunchInformation> getDefaultAdapters(
 			CommunicationConfiguration communicationConfiguration) {
-		List<LaunchInformation> defaultEndpoints = new ArrayList<>();
+		List<LaunchInformation> launchInformations = new ArrayList<>();
 
 		LaunchInformation launchInformation = null;
 
-		defaultEndpoints.addAll(getLocalEndpoints(communicationConfiguration));
+		launchInformations.addAll(getLocalAdapters(communicationConfiguration));
 
-		launchInformation = new LaunchInformation(new DefaultKryoEndpoint(),
+		launchInformation = new LaunchInformation(new KryoAdapter(),
 				SimpleTaskSubmitter.SETTING_NAME);
-		defaultEndpoints.add(launchInformation);
+		launchInformations.add(launchInformation);
 
-		launchInformation = new LaunchInformation(new DefaultRestEndpoint<>(),
+		launchInformation = new LaunchInformation(new RestAdapter<>(),
 				SimpleTaskSubmitter.SETTING_NAME);
-		defaultEndpoints.add(launchInformation);
+		launchInformations.add(launchInformation);
 
-		launchInformation = new LaunchInformation(new DefaultSocketEndpoint(),
+		launchInformation = new LaunchInformation(new SocketAdapter(),
 				SimpleTaskSubmitter.SETTING_NAME);
-		defaultEndpoints.add(launchInformation);
+		launchInformations.add(launchInformation);
 
 		launchInformation = new LaunchInformation(
-				new DefaultWebSocketEndpoint<>(),
+				new WebSocketAdapter<>(),
 				SimpleTaskSubmitter.SETTING_NAME);
-		defaultEndpoints.add(launchInformation);
+		launchInformations.add(launchInformation);
 
-		return defaultEndpoints;
+		return launchInformations;
 	}
 
-	public static List<LaunchInformation> getLocalEndpoints(
+	public static List<LaunchInformation> getLocalAdapters(
 			CommunicationConfiguration communicationConfiguration) {
 		List<LaunchInformation> launchInformations = new ArrayList<LaunchInformation>();
 		for (WorkerConfiguration workerConfiguration : communicationConfiguration
 				.getWorkerConfigurations()) {
-			if (DefaultLocalWorker.class
+			if (LocalWorker.class
 					.equals(workerConfiguration.getWorker())) {
 				Integer count = workerConfiguration.getCount();
 				for (int i = 0; i < count; i++) {
 					launchInformations.add(new LaunchInformation(
-							new DefaultLocalEndpoint(),
+							new LocalAdapter(),
 							SimpleTaskSubmitter.SETTING_NAME));
 				}
 			}

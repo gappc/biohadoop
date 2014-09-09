@@ -114,6 +114,7 @@ public class WorkerLauncher {
 				LOG.info("Client command for container {}: {}", container.getId(), clientCommand);
 				ctx.setCommands(Collections.singletonList(clientCommand));
 
+				// TODO SEVERE take path from configuration
 				String libPath = "hdfs://master:54310/biohadoop/lib/";
 				Map<String, LocalResource> jars = LocalResourceBuilder
 						.getStandardResources(libPath, yarnConfiguration);

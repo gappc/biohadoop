@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master;
+package at.ac.uibk.dps.biohadoop.communication.adapter;
 
 public class HandleMessageException extends Exception {
 

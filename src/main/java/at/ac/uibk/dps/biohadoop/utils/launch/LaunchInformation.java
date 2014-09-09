@@ -1,19 +1,19 @@
 package at.ac.uibk.dps.biohadoop.utils.launch;
 
-import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.adapter.Adapter;
 
 public class LaunchInformation {
 
-	private final MasterEndpoint master;
+	private final Adapter adapter;
 	private final String settingName;
 
-	public LaunchInformation(MasterEndpoint master, String settingName) {
-		this.master = master;
+	public LaunchInformation(Adapter adapter, String settingName) {
+		this.adapter = adapter;
 		this.settingName = settingName;
 	}
 
-	public MasterEndpoint getMaster() {
-		return master;
+	public Adapter getAdapter() {
+		return adapter;
 	}
 
 	public String getSettingName() {
@@ -23,8 +23,8 @@ public class LaunchInformation {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(", MasterEndpoint=")
-				.append(master.getClass().getCanonicalName())
+		sb.append(", adapter=")
+				.append(adapter.getClass().getCanonicalName())
 				.append(", setting name=").append(settingName);
 		return sb.toString();
 	}

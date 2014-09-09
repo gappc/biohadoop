@@ -1,17 +1,17 @@
 package at.ac.uibk.dps.biohadoop.communication;
 
-import at.ac.uibk.dps.biohadoop.communication.worker.WorkerEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.worker.Worker;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class WorkerConfiguration {
 
-	private final Class<? extends WorkerEndpoint> worker;
+	private final Class<? extends Worker> worker;
 	private final String settingName;
 	private final Integer count;
 
-	public WorkerConfiguration(Class<? extends WorkerEndpoint> worker,
+	public WorkerConfiguration(Class<? extends Worker> worker,
 			String settingName,
 			Integer count) {
 		this.worker = worker;
@@ -21,13 +21,13 @@ public class WorkerConfiguration {
 
 	@JsonCreator
 	public static WorkerConfiguration create(
-			@JsonProperty("worker") Class<? extends WorkerEndpoint> worker,
+			@JsonProperty("worker") Class<? extends Worker> worker,
 			@JsonProperty("settingName") String settingName,
 			@JsonProperty("count") Integer count) {
 		return new WorkerConfiguration(worker, settingName, count);
 	}
 
-	public Class<? extends WorkerEndpoint> getWorker() {
+	public Class<? extends Worker> getWorker() {
 		return worker;
 	}
 
@@ -41,10 +41,10 @@ public class WorkerConfiguration {
 
 	@Override
 	public String toString() {
-		String workerClass = worker != null ? worker.getCanonicalName() : null;
+		String workerClassname = worker != null ? worker.getCanonicalName() : null;
 
 		StringBuilder sb = new StringBuilder();
-		sb.append("WorkerEndpoint=").append(workerClass);
+		sb.append("worker=").append(workerClassname);
 		sb.append(" setting name=").append(settingName);
 		sb.append(" Count=").append(count);
 		return sb.toString();

@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master.rest;
+package at.ac.uibk.dps.biohadoop.communication.adapter.rest;
 
 import java.io.IOException;
 import java.util.Map;
@@ -18,13 +18,11 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.communication.ClassNameWrappedTask;
 import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
-import at.ac.uibk.dps.biohadoop.communication.master.DefaultMasterImpl;
-import at.ac.uibk.dps.biohadoop.communication.master.HandleMessageException;
-import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
+import at.ac.uibk.dps.biohadoop.communication.adapter.Adapter;
+import at.ac.uibk.dps.biohadoop.communication.adapter.HandleMessageException;
+import at.ac.uibk.dps.biohadoop.communication.adapter.TaskConsumer;
 import at.ac.uibk.dps.biohadoop.queue.ShutdownException;
-import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
-import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
-import at.ac.uibk.dps.biohadoop.queue.TaskException;
+import at.ac.uibk.dps.biohadoop.queue.Task;
 import at.ac.uibk.dps.biohadoop.queue.TaskId;
 import at.ac.uibk.dps.biohadoop.utils.convert.ConversionException;
 import at.ac.uibk.dps.biohadoop.utils.convert.MessageConverter;
@@ -34,16 +32,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Path("/")
 @Dependent
-public class DefaultRestEndpoint<R, T, S> implements MasterEndpoint {
+public class RestAdapter<R, T, S> implements Adapter {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(DefaultRestEndpoint.class);
-	private static final Map<String, DefaultMasterImpl<?, ?, ?>> MASTERS = new ConcurrentHashMap<>();
+			.getLogger(RestAdapter.class);
+	private static final Map<String, TaskConsumer<?, ?, ?>> TASK_CONSUMERS = new ConcurrentHashMap<>();
 
 	public void configure(String settingName) {
-		DefaultMasterImpl<?, ?, ?> master = new DefaultMasterImpl<>(settingName);
-		MASTERS.put(settingName, master);
-		DeployingClasses.addRestfulClass(DefaultRestEndpoint.class);
+		TaskConsumer<?, ?, ?> taskConsumer = new TaskConsumer<>(settingName);
+		TASK_CONSUMERS.put(settingName, taskConsumer);
+		DeployingClasses.addRestfulClass(RestAdapter.class);
 	}
 
 	public void start() {
@@ -65,8 +63,8 @@ public class DefaultRestEndpoint<R, T, S> implements MasterEndpoint {
 
 		Message<T> outputMessage = null;
 		try {
-			DefaultMasterImpl<R, T, S> masterEndpoint = getMasterEndpoint(path);
-			outputMessage = masterEndpoint.handleMessage(inputMessage);
+			TaskConsumer<R, T, S> taskConsumer = getTaskConsumer(path);
+			outputMessage = taskConsumer.handleMessage(inputMessage);
 		} catch (HandleMessageException e) {
 			LOG.error("Could not handle worker request {}", inputMessage, e);
 		}
@@ -77,8 +75,8 @@ public class DefaultRestEndpoint<R, T, S> implements MasterEndpoint {
 	@Path("{path}/workinit")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Message<T> workinit(@PathParam("path") String path) {
-		DefaultMasterImpl<R, T, S> masterEndpoint = getMasterEndpoint(path);
-		if (masterEndpoint == null) {
+		TaskConsumer<R, T, S> taskConsumer = getTaskConsumer(path);
+		if (taskConsumer == null) {
 			return new Message<>(MessageType.ERROR, null);
 		}
 		Message<S> inputMessage = new Message<>(MessageType.WORK_INIT_REQUEST,
@@ -86,7 +84,7 @@ public class DefaultRestEndpoint<R, T, S> implements MasterEndpoint {
 
 		Message<T> outputMessage = null;
 		try {
-			outputMessage = masterEndpoint.handleMessage(inputMessage);
+			outputMessage = taskConsumer.handleMessage(inputMessage);
 		} catch (HandleMessageException e) {
 			LOG.error("Could not handle worker request {}", inputMessage, e);
 		}
@@ -97,40 +95,47 @@ public class DefaultRestEndpoint<R, T, S> implements MasterEndpoint {
 	@Path("{path}/work")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Message<T> work(@PathParam("path") String path, String message) {
-		DefaultMasterImpl<R, T, S> masterEndpoint = getMasterEndpoint(path);
+		TaskConsumer<R, T, S> taskConsumer = getTaskConsumer(path);
 		Message<T> outputMessage = null;
 		try {
 			Message<S> inputMessage = MessageConverter
 					.getTypedMessageForMethod(message, "compute", -1);
-			outputMessage = masterEndpoint.handleMessage(inputMessage);
+			outputMessage = taskConsumer.handleMessage(inputMessage);
 		} catch (ConversionException e) {
 			LOG.error("Error while converting String to Message", e);
-			tryReschedule(path, message);
+			rescheduleCurrentTask(taskConsumer, message);
 		} catch (HandleMessageException e) {
 			LOG.error("Could not handle worker request {}", message, e);
-			tryReschedule(path, message);
+			rescheduleCurrentTask(taskConsumer, message);
 		}
 		return outputMessage;
 	}
 
 	@SuppressWarnings("unchecked")
-	private DefaultMasterImpl<R, T, S> getMasterEndpoint(String path) {
-		return (DefaultMasterImpl<R, T, S>) MASTERS.get(path);
+	private TaskConsumer<R, T, S> getTaskConsumer(String path) {
+		return (TaskConsumer<R, T, S>) TASK_CONSUMERS.get(path);
 	}
 
-	private void tryReschedule(String settingName, String message) {
+	private void rescheduleCurrentTask(TaskConsumer<?, ?, ?> taskConsumer,
+			String message) {
 		ObjectMapper objectMapper = new ObjectMapper();
+		Task<?> task = null;
 		try {
 			Message<?> rescheduleMessage = objectMapper.readValue(message,
 					Message.class);
+			task = rescheduleMessage.getTask();
 
-			TaskEndpoint<?, ?, ?> taskEndpoint = new TaskEndpointImpl<>(
-					settingName);
-			taskEndpoint.reschedule(rescheduleMessage.getTask().getTaskId());
+			if (task == null) {
+				LOG.error("Could not reschedule null task");
+				return;
+			}
+			taskConsumer.reschedule(task.getTaskId());
 		} catch (IOException e) {
 			LOG.error("Could not reschedule task", e);
-		} catch (TaskException | ShutdownException e) {
-			LOG.error("Error while rescheduling task", e);
+		} catch (ShutdownException e) {
+			LOG.error(
+					"Error while rescheduling task {}, got ShutdownException",
+					task.getTaskId(), e);
 		}
 	}
 

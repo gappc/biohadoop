@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.communication.master;
+package at.ac.uibk.dps.biohadoop.communication.adapter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,21 +8,24 @@ import at.ac.uibk.dps.biohadoop.communication.Message;
 import at.ac.uibk.dps.biohadoop.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.queue.ShutdownException;
 import at.ac.uibk.dps.biohadoop.queue.Task;
-import at.ac.uibk.dps.biohadoop.queue.TaskEndpoint;
-import at.ac.uibk.dps.biohadoop.queue.TaskEndpointImpl;
 import at.ac.uibk.dps.biohadoop.queue.TaskException;
 import at.ac.uibk.dps.biohadoop.queue.TaskId;
+import at.ac.uibk.dps.biohadoop.queue.TaskQueue;
+import at.ac.uibk.dps.biohadoop.queue.TaskQueueService;
 
-public class DefaultMasterImpl<R, T, S> {
+public class TaskConsumer<R, T, S> {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(DefaultMasterImpl.class);
+			.getLogger(TaskConsumer.class);
 
-	private final TaskEndpoint<R, T, S> taskEndpoint;
+	private final String settingName;
+	private final TaskQueue<R, T, S> taskQueue;
 	private Task<T> currentTask = null;
 
-	public DefaultMasterImpl(String settingName) {
-		taskEndpoint = new TaskEndpointImpl<>(settingName);
+	public TaskConsumer(String settingName) {
+		this.settingName = settingName;
+		taskQueue = TaskQueueService.getInstance().<R, T, S> getTaskQueue(
+				settingName);
 	}
 
 	public Message<T> handleMessage(Message<S> inputMessage)
@@ -45,7 +48,36 @@ public class DefaultMasterImpl<R, T, S> {
 		LOG.error(errMsg);
 		throw new HandleMessageException(errMsg);
 	}
+	
+	public R getInitialData(TaskId taskId) throws TaskException {
+		return taskQueue.getInitialData(taskId);
+	}
 
+	public Task<T> getCurrentTask() {
+		return (Task<T>) currentTask;
+	}
+	
+	public void reschedule(TaskId taskId) throws ShutdownException {
+		try {
+			taskQueue.reschedule(taskId);
+		} catch (InterruptedException e) {
+			throw new ShutdownException("Got interrupted while rescheduling task "
+					+ taskId + " to queue " + settingName);
+		} catch (TaskException e) {
+			LOG.error("Could nor reschedule task {}", taskId, e);
+		}
+	}
+
+	public void storeResult(TaskId taskId, S data) throws TaskException,
+			ShutdownException {
+		try {
+			taskQueue.storeResult(taskId, data);
+		} catch (TaskException e) {
+			throw new ShutdownException("Error while storing task " + taskId
+					+ " to queue " + settingName);
+		}
+	}
+	
 	private Message<R> getInitialData(Message<S> inputMessage)
 			throws HandleMessageException {
 		LOG.info("Got registration request");
@@ -67,33 +99,27 @@ public class DefaultMasterImpl<R, T, S> {
 			throws HandleMessageException {
 		Task<S> task = inputMessage.getTask();
 		try {
-			taskEndpoint.storeResult(task.getTaskId(), task.getData());
+			taskQueue.storeResult(task.getTaskId(), task.getData());
 		} catch (TaskException e) {
 			throw new HandleMessageException(
 					"Error while storing result for message {}" + inputMessage);
-		} catch (ShutdownException e) {
-			throw new HandleMessageException(
-					"Got ShutdownException, assuming this means to stop stopping work");
 		}
 	}
 
 	private Message<T> getWorkResponse() {
 		try {
-			Task<T> task = taskEndpoint.getTask();
+			Task<T> task = taskQueue.getTask();
 			currentTask = task;
 			return new Message<>(MessageType.WORK_INIT_RESPONSE, task);
-		} catch (TaskException | ShutdownException e) {
-			LOG.debug("Got TaskException, assuming this means to stop stopping work");
+		} catch (InterruptedException e) {
+			LOG.debug("Got InterruptedException, assuming this means to stop stopping work");
 			currentTask = null;
 			return new Message<>(MessageType.SHUTDOWN, null);
 		}
 	}
 
 	private R readInitialData(TaskId taskId) throws TaskException {
-		return taskEndpoint.getInitialData(taskId);
+		return taskQueue.getInitialData(taskId);
 	}
 
-	public Task<T> getCurrentTask() {
-		return (Task<T>) currentTask;
-	}
 }

@@ -7,75 +7,75 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.master.MasterEndpoint;
-import at.ac.uibk.dps.biohadoop.communication.master.MasterException;
+import at.ac.uibk.dps.biohadoop.communication.adapter.Adapter;
+import at.ac.uibk.dps.biohadoop.communication.adapter.AdapterException;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
 import at.ac.uibk.dps.biohadoop.utils.launch.DedicatedRemoteExecutableResolver;
 import at.ac.uibk.dps.biohadoop.utils.launch.DefaultRemoteExecutableResolver;
 import at.ac.uibk.dps.biohadoop.utils.launch.LaunchInformation;
-import at.ac.uibk.dps.biohadoop.utils.launch.ResolveDedicatedEndpointException;
+import at.ac.uibk.dps.biohadoop.utils.launch.ResolveDedicatedAdapterException;
 import at.ac.uibk.dps.biohadoop.webserver.StartServerException;
 import at.ac.uibk.dps.biohadoop.webserver.UndertowServer;
 
-public class MasterLauncher {
+public class AdapterLauncher {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(MasterLauncher.class);
+			.getLogger(AdapterLauncher.class);
 
 	private final CommunicationConfiguration communicationConfiguration;
 	private final List<LaunchInformation> launchInformations = new ArrayList<>();
 	private UndertowServer undertowServer;
 
-	public MasterLauncher(BiohadoopConfiguration config) {
+	public AdapterLauncher(BiohadoopConfiguration config) {
 		communicationConfiguration = config.getCommunicationConfiguration();
 	}
 
-	public void startMasterEndpoints() throws MasterException {
+	public void startAdapters() throws AdapterException {
 		try {
-			LOG.info("Adding default endpoints");
+			LOG.info("Adding default adapters");
 			launchInformations.addAll(DefaultRemoteExecutableResolver
-					.getDefaultEndpoints(communicationConfiguration));
+					.getDefaultAdapters(communicationConfiguration));
 
-			LOG.info("Adding dedicated endpoints");
+			LOG.info("Adding dedicated adapters");
 			launchInformations.addAll(DedicatedRemoteExecutableResolver
-					.getDedicatedEndpoints(communicationConfiguration));
+					.getDedicatedAdapters(communicationConfiguration));
 
 			if (launchInformations.size() == 0) {
-				LOG.warn("No usable endpoints found, maybe default endpoints are overwritten in config file?");
+				LOG.warn("No usable adapters found, maybe default adapters are overwritten in config file?");
 			}
 
-			LOG.info("Configuring endpoints");
+			LOG.info("Configuring adapters");
 			for (LaunchInformation launchInformation : launchInformations) {
-				LOG.debug("Configuring endpoint {}", launchInformation);
-				MasterEndpoint master = launchInformation.getMaster();
+				LOG.debug("Configuring adapter {}", launchInformation);
+				Adapter adapter = launchInformation.getAdapter();
 				String settingName = launchInformation.getSettingName();
-				master.configure(settingName);
+				adapter.configure(settingName);
 			}
 
 			undertowServer = new UndertowServer();
 			undertowServer.start();
 
-			LOG.info("Starting endpoints");
+			LOG.info("Starting adapters");
 			for (LaunchInformation launchInformation : launchInformations) {
-				LOG.debug("Starting endpoint {}", launchInformation);
-				MasterEndpoint master = launchInformation.getMaster();
-				master.start();
+				LOG.debug("Starting adapter {}", launchInformation);
+				Adapter adapter = launchInformation.getAdapter();
+				adapter.start();
 			}
 		} catch (StartServerException e) {
-			throw new MasterException(e);
-		} catch (ResolveDedicatedEndpointException e) {
-			throw new MasterException(e);
+			throw new AdapterException(e);
+		} catch (ResolveDedicatedAdapterException e) {
+			throw new AdapterException(e);
 		}
 	}
 
-	// TODO: what happens if any endpoint throws exception?
-	public void stopMasterEndpoints() throws Exception {
-		LOG.info("Stopping endpoints");
+	// TODO: what happens if any adapter throws exception?
+	public void stopAdapters() throws Exception {
+		LOG.info("Stopping adapters");
 		for (LaunchInformation launchInformation : launchInformations) {
-			LOG.debug("Stopping endpoint {}", launchInformation);
-			MasterEndpoint master = launchInformation.getMaster();
-			master.stop();
+			LOG.debug("Stopping adapter {}", launchInformation);
+			Adapter adapter = launchInformation.getAdapter();
+			adapter.stop();
 		}
 		ShutdownWaitingService.await();
 		undertowServer.stop();
