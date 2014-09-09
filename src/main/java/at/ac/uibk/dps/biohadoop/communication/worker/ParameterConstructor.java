@@ -1,6 +1,5 @@
 package at.ac.uibk.dps.biohadoop.communication.worker;
 
-import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLaunchException;
 

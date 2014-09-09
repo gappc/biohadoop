@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.communication.ClassNameWrappedTask;
 import at.ac.uibk.dps.biohadoop.communication.ComputeException;
 import at.ac.uibk.dps.biohadoop.communication.RemoteExecutable;
-import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLaunchException;
 import at.ac.uibk.dps.biohadoop.queue.TaskException;
 import at.ac.uibk.dps.biohadoop.queue.TaskQueue;

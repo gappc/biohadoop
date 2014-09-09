@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.adapter.kryo.KryoAdapter;
 import at.ac.uibk.dps.biohadoop.communication.adapter.local.LocalAdapter;
 import at.ac.uibk.dps.biohadoop.communication.adapter.rest.RestAdapter;
 import at.ac.uibk.dps.biohadoop.communication.adapter.socket.SocketAdapter;
 import at.ac.uibk.dps.biohadoop.communication.adapter.websocket.WebSocketAdapter;
 import at.ac.uibk.dps.biohadoop.communication.worker.LocalWorker;
+import at.ac.uibk.dps.biohadoop.communication.worker.WorkerConfiguration;
 import at.ac.uibk.dps.biohadoop.queue.SimpleTaskSubmitter;
 
 public class DefaultRemoteExecutableResolver {

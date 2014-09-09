@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.WorkerConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.adapter.Adapter;
 import at.ac.uibk.dps.biohadoop.communication.adapter.AdapterConfiguration;
 import at.ac.uibk.dps.biohadoop.communication.worker.Worker;
+import at.ac.uibk.dps.biohadoop.communication.worker.WorkerConfiguration;
 import at.ac.uibk.dps.biohadoop.queue.SimpleTaskSubmitter;
 import at.ac.uibk.dps.biohadoop.solver.SolverConfiguration;
 
