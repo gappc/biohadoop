@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.handler.persistence.file;
+package at.ac.uibk.dps.biohadoop.persistence;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;

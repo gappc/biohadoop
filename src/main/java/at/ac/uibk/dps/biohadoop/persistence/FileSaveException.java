@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.handler.persistence.file;
+package at.ac.uibk.dps.biohadoop.persistence;
 
 public class FileSaveException extends Exception {
 
