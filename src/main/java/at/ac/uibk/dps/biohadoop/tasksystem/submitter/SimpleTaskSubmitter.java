@@ -21,7 +21,7 @@ import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueueService;
  */
 public class SimpleTaskSubmitter<R, T, S> implements TaskSubmitter<T, S> {
 
-	public static final String SETTING_NAME = "DEFAULT_SETTING";
+	public static final String PIPELINE_NAME = "DEFAULT_PIPELINE";
 
 	private final TaskQueue<R, T, S> taskQueue;
 	private final String remoteExecutableClassName;
@@ -29,9 +29,9 @@ public class SimpleTaskSubmitter<R, T, S> implements TaskSubmitter<T, S> {
 
 	/**
 	 * Creates a <tt>SimpleTaskSubmitter</tt>, that is capable of adding tasks
-	 * to the default task setting "DEFAULT_SETTING" with a queue named
-	 * "DEFAULT_SETTING". The class defined by <tt>communicationClass</tt> is
-	 * used when computing the result on a worker.
+	 * to the default task pipeline {@value #PIPELINE_NAME} with a queue named
+	 * {@value #PIPELINE_NAME}. The class defined by <tt>communicationClass</tt>
+	 * is used when computing the result on a worker.
 	 * 
 	 * @param communicationClass
 	 *            defines the class that is used to compute the result of a task
@@ -39,16 +39,16 @@ public class SimpleTaskSubmitter<R, T, S> implements TaskSubmitter<T, S> {
 	 */
 	public SimpleTaskSubmitter(
 			Class<? extends RemoteExecutable<R, T, S>> communicationClass) {
-		this(communicationClass, SETTING_NAME, null);
+		this(communicationClass, PIPELINE_NAME, null);
 	}
 
 	/**
 	 * Creates a <tt>SimpleTaskSubmitter</tt>, that is capable of adding tasks
-	 * to the default task setting "DEFAULT_SETTING" with a queue named
-	 * "DEFAULT_SETTING". The class defined by <tt>communicationClass</tt> is
-	 * used when computing the result on a worker. The <tt>initialData</tt> is
-	 * send to a worker when it first encounters the <tt>communicationClass</tt>
-	 * type of work.
+	 * to the default task pipeline {@value #PIPELINE_NAME} with a queue named
+	 * {@value #PIPELINE_NAME}. The class defined by <tt>communicationClass</tt>
+	 * is used when computing the result on a worker. The <tt>initialData</tt>
+	 * is send to a worker when it first encounters the
+	 * <tt>communicationClass</tt> type of work.
 	 * 
 	 * @param communicationClass
 	 *            defines the class that is used to compute the result of a task
@@ -60,16 +60,16 @@ public class SimpleTaskSubmitter<R, T, S> implements TaskSubmitter<T, S> {
 	public SimpleTaskSubmitter(
 			Class<? extends RemoteExecutable<R, T, S>> communicationClass,
 			R initialData) {
-		this(communicationClass, SETTING_NAME, initialData);
+		this(communicationClass, PIPELINE_NAME, initialData);
 	}
 
 	/**
 	 * Creates a <tt>SimpleTaskSubmitter</tt>, that is capable of adding tasks
-	 * to the task setting, that is identified by <tt>settingName</tt>. If the
-	 * <tt>settingName</tt> differs from the default task setting name
-	 * "DEFAULT_SETTING", it is considered a dedicated setting. Its jobs can
-	 * only be handled by adapters and workers, that are also part of this
-	 * setting. If you would like to use the default setting, consider using
+	 * to the task pipeline, that is identified by <tt>pipelineName</tt>. If the
+	 * <tt>pipelineName</tt> differs from the default task pipeline name
+	 * {@value #PIPELINE_NAME}, it is considered a dedicated pipeline. Its jobs
+	 * can only be handled by adapters and workers, that are also part of this
+	 * pipeline. If you would like to use the default pipeline, consider using
 	 * {@link #SimpleTaskSubmitter(Class)}. The class defined by
 	 * <tt>communicationClass</tt> is used when computing the result of a task
 	 * on a worker.
@@ -77,17 +77,17 @@ public class SimpleTaskSubmitter<R, T, S> implements TaskSubmitter<T, S> {
 	 * @param remoteExecutableClass
 	 *            defines the class that is used to compute the result of a task
 	 *            on a worker
-	 * @param settingName
-	 *            defines the name of the dedicated setting
+	 * @param pipelineName
+	 *            defines the name of the dedicated pipeline
 	 * @param initialData
 	 *            is send to a worker when it first encounters the
 	 *            <tt>communicationClass</tt> type of work.
 	 */
 	public SimpleTaskSubmitter(
 			Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass,
-			String settingName, R initialData) {
+			String pipelineName, R initialData) {
 		taskQueue = TaskQueueService.getInstance().<R, T, S> getTaskQueue(
-				settingName);
+				pipelineName);
 		this.remoteExecutableClassName = remoteExecutableClass
 				.getCanonicalName();
 		// TODO copy object to prevent user from (accidentially) changing the

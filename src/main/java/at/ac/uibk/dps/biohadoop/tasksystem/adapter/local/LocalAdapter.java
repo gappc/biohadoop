@@ -21,11 +21,11 @@ public class LocalAdapter implements Adapter {
 	private LocalWorker<?, ?, ?> localWorker;
 
 	@Override
-	public void configure(String settingName)
+	public void configure(String pipelineName)
 			throws AdapterException {
 		localWorker = new LocalWorker<>();
 		try {
-			localWorker.configure(new String[] { settingName });
+			localWorker.configure(new String[] { pipelineName });
 		} catch (WorkerException e) {
 			throw new AdapterException("Could not configure local worker", e);
 		}

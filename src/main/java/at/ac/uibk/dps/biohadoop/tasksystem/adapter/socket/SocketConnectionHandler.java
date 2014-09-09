@@ -25,12 +25,12 @@ public class SocketConnectionHandler<R, T, S> implements Runnable {
 	private final ExecutorService executorService = Executors
 			.newCachedThreadPool();
 	private final List<Future<Object>> futures = new ArrayList<>();
-	private String settingName;
+	private String pipelineName;
 	
 	private volatile boolean stop;
 
-	public SocketConnectionHandler(String settingName) {
-		this.settingName = settingName;
+	public SocketConnectionHandler(String pipelineName) {
+		this.pipelineName = pipelineName;
 	}
 
 	@Override
@@ -43,11 +43,11 @@ public class SocketConnectionHandler<R, T, S> implements Runnable {
 			ServerSocket serverSocket = new ServerSocket(port);
 			PortFinder.releaseBindingLock();
 			
-			Environment.setPrefixed(settingName, Environment.SOCKET_HOST, host);
-			Environment.setPrefixed(settingName, Environment.SOCKET_PORT,
+			Environment.setPrefixed(pipelineName, Environment.SOCKET_HOST, host);
+			Environment.setPrefixed(pipelineName, Environment.SOCKET_PORT,
 					Integer.toString(port));
 
-			LOG.info("host: {} port: {} setting: {}", HostInfo.getHostname(), port, settingName);
+			LOG.info("host: {} port: {} pipeline: {}", HostInfo.getHostname(), port, pipelineName);
 
 			int socketTimeout = 2000;
 			serverSocket.setSoTimeout(socketTimeout);
@@ -55,7 +55,7 @@ public class SocketConnectionHandler<R, T, S> implements Runnable {
 			while (!stop) {
 				try {
 					Socket socket = serverSocket.accept();
-					SocketConnection<R, T, S> socketRunnable = new SocketConnection<>(socket, settingName);
+					SocketConnection<R, T, S> socketRunnable = new SocketConnection<>(socket, pipelineName);
 					Future<Object> future = executorService.submit(socketRunnable);
 					futures.add(future);
 				} catch (SocketTimeoutException e) {

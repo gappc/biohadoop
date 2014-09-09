@@ -5,19 +5,19 @@ import at.ac.uibk.dps.biohadoop.tasksystem.adapter.Adapter;
 public class LaunchInformation {
 
 	private final Adapter adapter;
-	private final String settingName;
+	private final String pipelineName;
 
-	public LaunchInformation(Adapter adapter, String settingName) {
+	public LaunchInformation(Adapter adapter, String pipelineName) {
 		this.adapter = adapter;
-		this.settingName = settingName;
+		this.pipelineName = pipelineName;
 	}
 
 	public Adapter getAdapter() {
 		return adapter;
 	}
 
-	public String getSettingName() {
-		return settingName;
+	public String getPipelineName() {
+		return pipelineName;
 	}
 
 	@Override
@@ -25,7 +25,7 @@ public class LaunchInformation {
 		StringBuilder sb = new StringBuilder();
 		sb.append(", adapter=")
 				.append(adapter.getClass().getCanonicalName())
-				.append(", setting name=").append(settingName);
+				.append(", pipelineName=").append(pipelineName);
 		return sb.toString();
 	}
 

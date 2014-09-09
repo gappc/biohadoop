@@ -38,9 +38,9 @@ public class RestAdapter<R, T, S> implements Adapter {
 			.getLogger(RestAdapter.class);
 	private static final Map<String, TaskConsumer<?, ?, ?>> TASK_CONSUMERS = new ConcurrentHashMap<>();
 
-	public void configure(String settingName) {
-		TaskConsumer<?, ?, ?> taskConsumer = new TaskConsumer<>(settingName);
-		TASK_CONSUMERS.put(settingName, taskConsumer);
+	public void configure(String pipelineName) {
+		TaskConsumer<?, ?, ?> taskConsumer = new TaskConsumer<>(pipelineName);
+		TASK_CONSUMERS.put(pipelineName, taskConsumer);
 		DeployingClasses.addRestfulClass(RestAdapter.class);
 	}
 

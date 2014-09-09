@@ -67,7 +67,7 @@ public class WebSocketWorker<R, T, S> implements Worker {
 	@Override
 	public void configure(String[] args) throws WorkerException {
 		parameters = WorkerParameters.getParameters(args);
-		path = parameters.getSettingName();
+		path = parameters.getPipelineName();
 	}
 
 	public void start() throws WorkerException, ConnectionRefusedException {

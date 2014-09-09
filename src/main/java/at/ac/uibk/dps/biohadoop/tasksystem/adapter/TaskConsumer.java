@@ -18,14 +18,14 @@ public class TaskConsumer<R, T, S> {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(TaskConsumer.class);
 
-	private final String settingName;
+	private final String pipelineName;
 	private final TaskQueue<R, T, S> taskQueue;
 	private Task<T> currentTask = null;
 
-	public TaskConsumer(String settingName) {
-		this.settingName = settingName;
+	public TaskConsumer(String pipelineName) {
+		this.pipelineName = pipelineName;
 		taskQueue = TaskQueueService.getInstance().<R, T, S> getTaskQueue(
-				settingName);
+				pipelineName);
 	}
 
 	public Message<T> handleMessage(Message<S> inputMessage)
@@ -62,7 +62,7 @@ public class TaskConsumer<R, T, S> {
 			taskQueue.reschedule(taskId);
 		} catch (InterruptedException e) {
 			throw new ShutdownException("Got interrupted while rescheduling task "
-					+ taskId + " to queue " + settingName);
+					+ taskId + " to queue " + pipelineName);
 		} catch (TaskException e) {
 			LOG.error("Could nor reschedule task {}", taskId, e);
 		}
@@ -74,7 +74,7 @@ public class TaskConsumer<R, T, S> {
 			taskQueue.storeResult(taskId, data);
 		} catch (TaskException e) {
 			throw new ShutdownException("Error while storing task " + taskId
-					+ " to queue " + settingName);
+					+ " to queue " + pipelineName);
 		}
 	}
 	

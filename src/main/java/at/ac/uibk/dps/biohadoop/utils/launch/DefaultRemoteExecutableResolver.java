@@ -26,20 +26,20 @@ public class DefaultRemoteExecutableResolver {
 		launchInformations.addAll(getLocalAdapters(communicationConfiguration));
 
 		launchInformation = new LaunchInformation(new KryoAdapter(),
-				SimpleTaskSubmitter.SETTING_NAME);
+				SimpleTaskSubmitter.PIPELINE_NAME);
 		launchInformations.add(launchInformation);
 
 		launchInformation = new LaunchInformation(new RestAdapter<>(),
-				SimpleTaskSubmitter.SETTING_NAME);
+				SimpleTaskSubmitter.PIPELINE_NAME);
 		launchInformations.add(launchInformation);
 
 		launchInformation = new LaunchInformation(new SocketAdapter(),
-				SimpleTaskSubmitter.SETTING_NAME);
+				SimpleTaskSubmitter.PIPELINE_NAME);
 		launchInformations.add(launchInformation);
 
 		launchInformation = new LaunchInformation(
 				new WebSocketAdapter<>(),
-				SimpleTaskSubmitter.SETTING_NAME);
+				SimpleTaskSubmitter.PIPELINE_NAME);
 		launchInformations.add(launchInformation);
 
 		return launchInformations;
@@ -56,7 +56,7 @@ public class DefaultRemoteExecutableResolver {
 				for (int i = 0; i < count; i++) {
 					launchInformations.add(new LaunchInformation(
 							new LocalAdapter(),
-							SimpleTaskSubmitter.SETTING_NAME));
+							SimpleTaskSubmitter.PIPELINE_NAME));
 				}
 			}
 		}

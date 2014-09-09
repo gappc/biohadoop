@@ -29,7 +29,7 @@ public class LocalWorker<R, T, S> implements Worker,
 	private final Map<String, WorkerData<R, T, S>> workerDatas = new ConcurrentHashMap<>();
 	private final AtomicBoolean stop = new AtomicBoolean(false);
 
-	private String settingName;
+	private String pipelineName;
 	private int logSteps = 1000;
 
 	// TODO check for correct implementation
@@ -41,7 +41,7 @@ public class LocalWorker<R, T, S> implements Worker,
 
 	@Override
 	public void configure(String[] args) throws WorkerException {
-		settingName = args[0];
+		pipelineName = args[0];
 	}
 
 	@Override
@@ -52,11 +52,11 @@ public class LocalWorker<R, T, S> implements Worker,
 
 	@Override
 	public Object call() throws WorkerException {
-		LOG.info("############# {} started for setting {} ##############",
-				CLASSNAME, settingName);
+		LOG.info("############# {} started for pipeline {} ##############",
+				CLASSNAME, pipelineName);
 
 		TaskQueue<R, T, S> taskQueue = TaskQueueService.getInstance()
-				.getTaskQueue(settingName);
+				.getTaskQueue(pipelineName);
 
 		PerformanceLogger performanceLogger = new PerformanceLogger(
 				System.currentTimeMillis(), 0, logSteps);

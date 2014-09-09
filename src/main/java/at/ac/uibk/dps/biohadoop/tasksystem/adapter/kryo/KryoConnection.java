@@ -29,10 +29,10 @@ public class KryoConnection<R, T, S> extends Listener {
 			.newCachedThreadPool();
 	private final ZeroLock zeroLock = new ZeroLock();
 
-	private final String settingName;
+	private final String pipelineName;
 
-	public KryoConnection(String settingName) {
-		this.settingName = settingName;
+	public KryoConnection(String pipelineName) {
+		this.pipelineName = pipelineName;
 	}
 
 	public void stop() {
@@ -48,7 +48,7 @@ public class KryoConnection<R, T, S> extends Listener {
 	public void connected(Connection connection) {
 		try {
 			TaskConsumer<R, T, S> taskConsumer = new TaskConsumer<R, T, S>(
-					settingName);
+					pipelineName);
 			taskConsumers.put(connection, taskConsumer);
 			zeroLock.increment();
 		} catch (Exception e) {

@@ -57,17 +57,16 @@ public class DedicatedRemoteExecutableResolver {
 			IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException, InstantiationException {
 		if (dedicatedAdapterConfiguration.getAdapter() == null
-				|| dedicatedAdapterConfiguration.getSettingName() == null) {
+				|| dedicatedAdapterConfiguration.getPipelineName() == null) {
 			return null;
 		}
 
 		Class<? extends Adapter> adapterClass = dedicatedAdapterConfiguration
 				.getAdapter();
-		String settingName = dedicatedAdapterConfiguration.getSettingName();
-
 		Adapter adapter = adapterClass.newInstance();
+		String pipelineName = dedicatedAdapterConfiguration.getPipelineName();
 
-		return new LaunchInformation(adapter, settingName);
+		return new LaunchInformation(adapter, pipelineName);
 	}
 
 	private static boolean isLocalAdapter(LaunchInformation launchInformation) {

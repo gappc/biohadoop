@@ -6,31 +6,31 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class WorkerConfiguration {
 
 	private final Class<? extends Worker> worker;
-	private final String settingName;
+	private final String pipelineName;
 	private final Integer count;
 
 	public WorkerConfiguration(Class<? extends Worker> worker,
-			String settingName,
+			String pipelineName,
 			Integer count) {
 		this.worker = worker;
-		this.settingName = settingName;
+		this.pipelineName = pipelineName;
 		this.count = count;
 	}
 
 	@JsonCreator
 	public static WorkerConfiguration create(
 			@JsonProperty("worker") Class<? extends Worker> worker,
-			@JsonProperty("settingName") String settingName,
+			@JsonProperty("pipelineName") String pipelineName,
 			@JsonProperty("count") Integer count) {
-		return new WorkerConfiguration(worker, settingName, count);
+		return new WorkerConfiguration(worker, pipelineName, count);
 	}
 
 	public Class<? extends Worker> getWorker() {
 		return worker;
 	}
 
-	public String getSettingName() {
-		return settingName;
+	public String getPipelineName() {
+		return pipelineName;
 	}
 
 	public Integer getCount() {
@@ -43,8 +43,8 @@ public class WorkerConfiguration {
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("worker=").append(workerClassname);
-		sb.append(" setting name=").append(settingName);
-		sb.append(" Count=").append(count);
+		sb.append(" pipelineName=").append(pipelineName);
+		sb.append(" count=").append(count);
 		return sb.toString();
 	}
 

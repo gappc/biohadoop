@@ -80,25 +80,25 @@ public class BiohadoopConfiguration {
 
 		public Builder addDedicatedAdapter(
 				Class<? extends Adapter> dedicatedAdapter,
-				String settingName) {
+				String pipelineName) {
 			AdapterConfiguration adapterConfiguration = new AdapterConfiguration(
-					dedicatedAdapter, settingName);
+					dedicatedAdapter, pipelineName);
 			dedicatedAdapters.add(adapterConfiguration);
 			return this;
 		}
 
 		public Builder addWorker(Class<? extends Worker> worker,
 				int count) {
-			addDedicatedWorker(worker, SimpleTaskSubmitter.SETTING_NAME, count);
+			addDedicatedWorker(worker, SimpleTaskSubmitter.PIPELINE_NAME, count);
 			return this;
 		}
 
 		public Builder addDedicatedWorker(
 				Class<? extends Worker> worker,
-				String settingName,
+				String pipelineName,
 				int count) {
 			WorkerConfiguration workerConfiguration = new WorkerConfiguration(
-					worker, settingName, count);
+					worker, pipelineName, count);
 			workerConfigurations.add(workerConfiguration);
 			return this;
 		}

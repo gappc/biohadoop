@@ -19,8 +19,8 @@ public class SocketAdapter implements Adapter {
 	private SocketConnectionHandler<?, ?, ?> socketServerConnection;
 
 	@Override
-	public void configure(String settingName) {
-		socketServerConnection = new SocketConnectionHandler<>(settingName);
+	public void configure(String pipelineName) {
+		socketServerConnection = new SocketConnectionHandler<>(pipelineName);
 	}
 	
 	@Override

@@ -34,7 +34,7 @@ public class WebSocketAdapter<R, T, S> implements Adapter {
 	private boolean close = false;
 
 	@Override
-	public void configure(String settingName) {
+	public void configure(String pipelineName) {
 		DeployingClasses.addWebSocketClass(WebSocketAdapter.class);
 	}
 

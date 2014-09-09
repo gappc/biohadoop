@@ -6,31 +6,31 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class AdapterConfiguration {
 
 	private final Class<? extends Adapter> adapter;
-	private String settingName;
+	private String pipelineName;
 
 	public AdapterConfiguration(Class<? extends Adapter> adapter,
-			String settingName) {
+			String pipelineName) {
 		this.adapter = adapter;
-		this.settingName = settingName;
+		this.pipelineName = pipelineName;
 	}
 
 	@JsonCreator
 	public static AdapterConfiguration create(
 			@JsonProperty("adapter") Class<? extends Adapter> adapter,
-			@JsonProperty("settingName") String settingName) {
-		return new AdapterConfiguration(adapter, settingName);
+			@JsonProperty("pipelineName") String pipelineName) {
+		return new AdapterConfiguration(adapter, pipelineName);
 	}
 
 	public Class<? extends Adapter> getAdapter() {
 		return adapter;
 	}
 
-	public String getSettingName() {
-		return settingName;
+	public String getPipelineName() {
+		return pipelineName;
 	}
 
-	public void setSettingName(String settingName) {
-		this.settingName = settingName;
+	public void setPipelineName(String pipelineName) {
+		this.pipelineName = pipelineName;
 	}
 
 	@Override
@@ -39,7 +39,7 @@ public class AdapterConfiguration {
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("adapter=").append(adapterClass);
-		sb.append(" setting name=").append(settingName);
+		sb.append(" pipelineName=").append(pipelineName);
 		return sb.toString();
 	}
 

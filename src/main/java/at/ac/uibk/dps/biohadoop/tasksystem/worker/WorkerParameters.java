@@ -12,15 +12,15 @@ import at.ac.uibk.dps.biohadoop.tasksystem.RemoteExecutable;
 public class WorkerParameters {
 
 	private final Class<? extends Worker> workerEnpoint;
-	private final String settingName;
+	private final String pipelineName;
 	private final String host;
 	private final int port;
 
 	private WorkerParameters(Class<? extends Worker> workerEnpoint,
-			String settingName,
+			String pipelineName,
 			String host, int port) {
 		this.workerEnpoint = workerEnpoint;
-		this.settingName = settingName;
+		this.pipelineName = pipelineName;
 		this.host = host;
 		this.port = port;
 	}
@@ -29,8 +29,8 @@ public class WorkerParameters {
 		return workerEnpoint;
 	}
 
-	public String getSettingName() {
-		return settingName;
+	public String getPipelineName() {
+		return pipelineName;
 	}
 
 	public String getHost() {
@@ -71,9 +71,9 @@ public class WorkerParameters {
 				workerClass = (Class<? extends Worker>) Class
 						.forName(args[0]);
 			}
-			String settingName = null;
+			String pipelineName = null;
 			if (args[1].length() > 0) {
-				settingName = args[1];
+				pipelineName = args[1];
 			}
 			String host = args[2];
 			int port = Integer.parseInt(args[3]);
@@ -84,7 +84,7 @@ public class WorkerParameters {
 			Environment.setBiohadoopConfiguration(biohadoopConfiguration);
 			Environment.setBiohadoopConfigurationPath(args[4]);
 
-			return new WorkerParameters(workerClass, settingName, host,
+			return new WorkerParameters(workerClass, pipelineName, host,
 					port);
 		} catch (Exception e) {
 			throw new WorkerException("Could not parse parameters "

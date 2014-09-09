@@ -49,8 +49,8 @@ public class AdapterLauncher {
 			for (LaunchInformation launchInformation : launchInformations) {
 				LOG.debug("Configuring adapter {}", launchInformation);
 				Adapter adapter = launchInformation.getAdapter();
-				String settingName = launchInformation.getSettingName();
-				adapter.configure(settingName);
+				String pipelineName = launchInformation.getPipelineName();
+				adapter.configure(pipelineName);
 			}
 
 			undertowServer = new UndertowServer();

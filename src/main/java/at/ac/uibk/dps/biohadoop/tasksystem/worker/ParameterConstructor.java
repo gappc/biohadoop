@@ -8,28 +8,28 @@ public class ParameterConstructor {
 	public static String resolveHttpParameter(
 			WorkerConfiguration workerConfiguration)
 			throws WorkerLaunchException {
-		String settingName = workerConfiguration.getSettingName();
+		String pipelineName = workerConfiguration.getPipelineName();
 		String hostname = getEnvironmentData(workerConfiguration,
 				Environment.DEFAULT_PREFIX, Environment.HTTP_HOST);
 		String port = getEnvironmentData(workerConfiguration,
 				Environment.DEFAULT_PREFIX, Environment.HTTP_PORT);
 
 		return workerConfiguration.getWorker().getCanonicalName() + " "
-				+ settingName + " " + hostname + " " + port + " "
+				+ pipelineName + " " + hostname + " " + port + " "
 				+ Environment.getBiohadoopConfigurationPath();
 	}
 
 	public static String resolveParameter(
 			WorkerConfiguration workerConfiguration, String envHost,
 			String envPort) throws WorkerLaunchException {
-		String settingName = workerConfiguration.getSettingName();
-		String hostname = getEnvironmentData(workerConfiguration, settingName,
+		String pipelineName = workerConfiguration.getPipelineName();
+		String hostname = getEnvironmentData(workerConfiguration, pipelineName,
 				envHost);
-		String port = getEnvironmentData(workerConfiguration, settingName,
+		String port = getEnvironmentData(workerConfiguration, pipelineName,
 				envPort);
 
 		return workerConfiguration.getWorker().getCanonicalName() + " "
-				+ settingName + " " + hostname + " " + port + " "
+				+ pipelineName + " " + hostname + " " + port + " "
 				+ Environment.getBiohadoopConfigurationPath();
 	}
 

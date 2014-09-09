@@ -23,13 +23,13 @@ public class KryoAdapter implements Adapter {
 
 	private final Server server = new Server(64 * 1024, 64 * 1024);
 
-	private String settingName;
+	private String pipelineName;
 	private KryoConnection<?, ?, ?> kryoConnection;
 
 	@Override
-	public void configure(String settingName) {
-		this.settingName = settingName;
-		kryoConnection = new KryoConnection<>(settingName);
+	public void configure(String pipelineName) {
+		this.pipelineName = pipelineName;
+		kryoConnection = new KryoConnection<>(pipelineName);
 	}
 
 	@Override
@@ -49,7 +49,7 @@ public class KryoAdapter implements Adapter {
 	private void startServer() throws AdapterException {
 		new Thread(server).start();
 
-		String prefix = settingName;
+		String prefix = pipelineName;
 		String host = HostInfo.getHostname();
 
 		PortFinder.aquireBindingLock();
@@ -69,8 +69,8 @@ public class KryoAdapter implements Adapter {
 		Kryo kryo = server.getKryo();
 		registerObjects(kryo);
 
-		LOG.info("host: {} port: {} setting: {}", HostInfo.getHostname(), port,
-				settingName);
+		LOG.info("host: {} port: {} pipeline: {}", HostInfo.getHostname(), port,
+				pipelineName);
 	}
 
 	private void registerObjects(Kryo kryo) throws AdapterException {
