@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.handler.distribution;
+package at.ac.uibk.dps.biohadoop.islandmodel;
 
 public class IslandModelException extends Exception {
 

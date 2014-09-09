@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.handler.distribution;
+package at.ac.uibk.dps.biohadoop.islandmodel;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -18,12 +18,14 @@ import at.ac.uibk.dps.biohadoop.solver.SolverId;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@Path("/distribution")
+@Path(IslandModelResource.PATH)
 @Produces(MediaType.APPLICATION_JSON)
-public class DistributionResource {
+public class IslandModelResource {
+	
+	public static final String PATH = "islandmodel";
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(DistributionResource.class);
+			.getLogger(IslandModelResource.class);
 	private static final ObjectMapper TYPED_OBJECT_MAPPER = new ObjectMapper()
 			.enableDefaultTyping();
 

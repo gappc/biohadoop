@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.handler.distribution.zookeeper;
+package at.ac.uibk.dps.biohadoop.islandmodel.zookeeper;
 
 import at.ac.uibk.dps.biohadoop.solver.SolverId;
 

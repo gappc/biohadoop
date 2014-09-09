@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.handler.distribution.zookeeper;
+package at.ac.uibk.dps.biohadoop.islandmodel.zookeeper;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
+import at.ac.uibk.dps.biohadoop.islandmodel.IslandModelResource;
 import at.ac.uibk.dps.biohadoop.solver.SolverId;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -103,15 +104,17 @@ public class NodePublisher {
 	}
 
 	private NodeData getNodeData() {
-		String host = Environment.getPrefixed(Environment.DEFAULT_PREFIX, Environment.HTTP_HOST);
-		String port = Environment.getPrefixed(Environment.DEFAULT_PREFIX, Environment.HTTP_PORT);
+		String host = Environment.getPrefixed(Environment.DEFAULT_PREFIX,
+				Environment.HTTP_HOST);
+		String port = Environment.getPrefixed(Environment.DEFAULT_PREFIX,
+				Environment.HTTP_PORT);
 
 		// TODO hardcoding http as protocol is a bad idea
-		StringBuilder distributionResourceUrl = new StringBuilder();
-		distributionResourceUrl.append("http://").append(host).append(":")
-				.append(port).append("/rs/distribution");
+		StringBuilder islandModelResourceUrl = new StringBuilder();
+		islandModelResourceUrl.append("http://").append(host).append(":")
+				.append(port).append("/rs/" + IslandModelResource.PATH);
 
-		return new NodeData(solverId, distributionResourceUrl.toString());
+		return new NodeData(solverId, islandModelResourceUrl.toString());
 	}
 
 }

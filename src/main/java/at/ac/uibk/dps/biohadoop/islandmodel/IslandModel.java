@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.handler.distribution;
+package at.ac.uibk.dps.biohadoop.islandmodel;
 
 import java.util.HashMap;
 import java.util.List;
@@ -8,8 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
-import at.ac.uibk.dps.biohadoop.handler.distribution.zookeeper.NodeData;
-import at.ac.uibk.dps.biohadoop.handler.distribution.zookeeper.ZooKeeperController;
+import at.ac.uibk.dps.biohadoop.islandmodel.zookeeper.NodeData;
+import at.ac.uibk.dps.biohadoop.islandmodel.zookeeper.ZooKeeperController;
 import at.ac.uibk.dps.biohadoop.solver.SolverData;
 import at.ac.uibk.dps.biohadoop.solver.SolverId;
 

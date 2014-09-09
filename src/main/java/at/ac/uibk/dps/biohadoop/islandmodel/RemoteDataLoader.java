@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.handler.distribution;
+package at.ac.uibk.dps.biohadoop.islandmodel;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.handler.distribution.zookeeper.NodeData;
+import at.ac.uibk.dps.biohadoop.islandmodel.zookeeper.NodeData;
 import at.ac.uibk.dps.biohadoop.solver.SolverData;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
