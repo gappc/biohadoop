@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
-import at.ac.uibk.dps.biohadoop.handler.distribution.DistributionResource;
+import at.ac.uibk.dps.biohadoop.islandmodel.IslandModelResource;
 import at.ac.uibk.dps.biohadoop.metrics.CORSFilter;
 import at.ac.uibk.dps.biohadoop.metrics.MetricsResource;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
@@ -82,7 +82,7 @@ public class UndertowServer {
 			throws ServletException {
 		ResteasyHandler resteasyHandler = new ResteasyHandler();
 		List<Class<?>> restfulClasses = DeployingClasses.getRestfulClasses();
-		restfulClasses.add(DistributionResource.class);
+		restfulClasses.add(IslandModelResource.class);
 
 		List<Class<?>> providerClasses = new ArrayList<Class<?>>();
 
