@@ -1,7 +1,5 @@
-package at.ac.uibk.dps.biohadoop.communication;
+package at.ac.uibk.dps.biohadoop.queue;
 
-import at.ac.uibk.dps.biohadoop.queue.SimpleTask;
-import at.ac.uibk.dps.biohadoop.queue.TaskId;
 
 public class ClassNameWrappedTask<T> extends SimpleTask<T> {
 
