@@ -7,12 +7,12 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.adapter.Adapter;
-import at.ac.uibk.dps.biohadoop.communication.adapter.AdapterConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.adapter.local.LocalAdapter;
-import at.ac.uibk.dps.biohadoop.communication.worker.LocalWorker;
-import at.ac.uibk.dps.biohadoop.communication.worker.WorkerConfiguration;
+import at.ac.uibk.dps.biohadoop.tasksystem.CommunicationConfiguration;
+import at.ac.uibk.dps.biohadoop.tasksystem.adapter.Adapter;
+import at.ac.uibk.dps.biohadoop.tasksystem.adapter.AdapterConfiguration;
+import at.ac.uibk.dps.biohadoop.tasksystem.adapter.local.LocalAdapter;
+import at.ac.uibk.dps.biohadoop.tasksystem.worker.LocalWorker;
+import at.ac.uibk.dps.biohadoop.tasksystem.worker.WorkerConfiguration;
 
 public class DedicatedRemoteExecutableResolver {
 

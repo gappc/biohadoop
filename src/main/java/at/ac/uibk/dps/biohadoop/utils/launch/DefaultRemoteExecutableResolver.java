@@ -3,15 +3,15 @@ package at.ac.uibk.dps.biohadoop.utils.launch;
 import java.util.ArrayList;
 import java.util.List;
 
-import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.adapter.kryo.KryoAdapter;
-import at.ac.uibk.dps.biohadoop.communication.adapter.local.LocalAdapter;
-import at.ac.uibk.dps.biohadoop.communication.adapter.rest.RestAdapter;
-import at.ac.uibk.dps.biohadoop.communication.adapter.socket.SocketAdapter;
-import at.ac.uibk.dps.biohadoop.communication.adapter.websocket.WebSocketAdapter;
-import at.ac.uibk.dps.biohadoop.communication.worker.LocalWorker;
-import at.ac.uibk.dps.biohadoop.communication.worker.WorkerConfiguration;
-import at.ac.uibk.dps.biohadoop.queue.SimpleTaskSubmitter;
+import at.ac.uibk.dps.biohadoop.tasksystem.CommunicationConfiguration;
+import at.ac.uibk.dps.biohadoop.tasksystem.adapter.kryo.KryoAdapter;
+import at.ac.uibk.dps.biohadoop.tasksystem.adapter.local.LocalAdapter;
+import at.ac.uibk.dps.biohadoop.tasksystem.adapter.rest.RestAdapter;
+import at.ac.uibk.dps.biohadoop.tasksystem.adapter.socket.SocketAdapter;
+import at.ac.uibk.dps.biohadoop.tasksystem.adapter.websocket.WebSocketAdapter;
+import at.ac.uibk.dps.biohadoop.tasksystem.submitter.SimpleTaskSubmitter;
+import at.ac.uibk.dps.biohadoop.tasksystem.worker.LocalWorker;
+import at.ac.uibk.dps.biohadoop.tasksystem.worker.WorkerConfiguration;
 
 public class DefaultRemoteExecutableResolver {
 

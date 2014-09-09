@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.adapter.Adapter;
-import at.ac.uibk.dps.biohadoop.communication.adapter.AdapterConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.worker.Worker;
-import at.ac.uibk.dps.biohadoop.communication.worker.WorkerConfiguration;
-import at.ac.uibk.dps.biohadoop.queue.SimpleTaskSubmitter;
 import at.ac.uibk.dps.biohadoop.solver.SolverConfiguration;
+import at.ac.uibk.dps.biohadoop.tasksystem.CommunicationConfiguration;
+import at.ac.uibk.dps.biohadoop.tasksystem.adapter.Adapter;
+import at.ac.uibk.dps.biohadoop.tasksystem.adapter.AdapterConfiguration;
+import at.ac.uibk.dps.biohadoop.tasksystem.submitter.SimpleTaskSubmitter;
+import at.ac.uibk.dps.biohadoop.tasksystem.worker.Worker;
+import at.ac.uibk.dps.biohadoop.tasksystem.worker.WorkerConfiguration;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

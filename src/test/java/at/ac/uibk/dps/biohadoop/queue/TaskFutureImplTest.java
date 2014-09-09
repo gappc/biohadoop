@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskFutureImpl;
+
 public class TaskFutureImplTest {
 
 	@Test

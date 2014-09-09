@@ -5,10 +5,10 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import at.ac.uibk.dps.biohadoop.communication.Message;
-import at.ac.uibk.dps.biohadoop.communication.MessageType;
-import at.ac.uibk.dps.biohadoop.queue.ClassNameWrappedTask;
-import at.ac.uibk.dps.biohadoop.queue.Task;
+import at.ac.uibk.dps.biohadoop.tasksystem.Message;
+import at.ac.uibk.dps.biohadoop.tasksystem.MessageType;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.ClassNameWrappedTask;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.Task;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;

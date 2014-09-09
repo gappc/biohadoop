@@ -6,11 +6,11 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.communication.CommunicationConfiguration;
-import at.ac.uibk.dps.biohadoop.communication.adapter.Adapter;
-import at.ac.uibk.dps.biohadoop.communication.adapter.AdapterException;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
+import at.ac.uibk.dps.biohadoop.tasksystem.CommunicationConfiguration;
+import at.ac.uibk.dps.biohadoop.tasksystem.adapter.Adapter;
+import at.ac.uibk.dps.biohadoop.tasksystem.adapter.AdapterException;
 import at.ac.uibk.dps.biohadoop.utils.launch.DedicatedRemoteExecutableResolver;
 import at.ac.uibk.dps.biohadoop.utils.launch.DefaultRemoteExecutableResolver;
 import at.ac.uibk.dps.biohadoop.utils.launch.LaunchInformation;

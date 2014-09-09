@@ -1,6 +1,6 @@
 package at.ac.uibk.dps.biohadoop.utils.launch;
 
-import at.ac.uibk.dps.biohadoop.communication.adapter.Adapter;
+import at.ac.uibk.dps.biohadoop.tasksystem.adapter.Adapter;
 
 public class LaunchInformation {
 
