@@ -5,6 +5,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.ApplicationConstants;
@@ -207,7 +210,9 @@ public class WorkerLauncher {
 		List<String> workerParameters = WorkerParametersResolver
 				.getAllWorkerParameters(biohadoopConfiguration
 						.getCommunicationConfiguration());
-		for (String workerParameter : workerParameters) {
+		
+		ExecutorService executorService = Executors.newCachedThreadPool();
+		for (final String workerParameter : workerParameters) {
 			String clientCommand = String
 					.format("$JAVA_HOME/bin/java -Xmx128M %s %s configFilename 1>%s/stdout 2>%s/stderr",
 							WorkerStarter.class.getCanonicalName(),
@@ -217,7 +222,17 @@ public class WorkerLauncher {
 
 			LOG.info("Launching worker {} with parameters: {}",
 					workerParameter, clientCommand);
+
+			executorService.submit(new Callable<Object>() {
+				@Override
+				public Object call() throws Exception {
+					WorkerStarter.main(workerParameter.split(" "));
+					return null;
+				}
+			});
 		}
+
+		executorService.shutdown();
 	}
 
 }

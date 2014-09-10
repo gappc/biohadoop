@@ -8,14 +8,18 @@ import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import javax.servlet.ServletException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xnio.BufferAllocator;
+import org.xnio.ByteBufferSlicePool;
 import org.xnio.OptionMap;
 import org.xnio.Options;
+import org.xnio.Pool;
 import org.xnio.Xnio;
 import org.xnio.XnioWorker;
 
@@ -44,7 +48,8 @@ public class WebSocketHandler {
 	 * @throws ServletException
 	 */
 	public HttpHandler getHandler(String contextPath,
-			List<Class<?>> webSocketClasses) throws IOException, ServletException {
+			List<Class<?>> webSocketClasses) throws IOException,
+			ServletException {
 		if (contextPath == null || contextPath.length() == 0) {
 			contextPath = "/";
 		}
@@ -71,6 +76,18 @@ public class WebSocketHandler {
 			webSockets.addEndpoint(webSocketClass);
 		}
 		webSockets.setWorker(xnioWorker);
+
+		if (System.getProperty("local") != null) {
+			// We have to manually set the buffer in local mode, else the
+			// WebSocket workers don't get assigned any buffer and fail with a
+			// NullPointerException
+			int bufferSize = 16384;
+			int buffersPerRegion = 20;
+			Pool<ByteBuffer> buffers = new ByteBufferSlicePool(
+					BufferAllocator.DIRECT_BYTE_BUFFER_ALLOCATOR, bufferSize,
+					bufferSize * buffersPerRegion);
+			webSockets.setBuffers(buffers);
+		}
 
 		return new DeploymentInfo()
 				.setClassLoader(Thread.currentThread().getContextClassLoader())
