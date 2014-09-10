@@ -14,7 +14,7 @@ import at.ac.uibk.dps.biohadoop.tasksystem.ComputeException;
 import at.ac.uibk.dps.biohadoop.tasksystem.ConnectionProperties;
 import at.ac.uibk.dps.biohadoop.tasksystem.Message;
 import at.ac.uibk.dps.biohadoop.tasksystem.MessageType;
-import at.ac.uibk.dps.biohadoop.tasksystem.RemoteExecutable;
+import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.kryo.KryoObjectRegistration;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.ClassNameWrappedTask;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.Task;
@@ -29,8 +29,7 @@ import com.esotericsoftware.kryonet.Listener;
 
 public class KryoWorker<R, T, S> implements Worker {
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(KryoWorker.class);
+	private static final Logger LOG = LoggerFactory.getLogger(KryoWorker.class);
 
 	private final Map<String, WorkerData<R, T, S>> workerData = new ConcurrentHashMap<>();
 
@@ -74,7 +73,7 @@ public class KryoWorker<R, T, S> implements Worker {
 		client.addListener(new Listener() {
 			public void received(Connection connection, Object object) {
 				if (object instanceof Message) {
-					String classString = null;
+					String asyncComputableClassName = null;
 					try {
 						Message<T> inputMessage = (Message<T>) object;
 
@@ -91,29 +90,29 @@ public class KryoWorker<R, T, S> implements Worker {
 
 						ClassNameWrappedTask<T> task = (ClassNameWrappedTask<T>) inputMessage
 								.getTask();
-						classString = task.getClassName();
+						asyncComputableClassName = task.getClassName();
 
 						if (inputMessage.getType() == MessageType.REGISTRATION_RESPONSE) {
-							Class<? extends RemoteExecutable<R, T, S>> className = (Class<? extends RemoteExecutable<R, T, S>>) Class
-									.forName(classString);
-							RemoteExecutable<R, T, S> remoteExecutable = className
+							Class<? extends AsyncComputable<R, T, S>> asyncComputableClass = (Class<? extends AsyncComputable<R, T, S>>) Class
+									.forName(asyncComputableClassName);
+							AsyncComputable<R, T, S> asyncComputable = asyncComputableClass
 									.newInstance();
 
 							WorkerData<R, T, S> workerEntry = new WorkerData<>(
-									remoteExecutable, (R) task.getData());
-							workerData.put(classString, workerEntry);
+									asyncComputable, (R) task.getData());
+							workerData.put(asyncComputableClassName, workerEntry);
 							inputMessage = oldMessage;
 							task = (ClassNameWrappedTask<T>) inputMessage
 									.getTask();
 						}
 
 						WorkerData<R, T, S> workerEntry = workerData
-								.get(classString);
+								.get(asyncComputableClassName);
 						if (workerEntry == null) {
 							oldMessage = inputMessage;
 
 							Task<T> intialTask = new ClassNameWrappedTask<>(
-									task.getTaskId(), null, classString);
+									task.getTaskId(), null, asyncComputableClassName);
 
 							connection.sendTCP(new Message<>(
 									MessageType.REGISTRATION_REQUEST,
@@ -127,22 +126,22 @@ public class KryoWorker<R, T, S> implements Worker {
 
 							T data = task.getData();
 
-							RemoteExecutable<R, T, S> remoteExecutable = workerEntry
-									.getRemoteExecutable();
+							AsyncComputable<R, T, S> asyncComputable = workerEntry
+									.getAsyncComputable();
 							R initalData = workerEntry.getInitialData();
-							S result = remoteExecutable.compute(data,
-									initalData);
+							S result = asyncComputable
+									.compute(data, initalData);
 
 							Message<S> outputMessage = createMessage(
-									task.getTaskId(), classString, result);
+									task.getTaskId(), asyncComputableClassName, result);
 
 							connection.sendTCP(outputMessage);
 						}
 					} catch (ClassNotFoundException | InstantiationException
 							| IllegalAccessException e) {
 						LOG.error(
-								"Could not instanciate RemoteExecutable class {}",
-								classString, e);
+								"Could not instanciate AsyncComputable class {}",
+								asyncComputableClassName, e);
 					} catch (ComputeException e) {
 						LOG.error("Error while computing result", e);
 					}

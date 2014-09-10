@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLaunchException;
 import at.ac.uibk.dps.biohadoop.tasksystem.ComputeException;
-import at.ac.uibk.dps.biohadoop.tasksystem.RemoteExecutable;
+import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.ClassNameWrappedTask;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskException;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueue;
@@ -18,8 +18,7 @@ import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueueService;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
-public class LocalWorker<R, T, S> implements Worker,
-		Callable<Object> {
+public class LocalWorker<R, T, S> implements Worker, Callable<Object> {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(LocalWorker.class);
@@ -79,12 +78,12 @@ public class LocalWorker<R, T, S> implements Worker,
 					workerDatas.put(className, workerData);
 				}
 
-				RemoteExecutable<R, T, S> remoteExecutable = workerData
-						.getRemoteExecutable();
+				AsyncComputable<R, T, S> asyncComputable = workerData
+						.getAsyncComputable();
 				R initialData = workerData.getInitialData();
 
 				T data = task.getData();
-				S result = remoteExecutable.compute(data, initialData);
+				S result = asyncComputable.compute(data, initialData);
 
 				taskQueue.storeResult(task.getTaskId(), result);
 			} catch (InterruptedException e) {
@@ -110,14 +109,14 @@ public class LocalWorker<R, T, S> implements Worker,
 	private WorkerData<R, T, S> getInitialData(TaskQueue<R, T, S> taskQueue,
 			ClassNameWrappedTask<T> task) throws ClassNotFoundException,
 			InstantiationException, IllegalAccessException, TaskException {
-		String className = task.getClassName();
-		Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass = (Class<? extends RemoteExecutable<R, T, S>>) Class
-				.forName(className);
-		RemoteExecutable<R, T, S> remoteExecutable = remoteExecutableClass
+		String asyncComputableClassName = task.getClassName();
+		Class<? extends AsyncComputable<R, T, S>> asyncComputableClass = (Class<? extends AsyncComputable<R, T, S>>) Class
+				.forName(asyncComputableClassName);
+		AsyncComputable<R, T, S> asyncComputable = asyncComputableClass
 				.newInstance();
 
 		R initialData = taskQueue.getInitialData(task.getTaskId());
-		return new WorkerData<>(remoteExecutable, initialData);
+		return new WorkerData<>(asyncComputable, initialData);
 	}
 
 }

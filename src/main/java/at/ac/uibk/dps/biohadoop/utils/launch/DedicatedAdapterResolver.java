@@ -14,10 +14,10 @@ import at.ac.uibk.dps.biohadoop.tasksystem.adapter.local.LocalAdapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.worker.LocalWorker;
 import at.ac.uibk.dps.biohadoop.tasksystem.worker.WorkerConfiguration;
 
-public class DedicatedRemoteExecutableResolver {
+public class DedicatedAdapterResolver {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(DedicatedRemoteExecutableResolver.class);
+			.getLogger(DedicatedAdapterResolver.class);
 
 	public static List<LaunchInformation> getDedicatedAdapters(
 			CommunicationConfiguration communicationConfiguration)

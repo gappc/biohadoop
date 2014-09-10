@@ -7,7 +7,6 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfigurationUtil;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
-import at.ac.uibk.dps.biohadoop.tasksystem.RemoteExecutable;
 
 public class WorkerParameters {
 
@@ -39,24 +38,6 @@ public class WorkerParameters {
 
 	public int getPort() {
 		return port;
-	}
-
-	@SuppressWarnings("unchecked")
-	public static Class<? extends RemoteExecutable<?, ?, ?>> getLocalParameters(
-			String[] args) throws WorkerException {
-		if (args == null || args.length == 0) {
-			throw new WorkerException("Parameters are null");
-		}
-		if (args[0] == null || "".equals(args[0])) {
-			return null;
-		}
-		try {
-			return (Class<? extends RemoteExecutable<?, ?, ?>>) Class
-					.forName(args[0]);
-		} catch (ClassNotFoundException e) {
-			throw new WorkerException("Could not parse parameters "
-					+ Arrays.toString(args), e);
-		}
 	}
 
 	@SuppressWarnings("unchecked")

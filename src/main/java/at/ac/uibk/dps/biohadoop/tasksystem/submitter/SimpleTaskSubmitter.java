@@ -3,7 +3,7 @@ package at.ac.uibk.dps.biohadoop.tasksystem.submitter;
 import java.util.ArrayList;
 import java.util.List;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.RemoteExecutable;
+import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskException;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskFuture;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueue;
@@ -24,43 +24,44 @@ public class SimpleTaskSubmitter<R, T, S> implements TaskSubmitter<T, S> {
 	public static final String PIPELINE_NAME = "DEFAULT_PIPELINE";
 
 	private final TaskQueue<R, T, S> taskQueue;
-	private final String remoteExecutableClassName;
+	private final String asyncComputableClassName;
 	private final R initialData;
 
 	/**
 	 * Creates a <tt>SimpleTaskSubmitter</tt>, that is capable of adding tasks
 	 * to the default task pipeline {@value #PIPELINE_NAME} with a queue named
-	 * {@value #PIPELINE_NAME}. The class defined by <tt>communicationClass</tt>
-	 * is used when computing the result on a worker.
+	 * {@value #PIPELINE_NAME}. The class defined by
+	 * <tt>asyncComputableClass</tt> is used when computing the result on a
+	 * worker.
 	 * 
-	 * @param communicationClass
+	 * @param asyncComputableClass
 	 *            defines the class that is used to compute the result of a task
 	 *            on a worker
 	 */
 	public SimpleTaskSubmitter(
-			Class<? extends RemoteExecutable<R, T, S>> communicationClass) {
-		this(communicationClass, PIPELINE_NAME, null);
+			Class<? extends AsyncComputable<R, T, S>> asyncComputableClass) {
+		this(asyncComputableClass, PIPELINE_NAME, null);
 	}
 
 	/**
 	 * Creates a <tt>SimpleTaskSubmitter</tt>, that is capable of adding tasks
 	 * to the default task pipeline {@value #PIPELINE_NAME} with a queue named
-	 * {@value #PIPELINE_NAME}. The class defined by <tt>communicationClass</tt>
-	 * is used when computing the result on a worker. The <tt>initialData</tt>
-	 * is send to a worker when it first encounters the
-	 * <tt>communicationClass</tt> type of work.
+	 * {@value #PIPELINE_NAME}. The class defined by
+	 * <tt>asyncComputableClass</tt> is used when computing the result on a
+	 * worker. The <tt>initialData</tt> is send to a worker when it first
+	 * encounters the <tt>asyncComputableClass</tt> type of work.
 	 * 
-	 * @param communicationClass
+	 * @param asyncComputableClass
 	 *            defines the class that is used to compute the result of a task
 	 *            on a worker
 	 * @param initialData
 	 *            is send to a worker when it first encounters the
-	 *            <tt>communicationClass</tt> type of work.
+	 *            <tt>asyncComputableClass</tt> type of work.
 	 */
 	public SimpleTaskSubmitter(
-			Class<? extends RemoteExecutable<R, T, S>> communicationClass,
+			Class<? extends AsyncComputable<R, T, S>> asyncComputableClass,
 			R initialData) {
-		this(communicationClass, PIPELINE_NAME, initialData);
+		this(asyncComputableClass, PIPELINE_NAME, initialData);
 	}
 
 	/**
@@ -71,25 +72,24 @@ public class SimpleTaskSubmitter<R, T, S> implements TaskSubmitter<T, S> {
 	 * can only be handled by adapters and workers, that are also part of this
 	 * pipeline. If you would like to use the default pipeline, consider using
 	 * {@link #SimpleTaskSubmitter(Class)}. The class defined by
-	 * <tt>communicationClass</tt> is used when computing the result of a task
+	 * <tt>asyncComputableClass</tt> is used when computing the result of a task
 	 * on a worker.
 	 * 
-	 * @param remoteExecutableClass
+	 * @param asyncComputableClass
 	 *            defines the class that is used to compute the result of a task
 	 *            on a worker
 	 * @param pipelineName
 	 *            defines the name of the dedicated pipeline
 	 * @param initialData
 	 *            is send to a worker when it first encounters the
-	 *            <tt>communicationClass</tt> type of work.
+	 *            <tt>asyncComputableClass</tt> type of work.
 	 */
 	public SimpleTaskSubmitter(
-			Class<? extends RemoteExecutable<R, T, S>> remoteExecutableClass,
+			Class<? extends AsyncComputable<R, T, S>> asyncComputableClass,
 			String pipelineName, R initialData) {
 		taskQueue = TaskQueueService.getInstance().<R, T, S> getTaskQueue(
 				pipelineName);
-		this.remoteExecutableClassName = remoteExecutableClass
-				.getCanonicalName();
+		this.asyncComputableClassName = asyncComputableClass.getCanonicalName();
 		// TODO copy object to prevent user from (accidentially) changing the
 		// initialData after SimpleTaskSubmitter is constructed
 		this.initialData = initialData;
@@ -119,7 +119,7 @@ public class SimpleTaskSubmitter<R, T, S> implements TaskSubmitter<T, S> {
 
 	private TaskFuture<S> submitTask(T data) throws TaskException {
 		try {
-			return taskQueue.add(data, remoteExecutableClassName, initialData);
+			return taskQueue.add(data, asyncComputableClassName, initialData);
 		} catch (InterruptedException e) {
 			throw new TaskException("Could not add Task", e);
 		}

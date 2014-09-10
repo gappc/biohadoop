@@ -13,7 +13,7 @@ import at.ac.uibk.dps.biohadoop.tasksystem.submitter.SimpleTaskSubmitter;
 import at.ac.uibk.dps.biohadoop.tasksystem.worker.LocalWorker;
 import at.ac.uibk.dps.biohadoop.tasksystem.worker.WorkerConfiguration;
 
-public class DefaultRemoteExecutableResolver {
+public class DefaultAdapterResolver {
 
 	// TODO Consider CommunicationConfiguration, such that default values can be
 	// overridden

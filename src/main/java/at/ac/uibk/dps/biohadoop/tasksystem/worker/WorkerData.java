@@ -1,20 +1,19 @@
 package at.ac.uibk.dps.biohadoop.tasksystem.worker;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.RemoteExecutable;
+import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
 
 public class WorkerData<R, T, S> {
 
-	private final RemoteExecutable<R, T, S> remoteExecutable;
+	private final AsyncComputable<R, T, S> asyncComputable;
 	private final R initialData;
 
-	public WorkerData(RemoteExecutable<R, T, S> remoteExecutable,
-			R initialData) {
-		this.remoteExecutable = remoteExecutable;
+	public WorkerData(AsyncComputable<R, T, S> asyncComputable, R initialData) {
+		this.asyncComputable = asyncComputable;
 		this.initialData = initialData;
 	}
 
-	public RemoteExecutable<R, T, S> getRemoteExecutable() {
-		return remoteExecutable;
+	public AsyncComputable<R, T, S> getAsyncComputable() {
+		return asyncComputable;
 	}
 
 	public R getInitialData() {

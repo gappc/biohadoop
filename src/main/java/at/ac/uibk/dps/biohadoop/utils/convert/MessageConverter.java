@@ -26,7 +26,7 @@ public class MessageConverter {
 		module.addAbstractTypeMapping(Task.class, ClassNameWrappedTask.class);
 		objectMapper.registerModule(module);
 	}
-	
+
 	public static <T> Message<T> getTypedMessageForMethod(String data,
 			String methodName, int pos) throws ConversionException {
 		try {
@@ -37,18 +37,19 @@ public class MessageConverter {
 				return objectMapper.readValue(node.traverse(), Message.class);
 			}
 
-			String className = ((TextNode) node.findValue("className"))
-					.asText();
+			String asyncComputableClassName = ((TextNode) node
+					.findValue("className")).asText();
 
-			String key = className + methodName + pos;
+			String key = asyncComputableClassName + methodName + pos;
 
 			JavaType javaType = types.get(key);
 
 			if (javaType == null) {
-				Class<?> remoteExecutableClass = Class.forName(className);
+				Class<?> asyncComputableClass = Class
+						.forName(asyncComputableClassName);
 
 				Class<?> receiveClass = null;
-				for (Method method : remoteExecutableClass.getDeclaredMethods()) {
+				for (Method method : asyncComputableClass.getDeclaredMethods()) {
 					if (!method.isSynthetic()
 							&& methodName.equals(method.getName())) {
 						if (pos == -1) {

@@ -18,7 +18,7 @@ import at.ac.uibk.dps.biohadoop.tasksystem.ComputeException;
 import at.ac.uibk.dps.biohadoop.tasksystem.ConnectionProperties;
 import at.ac.uibk.dps.biohadoop.tasksystem.Message;
 import at.ac.uibk.dps.biohadoop.tasksystem.MessageType;
-import at.ac.uibk.dps.biohadoop.tasksystem.RemoteExecutable;
+import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.ClassNameWrappedTask;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.Task;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskId;
@@ -105,19 +105,19 @@ public class SocketWorker<R, T, S> implements Worker {
 
 			ClassNameWrappedTask<T> task = (ClassNameWrappedTask<T>) inputMessage
 					.getTask();
-			String classString = task.getClassName();
+			String asyncComputableClassName = task.getClassName();
 
 			WorkerData<R, T, S> workerEntry = getWorkerData(task, os, is);
 
-			RemoteExecutable<R, T, S> remoteExecutable = workerEntry
-					.getRemoteExecutable();
+			AsyncComputable<R, T, S> asyncComputable = workerEntry
+					.getAsyncComputable();
 			R initalData = workerEntry.getInitialData();
 			T data = task.getData();
 
-			S result = remoteExecutable.compute(data, initalData);
+			S result = asyncComputable.compute(data, initalData);
 
 			Message<S> outputMessage = createMessage(task.getTaskId(),
-					classString, result);
+					asyncComputableClassName, result);
 
 			send(os, outputMessage);
 
@@ -141,26 +141,26 @@ public class SocketWorker<R, T, S> implements Worker {
 			ObjectOutputStream os, ObjectInputStream is)
 			throws ClassNotFoundException, IOException, ConversionException,
 			InstantiationException, IllegalAccessException {
-		String classString = task.getClassName();
-		WorkerData<R, T, S> workerEntry = workerData.get(classString);
+		String asyncComputableClassName = task.getClassName();
+		WorkerData<R, T, S> workerEntry = workerData.get(asyncComputableClassName);
 		if (workerEntry == null) {
 			Task<T> intialTask = new ClassNameWrappedTask<>(task.getTaskId(),
-					null, classString);
+					null, asyncComputableClassName);
 			Message<?> registrationRequest = new Message<>(
 					MessageType.REGISTRATION_REQUEST, intialTask);
 
 			send(os, registrationRequest);
 			Message<T> inputMessage = receive(is);
 
-			Class<? extends RemoteExecutable<R, T, S>> className = (Class<? extends RemoteExecutable<R, T, S>>) Class
-					.forName(classString);
-			RemoteExecutable<R, T, S> remoteExecutable = className
+			Class<? extends AsyncComputable<R, T, S>> asyncComputableClass = (Class<? extends AsyncComputable<R, T, S>>) Class
+					.forName(asyncComputableClassName);
+			AsyncComputable<R, T, S> asyncComputable = asyncComputableClass
 					.newInstance();
 
 			T initialData = inputMessage.getTask().getData();
-			workerEntry = new WorkerData<>(remoteExecutable, (R) initialData);
+			workerEntry = new WorkerData<>(asyncComputable, (R) initialData);
 
-			workerData.put(classString, workerEntry);
+			workerData.put(asyncComputableClassName, workerEntry);
 		}
 		return workerEntry;
 	}

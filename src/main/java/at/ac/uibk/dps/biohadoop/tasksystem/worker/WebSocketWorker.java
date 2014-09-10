@@ -32,7 +32,7 @@ import at.ac.uibk.dps.biohadoop.tasksystem.ComputeException;
 import at.ac.uibk.dps.biohadoop.tasksystem.ConnectionProperties;
 import at.ac.uibk.dps.biohadoop.tasksystem.Message;
 import at.ac.uibk.dps.biohadoop.tasksystem.MessageType;
-import at.ac.uibk.dps.biohadoop.tasksystem.RemoteExecutable;
+import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.websocket.WebSocketDecoder;
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.websocket.WebSocketEncoder;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.ClassNameWrappedTask;
@@ -134,7 +134,7 @@ public class WebSocketWorker<R, T, S> implements Worker {
 	@OnMessage
 	public Message<?> onMessage(Message<T> inputMessage, Session session)
 			throws WorkerException {
-		String classString = null;
+		String asyncComputableClassName = null;
 		try {
 			performanceLogger.step(LOG);
 
@@ -150,26 +150,26 @@ public class WebSocketWorker<R, T, S> implements Worker {
 
 			ClassNameWrappedTask<T> task = ((ClassNameWrappedTask<T>) inputMessage
 					.getTask());
-			classString = task.getClassName();
+			asyncComputableClassName = task.getClassName();
 
 			if (inputMessage.getType() == MessageType.REGISTRATION_RESPONSE) {
-				Class<? extends RemoteExecutable<R, T, S>> className = (Class<? extends RemoteExecutable<R, T, S>>) Class
-						.forName(classString);
-				RemoteExecutable<R, T, S> remoteExecutable = className
+				Class<? extends AsyncComputable<R, T, S>> asyncComputableClass = (Class<? extends AsyncComputable<R, T, S>>) Class
+						.forName(asyncComputableClassName);
+				AsyncComputable<R, T, S> asyncComputable = asyncComputableClass
 						.newInstance();
 				// Need conversion here as return type is none of R, T, S
 				WorkerData<R, T, S> workerEntry = new WorkerData<R, T, S>(
-						remoteExecutable, (R) task.getData());
-				workerDatas.put(classString, workerEntry);
+						asyncComputable, (R) task.getData());
+				workerDatas.put(asyncComputableClassName, workerEntry);
 				inputMessage = oldMessage;
 				task = (ClassNameWrappedTask<T>) inputMessage.getTask();
 			}
 
-			WorkerData<R, T, S> workerData = workerDatas.get(classString);
+			WorkerData<R, T, S> workerData = workerDatas.get(asyncComputableClassName);
 			if (workerData == null) {
 				oldMessage = inputMessage;
 				Task<T> intialTask = new ClassNameWrappedTask<>(
-						task.getTaskId(), null, classString);
+						task.getTaskId(), null, asyncComputableClassName);
 				return new Message<>(MessageType.REGISTRATION_REQUEST,
 						intialTask);
 			}
@@ -182,14 +182,14 @@ public class WebSocketWorker<R, T, S> implements Worker {
 
 				T data = task.getData();
 
-				RemoteExecutable<R, T, S> remoteExecutable = workerData
-						.getRemoteExecutable();
+				AsyncComputable<R, T, S> asyncComputable = workerData
+						.getAsyncComputable();
 				R initialData = workerData.getInitialData();
 
-				S result = remoteExecutable.compute(data, initialData);
+				S result = asyncComputable.compute(data, initialData);
 
 				Message<?> outputMessage = createMessage(task.getTaskId(),
-						classString, result);
+						asyncComputableClassName, result);
 
 				return outputMessage;
 			}
@@ -201,11 +201,11 @@ public class WebSocketWorker<R, T, S> implements Worker {
 			throw new WorkerException("Error during communication", e);
 		} catch (ClassNotFoundException | InstantiationException
 				| IllegalAccessException e) {
-			LOG.error("Could not instanciate RemoteExecutable class {}",
-					classString, e);
+			LOG.error("Could not instanciate AsyncComputable class {}",
+					asyncComputableClassName, e);
 			throw new WorkerException(
-					"Could not instanciate RemoteExecutable class "
-							+ classString, e);
+					"Could not instanciate AsyncComputable class "
+							+ asyncComputableClassName, e);
 		} catch (ComputeException e) {
 			LOG.error("Error while computing result", e);
 			throw new WorkerException("Error while computing result", e);

@@ -11,8 +11,8 @@ import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
 import at.ac.uibk.dps.biohadoop.tasksystem.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.Adapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.AdapterException;
-import at.ac.uibk.dps.biohadoop.utils.launch.DedicatedRemoteExecutableResolver;
-import at.ac.uibk.dps.biohadoop.utils.launch.DefaultRemoteExecutableResolver;
+import at.ac.uibk.dps.biohadoop.utils.launch.DedicatedAdapterResolver;
+import at.ac.uibk.dps.biohadoop.utils.launch.DefaultAdapterResolver;
 import at.ac.uibk.dps.biohadoop.utils.launch.LaunchInformation;
 import at.ac.uibk.dps.biohadoop.utils.launch.ResolveDedicatedAdapterException;
 import at.ac.uibk.dps.biohadoop.webserver.StartServerException;
@@ -34,11 +34,11 @@ public class AdapterLauncher {
 	public void startAdapters() throws AdapterException {
 		try {
 			LOG.info("Adding default adapters");
-			launchInformations.addAll(DefaultRemoteExecutableResolver
+			launchInformations.addAll(DefaultAdapterResolver
 					.getDefaultAdapters(communicationConfiguration));
 
 			LOG.info("Adding dedicated adapters");
-			launchInformations.addAll(DedicatedRemoteExecutableResolver
+			launchInformations.addAll(DedicatedAdapterResolver
 					.getDedicatedAdapters(communicationConfiguration));
 
 			if (launchInformations.size() == 0) {

@@ -50,23 +50,23 @@ public class TaskQueue<R, T, S> {
 	 * @param data
 	 *            that should be added to the task queue. This data is send to a
 	 *            waiting worker for computation
-	 * @param remoteExecutableClassName
+	 * @param asyncComputableClassName
 	 *            defines the class that should be used by a worker to compute
 	 *            the result for this data
 	 * @param initialData
 	 *            is send to a worker the first time it encounters this
-	 *            remoteExecutableClassName
+	 *            asyncComputableClassName
 	 * @return {@link TaskFuture} that represents the result of the asynchronous
 	 *         computation
 	 * @throws InterruptedException
 	 *             if adding data to the queue was not possible
 	 */
-	public TaskFuture<S> add(T data, String remoteExecutableClassName,
+	public TaskFuture<S> add(T data, String asyncComputableClassName,
 			R initialData) throws InterruptedException {
 		TaskId taskId = TaskId.newInstance();
 		LOG.debug("Adding task {}", taskId);
 		Task<T> task = new ClassNameWrappedTask<>(taskId, data,
-				remoteExecutableClassName);
+				asyncComputableClassName);
 		TaskFutureImpl<S> taskFutureImpl = new TaskFutureImpl<>();
 		TaskQueueEntry<R, T, S> taskQueueEntry = new TaskQueueEntry<>(task,
 				taskFutureImpl, initialData);
@@ -90,12 +90,12 @@ public class TaskQueue<R, T, S> {
 	 * @param datas
 	 *            that should be added to the task queue. This datas are send to
 	 *            waiting workers for computation
-	 * @param remoteExecutableClassName
+	 * @param asyncComputableClassName
 	 *            defines the class that should be used by a worker to compute
 	 *            the result for this data
 	 * @param initialData
 	 *            is send to a worker the first time it encounters this
-	 *            remoteExecutableClassName
+	 *            asyncComputableClassName
 	 * @return list of {@link TaskFuture} that represents the results of the
 	 *         asynchronous computation. Exactly one element is returned for
 	 *         each element in the input list.
@@ -105,12 +105,12 @@ public class TaskQueue<R, T, S> {
 	 *             been submitted when the exception occurs.
 	 */
 	public List<TaskFuture<S>> addAll(List<T> datas,
-			String remoteExecutableClassName, R initialData)
+			String asyncComputableClassName, R initialData)
 			throws InterruptedException {
 		LOG.debug("Adding list of tasks with size {}", datas.size());
 		List<TaskFuture<S>> taskFutures = new ArrayList<>();
 		for (T data : datas) {
-			TaskFuture<S> taskFutureImpl = add(data, remoteExecutableClassName,
+			TaskFuture<S> taskFutureImpl = add(data, asyncComputableClassName,
 					initialData);
 			taskFutures.add(taskFutureImpl);
 		}
@@ -130,12 +130,12 @@ public class TaskQueue<R, T, S> {
 	 * @param datas
 	 *            that should be added to the task queue. This datas are send to
 	 *            waiting workers for computation
-	 * @param remoteExecutableClassName
+	 * @param asyncComputableClassName
 	 *            defines the class that should be used by a worker to compute
 	 *            the result for this data
 	 * @param initialData
 	 *            is send to a worker the first time it encounters this
-	 *            remoteExecutableClassName
+	 *            asyncComputableClassName
 	 * @return list of {@link TaskFuture} that represents the results of the
 	 *         asynchronous computation. Exactly one element is returned for
 	 *         each element in the input array.
@@ -145,12 +145,12 @@ public class TaskQueue<R, T, S> {
 	 *             been submitted when the exception occurs.
 	 */
 	public List<TaskFuture<S>> addAll(T[] datas,
-			String remoteExecutableClassName, R initialData)
+			String asyncComputableClassName, R initialData)
 			throws InterruptedException {
 		LOG.debug("Adding list of tasks with size {}", datas.length);
 		List<TaskFuture<S>> taskFutures = new ArrayList<>();
 		for (T data : datas) {
-			TaskFuture<S> taskFutureImpl = add(data, remoteExecutableClassName,
+			TaskFuture<S> taskFutureImpl = add(data, asyncComputableClassName,
 					initialData);
 			taskFutures.add(taskFutureImpl);
 		}
