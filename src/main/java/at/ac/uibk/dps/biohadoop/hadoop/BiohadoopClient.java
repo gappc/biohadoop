@@ -73,7 +73,7 @@ public class BiohadoopClient {
 	 */
 	public void run(YarnConfiguration yarnConfiguration, String[] args)
 			throws Exception {
-		checkArguments(new YarnConfiguration(), args);
+		checkArguments(yarnConfiguration, args);
 		String configFilename = args[0];
 		setIncludePaths(yarnConfiguration, configFilename);
 		startApplicationMaster(yarnConfiguration, configFilename);
