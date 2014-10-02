@@ -1,6 +1,7 @@
 package at.ac.uibk.dps.biohadoop.hadoop.launcher;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -114,14 +115,13 @@ public class WorkerLauncher {
 								ApplicationConstants.LOG_DIR_EXPANSION_VAR);
 
 				workerParameters.remove(0);
-				LOG.info("Client command for container {}: {}", container.getId(), clientCommand);
+				LOG.info("Client command for container {}: {}",
+						container.getId(), clientCommand);
 				ctx.setCommands(Collections.singletonList(clientCommand));
 
-				// TODO SEVERE take path from configuration
-				String libPath = "hdfs://master:54310/biohadoop/lib/";
-				Map<String, LocalResource> jars = LocalResourceBuilder
-						.getStandardResources(libPath, yarnConfiguration);
-				ctx.setLocalResources(jars);
+				Map<String, LocalResource> resources = buildResourcePaths(
+						yarnConfiguration, biohadoopConfig.getIncludePaths());
+				ctx.setLocalResources(resources);
 
 				// Setup CLASSPATH for ApplicationMaster
 				Map<String, String> appMasterEnv = new HashMap<String, String>();
@@ -157,7 +157,8 @@ public class WorkerLauncher {
 					while (completedContainers < containerCount) {
 						float progress = solverService.getOverallProgress();
 						AllocateResponse response = rmClient.allocate(progress);
-						LOG.debug("Waiting for {} containers", containerCount - completedContainers);
+						LOG.debug("Waiting for {} containers", containerCount
+								- completedContainers);
 						for (ContainerStatus status : response
 								.getCompletedContainersStatuses()) {
 							++completedContainers;
@@ -179,8 +180,7 @@ public class WorkerLauncher {
 						LOG.info("All containers completed, unregister with ResourceManager");
 						rmClient.unregisterApplicationMaster(
 								FinalApplicationStatus.SUCCEEDED, "", "");
-					}
-					else {
+					} else {
 						LOG.info("All containers completed but some had non-zero exit code, unregister with ResourceManager");
 						rmClient.unregisterApplicationMaster(
 								FinalApplicationStatus.FAILED, "", "");
@@ -204,13 +204,52 @@ public class WorkerLauncher {
 		}
 	}
 
+	private static Map<String, LocalResource> buildResourcePaths(
+			YarnConfiguration yarnConfiguration, List<String> includePaths)
+			throws WorkerLaunchException, IOException {
+		String fsName = null;
+		fsName = yarnConfiguration.get("fs.defaultFS");
+		if (fsName == null) {
+			LOG.debug("fs.defaultFS not set, trying fs.default.name");
+			fsName = yarnConfiguration.get("fs.default.name");
+			if (fsName != null) {
+				LOG.warn("Found fs.default.name which is deprecated, consider replacing it with fs.defaultFS");
+			} else {
+				throw new WorkerLaunchException(
+						"Neither fs.defaultFS nor fs.default.name found in YarnConfiguration");
+			}
+		}
+		if (!fsName.endsWith("/")) {
+			fsName += "/";
+		}
+		
+		LOG.debug("Root of libpath is {}", fsName);
+
+		Map<String, LocalResource> resources = new HashMap<>();
+
+		for (String includePath : includePaths) {
+			String libPath = fsName;
+			if (includePath.startsWith("/")) {
+				libPath += includePath.substring(1);
+			} else {
+				libPath += includePath;
+			}
+			LOG.debug("Including libPath: {}", libPath);
+			Map<String, LocalResource> includePathResources = LocalResourceBuilder
+					.getStandardResources(libPath, yarnConfiguration);
+			resources.putAll(includePathResources);
+		}
+
+		return resources;
+	}
+
 	public static void pretendToLaunchWorkers(
 			BiohadoopConfiguration biohadoopConfiguration)
 			throws WorkerLaunchException {
 		List<String> workerParameters = WorkerParametersResolver
 				.getAllWorkerParameters(biohadoopConfiguration
 						.getCommunicationConfiguration());
-		
+
 		ExecutorService executorService = Executors.newCachedThreadPool();
 		for (final String workerParameter : workerParameters) {
 			String clientCommand = String
