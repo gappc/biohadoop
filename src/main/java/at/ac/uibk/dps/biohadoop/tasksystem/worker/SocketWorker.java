@@ -14,14 +14,15 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLaunchException;
+import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
 import at.ac.uibk.dps.biohadoop.tasksystem.ComputeException;
 import at.ac.uibk.dps.biohadoop.tasksystem.ConnectionProperties;
 import at.ac.uibk.dps.biohadoop.tasksystem.Message;
 import at.ac.uibk.dps.biohadoop.tasksystem.MessageType;
-import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.ClassNameWrappedTask;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.Task;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskId;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskTypeId;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 import at.ac.uibk.dps.biohadoop.utils.convert.ConversionException;
@@ -34,7 +35,7 @@ public class SocketWorker<R, T, S> implements Worker {
 	private static String className = ClassnameProvider
 			.getClassname(SocketWorker.class);
 
-	private final Map<String, WorkerData<R, T, S>> workerData = new ConcurrentHashMap<>();
+	private final Map<TaskTypeId, WorkerData<R, T, S>> workerData = new ConcurrentHashMap<>();
 	private WorkerParameters parameters;
 	private int logSteps = 1000;
 
@@ -103,9 +104,7 @@ public class SocketWorker<R, T, S> implements Worker {
 
 			LOG.debug("{} WORK_RESPONSE", className);
 
-			ClassNameWrappedTask<T> task = (ClassNameWrappedTask<T>) inputMessage
-					.getTask();
-			String asyncComputableClassName = task.getClassName();
+			Task<T> task = inputMessage.getTask();
 
 			WorkerData<R, T, S> workerEntry = getWorkerData(task, os, is);
 
@@ -117,7 +116,7 @@ public class SocketWorker<R, T, S> implements Worker {
 			S result = asyncComputable.compute(data, initalData);
 
 			Message<S> outputMessage = createMessage(task.getTaskId(),
-					asyncComputableClassName, result);
+					task.getTaskTypeId(), result);
 
 			send(os, outputMessage);
 
@@ -137,37 +136,36 @@ public class SocketWorker<R, T, S> implements Worker {
 		os.flush();
 	}
 
-	private WorkerData<R, T, S> getWorkerData(ClassNameWrappedTask<T> task,
+	private WorkerData<R, T, S> getWorkerData(Task<T> task,
 			ObjectOutputStream os, ObjectInputStream is)
 			throws ClassNotFoundException, IOException, ConversionException,
 			InstantiationException, IllegalAccessException {
-		String asyncComputableClassName = task.getClassName();
-		WorkerData<R, T, S> workerEntry = workerData.get(asyncComputableClassName);
+		TaskTypeId taskTypeId = task.getTaskTypeId();
+		WorkerData<R, T, S> workerEntry = workerData.get(taskTypeId);
 		if (workerEntry == null) {
-			Task<T> intialTask = new ClassNameWrappedTask<>(task.getTaskId(),
-					null, asyncComputableClassName);
+			Task<T> intialTask = new Task<>(task.getTaskId(), null, null);
 			Message<?> registrationRequest = new Message<>(
 					MessageType.REGISTRATION_REQUEST, intialTask);
 
 			send(os, registrationRequest);
 			Message<T> inputMessage = receive(is);
 
+			TaskConfiguration<R> taskConfiguration = (TaskConfiguration<R>) inputMessage
+					.getTask().getData();
 			Class<? extends AsyncComputable<R, T, S>> asyncComputableClass = (Class<? extends AsyncComputable<R, T, S>>) Class
-					.forName(asyncComputableClassName);
+					.forName(taskConfiguration.getAsyncComputableClassName());
 			AsyncComputable<R, T, S> asyncComputable = asyncComputableClass
 					.newInstance();
 
-			T initialData = inputMessage.getTask().getData();
-			workerEntry = new WorkerData<>(asyncComputable, (R) initialData);
+			workerEntry = new WorkerData<>(asyncComputable, taskConfiguration.getInitialData());
 
-			workerData.put(asyncComputableClassName, workerEntry);
+			workerData.put(taskTypeId, workerEntry);
 		}
 		return workerEntry;
 	}
 
-	public Message<S> createMessage(TaskId taskId, String classString, S data) {
-		ClassNameWrappedTask<S> task = new ClassNameWrappedTask<>(taskId, data,
-				classString);
+	public Message<S> createMessage(TaskId taskId, TaskTypeId taskTypeId, S data) {
+		Task<S> task = new Task<>(taskId, taskTypeId, data);
 		return new Message<>(MessageType.WORK_REQUEST, task);
 	}
 

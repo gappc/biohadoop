@@ -9,12 +9,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLaunchException;
-import at.ac.uibk.dps.biohadoop.tasksystem.ComputeException;
 import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.ClassNameWrappedTask;
+import at.ac.uibk.dps.biohadoop.tasksystem.ComputeException;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.Task;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskException;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueue;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueueService;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskTypeId;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
@@ -25,7 +27,7 @@ public class LocalWorker<R, T, S> implements Worker, Callable<Object> {
 	private static final String CLASSNAME = ClassnameProvider
 			.getClassname(LocalWorker.class);
 
-	private final Map<String, WorkerData<R, T, S>> workerDatas = new ConcurrentHashMap<>();
+	private final Map<TaskTypeId, WorkerData<R, T, S>> workerDatas = new ConcurrentHashMap<>();
 	private final AtomicBoolean stop = new AtomicBoolean(false);
 
 	private String pipelineName;
@@ -63,19 +65,18 @@ public class LocalWorker<R, T, S> implements Worker, Callable<Object> {
 			try {
 				// performanceLogger.step(LOG);
 
-				ClassNameWrappedTask<T> task = (ClassNameWrappedTask<T>) taskQueue
-						.getTask();
+				Task<T> task = taskQueue.getTask();
 				if (task == null) {
 					LOG.info("############# {} Worker stopped ###############",
 							CLASSNAME);
 					break;
 				}
 
-				String className = task.getClassName();
-				WorkerData<R, T, S> workerData = workerDatas.get(className);
+				TaskTypeId taskTypeId = task.getTaskTypeId();
+				WorkerData<R, T, S> workerData = workerDatas.get(taskTypeId);
 				if (workerData == null) {
 					workerData = getInitialData(taskQueue, task);
-					workerDatas.put(className, workerData);
+					workerDatas.put(taskTypeId, workerData);
 				}
 
 				AsyncComputable<R, T, S> asyncComputable = workerData
@@ -107,16 +108,20 @@ public class LocalWorker<R, T, S> implements Worker, Callable<Object> {
 	}
 
 	private WorkerData<R, T, S> getInitialData(TaskQueue<R, T, S> taskQueue,
-			ClassNameWrappedTask<T> task) throws ClassNotFoundException,
+			Task<T> task) throws ClassNotFoundException,
 			InstantiationException, IllegalAccessException, TaskException {
-		String asyncComputableClassName = task.getClassName();
+		TaskConfiguration<R> taskConfiguration = taskQueue
+				.getTaskConfiguration(task.getTaskId());
+
+		String asyncComputableClassName = taskConfiguration
+				.getAsyncComputableClassName();
 		Class<? extends AsyncComputable<R, T, S>> asyncComputableClass = (Class<? extends AsyncComputable<R, T, S>>) Class
 				.forName(asyncComputableClassName);
 		AsyncComputable<R, T, S> asyncComputable = asyncComputableClass
 				.newInstance();
 
-		R initialData = taskQueue.getInitialData(task.getTaskId());
-		return new WorkerData<>(asyncComputable, initialData);
+		return new WorkerData<>(asyncComputable,
+				taskConfiguration.getInitialData());
 	}
 
 }

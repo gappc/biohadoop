@@ -10,9 +10,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.Message;
 import at.ac.uibk.dps.biohadoop.tasksystem.MessageType;
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.ClassNameWrappedTask;
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.SimpleTask;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.Task;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskId;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskTypeId;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
@@ -26,9 +27,9 @@ public class KryoObjectRegistration {
 					Character[][].class, Integer[].class, Integer[][].class,
 					Float[].class, Float[][].class, Double[].class,
 					Double[][].class, String[].class, String[][].class,
-					Object[].class, Class.class, TaskId.class,
-					SimpleTask.class, ClassNameWrappedTask.class,
-					Message.class, MessageType.class));
+					Object[].class, Class.class, Task.class, TaskId.class,
+					TaskTypeId.class, TaskConfiguration.class, Message.class,
+					MessageType.class));
 
 	private static final Map<Class<?>, Serializer<?>> DEFAULT_OBJECTS_WITH_SERIALIZER = new ConcurrentHashMap<>();
 

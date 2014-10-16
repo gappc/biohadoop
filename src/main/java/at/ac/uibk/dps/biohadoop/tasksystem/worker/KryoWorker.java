@@ -10,15 +10,16 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLaunchException;
+import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
 import at.ac.uibk.dps.biohadoop.tasksystem.ComputeException;
 import at.ac.uibk.dps.biohadoop.tasksystem.ConnectionProperties;
 import at.ac.uibk.dps.biohadoop.tasksystem.Message;
 import at.ac.uibk.dps.biohadoop.tasksystem.MessageType;
-import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.kryo.KryoObjectRegistration;
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.ClassNameWrappedTask;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.Task;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskId;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskTypeId;
 import at.ac.uibk.dps.biohadoop.utils.KryoRegistrator;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
@@ -31,7 +32,7 @@ public class KryoWorker<R, T, S> implements Worker {
 
 	private static final Logger LOG = LoggerFactory.getLogger(KryoWorker.class);
 
-	private final Map<String, WorkerData<R, T, S>> workerData = new ConcurrentHashMap<>();
+	private final Map<TaskTypeId, WorkerData<R, T, S>> workerDatas = new ConcurrentHashMap<>();
 
 	private WorkerParameters parameters;
 	private int logSteps = 1000;
@@ -73,46 +74,56 @@ public class KryoWorker<R, T, S> implements Worker {
 		client.addListener(new Listener() {
 			public void received(Connection connection, Object object) {
 				if (object instanceof Message) {
-					String asyncComputableClassName = null;
+					WorkerData<R, T, S> workerData = null;
 					try {
 						Message<T> inputMessage = (Message<T>) object;
 
 						performanceLogger.step(LOG);
 
-						if (inputMessage.getType() == MessageType.SHUTDOWN) {
-							LOG.info(
-									"############# {} Worker stopped ###############",
-									KryoWorker.class.getSimpleName());
+						if (isShutdown(inputMessage)) {
 							client.close();
-							latch.countDown();
 							return;
 						}
 
-						ClassNameWrappedTask<T> task = (ClassNameWrappedTask<T>) inputMessage
-								.getTask();
-						asyncComputableClassName = task.getClassName();
+						Task<T> task = inputMessage.getTask();
+						TaskTypeId taskTypeId = task.getTaskTypeId();
 
+						LOG.error(taskTypeId.toString());
+						
 						if (inputMessage.getType() == MessageType.REGISTRATION_RESPONSE) {
-							Class<? extends AsyncComputable<R, T, S>> asyncComputableClass = (Class<? extends AsyncComputable<R, T, S>>) Class
-									.forName(asyncComputableClassName);
-							AsyncComputable<R, T, S> asyncComputable = asyncComputableClass
-									.newInstance();
+							TaskConfiguration<R> taskConfiguration = (TaskConfiguration) task
+									.getData();
+							String asyncComputableClassName = taskConfiguration
+									.getAsyncComputableClassName();
+							try {
+								Class<? extends AsyncComputable<R, T, S>> asyncComputableClass = (Class<? extends AsyncComputable<R, T, S>>) Class
+										.forName(asyncComputableClassName);
+								AsyncComputable<R, T, S> asyncComputable = asyncComputableClass
+										.newInstance();
+								workerData = new WorkerData<>(asyncComputable,
+										taskConfiguration.getInitialData());
+							} catch (ClassNotFoundException
+									| InstantiationException
+									| IllegalAccessException e) {
+								LOG.error(
+										"Could not instanciate AsyncComputable class {}",
+										asyncComputableClassName, e);
+								return;
+							}
 
-							WorkerData<R, T, S> workerEntry = new WorkerData<>(
-									asyncComputable, (R) task.getData());
-							workerData.put(asyncComputableClassName, workerEntry);
+							workerDatas.put(taskConfiguration.getTaskTypeId(),
+									workerData);
 							inputMessage = oldMessage;
-							task = (ClassNameWrappedTask<T>) inputMessage
-									.getTask();
+							task = inputMessage.getTask();
+						} else {
+							workerData = workerDatas.get(taskTypeId);
 						}
 
-						WorkerData<R, T, S> workerEntry = workerData
-								.get(asyncComputableClassName);
-						if (workerEntry == null) {
+						if (workerData == null) {
 							oldMessage = inputMessage;
 
-							Task<T> intialTask = new ClassNameWrappedTask<>(
-									task.getTaskId(), null, asyncComputableClassName);
+							Task<T> intialTask = new Task<>(task.getTaskId(),
+									null, null);
 
 							connection.sendTCP(new Message<>(
 									MessageType.REGISTRATION_REQUEST,
@@ -126,22 +137,18 @@ public class KryoWorker<R, T, S> implements Worker {
 
 							T data = task.getData();
 
-							AsyncComputable<R, T, S> asyncComputable = workerEntry
+							AsyncComputable<R, T, S> asyncComputable = workerData
 									.getAsyncComputable();
-							R initalData = workerEntry.getInitialData();
+							R initalData = workerData.getInitialData();
 							S result = asyncComputable
 									.compute(data, initalData);
 
 							Message<S> outputMessage = createMessage(
-									task.getTaskId(), asyncComputableClassName, result);
+									task.getTaskId(), task.getTaskTypeId(),
+									result);
 
 							connection.sendTCP(outputMessage);
 						}
-					} catch (ClassNotFoundException | InstantiationException
-							| IllegalAccessException e) {
-						LOG.error(
-								"Could not instanciate AsyncComputable class {}",
-								asyncComputableClassName, e);
 					} catch (ComputeException e) {
 						LOG.error("Error while computing result", e);
 					}
@@ -192,10 +199,20 @@ public class KryoWorker<R, T, S> implements Worker {
 		client.sendTCP(message);
 	}
 
-	public Message<S> createMessage(TaskId taskId, String classString, S data) {
-		ClassNameWrappedTask<S> task = new ClassNameWrappedTask<>(taskId, data,
-				classString);
+	private Message<S> createMessage(TaskId taskId, TaskTypeId taskTypeId,
+			S data) {
+		Task<S> task = new Task<>(taskId, taskTypeId, data);
 		return new Message<>(MessageType.WORK_REQUEST, task);
+	}
+
+	private boolean isShutdown(Message<?> inputMessage) {
+		if (inputMessage.getType() == MessageType.SHUTDOWN) {
+			LOG.info("############# {} Worker stopped ###############",
+					KryoWorker.class.getSimpleName());
+			latch.countDown();
+			return true;
+		}
+		return false;
 	}
 
 }

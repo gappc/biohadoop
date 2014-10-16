@@ -15,13 +15,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLaunchException;
+import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
 import at.ac.uibk.dps.biohadoop.tasksystem.ComputeException;
 import at.ac.uibk.dps.biohadoop.tasksystem.Message;
 import at.ac.uibk.dps.biohadoop.tasksystem.MessageType;
-import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.ClassNameWrappedTask;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.Task;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskId;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskTypeId;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 import at.ac.uibk.dps.biohadoop.utils.convert.ConversionException;
 import at.ac.uibk.dps.biohadoop.utils.convert.MessageConverter;
@@ -30,7 +31,7 @@ public class RestWorker<R, T, S> implements Worker {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RestWorker.class);
 
-	private final Map<String, WorkerData<R, T, S>> workerData = new ConcurrentHashMap<>();
+	private final Map<TaskTypeId, WorkerData<R, T, S>> workerDatas = new ConcurrentHashMap<>();
 	private WorkerParameters parameters;
 	private String path;
 
@@ -63,9 +64,7 @@ public class RestWorker<R, T, S> implements Worker {
 			while (inputMessage.getType() != MessageType.SHUTDOWN) {
 				performanceLogger.step(LOG);
 
-				ClassNameWrappedTask<T> task = (ClassNameWrappedTask<T>) inputMessage
-						.getTask();
-				String classString = task.getClassName();
+				Task<T> task = inputMessage.getTask();
 
 				WorkerData<R, T, S> workerEntry = getWorkerData(task, client,
 						url);
@@ -78,7 +77,7 @@ public class RestWorker<R, T, S> implements Worker {
 				S result = asyncComputable.compute(data, initalData);
 
 				Message<S> outputMessage = createMessage(task.getTaskId(),
-						classString, result);
+						task.getTaskTypeId(), result);
 				inputMessage = sendAndReceive(outputMessage, client, url
 						+ "/work");
 			}
@@ -95,36 +94,38 @@ public class RestWorker<R, T, S> implements Worker {
 		}
 	}
 
-	private WorkerData<R, T, S> getWorkerData(ClassNameWrappedTask<T> task,
-			Client client, String baseUrl) throws ClassNotFoundException,
-			IOException, ConversionException, InstantiationException,
-			IllegalAccessException {
-		String asyncComputableClassName = task.getClassName();
-		WorkerData<R, T, S> workerEntry = workerData.get(asyncComputableClassName);
-		if (workerEntry == null) {
-			Class<? extends AsyncComputable<R, T, S>> asyncComputableClass = (Class<? extends AsyncComputable<R, T, S>>) Class
-					.forName(asyncComputableClassName);
-			AsyncComputable<R, T, S> asyncComputable = asyncComputableClass
-					.newInstance();
-
-			String url = baseUrl + "/initialdata/" + asyncComputableClassName + "/"
-					+ task.getTaskId();
+	private WorkerData<R, T, S> getWorkerData(Task<T> task, Client client,
+			String baseUrl) throws ClassNotFoundException, IOException,
+			ConversionException, InstantiationException, IllegalAccessException {
+		TaskTypeId taskTypeId = task.getTaskTypeId();
+		WorkerData<R, T, S> workerData = workerDatas.get(taskTypeId);
+		if (workerData == null) {
+			String url = baseUrl + "/initialdata/" + task.getTaskId();
 			Response response = client.target(url)
 					.request(MediaType.APPLICATION_JSON).get();
 			String dataString = response.readEntity(String.class);
 
 			Message<R> registrationMessage = MessageConverter
 					.getTypedMessageForMethod(dataString, "compute", 1);
-			R initialData = registrationMessage.getTask().getData();
-			workerEntry = new WorkerData<R, T, S>(asyncComputable, initialData);
 
-			workerData.put(asyncComputableClassName, workerEntry);
+			TaskConfiguration<R> taskConfiguration = (TaskConfiguration<R>) registrationMessage
+					.getTask().getData();
+
+			Class<? extends AsyncComputable<R, T, S>> asyncComputableClass = (Class<? extends AsyncComputable<R, T, S>>) Class
+					.forName(taskConfiguration.getAsyncComputableClassName());
+			AsyncComputable<R, T, S> asyncComputable = asyncComputableClass
+					.newInstance();
+
+			workerData = new WorkerData<R, T, S>(asyncComputable,
+					taskConfiguration.getInitialData());
+
+			workerDatas.put(taskTypeId, workerData);
 		}
-		return workerEntry;
+		return workerData;
 	}
 
-	public Message<S> createMessage(TaskId taskId, String classString, S data) {
-		Task<S> task = new ClassNameWrappedTask<>(taskId, data, classString);
+	public Message<S> createMessage(TaskId taskId, TaskTypeId taskTypeId, S data) {
+		Task<S> task = new Task<>(taskId, taskTypeId, data);
 		return new Message<>(MessageType.WORK_REQUEST, task);
 	}
 

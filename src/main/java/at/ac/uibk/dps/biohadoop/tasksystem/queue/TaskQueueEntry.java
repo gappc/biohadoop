@@ -16,12 +16,13 @@ public class TaskQueueEntry<R, T, S> {
 
 	private final Task<T> task;
 	private final TaskFutureImpl<S> taskFuture;
-	private final R initialData;
+	private final TaskConfiguration<R> taskConfiguration;
 
-	public TaskQueueEntry(Task<T> task, TaskFutureImpl<S> taskFuture, R initalData) {
+	public TaskQueueEntry(Task<T> task, TaskFutureImpl<S> taskFuture,
+			TaskConfiguration<R> taskConfiguration) {
 		this.task = task;
 		this.taskFuture = taskFuture;
-		this.initialData = initalData;
+		this.taskConfiguration = taskConfiguration;
 	}
 
 	public Task<T> getTask() {
@@ -32,8 +33,8 @@ public class TaskQueueEntry<R, T, S> {
 		return taskFuture;
 	}
 
-	public R getInitialData() {
-		return initialData;
+	public TaskConfiguration<R> getTaskConfiguration() {
+		return taskConfiguration;
 	}
 
 }

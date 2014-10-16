@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskException;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskFuture;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueue;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueueService;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskTypeId;
 
 /**
  * This class provides a base implementation of {@link TaskSubmitter}, with
@@ -24,8 +26,7 @@ public class SimpleTaskSubmitter<R, T, S> implements TaskSubmitter<T, S> {
 	public static final String PIPELINE_NAME = "DEFAULT_PIPELINE";
 
 	private final TaskQueue<R, T, S> taskQueue;
-	private final String asyncComputableClassName;
-	private final R initialData;
+	private final TaskConfiguration<R> taskConfiguration;
 
 	/**
 	 * Creates a <tt>SimpleTaskSubmitter</tt>, that is capable of adding tasks
@@ -89,10 +90,10 @@ public class SimpleTaskSubmitter<R, T, S> implements TaskSubmitter<T, S> {
 			String pipelineName, R initialData) {
 		taskQueue = TaskQueueService.getInstance().<R, T, S> getTaskQueue(
 				pipelineName);
-		this.asyncComputableClassName = asyncComputableClass.getCanonicalName();
-		// TODO copy object to prevent user from (accidentially) changing the
+		String asyncComputableClassName = asyncComputableClass.getCanonicalName();
+		// TODO copy initialData to prevent user from (accidentially) changing the
 		// initialData after SimpleTaskSubmitter is constructed
-		this.initialData = initialData;
+		taskConfiguration = new TaskConfiguration<>(asyncComputableClassName, initialData);
 	}
 
 	public TaskFuture<S> add(T data) throws TaskException {
@@ -119,7 +120,7 @@ public class SimpleTaskSubmitter<R, T, S> implements TaskSubmitter<T, S> {
 
 	private TaskFuture<S> submitTask(T data) throws TaskException {
 		try {
-			return taskQueue.add(data, asyncComputableClassName, initialData);
+			return taskQueue.add(data, taskConfiguration);
 		} catch (InterruptedException e) {
 			throw new TaskException("Could not add Task", e);
 		}

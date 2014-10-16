@@ -10,14 +10,14 @@ import java.io.Serializable;
  *
  * @param <T>
  */
-public class SimpleTask<T> implements Task<T>, Serializable {
+public class SimpleTask1<T> {//implements Task<T>, Serializable {
 
 	private static final long serialVersionUID = -3520833985789659499L;
 
 	private TaskId taskId;
 	private T data;
 
-	public SimpleTask() {
+	public SimpleTask1() {
 		// Nothing to do
 	}
 
@@ -27,20 +27,20 @@ public class SimpleTask<T> implements Task<T>, Serializable {
 	 * @param taskId the {@link TaskId} for this task
 	 * @param data that should be wrapped inside this task and send to the workers
 	 */
-	public SimpleTask(TaskId taskId, T data) {
+	public SimpleTask1(TaskId taskId, T data) {
 		this.taskId = taskId;
 		this.data = data;
 	}
 
-	@Override
-	public TaskId getTaskId() {
-		return taskId;
-	}
-
-	@Override
-	public T getData() {
-		return data;
-	}
+//	@Override
+//	public TaskId getTaskId() {
+//		return taskId;
+//	}
+//
+//	@Override
+//	public T getData() {
+//		return data;
+//	}
 
 	@Override
 	public String toString() {

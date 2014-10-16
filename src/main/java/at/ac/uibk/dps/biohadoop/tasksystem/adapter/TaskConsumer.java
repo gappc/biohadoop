@@ -5,13 +5,14 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.Message;
 import at.ac.uibk.dps.biohadoop.tasksystem.MessageType;
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.ClassNameWrappedTask;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.ShutdownException;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.Task;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskException;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskId;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueue;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueueService;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskTypeId;
 
 public class TaskConsumer<R, T, S> {
 
@@ -48,21 +49,18 @@ public class TaskConsumer<R, T, S> {
 		LOG.error(errMsg);
 		throw new HandleMessageException(errMsg);
 	}
-	
-	public R getInitialData(TaskId taskId) throws TaskException {
-		return taskQueue.getInitialData(taskId);
-	}
 
 	public Task<T> getCurrentTask() {
 		return (Task<T>) currentTask;
 	}
-	
+
 	public void reschedule(TaskId taskId) throws ShutdownException {
 		try {
 			taskQueue.reschedule(taskId);
 		} catch (InterruptedException e) {
-			throw new ShutdownException("Got interrupted while rescheduling task "
-					+ taskId + " to queue " + pipelineName);
+			throw new ShutdownException(
+					"Got interrupted while rescheduling task " + taskId
+							+ " to queue " + pipelineName);
 		} catch (TaskException e) {
 			LOG.error("Could nor reschedule task {}", taskId, e);
 		}
@@ -77,18 +75,16 @@ public class TaskConsumer<R, T, S> {
 					+ " to queue " + pipelineName);
 		}
 	}
-	
+
 	private Message<R> getInitialData(Message<S> inputMessage)
 			throws HandleMessageException {
 		LOG.info("Got registration request");
 		try {
-			TaskId taskId = inputMessage.getTask().getTaskId();
-			R initialData = readInitialData(taskId);
-			String className = ((ClassNameWrappedTask<T>) inputMessage
-					.getTask()).getClassName();
-			Task<R> task = new ClassNameWrappedTask<>(taskId, initialData,
-					className);
-			return new Message<>(MessageType.REGISTRATION_RESPONSE, task);
+			Task<S> inputTask = inputMessage.getTask();
+			TaskId taskId = inputTask.getTaskId();
+			TaskConfiguration<R> taskConfiguration = taskQueue.getTaskConfiguration(taskId);
+			Task<?> outputTask = new Task<>(taskId, taskConfiguration.getTaskTypeId(), taskConfiguration);
+			return new Message<>(MessageType.REGISTRATION_RESPONSE, (Task<R>)outputTask);
 		} catch (TaskException e) {
 			throw new HandleMessageException("Could not get initial data", e);
 		}
@@ -116,10 +112,6 @@ public class TaskConsumer<R, T, S> {
 			currentTask = null;
 			return new Message<>(MessageType.SHUTDOWN, null);
 		}
-	}
-
-	private R readInitialData(TaskId taskId) throws TaskException {
-		return taskQueue.getInitialData(taskId);
 	}
 
 }

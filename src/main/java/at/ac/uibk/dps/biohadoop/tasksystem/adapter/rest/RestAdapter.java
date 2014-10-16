@@ -20,7 +20,6 @@ import at.ac.uibk.dps.biohadoop.tasksystem.MessageType;
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.Adapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.HandleMessageException;
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.TaskConsumer;
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.ClassNameWrappedTask;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.ShutdownException;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.Task;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskId;
@@ -51,20 +50,19 @@ public class RestAdapter<R, T, S> implements Adapter {
 	}
 
 	@GET
-	@Path("{path}/initialdata/{className}/{taskId}")
+	@Path("{path}/initialdata/{taskId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Message<T> getInitialData(@PathParam("path") String path,
-			@PathParam("className") String className,
 			@PathParam("taskId") String taskIdString) {
 		TaskId taskId = TaskId.newInstance(taskIdString);
-		Message<S> inputMessage = new Message<>(
-				MessageType.REGISTRATION_REQUEST, new ClassNameWrappedTask<S>(
-						taskId, null, className));
+		Message<S> inputMessage = (Message<S>) new Message<>(
+				MessageType.REGISTRATION_REQUEST, new Task<>(taskId, null, null));
 
 		Message<T> outputMessage = null;
 		try {
 			TaskConsumer<R, T, S> taskConsumer = getTaskConsumer(path);
-			outputMessage = taskConsumer.handleMessage(inputMessage);
+			outputMessage = taskConsumer
+					.handleMessage(inputMessage);
 		} catch (HandleMessageException e) {
 			LOG.error("Could not handle worker request {}", inputMessage, e);
 		}

@@ -28,16 +28,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLaunchException;
+import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
 import at.ac.uibk.dps.biohadoop.tasksystem.ComputeException;
 import at.ac.uibk.dps.biohadoop.tasksystem.ConnectionProperties;
 import at.ac.uibk.dps.biohadoop.tasksystem.Message;
 import at.ac.uibk.dps.biohadoop.tasksystem.MessageType;
-import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.websocket.WebSocketDecoder;
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.websocket.WebSocketEncoder;
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.ClassNameWrappedTask;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.Task;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskId;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskTypeId;
 import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
 @ClientEndpoint(encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
@@ -46,7 +47,7 @@ public class WebSocketWorker<R, T, S> implements Worker {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WebSocketWorker.class);
 
-	private final Map<String, WorkerData<R, T, S>> workerDatas = new ConcurrentHashMap<>();
+	private final Map<TaskTypeId, WorkerData<R, T, S>> workerDatas = new ConcurrentHashMap<>();
 	private final CountDownLatch latch = new CountDownLatch(1);
 	private final PerformanceLogger performanceLogger = new PerformanceLogger(
 			System.currentTimeMillis(), 0, 1000);
@@ -134,7 +135,7 @@ public class WebSocketWorker<R, T, S> implements Worker {
 	@OnMessage
 	public Message<?> onMessage(Message<T> inputMessage, Session session)
 			throws WorkerException {
-		String asyncComputableClassName = null;
+		WorkerData<R, T, S> workerData = null;
 		try {
 			performanceLogger.step(LOG);
 
@@ -148,28 +149,38 @@ public class WebSocketWorker<R, T, S> implements Worker {
 				return null;
 			}
 
-			ClassNameWrappedTask<T> task = ((ClassNameWrappedTask<T>) inputMessage
-					.getTask());
-			asyncComputableClassName = task.getClassName();
+			Task<T> task = inputMessage.getTask();
+			TaskTypeId taskTypeId = task.getTaskTypeId();
 
 			if (inputMessage.getType() == MessageType.REGISTRATION_RESPONSE) {
-				Class<? extends AsyncComputable<R, T, S>> asyncComputableClass = (Class<? extends AsyncComputable<R, T, S>>) Class
-						.forName(asyncComputableClassName);
-				AsyncComputable<R, T, S> asyncComputable = asyncComputableClass
-						.newInstance();
-				// Need conversion here as return type is none of R, T, S
-				WorkerData<R, T, S> workerEntry = new WorkerData<R, T, S>(
-						asyncComputable, (R) task.getData());
-				workerDatas.put(asyncComputableClassName, workerEntry);
+				TaskConfiguration<R> taskConfiguration = (TaskConfiguration) task
+						.getData();
+				String asyncComputableClassName = taskConfiguration
+						.getAsyncComputableClassName();
+				try {
+					Class<? extends AsyncComputable<R, T, S>> asyncComputableClass = (Class<? extends AsyncComputable<R, T, S>>) Class
+							.forName(asyncComputableClassName);
+					AsyncComputable<R, T, S> asyncComputable = asyncComputableClass
+							.newInstance();
+					workerData = new WorkerData<R, T, S>(asyncComputable,
+							taskConfiguration.getInitialData());
+				} catch (ClassNotFoundException | InstantiationException
+						| IllegalAccessException e) {
+					LOG.error("Could not instanciate AsyncComputable class {}",
+							asyncComputableClassName, e);
+					// TODO what to do in case of error?
+					return null;
+				}
+				workerDatas.put(taskConfiguration.getTaskTypeId(), workerData);
 				inputMessage = oldMessage;
-				task = (ClassNameWrappedTask<T>) inputMessage.getTask();
+				task = inputMessage.getTask();
+			} else {
+				workerData = workerDatas.get(taskTypeId);
 			}
 
-			WorkerData<R, T, S> workerData = workerDatas.get(asyncComputableClassName);
 			if (workerData == null) {
 				oldMessage = inputMessage;
-				Task<T> intialTask = new ClassNameWrappedTask<>(
-						task.getTaskId(), null, asyncComputableClassName);
+				Task<T> intialTask = new Task<>(task.getTaskId(), null, null);
 				return new Message<>(MessageType.REGISTRATION_REQUEST,
 						intialTask);
 			}
@@ -189,7 +200,7 @@ public class WebSocketWorker<R, T, S> implements Worker {
 				S result = asyncComputable.compute(data, initialData);
 
 				Message<?> outputMessage = createMessage(task.getTaskId(),
-						asyncComputableClassName, result);
+						task.getTaskTypeId(), result);
 
 				return outputMessage;
 			}
@@ -199,13 +210,6 @@ public class WebSocketWorker<R, T, S> implements Worker {
 		} catch (IOException e) {
 			LOG.error("Error during communication", e);
 			throw new WorkerException("Error during communication", e);
-		} catch (ClassNotFoundException | InstantiationException
-				| IllegalAccessException e) {
-			LOG.error("Could not instanciate AsyncComputable class {}",
-					asyncComputableClassName, e);
-			throw new WorkerException(
-					"Could not instanciate AsyncComputable class "
-							+ asyncComputableClassName, e);
 		} catch (ComputeException e) {
 			LOG.error("Error while computing result", e);
 			throw new WorkerException("Error while computing result", e);
@@ -219,9 +223,8 @@ public class WebSocketWorker<R, T, S> implements Worker {
 		latch.countDown();
 	}
 
-	public Message<?> createMessage(TaskId taskId, String classString, S data) {
-		ClassNameWrappedTask<?> task = new ClassNameWrappedTask<>(taskId, data,
-				classString);
+	public Message<?> createMessage(TaskId taskId, TaskTypeId taskTypeId, S data) {
+		Task<?> task = new Task<>(taskId, taskTypeId, data);
 		return new Message<>(MessageType.WORK_REQUEST, task);
 	}
 

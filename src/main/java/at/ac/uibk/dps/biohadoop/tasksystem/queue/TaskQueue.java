@@ -61,15 +61,15 @@ public class TaskQueue<R, T, S> {
 	 * @throws InterruptedException
 	 *             if adding data to the queue was not possible
 	 */
-	public TaskFuture<S> add(T data, String asyncComputableClassName,
-			R initialData) throws InterruptedException {
+	public TaskFuture<S> add(T data, TaskConfiguration<R> taskConfiguration)
+			throws InterruptedException {
 		TaskId taskId = TaskId.newInstance();
 		LOG.debug("Adding task {}", taskId);
-		Task<T> task = new ClassNameWrappedTask<>(taskId, data,
-				asyncComputableClassName);
+		Task<T> task = new Task<>(taskId, taskConfiguration.getTaskTypeId(),
+				data);
 		TaskFutureImpl<S> taskFutureImpl = new TaskFutureImpl<>();
 		TaskQueueEntry<R, T, S> taskQueueEntry = new TaskQueueEntry<>(task,
-				taskFutureImpl, initialData);
+				taskFutureImpl, taskConfiguration);
 		workingSet.put(task.getTaskId(), taskQueueEntry);
 		queue.put(task);
 		queueSizeCounter.inc();
@@ -105,13 +105,11 @@ public class TaskQueue<R, T, S> {
 	 *             been submitted when the exception occurs.
 	 */
 	public List<TaskFuture<S>> addAll(List<T> datas,
-			String asyncComputableClassName, R initialData)
-			throws InterruptedException {
+			TaskConfiguration<R> taskConfiguration) throws InterruptedException {
 		LOG.debug("Adding list of tasks with size {}", datas.size());
 		List<TaskFuture<S>> taskFutures = new ArrayList<>();
 		for (T data : datas) {
-			TaskFuture<S> taskFutureImpl = add(data, asyncComputableClassName,
-					initialData);
+			TaskFuture<S> taskFutureImpl = add(data, taskConfiguration);
 			taskFutures.add(taskFutureImpl);
 		}
 		return taskFutures;
@@ -145,13 +143,11 @@ public class TaskQueue<R, T, S> {
 	 *             been submitted when the exception occurs.
 	 */
 	public List<TaskFuture<S>> addAll(T[] datas,
-			String asyncComputableClassName, R initialData)
-			throws InterruptedException {
+			TaskConfiguration<R> taskConfiguration) throws InterruptedException {
 		LOG.debug("Adding list of tasks with size {}", datas.length);
 		List<TaskFuture<S>> taskFutures = new ArrayList<>();
 		for (T data : datas) {
-			TaskFuture<S> taskFutureImpl = add(data, asyncComputableClassName,
-					initialData);
+			TaskFuture<S> taskFutureImpl = add(data, taskConfiguration);
 			taskFutures.add(taskFutureImpl);
 		}
 		return taskFutures;
@@ -187,7 +183,7 @@ public class TaskQueue<R, T, S> {
 	 * @throws TaskException
 	 *             if the <tt>taskId<tt> is unknown
 	 */
-	public R getInitialData(TaskId taskId) throws TaskException {
+	public TaskConfiguration<R> getTaskConfiguration(TaskId taskId) throws TaskException {
 		if (taskId == null) {
 			throw new TaskException("TaskId can not be null");
 		}
@@ -196,7 +192,7 @@ public class TaskQueue<R, T, S> {
 			throw new TaskException("Could not find initial data for task "
 					+ taskId);
 		}
-		return entry.getInitialData();
+		return entry.getTaskConfiguration();
 	}
 
 	/**
