@@ -1,6 +1,7 @@
 package at.ac.uibk.dps.biohadoop.tasksystem.queue;
 
 import java.io.Serializable;
+import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -13,15 +14,16 @@ import java.util.UUID;
 public class TaskId implements Serializable {
 
 	private static final long serialVersionUID = 6854822752868421064L;
+	private static final Random RAND = new Random();
 
 	private final UUID id;
 
 	private TaskId() {
-		this.id = UUID.randomUUID();
-	}
-	
-	private TaskId(String taskId) {
-		this.id = UUID.fromString(taskId);
+		// UUID uses internally SecureRandom, which generates better random
+		// numbers, but is slow. As security is not a concern at this stage, we
+		// can use the implementation above, which gives significant speed
+		// improvements
+		this.id = new UUID(RAND.nextLong(), RAND.nextLong());
 	}
 
 	/**
@@ -31,10 +33,6 @@ public class TaskId implements Serializable {
 	 */
 	public static TaskId newInstance() {
 		return new TaskId();
-	}
-	
-	public static TaskId newInstance(String taskId) {
-		return new TaskId(taskId);
 	}
 
 	/**

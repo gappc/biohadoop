@@ -75,7 +75,7 @@ public class SolverLauncher {
 				SolverService.getInstance().setSolverState(solverId,
 						SolverState.RUNNING);
 
-				algorithm.compute(solverId, solverConfig.getProperties());
+				algorithm.run(solverId, solverConfig.getProperties());
 
 				SolverService.getInstance().setSolverState(solverId,
 						SolverState.SUCCEEDED);

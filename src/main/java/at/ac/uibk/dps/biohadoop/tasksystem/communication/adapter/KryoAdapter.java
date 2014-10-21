@@ -1,27 +1,40 @@
 package at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter;
 
-import org.jboss.netty.channel.ChannelPipelineFactory;
+import org.jboss.netty.channel.ChannelPipeline;
+import org.jboss.netty.handler.execution.ExecutionHandler;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.adapter.AdapterException;
+import at.ac.uibk.dps.biohadoop.tasksystem.adapter.kryo.KryoObjectRegistration;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.AbstractAdapter;
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.CounterHandler;
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.pipeline.KryoAdapterChannelPipelineFactory;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.AdapterInitialDataHandler;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.AdapterWorkHandler;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.KryoDecoder;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.KryoEncoder;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.KryoWorker;
+import at.ac.uibk.dps.biohadoop.tasksystem.worker.Worker;
+
+import com.esotericsoftware.kryo.Kryo;
 
 public class KryoAdapter extends AbstractAdapter {
 
-	private String pipelineName;
-
 	@Override
-	public void configure(String pipelineName) throws AdapterException {
-		this.pipelineName = pipelineName;
+	public ChannelPipeline getPipeline() throws Exception {
+		Kryo kryo = new Kryo();
+		kryo.setReferences(false);
+		KryoObjectRegistration.registerDefaultObjects(kryo);
+		ChannelPipeline pipeline = super.getPipeline();
+		pipeline.addLast("decoder", new KryoDecoder(kryo));
+		pipeline.addLast("encoder", new KryoEncoder(kryo, 1 * 1024, 512 * 1024));
+		pipeline.addLast("counter", counterHandler);
+//		pipeline.addLast("pipelineExecutor", new ExecutionHandler(eventExecutor));
+		pipeline.addLast("workHandler", new AdapterWorkHandler(pipelineName));
+		pipeline.addLast("initialDataHandler", new AdapterInitialDataHandler(pipelineName));
+//		pipeline.addLast("workHandler", new TestAdapterWorkHandler(pipelineName));
+		return pipeline;
 	}
 
 	@Override
-	public void start() throws AdapterException {
-		CounterHandler counterHandler = new CounterHandler();
-		ChannelPipelineFactory factory = new KryoAdapterChannelPipelineFactory(
-				pipelineName, counterHandler);
-		start(factory);
+	protected Class<? extends Worker> getMatchingWorkerClass() {
+		return KryoWorker.class;
 	}
 
 }

@@ -1,9 +1,9 @@
 package at.ac.uibk.dps.biohadoop.islandmodel.zookeeper;
 
-import at.ac.uibk.dps.biohadoop.solver.SolverId;
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonProperty;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import at.ac.uibk.dps.biohadoop.solver.SolverId;
 
 public class NodeData {
 

@@ -15,21 +15,20 @@ import at.ac.uibk.dps.biohadoop.solver.SolverId;
 public interface Algorithm {
 
 	/**
-	 * This method is called by Biohadoop after the initialisation. Inside the
-	 * method, an algorithm writer may define the algorithm, that should be run
-	 * by Biohadoop
+	 * This method is called by Biohadoop after the initialization. The
+	 * algorithm should be defined inside this method.
 	 * 
 	 * @param solverId
 	 *            represents the unique Id of this algorithm inside this running
-	 *            Biohadoop instance. It can be used by the code, for example
-	 *            when logging information
+	 *            Biohadoop instance
 	 * @param properties
 	 *            contains the configuration for this algorithm, as defined in
 	 *            the configuration file
 	 * @throws AlgorithmException
-	 *             if there was some error during the execution of the algorithm
+	 *             if there was was an error during the execution of the
+	 *             algorithm
 	 */
-	public void compute(SolverId solverId, Map<String, String> properties)
+	public void run(SolverId solverId, Map<String, String> properties)
 			throws AlgorithmException;
 
 }

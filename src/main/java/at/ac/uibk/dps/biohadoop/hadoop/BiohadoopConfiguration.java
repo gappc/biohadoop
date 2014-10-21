@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonProperty;
+
 import at.ac.uibk.dps.biohadoop.solver.SolverConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.Adapter;
@@ -12,9 +15,6 @@ import at.ac.uibk.dps.biohadoop.tasksystem.adapter.AdapterConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.submitter.SimpleTaskSubmitter;
 import at.ac.uibk.dps.biohadoop.tasksystem.worker.Worker;
 import at.ac.uibk.dps.biohadoop.tasksystem.worker.WorkerConfiguration;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class BiohadoopConfiguration {
 

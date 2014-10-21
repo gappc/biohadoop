@@ -21,8 +21,7 @@ public class WorkerStarter {
 			Class<? extends Worker> workerClass = (Class<? extends Worker>) Class
 					.forName(args[0]);
 			Worker worker = workerClass.newInstance();
-			worker.configure(args);
-			worker.start();
+			worker.start(args[1], Integer.parseInt(args[2]));
 		} catch(ConnectionRefusedException e) {
 			LOG.error(
 					"Error while connecting to Adapter for Worker {}, exiting with status code 2",

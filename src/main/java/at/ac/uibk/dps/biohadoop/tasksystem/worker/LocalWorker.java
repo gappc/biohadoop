@@ -34,19 +34,19 @@ public class LocalWorker<R, T, S> implements Worker, Callable<Object> {
 	private int logSteps = 1000;
 
 	// TODO check for correct implementation
-	@Override
-	public String buildLaunchArguments(WorkerConfiguration workerConfiguration)
-			throws WorkerLaunchException {
-		return null;
-	}
+//	@Override
+//	public String buildLaunchArguments(WorkerConfiguration workerConfiguration)
+//			throws WorkerLaunchException {
+//		return null;
+//	}
 
+//	@Override
+//	public void configure(String[] args) throws WorkerException {
+//		pipelineName = args[0];
+//	}
+//
 	@Override
-	public void configure(String[] args) throws WorkerException {
-		pipelineName = args[0];
-	}
-
-	@Override
-	public void start() throws WorkerException {
+	public void start(String host, int port) throws WorkerException {
 		// TODO Auto-generated method stub
 
 	}
@@ -56,7 +56,7 @@ public class LocalWorker<R, T, S> implements Worker, Callable<Object> {
 		LOG.info("############# {} started for pipeline {} ##############",
 				CLASSNAME, pipelineName);
 
-		TaskQueue<R, T, S> taskQueue = TaskQueueService.getInstance()
+		TaskQueue<R, T, S> taskQueue = TaskQueueService
 				.getTaskQueue(pipelineName);
 
 		PerformanceLogger performanceLogger = new PerformanceLogger(

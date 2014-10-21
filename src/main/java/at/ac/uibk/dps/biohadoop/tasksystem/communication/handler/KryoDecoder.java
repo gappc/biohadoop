@@ -1,6 +1,7 @@
 package at.ac.uibk.dps.biohadoop.tasksystem.communication.handler;
 
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.CompositeChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
@@ -27,7 +28,15 @@ public class KryoDecoder extends FrameDecoder {
 	@Override
 	protected Object decode(ChannelHandlerContext ctx, Channel channel,
 			ChannelBuffer buffer) throws Exception {
-		input.setBuffer(buffer.array(), buffer.readerIndex(),
+		byte[] data = null;
+		if (buffer instanceof CompositeChannelBuffer) {
+			data = buffer.toByteBuffer().array();
+//			System.out.println(buffer.toByteBuffer().array() toString());
+		}
+		else {
+			data = buffer.array();
+		}
+		input.setBuffer(data, buffer.readerIndex(),
 				buffer.readableBytes());
 		if (length == -1) {
 			// Read length.

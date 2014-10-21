@@ -13,13 +13,13 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.worker.Worker;
 
-public abstract class AbstractWorker implements Worker {
+public abstract class AbstractWorker implements Worker, ChannelPipelineFactory {
 	private final Logger LOG = LoggerFactory
 			.getLogger(getClass());
 
 	private ChannelFactory factory;
 
-	public void start(final String host, final int port, final ChannelPipelineFactory pipelineFactory) {
+	public void startClient(final String host, final int port, final ChannelPipelineFactory pipelineFactory) {
 		factory = new NioClientSocketChannelFactory(
 				Executors.newCachedThreadPool(),
 				Executors.newCachedThreadPool());

@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.Adapter;
+import at.ac.uibk.dps.biohadoop.tasksystem.adapter.AdapterException;
 
 public class SocketAdapter implements Adapter {
 
@@ -18,13 +19,13 @@ public class SocketAdapter implements Adapter {
 	
 	private SocketConnectionHandler<?, ?, ?> socketServerConnection;
 
-	@Override
-	public void configure(String pipelineName) {
-		socketServerConnection = new SocketConnectionHandler<>(pipelineName);
-	}
+//	@Override
+//	public void configure(String pipelineName) {
+//		socketServerConnection = new SocketConnectionHandler<>(pipelineName);
+//	}
 	
 	@Override
-	public void start() {
+	public void start(String pipelineName) {
 		LOG.info("Starting Socket server");
 		executorService.submit(socketServerConnection);
 	}
@@ -35,6 +36,12 @@ public class SocketAdapter implements Adapter {
 		socketServerConnection.stop();
 		executorService.shutdown();
 		LOG.info("Socket Server successful shut down");
+	}
+
+	@Override
+	public int getPort(String pipelineName) throws AdapterException {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

@@ -1,8 +1,5 @@
 package at.ac.uibk.dps.biohadoop.datastore;
 
-import org.xnio.Option;
-
-import at.ac.uibk.dps.biohadoop.solver.SolverData;
 import at.ac.uibk.dps.biohadoop.solver.SolverId;
 
 public class DataClient {

@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.CommunicationConfiguration;
-import at.ac.uibk.dps.biohadoop.tasksystem.adapter.kryo.KryoAdapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.local.LocalAdapter;
-import at.ac.uibk.dps.biohadoop.tasksystem.adapter.rest.RestAdapter;
-import at.ac.uibk.dps.biohadoop.tasksystem.adapter.socket.SocketAdapter;
-import at.ac.uibk.dps.biohadoop.tasksystem.adapter.websocket.WebSocketAdapter;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.KryoAdapter;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.WebSocketAdapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.submitter.SimpleTaskSubmitter;
 import at.ac.uibk.dps.biohadoop.tasksystem.worker.LocalWorker;
 import at.ac.uibk.dps.biohadoop.tasksystem.worker.WorkerConfiguration;
@@ -28,24 +26,15 @@ public class DefaultAdapterResolver {
 		launchInformation = new LaunchInformation(new KryoAdapter(),
 				SimpleTaskSubmitter.PIPELINE_NAME);
 		launchInformations.add(launchInformation);
-
-		launchInformation = new LaunchInformation(new RestAdapter<>(),
+		
+		launchInformation = new LaunchInformation(new WebSocketAdapter(),
 				SimpleTaskSubmitter.PIPELINE_NAME);
 		launchInformations.add(launchInformation);
-
-		launchInformation = new LaunchInformation(new SocketAdapter(),
-				SimpleTaskSubmitter.PIPELINE_NAME);
-		launchInformations.add(launchInformation);
-
-		launchInformation = new LaunchInformation(
-				new WebSocketAdapter<>(),
-				SimpleTaskSubmitter.PIPELINE_NAME);
-		launchInformations.add(launchInformation);
-
+		
 		return launchInformations;
 	}
 
-	public static List<LaunchInformation> getLocalAdapters(
+	private static List<LaunchInformation> getLocalAdapters(
 			CommunicationConfiguration communicationConfiguration) {
 		List<LaunchInformation> launchInformations = new ArrayList<LaunchInformation>();
 		for (WorkerConfiguration workerConfiguration : communicationConfiguration

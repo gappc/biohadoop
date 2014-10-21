@@ -26,7 +26,7 @@ public class TaskTypeId implements Serializable {
 			return false;
 		}
 		TaskTypeId taskTypeId = (TaskTypeId) obj;
-		return id == taskTypeId.id;
+		return id.equals(taskTypeId.id);
 	}
 
 	@Override

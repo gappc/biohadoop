@@ -11,11 +11,12 @@ public class UUIDSerializer extends Serializer<UUID> {
 
 	@Override
 	public UUID read(Kryo kryo, Input input, Class<UUID> type) {
-		return UUID.fromString(input.readString());
+		return new UUID(input.readLong(), input.readLong());
 	}
 
 	@Override
 	public void write(Kryo kryo, Output output, UUID uuid) {
-		output.writeString(uuid.toString());
+		output.writeLong(uuid.getMostSignificantBits());
+		output.writeLong(uuid.getLeastSignificantBits());
 	}
 }

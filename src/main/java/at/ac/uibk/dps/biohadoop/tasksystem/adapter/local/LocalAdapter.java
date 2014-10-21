@@ -20,19 +20,19 @@ public class LocalAdapter implements Adapter {
 			.newCachedThreadPool();
 	private LocalWorker<?, ?, ?> localWorker;
 
-	@Override
-	public void configure(String pipelineName)
-			throws AdapterException {
-		localWorker = new LocalWorker<>();
-		try {
-			localWorker.configure(new String[] { pipelineName });
-		} catch (WorkerException e) {
-			throw new AdapterException("Could not configure local worker", e);
-		}
-	}
+//	@Override
+//	public void configure(String pipelineName)
+//			throws AdapterException {
+//		localWorker = new LocalWorker<>();
+//		try {
+//			localWorker.configure(new String[] { pipelineName });
+//		} catch (WorkerException e) {
+//			throw new AdapterException("Could not configure local worker", e);
+//		}
+//	}
 
 	@Override
-	public void start() throws AdapterException {
+	public void start(String pipelineName) throws AdapterException {
 		// TODO must catch WorkerExecption
 		executorService.submit(localWorker);
 		LOG.info("Local Workers started");
@@ -42,6 +42,12 @@ public class LocalAdapter implements Adapter {
 	public void stop() {
 		localWorker.stop();
 		executorService.shutdown();
+	}
+
+	@Override
+	public int getPort(String pipelineName) throws AdapterException {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

@@ -8,14 +8,13 @@ import java.io.OutputStream;
 import java.util.Map;
 
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.solver.SolverData;
 import at.ac.uibk.dps.biohadoop.solver.SolverId;
 import at.ac.uibk.dps.biohadoop.utils.HdfsUtil;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class FileLoader {
 

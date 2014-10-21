@@ -1,7 +1,5 @@
 package at.ac.uibk.dps.biohadoop.queue;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
@@ -12,7 +10,7 @@ public class TaskQueueServiceTest {
 
 	@Test
 	public void taskQueueNotNull() {
-		assertNotNull(TaskQueueService.getInstance().getTaskQueue(""));
+		assertNotNull(TaskQueueService.getTaskQueue(""));
 	}
 
 //	@Test

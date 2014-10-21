@@ -11,12 +11,10 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
 import at.ac.uibk.dps.biohadoop.tasksystem.Message;
 import at.ac.uibk.dps.biohadoop.tasksystem.MessageType;
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.AdapterException;
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.HandleMessageException;
-import at.ac.uibk.dps.biohadoop.tasksystem.adapter.TaskConsumer;
 
 public class SocketConnection<R, T, S> implements Callable<Object> {
 
@@ -38,44 +36,44 @@ public class SocketConnection<R, T, S> implements Callable<Object> {
 
 	@Override
 	public Object call() throws AdapterException {
-		TaskConsumer<R, T, S> taskConsumer = null;
-		try {
-			LOG.info("Opened Socket on server");
-
-			os = new ObjectOutputStream(new BufferedOutputStream(
-					socket.getOutputStream()));
-			os.flush();
-			is = new ObjectInputStream(new BufferedInputStream(
-					socket.getInputStream()));
-
-			taskConsumer = new TaskConsumer<R, T, S>(path);
-
-			while (!close && !ShutdownWaitingService.isFinished()) {
-				Message<S> inputMessage = receive();
-				Message<T> outputMessage = taskConsumer
-						.handleMessage(inputMessage);
-				send(outputMessage);
-			}
-		} catch (IOException | ClassNotFoundException | HandleMessageException e) {
-			// TODO remove logging
-			LOG.error("Could not handle worker request", e);
-			throw new AdapterException("Could not handle worker request", e);
-		} finally {
-			if (os != null) {
-				try {
-					os.close();
-				} catch (IOException e) {
-					LOG.error("Error while closing OutputStream", e);
-				}
-			}
-			if (is != null) {
-				try {
-					is.close();
-				} catch (IOException e) {
-					LOG.error("Error while closing InputStream", e);
-				}
-			}
-		}
+//		TaskConsumer<R, T, S> taskConsumer = null;
+//		try {
+//			LOG.info("Opened Socket on server");
+//
+//			os = new ObjectOutputStream(new BufferedOutputStream(
+//					socket.getOutputStream()));
+//			os.flush();
+//			is = new ObjectInputStream(new BufferedInputStream(
+//					socket.getInputStream()));
+//
+//			taskConsumer = new TaskConsumer<R, T, S>(path);
+//
+//			while (!close && !ShutdownWaitingService.isFinished()) {
+//				Message<S> inputMessage = receive();
+//				Message<T> outputMessage = taskConsumer
+//						.handleMessage(inputMessage);
+//				send(outputMessage);
+//			}
+//		} catch (IOException | ClassNotFoundException | HandleMessageException e) {
+//			// TODO remove logging
+//			LOG.error("Could not handle worker request", e);
+//			throw new AdapterException("Could not handle worker request", e);
+//		} finally {
+//			if (os != null) {
+//				try {
+//					os.close();
+//				} catch (IOException e) {
+//					LOG.error("Error while closing OutputStream", e);
+//				}
+//			}
+//			if (is != null) {
+//				try {
+//					is.close();
+//				} catch (IOException e) {
+//					LOG.error("Error while closing InputStream", e);
+//				}
+//			}
+//		}
 		return null;
 	}
 
@@ -92,7 +90,7 @@ public class SocketConnection<R, T, S> implements Callable<Object> {
 		}
 		os.writeUnshared(message);
 		os.flush();
-		if (message.getType() == MessageType.SHUTDOWN) {
+		if (message.getType() == MessageType.SHUTDOWN.ordinal()) {
 			close = true;
 		}
 	}

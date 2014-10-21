@@ -9,7 +9,6 @@ import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskException;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskFuture;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueue;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueueService;
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskTypeId;
 
 /**
  * This class provides a base implementation of {@link TaskSubmitter}, with
@@ -88,7 +87,7 @@ public class SimpleTaskSubmitter<R, T, S> implements TaskSubmitter<T, S> {
 	public SimpleTaskSubmitter(
 			Class<? extends AsyncComputable<R, T, S>> asyncComputableClass,
 			String pipelineName, R initialData) {
-		taskQueue = TaskQueueService.getInstance().<R, T, S> getTaskQueue(
+		taskQueue = TaskQueueService.<R, T, S> getTaskQueue(
 				pipelineName);
 		String asyncComputableClassName = asyncComputableClass.getCanonicalName();
 		// TODO copy initialData to prevent user from (accidentially) changing the

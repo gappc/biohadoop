@@ -2,11 +2,11 @@ package at.ac.uibk.dps.biohadoop.tasksystem;
 
 import java.util.List;
 
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonProperty;
+
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.AdapterConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.worker.WorkerConfiguration;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CommunicationConfiguration {
 

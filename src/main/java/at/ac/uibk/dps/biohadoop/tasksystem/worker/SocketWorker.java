@@ -39,20 +39,20 @@ public class SocketWorker<R, T, S> implements Worker {
 	private WorkerParameters parameters;
 	private int logSteps = 1000;
 
-	@Override
-	public String buildLaunchArguments(WorkerConfiguration workerConfiguration)
-			throws WorkerLaunchException {
-		return ParameterConstructor.resolveParameter(workerConfiguration,
-				Environment.SOCKET_HOST, Environment.SOCKET_PORT);
-	}
+//	@Override
+//	public String buildLaunchArguments(WorkerConfiguration workerConfiguration)
+//			throws WorkerLaunchException {
+//		return ParameterConstructor.resolveParameter(workerConfiguration,
+//				Environment.SOCKET_HOST, Environment.SOCKET_PORT);
+//	}
+//
+//	@Override
+//	public void configure(String[] args) throws WorkerException {
+//		parameters = WorkerParameters.getParameters(args);
+//	}
 
 	@Override
-	public void configure(String[] args) throws WorkerException {
-		parameters = WorkerParameters.getParameters(args);
-	}
-
-	@Override
-	public void start() throws WorkerException, ConnectionRefusedException {
+	public void start(String host, int port) throws WorkerException, ConnectionRefusedException {
 		try {
 			// TODO: implement timeout
 			Socket clientSocket = new Socket(parameters.getHost(),
@@ -88,40 +88,40 @@ public class SocketWorker<R, T, S> implements Worker {
 				System.currentTimeMillis(), 0, logSteps);
 		int counter = 0;
 
-		Message<Object> requestMessage = new Message<Object>(
-				MessageType.WORK_INIT_REQUEST, null);
-		send(os, requestMessage);
-
-		Message<T> inputMessage = receive(is);
-
-		while (inputMessage.getType() != MessageType.SHUTDOWN) {
-			performanceLogger.step(LOG);
-			counter++;
-			if (counter % 1000 == 0) {
-				os.reset();
-				counter = 0;
-			}
-
-			LOG.debug("{} WORK_RESPONSE", className);
-
-			Task<T> task = inputMessage.getTask();
-
-			WorkerData<R, T, S> workerEntry = getWorkerData(task, os, is);
-
-			AsyncComputable<R, T, S> asyncComputable = workerEntry
-					.getAsyncComputable();
-			R initalData = workerEntry.getInitialData();
-			T data = task.getData();
-
-			S result = asyncComputable.compute(data, initalData);
-
-			Message<S> outputMessage = createMessage(task.getTaskId(),
-					task.getTaskTypeId(), result);
-
-			send(os, outputMessage);
-
-			inputMessage = receive(is);
-		}
+//		Message<Object> requestMessage = new Message<Object>(
+//				MessageType.WORK_INIT_REQUEST, null);
+//		send(os, requestMessage);
+//
+//		Message<T> inputMessage = receive(is);
+//
+//		while (inputMessage.getType() != MessageType.SHUTDOWN) {
+//			performanceLogger.step(LOG);
+//			counter++;
+//			if (counter % 1000 == 0) {
+//				os.reset();
+//				counter = 0;
+//			}
+//
+//			LOG.debug("{} WORK_RESPONSE", className);
+//
+//			Task<T> task = inputMessage.getTask();
+//
+//			WorkerData<R, T, S> workerEntry = getWorkerData(task, os, is);
+//
+//			AsyncComputable<R, T, S> asyncComputable = workerEntry
+//					.getAsyncComputable();
+//			R initalData = workerEntry.getInitialData();
+//			T data = task.getData();
+//
+//			S result = asyncComputable.compute(data, initalData);
+//
+//			Message<S> outputMessage = createMessage(task.getTaskId(),
+//					task.getTaskTypeId(), result);
+//
+//			send(os, outputMessage);
+//
+//			inputMessage = receive(is);
+//		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -142,31 +142,31 @@ public class SocketWorker<R, T, S> implements Worker {
 			InstantiationException, IllegalAccessException {
 		TaskTypeId taskTypeId = task.getTaskTypeId();
 		WorkerData<R, T, S> workerEntry = workerData.get(taskTypeId);
-		if (workerEntry == null) {
-			Task<T> intialTask = new Task<>(task.getTaskId(), null, null);
-			Message<?> registrationRequest = new Message<>(
-					MessageType.REGISTRATION_REQUEST, intialTask);
-
-			send(os, registrationRequest);
-			Message<T> inputMessage = receive(is);
-
-			TaskConfiguration<R> taskConfiguration = (TaskConfiguration<R>) inputMessage
-					.getTask().getData();
-			Class<? extends AsyncComputable<R, T, S>> asyncComputableClass = (Class<? extends AsyncComputable<R, T, S>>) Class
-					.forName(taskConfiguration.getAsyncComputableClassName());
-			AsyncComputable<R, T, S> asyncComputable = asyncComputableClass
-					.newInstance();
-
-			workerEntry = new WorkerData<>(asyncComputable, taskConfiguration.getInitialData());
-
-			workerData.put(taskTypeId, workerEntry);
-		}
+//		if (workerEntry == null) {
+//			Task<T> intialTask = new Task<>(task.getTaskId(), null, null);
+//			Message<?> registrationRequest = new Message<>(
+//					MessageType.REGISTRATION_REQUEST, intialTask);
+//
+//			send(os, registrationRequest);
+//			Message<T> inputMessage = receive(is);
+//
+//			TaskConfiguration<R> taskConfiguration = (TaskConfiguration<R>) inputMessage
+//					.getTask().getData();
+//			Class<? extends AsyncComputable<R, T, S>> asyncComputableClass = (Class<? extends AsyncComputable<R, T, S>>) Class
+//					.forName(taskConfiguration.getAsyncComputableClassName());
+//			AsyncComputable<R, T, S> asyncComputable = asyncComputableClass
+//					.newInstance();
+//
+//			workerEntry = new WorkerData<>(asyncComputable, taskConfiguration.getInitialData());
+//
+//			workerData.put(taskTypeId, workerEntry);
+//		}
 		return workerEntry;
 	}
 
-	public Message<S> createMessage(TaskId taskId, TaskTypeId taskTypeId, S data) {
-		Task<S> task = new Task<>(taskId, taskTypeId, data);
-		return new Message<>(MessageType.WORK_REQUEST, task);
-	}
+//	public Message<S> createMessage(TaskId taskId, TaskTypeId taskTypeId, S data) {
+//		Task<S> task = new Task<>(taskId, taskTypeId, data);
+//		return new Message<>(MessageType.WORK_REQUEST, task);
+//	}
 
 }
