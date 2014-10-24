@@ -26,11 +26,11 @@ public class RestAdapter<R, T, S> implements Adapter {
 	public void stop() {
 	}
 
-	@Override
-	public int getPort(String pipelineName) throws AdapterException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+//	@Override
+//	public int getPort(String pipelineName) throws AdapterException {
+//		// TODO Auto-generated method stub
+//		return 0;
+//	}
 
 //	@GET
 //	@Path("{path}/initialdata/{taskId}")

@@ -1,7 +1,6 @@
 package at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter;
 
 import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.handler.execution.ExecutionHandler;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.kryo.KryoObjectRegistration;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.AbstractAdapter;
@@ -23,7 +22,7 @@ public class KryoAdapter extends AbstractAdapter {
 		KryoObjectRegistration.registerDefaultObjects(kryo);
 		ChannelPipeline pipeline = super.getPipeline();
 		pipeline.addLast("decoder", new KryoDecoder(kryo));
-		pipeline.addLast("encoder", new KryoEncoder(kryo, 1 * 1024, 512 * 1024));
+		pipeline.addLast("encoder", new KryoEncoder(kryo, 1 * 1024, 2 * 1024 * 1024));
 		pipeline.addLast("counter", counterHandler);
 //		pipeline.addLast("pipelineExecutor", new ExecutionHandler(eventExecutor));
 		pipeline.addLast("workHandler", new AdapterWorkHandler(pipelineName));

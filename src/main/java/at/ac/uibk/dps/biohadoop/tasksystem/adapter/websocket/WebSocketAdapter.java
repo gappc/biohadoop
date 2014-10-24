@@ -30,11 +30,11 @@ public class WebSocketAdapter<R, T, S> implements Adapter {
 		// Nothing to do
 	}
 
-	@Override
-	public int getPort(String pipelineName) throws AdapterException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+//	@Override
+//	public int getPort(String pipelineName) throws AdapterException {
+//		// TODO Auto-generated method stub
+//		return 0;
+//	}
 
 //	@OnOpen
 //	public void open(@PathParam("path") String path, Session session) {

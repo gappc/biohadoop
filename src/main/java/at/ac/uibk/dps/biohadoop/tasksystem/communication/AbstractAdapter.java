@@ -50,12 +50,6 @@ public abstract class AbstractAdapter implements Adapter,
 		pipeline.addLast("channelGroup", new ChannelGroupHandler(channels));
 		return pipeline;
 	}
-
-	@Override
-	public int getPort(String pipelineName) throws AdapterException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 	
 	@Override
 	public void start(String pipelineName) throws AdapterException {

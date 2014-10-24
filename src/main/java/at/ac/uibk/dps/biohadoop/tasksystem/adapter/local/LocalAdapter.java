@@ -44,10 +44,10 @@ public class LocalAdapter implements Adapter {
 		executorService.shutdown();
 	}
 
-	@Override
-	public int getPort(String pipelineName) throws AdapterException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+//	@Override
+//	public int getPort(String pipelineName) throws AdapterException {
+//		// TODO Auto-generated method stub
+//		return 0;
+//	}
 
 }
