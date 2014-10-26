@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.AbstractAdapter;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.NettyServer;
 import at.ac.uibk.dps.biohadoop.tasksystem.worker.Worker;
 import at.ac.uibk.dps.biohadoop.tasksystem.worker.WorkerConfiguration;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
@@ -24,7 +24,7 @@ public class WorkerParametersResolver {
 				.getWorkerConfigurations();
 		for (WorkerConfiguration configuration : configurations) {
 			Class<? extends Worker> worker = configuration.getWorker();
-			Integer port = AbstractAdapter.getPort(worker,
+			Integer port = NettyServer.getPort(worker,
 					configuration.getPipelineName());
 			for (int i = 0; i < configuration.getCount(); i++) {
 				workerParameters.add(worker.getCanonicalName() + " "

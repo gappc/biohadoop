@@ -5,11 +5,16 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.Adapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.AdapterException;
+import at.ac.uibk.dps.biohadoop.tasksystem.worker.Worker;
 
 //@Path("/")
 //@Dependent
 public class RestAdapter<R, T, S> implements Adapter {
-
+	@Override
+	public Class<? extends Worker> getMatchingWorkerClass() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	private static final Logger LOG = LoggerFactory
 			.getLogger(RestAdapter.class);
 //	private static final Map<String, TaskConsumer<?, ?, ?>> TASK_CONSUMERS = new ConcurrentHashMap<>();

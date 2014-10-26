@@ -5,12 +5,18 @@ import java.util.Map;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.Adapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.AdapterException;
-import at.ac.uibk.dps.biohadoop.utils.KryoRegistrator;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoObjectRegistration;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoRegistrator;
+import at.ac.uibk.dps.biohadoop.tasksystem.worker.Worker;
 
 import com.esotericsoftware.kryo.Kryo;
 
 public class KryoAdapter implements Adapter {
-
+	@Override
+	public Class<? extends Worker> getMatchingWorkerClass() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 //	private static final Logger LOG = LoggerFactory
 //			.getLogger(KryoAdapter.class);
 //

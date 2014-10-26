@@ -11,9 +11,7 @@ import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.worker.Worker;
-
-public abstract class AbstractWorker implements Worker, ChannelPipelineFactory {
+public class NettyClient {
 	private final Logger LOG = LoggerFactory
 			.getLogger(getClass());
 

@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.tasksystem.adapter.kryo;
+package at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -10,6 +10,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.Message;
 import at.ac.uibk.dps.biohadoop.tasksystem.MessageType;
+import at.ac.uibk.dps.biohadoop.tasksystem.adapter.kryo.UUIDSerializer;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.Task;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskId;

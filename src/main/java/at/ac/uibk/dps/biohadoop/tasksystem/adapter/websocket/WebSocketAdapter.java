@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.Adapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.AdapterException;
+import at.ac.uibk.dps.biohadoop.tasksystem.worker.Worker;
 
 //@ServerEndpoint(value = "/{path}", encoders = WebSocketEncoder.class, decoders = WebSocketDecoder.class)
 public class WebSocketAdapter<R, T, S> implements Adapter {
@@ -28,6 +29,12 @@ public class WebSocketAdapter<R, T, S> implements Adapter {
 	@Override
 	public void stop() {
 		// Nothing to do
+	}
+
+	@Override
+	public Class<? extends Worker> getMatchingWorkerClass() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 //	@Override

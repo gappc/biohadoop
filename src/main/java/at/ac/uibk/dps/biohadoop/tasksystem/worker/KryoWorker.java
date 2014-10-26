@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLaunchException;
 import at.ac.uibk.dps.biohadoop.tasksystem.Message;
-import at.ac.uibk.dps.biohadoop.tasksystem.adapter.kryo.KryoObjectRegistration;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoObjectRegistration;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoRegistrator;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskTypeId;
-import at.ac.uibk.dps.biohadoop.utils.KryoRegistrator;
 
 import com.esotericsoftware.kryo.Kryo;
 

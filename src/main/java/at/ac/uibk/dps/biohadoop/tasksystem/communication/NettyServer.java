@@ -8,9 +8,7 @@ import java.util.concurrent.Executors;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFactory;
-import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
@@ -18,15 +16,11 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.adapter.Adapter;
-import at.ac.uibk.dps.biohadoop.tasksystem.adapter.AdapterException;
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.ChannelGroupHandler;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.CounterHandler;
 import at.ac.uibk.dps.biohadoop.tasksystem.worker.Worker;
 import at.ac.uibk.dps.biohadoop.utils.PortFinder;
 
-public abstract class AbstractAdapter implements Adapter,
-		ChannelPipelineFactory {
+public class NettyServer {
 
 	protected final ChannelGroup channels = new DefaultChannelGroup(this
 			.getClass().getCanonicalName() + "-server");
@@ -44,30 +38,11 @@ public abstract class AbstractAdapter implements Adapter,
 		return PORT_MAP.get(workerClass.getCanonicalName() + "-" + pipelineName);
 	}
 	
-	@Override
-	public ChannelPipeline getPipeline() throws Exception {
-		ChannelPipeline pipeline = Channels.pipeline();
-		pipeline.addLast("channelGroup", new ChannelGroupHandler(channels));
-		return pipeline;
+	public ChannelGroup getChannelGroup() {
+		return channels;
 	}
 	
-	@Override
-	public void start(String pipelineName) throws AdapterException {
-		this.pipelineName = pipelineName;
-		startServer(this);
-	}
-
-	@Override
-	public void stop() throws AdapterException {
-		LOG.info("Stopping {} channels", channels.size());
-		ChannelGroupFuture future = channels.close();
-		future.awaitUninterruptibly();
-		factory.releaseExternalResources();
-	}
-	
-	protected abstract Class<? extends Worker> getMatchingWorkerClass();
-	
-	private void startServer(final ChannelPipelineFactory pipelineFactory) {
+	public void startServer(final ChannelPipelineFactory pipelineFactory, Class<? extends Worker> workerClass) {
 		factory = new NioServerSocketChannelFactory(
 				Executors.newCachedThreadPool(),
 				Executors.newCachedThreadPool());
@@ -86,11 +61,19 @@ public abstract class AbstractAdapter implements Adapter,
 
 		channels.add(channel);
 		
-		registerPort(port);
+		registerPort(workerClass, port);
 	}
 	
-	private void registerPort(int port) {
-		String key = getMatchingWorkerClass().getCanonicalName() + "-" + pipelineName;
+	public void stopServer() {
+		LOG.info("Stopping {} channels", channels.size());
+		ChannelGroupFuture future = channels.close();
+		future.awaitUninterruptibly();
+		factory.releaseExternalResources();
+	}
+	
+	private void registerPort(Class<? extends Worker> workerClass, int port) {
+		String key = workerClass.getCanonicalName() + "-" + pipelineName;
 		PORT_MAP.put(key, port);
 	}
+
 }

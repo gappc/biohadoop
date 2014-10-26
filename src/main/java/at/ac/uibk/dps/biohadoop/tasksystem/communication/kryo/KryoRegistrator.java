@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.utils;
+package at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo;
 
 import java.util.List;
 import java.util.Map;
