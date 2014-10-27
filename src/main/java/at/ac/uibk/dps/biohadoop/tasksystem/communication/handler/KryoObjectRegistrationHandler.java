@@ -12,29 +12,13 @@ import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoObjectRegistra
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoRegistrator;
 
 public class KryoObjectRegistrationHandler extends SimpleChannelUpstreamHandler {
-
+	
 	@Override
 	public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e)
 			throws Exception {
 		String className = getKryoRegistratorClassName();
 		e.getChannel().write(new KryoObjectRegistrationMessage(className));
 		super.channelConnected(ctx, e);
-	}
-
-	private KryoRegistrator getKryoRegistrator() throws AdapterException {
-		String kryoRegistratorClassName = getKryoRegistratorClassName();
-		if (kryoRegistratorClassName == null) {
-			return null;
-		}
-		try {
-			return (KryoRegistrator) Class.forName(kryoRegistratorClassName)
-					.newInstance();
-		} catch (InstantiationException | IllegalAccessException
-				| ClassNotFoundException | NoClassDefFoundError e) {
-			throw new AdapterException(
-					"Could not register objects for Kryo serialization, KryoRegistrator="
-							+ kryoRegistratorClassName, e);
-		}
 	}
 
 	private String getKryoRegistratorClassName()

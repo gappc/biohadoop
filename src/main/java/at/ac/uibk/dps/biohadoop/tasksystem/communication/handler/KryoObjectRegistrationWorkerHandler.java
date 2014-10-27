@@ -3,8 +3,6 @@ package at.ac.uibk.dps.biohadoop.tasksystem.communication.handler;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoBuilder;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoObjectRegistrationMessage;
