@@ -18,6 +18,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.ApplicationSubmissionContext;
 import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.LocalResource;
 import org.apache.hadoop.yarn.api.records.Resource;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
@@ -54,10 +55,12 @@ public class BiohadoopClient {
 			long start = System.currentTimeMillis();
 
 			BiohadoopClient client = new BiohadoopClient();
-			client.run(new YarnConfiguration(), args);
+			FinalApplicationStatus finalAppState = client.run(new YarnConfiguration(),
+					args);
 
 			long end = System.currentTimeMillis();
-			LOG.info("Client stopped, time: {}ms", end - start);
+			LOG.info("Client stopped after {}ms with state {}", end - start,
+					finalAppState);
 		} catch (Exception e) {
 			LOG.error("Error while running {}", CLASSNAME, e);
 			System.exit(1);
@@ -71,12 +74,12 @@ public class BiohadoopClient {
 	 * @param configFilename
 	 * @throws Exception
 	 */
-	public void run(YarnConfiguration yarnConfiguration, String[] args)
-			throws Exception {
+	public FinalApplicationStatus run(YarnConfiguration yarnConfiguration,
+			String[] args) throws Exception {
 		checkArguments(yarnConfiguration, args);
 		String configFilename = args[0];
 		setIncludePaths(yarnConfiguration, configFilename);
-		startApplicationMaster(yarnConfiguration, configFilename);
+		return startApplicationMaster(yarnConfiguration, configFilename);
 	}
 
 	private void checkArguments(YarnConfiguration yarnConfiguration,
@@ -85,10 +88,13 @@ public class BiohadoopClient {
 		if (args.length != 1) {
 			LOG.error("Wrong number of arguments, got {}, expected {}",
 					args.length, 1);
-			throw new IllegalArgumentException("Wrong number of arguments, got " + args.length + ", expected 1");
+			throw new IllegalArgumentException(
+					"Wrong number of arguments, got " + args.length
+							+ ", expected 1");
 		}
 		if (!HdfsUtil.exists(yarnConfiguration, args[0])) {
-			throw new IllegalArgumentException("Could not find config file " + args[0]);
+			throw new IllegalArgumentException("Could not find config file "
+					+ args[0]);
 		}
 	}
 
@@ -119,8 +125,9 @@ public class BiohadoopClient {
 		}
 	}
 
-	private void startApplicationMaster(YarnConfiguration yarnConfiguration,
-			String configFilename) throws Exception {
+	private FinalApplicationStatus startApplicationMaster(
+			YarnConfiguration yarnConfiguration, String configFilename)
+			throws Exception {
 		LOG.info("Launching Application Master");
 
 		// Configure yarnClient
@@ -192,12 +199,15 @@ public class BiohadoopClient {
 			appReport = yarnClient.getApplicationReport(appId);
 			appState = appReport.getYarnApplicationState();
 			if (count++ % 20 == 0) {
-				LOG.info("Progress: {}, state: {}", appReport.getProgress(), appState);
+				LOG.info("Progress: {}, state: {}", appReport.getProgress(),
+						appState);
 			}
 		}
 
 		LOG.info("Application {} finished with state {} at {}", appId,
-				appReport.getFinalApplicationStatus(), appReport.getFinishTime());
+				appReport.getFinalApplicationStatus(),
+				appReport.getFinishTime());
+		return appReport.getFinalApplicationStatus();
 	}
 
 	private void setupAppMasterEnv(Map<String, String> appMasterEnv,

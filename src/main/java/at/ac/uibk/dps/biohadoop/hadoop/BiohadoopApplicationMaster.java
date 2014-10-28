@@ -10,11 +10,8 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.AdapterLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.SolverLauncher;
-import at.ac.uibk.dps.biohadoop.hadoop.launcher.WeldLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLauncher;
-import at.ac.uibk.dps.biohadoop.hadoop.shutdown.ShutdownWaitingService;
 import at.ac.uibk.dps.biohadoop.solver.SolverId;
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueueService;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.HdfsUtil;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
@@ -52,14 +49,9 @@ public class BiohadoopApplicationMaster {
 		Environment.setBiohadoopConfiguration(biohadoopConfiguration);
 		Environment.setBiohadoopConfigurationPath(args[0]);
 
-		WeldLauncher.startWeld();
-
 		AdapterLauncher adapterLauncher = new AdapterLauncher(
 				biohadoopConfiguration);
 		adapterLauncher.startAdapters();
-
-		List<Future<SolverId>> solvers = SolverLauncher
-				.launchSolver(biohadoopConfiguration);
 
 		if (System.getProperty("local") == null) {
 			WorkerLauncher.launchWorkers(yarnConfiguration,
@@ -68,10 +60,12 @@ public class BiohadoopApplicationMaster {
 			WorkerLauncher.pretendToLaunchWorkers(biohadoopConfiguration);
 		}
 
+		List<Future<SolverId>> solvers = SolverLauncher
+				.launchSolver(biohadoopConfiguration);
+		
 		for (Future<SolverId> solver : solvers) {
-			SolverId solverId = null;
 			try {
-				solverId = solver.get();
+				SolverId solverId = solver.get();
 				LOG.info("Finished solver with id {}", solverId);
 			} catch (ExecutionException e) {
 				// TODO add counter to detect errors and set Biohadoops result
@@ -80,15 +74,9 @@ public class BiohadoopApplicationMaster {
 			}
 		}
 		LOG.info("All solvers finished");
-		ShutdownWaitingService.setFinished();
-
-		LOG.info("Stopping all queues");
-		TaskQueueService.getInstance().stopAllTaskQueues();
 
 		LOG.info("Stopping all communication");
 		adapterLauncher.stopAdapters();
-
-		WeldLauncher.stopWeld();
 	}
 
 	private void checkArguments(String[] args) {

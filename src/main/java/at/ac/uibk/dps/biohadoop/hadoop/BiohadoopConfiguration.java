@@ -5,16 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import at.ac.uibk.dps.biohadoop.solver.SolverConfiguration;
-import at.ac.uibk.dps.biohadoop.tasksystem.CommunicationConfiguration;
-import at.ac.uibk.dps.biohadoop.tasksystem.adapter.Adapter;
-import at.ac.uibk.dps.biohadoop.tasksystem.adapter.AdapterConfiguration;
-import at.ac.uibk.dps.biohadoop.tasksystem.submitter.SimpleTaskSubmitter;
-import at.ac.uibk.dps.biohadoop.tasksystem.worker.Worker;
-import at.ac.uibk.dps.biohadoop.tasksystem.worker.WorkerConfiguration;
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonProperty;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import at.ac.uibk.dps.biohadoop.solver.SolverConfiguration;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.CommunicationConfiguration;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.Adapter;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.AdapterConfiguration;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.Worker;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerConfiguration;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.SimpleTaskSubmitter;
 
 public class BiohadoopConfiguration {
 

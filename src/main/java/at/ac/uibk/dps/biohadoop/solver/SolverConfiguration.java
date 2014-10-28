@@ -3,10 +3,10 @@ package at.ac.uibk.dps.biohadoop.solver;
 import java.util.HashMap;
 import java.util.Map;
 
-import at.ac.uibk.dps.biohadoop.algorithm.Algorithm;
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonProperty;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.Algorithm;
 
 public class SolverConfiguration {
 

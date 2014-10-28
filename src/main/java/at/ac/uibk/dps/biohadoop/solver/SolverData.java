@@ -3,8 +3,8 @@ package at.ac.uibk.dps.biohadoop.solver;
 import java.io.Serializable;
 import java.util.TimeZone;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 public class SolverData<T> implements Serializable {
 

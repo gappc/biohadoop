@@ -5,11 +5,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig.Feature;
 
 import at.ac.uibk.dps.biohadoop.utils.HdfsUtil;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class BiohadoopConfigurationUtil {
 
@@ -37,8 +36,8 @@ public class BiohadoopConfigurationUtil {
 			throws IOException {
 		try (OutputStream os = HdfsUtil.createFile(yarnConfiguration, path)) {
 			ObjectMapper mapper = new ObjectMapper();
-			mapper.enable(SerializationFeature.INDENT_OUTPUT);
-			mapper.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
+			mapper.enable(Feature.INDENT_OUTPUT);
+			mapper.enable(Feature.SORT_PROPERTIES_ALPHABETICALLY);
 			mapper.writeValue(os, biohadoopConfiguration);
 		}
 	}
@@ -46,8 +45,8 @@ public class BiohadoopConfigurationUtil {
 	public static void saveLocal(BiohadoopConfiguration biohadoopConfiguration,
 			String path) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
-		mapper.enable(SerializationFeature.INDENT_OUTPUT);
-		mapper.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
+		mapper.enable(Feature.INDENT_OUTPUT);
+		mapper.enable(Feature.SORT_PROPERTIES_ALPHABETICALLY);
 		mapper.writeValue(new File(path), biohadoopConfiguration);
 	}
 

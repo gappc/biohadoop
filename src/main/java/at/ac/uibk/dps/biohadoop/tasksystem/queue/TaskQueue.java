@@ -10,11 +10,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.metrics.Metrics;
-
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.MetricRegistry;
-
 /**
  * A queue that can be used to add tasks for asynchronous computation. The tasks
  * can then be consumed by e.g. adapters, which send them to waiting workers.
@@ -38,9 +33,8 @@ public class TaskQueue<R, T, S> {
 
 	private final BlockingQueue<Task<T>> queue = new LinkedBlockingQueue<>();
 	private final Map<TaskId, TaskQueueEntry<R, T, S>> workingSet = new ConcurrentHashMap<>();
-	private final Map<Thread, Thread> waitingThreads = new ConcurrentHashMap<>();
-	private final Counter queueSizeCounter = Metrics.getInstance().counter(
-			MetricRegistry.name(TaskQueue.class, this + "-queue-size"));
+//	private final Counter queueSizeCounter = Metrics.getInstance().counter(
+//			MetricRegistry.name(TaskQueue.class, this + "-queue-size"));
 
 	/**
 	 * Add a task to the task queue to make it available for asynchronous
@@ -61,18 +55,18 @@ public class TaskQueue<R, T, S> {
 	 * @throws InterruptedException
 	 *             if adding data to the queue was not possible
 	 */
-	public TaskFuture<S> add(T data, String asyncComputableClassName,
-			R initialData) throws InterruptedException {
+	public TaskFuture<S> add(T data, TaskConfiguration<R> taskConfiguration)
+			throws InterruptedException {
 		TaskId taskId = TaskId.newInstance();
 		LOG.debug("Adding task {}", taskId);
-		Task<T> task = new ClassNameWrappedTask<>(taskId, data,
-				asyncComputableClassName);
+		Task<T> task = new Task<>(taskId, taskConfiguration.getTaskTypeId(),
+				data);
 		TaskFutureImpl<S> taskFutureImpl = new TaskFutureImpl<>();
 		TaskQueueEntry<R, T, S> taskQueueEntry = new TaskQueueEntry<>(task,
-				taskFutureImpl, initialData);
+				taskFutureImpl, taskConfiguration);
 		workingSet.put(task.getTaskId(), taskQueueEntry);
 		queue.put(task);
-		queueSizeCounter.inc();
+//		queueSizeCounter.inc();
 		LOG.debug("Task {} was put to queue", task);
 		return taskFutureImpl;
 	}
@@ -105,13 +99,11 @@ public class TaskQueue<R, T, S> {
 	 *             been submitted when the exception occurs.
 	 */
 	public List<TaskFuture<S>> addAll(List<T> datas,
-			String asyncComputableClassName, R initialData)
-			throws InterruptedException {
+			TaskConfiguration<R> taskConfiguration) throws InterruptedException {
 		LOG.debug("Adding list of tasks with size {}", datas.size());
 		List<TaskFuture<S>> taskFutures = new ArrayList<>();
 		for (T data : datas) {
-			TaskFuture<S> taskFutureImpl = add(data, asyncComputableClassName,
-					initialData);
+			TaskFuture<S> taskFutureImpl = add(data, taskConfiguration);
 			taskFutures.add(taskFutureImpl);
 		}
 		return taskFutures;
@@ -145,13 +137,11 @@ public class TaskQueue<R, T, S> {
 	 *             been submitted when the exception occurs.
 	 */
 	public List<TaskFuture<S>> addAll(T[] datas,
-			String asyncComputableClassName, R initialData)
-			throws InterruptedException {
+			TaskConfiguration<R> taskConfiguration) throws InterruptedException {
 		LOG.debug("Adding list of tasks with size {}", datas.length);
 		List<TaskFuture<S>> taskFutures = new ArrayList<>();
 		for (T data : datas) {
-			TaskFuture<S> taskFutureImpl = add(data, asyncComputableClassName,
-					initialData);
+			TaskFuture<S> taskFutureImpl = add(data, taskConfiguration);
 			taskFutures.add(taskFutureImpl);
 		}
 		return taskFutures;
@@ -168,11 +158,11 @@ public class TaskQueue<R, T, S> {
 	 *             if getting a task from the underlying queue is interrupted
 	 */
 	public Task<T> getTask() throws InterruptedException {
-		waitingThreads.put(Thread.currentThread(), Thread.currentThread());
-		Task<T> task = queue.take();
-		waitingThreads.remove(Thread.currentThread());
-		queueSizeCounter.dec();
-		return task;
+		return queue.take();
+	}
+	
+	public Task<T> pollTask() throws InterruptedException {
+		return queue.poll();
 	}
 
 	/**
@@ -187,7 +177,7 @@ public class TaskQueue<R, T, S> {
 	 * @throws TaskException
 	 *             if the <tt>taskId<tt> is unknown
 	 */
-	public R getInitialData(TaskId taskId) throws TaskException {
+	public TaskConfiguration<R> getTaskConfiguration(TaskId taskId) throws TaskException {
 		if (taskId == null) {
 			throw new TaskException("TaskId can not be null");
 		}
@@ -196,7 +186,7 @@ public class TaskQueue<R, T, S> {
 			throw new TaskException("Could not find initial data for task "
 					+ taskId);
 		}
-		return entry.getInitialData();
+		return entry.getTaskConfiguration();
 	}
 
 	/**
@@ -244,47 +234,7 @@ public class TaskQueue<R, T, S> {
 					+ ", because the task id is not known");
 		}
 		queue.put(taskQueueEntry.getTask());
-		queueSizeCounter.inc();
-	}
-
-	/**
-	 * Stops this queue by interrupting all threads that are blocked at the
-	 * underlying queue. Methods that may block are {@link #add(Task)},
-	 * {@link #addAll(List)}, {@link #addAll(Task[])}, {@link #getTask()},
-	 * {@link #reschedule(TaskId)}, {@link #storeResult(TaskId, Object)}
-	 */
-	public void stopQueue() {
-		LOG.info("Interrupting all waiting Threads");
-		forceShutdown();
-	}
-
-	/**
-	 * Starts a daemon thread that goes into an infinite loop to interrupt all
-	 * waiting threads. This is necessary, as we keep no worker state and it is
-	 * possible, that a worker blocks on the {@link #getTask()} method, which
-	 * would prevent the system from shutting down.
-	 */
-	private void forceShutdown() {
-		Thread shutdownForcer = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while (true) {
-					for (Thread thread : waitingThreads.keySet()) {
-						LOG.debug("Interrupting {}", thread);
-						thread.interrupt();
-					}
-					try {
-						Thread.sleep(2000);
-					} catch (InterruptedException e) {
-						LOG.error(
-								"Got interrupted while waiting for next round of forceful shutdown",
-								e);
-					}
-				}
-			}
-		}, "TaskQueue-ShutdownForcer");
-		shutdownForcer.setDaemon(true);
-		shutdownForcer.start();
+//		queueSizeCounter.inc();
 	}
 
 }

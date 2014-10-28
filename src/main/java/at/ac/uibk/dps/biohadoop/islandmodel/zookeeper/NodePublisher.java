@@ -8,14 +8,13 @@ import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.islandmodel.IslandModelResource;
 import at.ac.uibk.dps.biohadoop.solver.SolverId;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class NodePublisher {
 

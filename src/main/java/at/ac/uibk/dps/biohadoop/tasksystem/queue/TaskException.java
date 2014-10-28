@@ -6,7 +6,7 @@ package at.ac.uibk.dps.biohadoop.tasksystem.queue;
  * @author Christian Gapp
  *
  */
-public class TaskException extends Exception {
+public class TaskException extends RuntimeException {
 
 	private static final long serialVersionUID = 2984864374422854392L;
 

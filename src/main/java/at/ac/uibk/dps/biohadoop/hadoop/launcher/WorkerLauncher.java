@@ -34,7 +34,7 @@ import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.LaunchContainerRunnable;
 import at.ac.uibk.dps.biohadoop.hadoop.LocalResourceBuilder;
 import at.ac.uibk.dps.biohadoop.solver.SolverService;
-import at.ac.uibk.dps.biohadoop.tasksystem.worker.WorkerStarter;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerStarter;
 
 //TODO make more parallel and use Callable instead of Thread
 public class WorkerLauncher {
@@ -74,9 +74,7 @@ public class WorkerLauncher {
 		capability.setMemory(128);
 		capability.setVirtualCores(1);
 
-		List<String> workerParameters = WorkerParametersResolver
-				.getAllWorkerParameters(biohadoopConfig
-						.getCommunicationConfiguration());
+		List<String> workerParameters = WorkerParametersResolver.getWorkerParameters();
 
 		final int containerCount = workerParameters.size();
 
@@ -246,14 +244,16 @@ public class WorkerLauncher {
 	public static void pretendToLaunchWorkers(
 			BiohadoopConfiguration biohadoopConfiguration)
 			throws WorkerLaunchException {
-		List<String> workerParameters = WorkerParametersResolver
-				.getAllWorkerParameters(biohadoopConfiguration
-						.getCommunicationConfiguration());
+//		List<String> workerParameters = WorkerParametersResolver
+//				.getAllWorkerParameters(biohadoopConfiguration
+//						.getCommunicationConfiguration());
 
+		List<String> workerParameters = WorkerParametersResolver.getWorkerParameters();
+				
 		ExecutorService executorService = Executors.newCachedThreadPool();
 		for (final String workerParameter : workerParameters) {
 			String clientCommand = String
-					.format("$JAVA_HOME/bin/java -Xmx128M %s %s configFilename 1>%s/stdout 2>%s/stderr",
+					.format("$JAVA_HOME/bin/java -Xmx128M %s %s 1>%s/stdout 2>%s/stderr",
 							WorkerStarter.class.getCanonicalName(),
 							workerParameter,
 							ApplicationConstants.LOG_DIR_EXPANSION_VAR,
