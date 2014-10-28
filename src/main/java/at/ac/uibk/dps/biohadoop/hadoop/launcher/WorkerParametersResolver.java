@@ -3,9 +3,6 @@ package at.ac.uibk.dps.biohadoop.hadoop.launcher;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.NettyServer;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.Worker;
@@ -13,9 +10,6 @@ import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerConfigurat
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 
 public class WorkerParametersResolver {
-
-	private static Logger LOG = LoggerFactory
-			.getLogger(WorkerParametersResolver.class);
 
 	public static List<String> getWorkerParameters() {
 		List<String> workerParameters = new ArrayList<>();
