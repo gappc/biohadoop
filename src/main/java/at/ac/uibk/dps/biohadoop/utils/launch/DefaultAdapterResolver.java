@@ -3,7 +3,7 @@ package at.ac.uibk.dps.biohadoop.utils.launch;
 import java.util.ArrayList;
 import java.util.List;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.CommunicationConfiguration;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.KryoAdapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.LocalAdapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.WebSocketAdapter;

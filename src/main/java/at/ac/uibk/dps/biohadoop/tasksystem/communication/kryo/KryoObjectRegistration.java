@@ -8,8 +8,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.Message;
-import at.ac.uibk.dps.biohadoop.tasksystem.MessageType;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.Message;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.Task;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskId;

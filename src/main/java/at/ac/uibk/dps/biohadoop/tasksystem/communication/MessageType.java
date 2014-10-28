@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.tasksystem;
+package at.ac.uibk.dps.biohadoop.tasksystem.communication;
 
 public enum MessageType {
 	WORK_REQUEST,

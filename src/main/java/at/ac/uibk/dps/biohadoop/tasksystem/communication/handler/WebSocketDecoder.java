@@ -7,7 +7,7 @@ import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.Message;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.Message;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.mapper.JsonMapper;
 
 public class WebSocketDecoder extends OneToOneDecoder {

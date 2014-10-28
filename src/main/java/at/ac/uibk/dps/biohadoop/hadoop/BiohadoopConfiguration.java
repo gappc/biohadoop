@@ -9,7 +9,7 @@ import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import at.ac.uibk.dps.biohadoop.solver.SolverConfiguration;
-import at.ac.uibk.dps.biohadoop.tasksystem.CommunicationConfiguration;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.Adapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.AdapterConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.Worker;

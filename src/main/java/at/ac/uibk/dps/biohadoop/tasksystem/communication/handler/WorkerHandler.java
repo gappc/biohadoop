@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
-import at.ac.uibk.dps.biohadoop.tasksystem.Message;
-import at.ac.uibk.dps.biohadoop.tasksystem.MessageType;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.Message;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerData;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.Task;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskConfiguration;
