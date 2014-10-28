@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.tasksystem.adapter;
+package at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.Worker;
 

@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.CommunicationConfiguration;
-import at.ac.uibk.dps.biohadoop.tasksystem.adapter.local.LocalAdapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.KryoAdapter;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.LocalAdapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.WebSocketAdapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.LocalWorker;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerConfiguration;

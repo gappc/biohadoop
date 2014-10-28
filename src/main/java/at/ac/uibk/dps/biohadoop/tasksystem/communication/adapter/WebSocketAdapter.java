@@ -3,7 +3,6 @@ package at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.group.ChannelGroup;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.adapter.AdapterException;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.pipeline.WebSocketAdapterPipelineFactory;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WebSocketWorker;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.Worker;

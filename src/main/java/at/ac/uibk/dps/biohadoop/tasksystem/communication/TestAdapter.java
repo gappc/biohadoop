@@ -1,6 +1,6 @@
 package at.ac.uibk.dps.biohadoop.tasksystem.communication;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.adapter.AdapterException;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.AdapterException;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.KryoAdapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.WebSocketAdapter;
 

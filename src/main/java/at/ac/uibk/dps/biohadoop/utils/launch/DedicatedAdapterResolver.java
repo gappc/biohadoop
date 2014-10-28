@@ -8,9 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.CommunicationConfiguration;
-import at.ac.uibk.dps.biohadoop.tasksystem.adapter.Adapter;
-import at.ac.uibk.dps.biohadoop.tasksystem.adapter.AdapterConfiguration;
-import at.ac.uibk.dps.biohadoop.tasksystem.adapter.local.LocalAdapter;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.Adapter;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.AdapterConfiguration;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.LocalAdapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.LocalWorker;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerConfiguration;
 

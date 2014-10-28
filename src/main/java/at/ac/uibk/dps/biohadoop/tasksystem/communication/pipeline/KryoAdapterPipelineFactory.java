@@ -6,7 +6,7 @@ import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.group.ChannelGroup;
 
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
-import at.ac.uibk.dps.biohadoop.tasksystem.adapter.AdapterException;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.AdapterException;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.AdapterInitialDataHandler;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.AdapterWorkHandler;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.KryoDecoder;
