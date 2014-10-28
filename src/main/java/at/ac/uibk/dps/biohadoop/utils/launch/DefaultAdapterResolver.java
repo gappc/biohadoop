@@ -7,9 +7,9 @@ import at.ac.uibk.dps.biohadoop.tasksystem.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.local.LocalAdapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.KryoAdapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.WebSocketAdapter;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.LocalWorker;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.submitter.SimpleTaskSubmitter;
-import at.ac.uibk.dps.biohadoop.tasksystem.worker.LocalWorker;
-import at.ac.uibk.dps.biohadoop.tasksystem.worker.WorkerConfiguration;
 
 public class DefaultAdapterResolver {
 

@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.tasksystem.worker;
+package at.ac.uibk.dps.biohadoop.tasksystem.communication.worker;
 
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;

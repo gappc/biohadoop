@@ -1,9 +1,9 @@
 package at.ac.uibk.dps.biohadoop.tasksystem.communication;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.AdapterException;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.ConnectionRefusedException;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.KryoWorker;
-import at.ac.uibk.dps.biohadoop.tasksystem.worker.ConnectionRefusedException;
-import at.ac.uibk.dps.biohadoop.tasksystem.worker.WorkerException;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerException;
 
 public class TestWorker {
 

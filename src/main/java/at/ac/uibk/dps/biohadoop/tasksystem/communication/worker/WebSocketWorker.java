@@ -9,8 +9,6 @@ import org.jboss.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFa
 import org.jboss.netty.handler.codec.http.websocketx.WebSocketVersion;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.pipeline.WebSocketWorkerPipelineFactory;
-import at.ac.uibk.dps.biohadoop.tasksystem.worker.ConnectionRefusedException;
-import at.ac.uibk.dps.biohadoop.tasksystem.worker.WorkerException;
 
 public class WebSocketWorker extends AbstractWorker {
 

@@ -1,6 +1,6 @@
 package at.ac.uibk.dps.biohadoop.tasksystem.adapter;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.worker.Worker;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.Worker;
 
 public interface Adapter {
 

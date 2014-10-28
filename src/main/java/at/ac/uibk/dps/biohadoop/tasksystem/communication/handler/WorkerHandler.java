@@ -13,10 +13,10 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
 import at.ac.uibk.dps.biohadoop.tasksystem.Message;
 import at.ac.uibk.dps.biohadoop.tasksystem.MessageType;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerData;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.Task;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskTypeId;
-import at.ac.uibk.dps.biohadoop.tasksystem.worker.WorkerData;
 
 public class WorkerHandler extends SimpleChannelHandler {
 

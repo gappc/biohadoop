@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.tasksystem.worker;
+package at.ac.uibk.dps.biohadoop.tasksystem.communication.worker;
 
 import java.util.Map;
 import java.util.concurrent.Callable;

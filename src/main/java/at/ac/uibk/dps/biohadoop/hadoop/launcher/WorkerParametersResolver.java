@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.NettyServer;
-import at.ac.uibk.dps.biohadoop.tasksystem.worker.Worker;
-import at.ac.uibk.dps.biohadoop.tasksystem.worker.WorkerConfiguration;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.Worker;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerConfiguration;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 
 public class WorkerParametersResolver {

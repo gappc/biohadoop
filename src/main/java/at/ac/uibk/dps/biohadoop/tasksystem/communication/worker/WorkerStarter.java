@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.tasksystem.worker;
+package at.ac.uibk.dps.biohadoop.tasksystem.communication.worker;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

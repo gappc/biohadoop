@@ -8,9 +8,9 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.Adapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.adapter.AdapterException;
-import at.ac.uibk.dps.biohadoop.tasksystem.worker.LocalWorker;
-import at.ac.uibk.dps.biohadoop.tasksystem.worker.Worker;
-import at.ac.uibk.dps.biohadoop.tasksystem.worker.WorkerException;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.LocalWorker;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.Worker;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerException;
 
 public class LocalAdapter implements Adapter {
 	@Override
