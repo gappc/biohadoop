@@ -14,7 +14,7 @@ import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.Adapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.AdapterConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.Worker;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerConfiguration;
-import at.ac.uibk.dps.biohadoop.tasksystem.submitter.SimpleTaskSubmitter;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.SimpleTaskSubmitter;
 
 public class BiohadoopConfiguration {
 

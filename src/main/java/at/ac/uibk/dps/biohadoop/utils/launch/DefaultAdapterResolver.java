@@ -9,7 +9,7 @@ import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.LocalAdapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.WebSocketAdapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.LocalWorker;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerConfiguration;
-import at.ac.uibk.dps.biohadoop.tasksystem.submitter.SimpleTaskSubmitter;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.SimpleTaskSubmitter;
 
 public class DefaultAdapterResolver {
 

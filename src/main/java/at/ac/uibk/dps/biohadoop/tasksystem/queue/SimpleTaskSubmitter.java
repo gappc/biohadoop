@@ -1,14 +1,9 @@
-package at.ac.uibk.dps.biohadoop.tasksystem.submitter;
+package at.ac.uibk.dps.biohadoop.tasksystem.queue;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskConfiguration;
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskException;
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskFuture;
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueue;
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueueService;
 
 /**
  * This class provides a base implementation of {@link TaskSubmitter}, with

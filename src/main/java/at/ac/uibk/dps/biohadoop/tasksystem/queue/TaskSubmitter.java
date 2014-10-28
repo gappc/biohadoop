@@ -1,9 +1,6 @@
-package at.ac.uibk.dps.biohadoop.tasksystem.submitter;
+package at.ac.uibk.dps.biohadoop.tasksystem.queue;
 
 import java.util.List;
-
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskException;
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskFuture;
 
 /**
  * A <tt>TaskSubmitter</tt> is the main entry point to Biohadoops task system. It

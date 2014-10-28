@@ -3,7 +3,6 @@ package at.ac.uibk.dps.biohadoop.tasksystem.queue;
 import java.io.Serializable;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
-import at.ac.uibk.dps.biohadoop.tasksystem.submitter.TaskSubmitter;
 
 /**
  * A task, that is used by Biohadoop's Task system. Methods are provided to get
