@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.algorithm;
+package at.ac.uibk.dps.biohadoop.tasksystem.algorithm;
 
 import java.util.Map;
 

@@ -10,13 +10,13 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.algorithm.Algorithm;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.solver.Solver;
 import at.ac.uibk.dps.biohadoop.solver.SolverConfiguration;
 import at.ac.uibk.dps.biohadoop.solver.SolverId;
 import at.ac.uibk.dps.biohadoop.solver.SolverService;
 import at.ac.uibk.dps.biohadoop.solver.SolverState;
+import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.Algorithm;
 
 public class SolverLauncher {
 

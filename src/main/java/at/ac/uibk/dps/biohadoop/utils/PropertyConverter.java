@@ -3,7 +3,7 @@ package at.ac.uibk.dps.biohadoop.utils;
 import java.util.Arrays;
 import java.util.Map;
 
-import at.ac.uibk.dps.biohadoop.algorithm.AlgorithmException;
+import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.AlgorithmException;
 
 public class PropertyConverter {
 
