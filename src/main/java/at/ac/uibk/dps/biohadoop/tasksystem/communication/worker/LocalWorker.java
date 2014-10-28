@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLaunchException;
 import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
 import at.ac.uibk.dps.biohadoop.tasksystem.ComputeException;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.Task;
@@ -18,7 +17,6 @@ import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueue;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueueService;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskTypeId;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
-import at.ac.uibk.dps.biohadoop.utils.PerformanceLogger;
 
 public class LocalWorker<R, T, S> implements Worker, Callable<Object> {
 
@@ -59,12 +57,8 @@ public class LocalWorker<R, T, S> implements Worker, Callable<Object> {
 		TaskQueue<R, T, S> taskQueue = TaskQueueService
 				.getTaskQueue(pipelineName);
 
-		PerformanceLogger performanceLogger = new PerformanceLogger(
-				System.currentTimeMillis(), 0, logSteps);
 		while (!stop.get()) {
 			try {
-				// performanceLogger.step(LOG);
-
 				Task<T> task = taskQueue.getTask();
 				if (task == null) {
 					LOG.info("############# {} Worker stopped ###############",
