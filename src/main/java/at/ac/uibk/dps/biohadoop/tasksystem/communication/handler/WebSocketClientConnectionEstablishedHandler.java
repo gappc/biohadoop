@@ -5,7 +5,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.event.HandshakeEvent;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.websocket.HandshakeEvent;
 
 public class WebSocketClientConnectionEstablishedHandler extends
 		DefaultClientConnectionEstablishedHandler {

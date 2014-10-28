@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.tasksystem.communication.event;
+package at.ac.uibk.dps.biohadoop.tasksystem.communication.websocket;
 
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelEvent;

@@ -11,7 +11,7 @@ import org.jboss.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.event.HandshakeEvent;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.websocket.HandshakeEvent;
 
 public class WebSocketHandshakeHandler extends SimpleChannelHandler {
 
