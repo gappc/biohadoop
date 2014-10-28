@@ -10,11 +10,11 @@ import at.ac.uibk.dps.biohadoop.tasksystem.worker.Worker;
 
 public class WebSocketAdapter extends AbstractAdapter {
 
-
 	@Override
 	public void start(String pipelineName) throws AdapterException {
 		ChannelGroup channels = server.getChannelGroup();
 		ChannelPipelineFactory pipelineFactory = new WebSocketAdapterPipelineFactory(channels, pipelineName);
+		server.setPipelineName(pipelineName);
 		server.startServer(pipelineFactory, getMatchingWorkerClass());
 	}
 	

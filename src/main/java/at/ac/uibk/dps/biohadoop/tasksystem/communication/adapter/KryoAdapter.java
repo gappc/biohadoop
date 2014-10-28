@@ -14,6 +14,7 @@ public class KryoAdapter extends AbstractAdapter {
 	public void start(String pipelineName) throws AdapterException {
 		ChannelGroup channels = server.getChannelGroup();
 		ChannelPipelineFactory pipelineFactory = new KryoAdapterPipelineFactory(channels, pipelineName);
+		server.setPipelineName(pipelineName);
 		server.startServer(pipelineFactory, getMatchingWorkerClass());
 	}
 

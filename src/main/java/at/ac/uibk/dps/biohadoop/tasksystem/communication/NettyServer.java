@@ -42,6 +42,10 @@ public class NettyServer {
 		return channels;
 	}
 	
+	public void setPipelineName(String pipelineName) {
+		this.pipelineName = pipelineName;	
+	}
+	
 	public void startServer(final ChannelPipelineFactory pipelineFactory, Class<? extends Worker> workerClass) {
 		factory = new NioServerSocketChannelFactory(
 				Executors.newCachedThreadPool(),
