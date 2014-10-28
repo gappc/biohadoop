@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.utils.launch;
+package at.ac.uibk.dps.biohadoop.hadoop.launcher;
 
 import java.util.ArrayList;
 import java.util.List;

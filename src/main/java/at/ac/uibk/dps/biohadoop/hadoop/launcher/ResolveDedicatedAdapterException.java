@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.utils.launch;
+package at.ac.uibk.dps.biohadoop.hadoop.launcher;
 
 public class ResolveDedicatedAdapterException extends Exception {
 

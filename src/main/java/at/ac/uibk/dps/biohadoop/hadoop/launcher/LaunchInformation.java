@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.utils.launch;
+package at.ac.uibk.dps.biohadoop.hadoop.launcher;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.Adapter;
 

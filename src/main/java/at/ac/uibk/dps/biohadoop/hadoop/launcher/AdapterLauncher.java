@@ -10,10 +10,6 @@ import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.Adapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.AdapterException;
-import at.ac.uibk.dps.biohadoop.utils.launch.DedicatedAdapterResolver;
-import at.ac.uibk.dps.biohadoop.utils.launch.DefaultAdapterResolver;
-import at.ac.uibk.dps.biohadoop.utils.launch.LaunchInformation;
-import at.ac.uibk.dps.biohadoop.utils.launch.ResolveDedicatedAdapterException;
 
 public class AdapterLauncher {
 
