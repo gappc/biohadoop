@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.tasksystem.adapter.kryo;
+package at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo;
 
 import java.util.UUID;
 
