@@ -30,6 +30,18 @@ public class PropertyConverter {
 					+ " to long, value was " + value, e);
 		}
 	}
+	
+	public static double toDouble(Map<String, String> properties, String key)
+			throws AlgorithmException {
+		String value = null;
+		try {
+			value = properties.get(key);
+			return Double.parseDouble(value);
+		} catch (Exception e) {
+			throw new AlgorithmException("Could not convert property " + key
+					+ " to double, value was " + value, e);
+		}
+	}
 
 	public static String toString(Map<String, String> properties, String key,
 			String[] validVals) throws AlgorithmException {
