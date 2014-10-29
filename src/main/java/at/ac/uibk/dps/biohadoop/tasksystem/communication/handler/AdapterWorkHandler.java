@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.Message;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.Task;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskException;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskId;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueue;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueueService;
 
@@ -22,7 +24,9 @@ public class AdapterWorkHandler extends SimpleChannelHandler {
 			.getLogger(AdapterWorkHandler.class);
 
 	private final TaskQueue taskQueue;
-	ForkJoinPool pool = new ForkJoinPool();
+	private final ForkJoinPool pool = new ForkJoinPool();
+
+	private TaskId currentTaskId;
 
 	public AdapterWorkHandler(String pipelineName) {
 		taskQueue = TaskQueueService.getTaskQueue(pipelineName);
@@ -47,6 +51,7 @@ public class AdapterWorkHandler extends SimpleChannelHandler {
 			// approach inside a dedicated thread
 			Task outputTask = taskQueue.pollTask();
 			if (outputTask != null) {
+				currentTaskId = outputTask.getTaskId();
 				Message outputMessage = new Message(
 						MessageType.WORK_RESPONSE.ordinal(), outputTask);
 				e.getChannel().write(outputMessage);
@@ -67,6 +72,19 @@ public class AdapterWorkHandler extends SimpleChannelHandler {
 		e.getChannel().close();
 	}
 
+	public void handleError() {
+		if (currentTaskId != null) {
+			try {
+				taskQueue.reschedule(currentTaskId);
+			} catch (TaskException | InterruptedException e) {
+				LOG.error("Error while rescheduling task {}", currentTaskId);
+			}
+		}
+		else {
+			LOG.warn("TaskId is null, maybe the exception was raised before the first task was taken from queue?");
+		}
+	}
+
 	private class TaskGetter implements Callable<Object> {
 
 		private final MessageEvent e;
@@ -78,6 +96,7 @@ public class AdapterWorkHandler extends SimpleChannelHandler {
 		@Override
 		public Object call() throws Exception {
 			Task outputTask = taskQueue.getTask();
+			currentTaskId = outputTask.getTaskId();
 			Message outputMessage = new Message(
 					MessageType.WORK_RESPONSE.ordinal(), outputTask);
 			e.getChannel().write(outputMessage);

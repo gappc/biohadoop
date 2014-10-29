@@ -37,6 +37,8 @@ public class CustomWebSocketServerProtocolHandler extends WebSocketServerProtoco
             response.setContent(ChannelBuffers.wrappedBuffer(e.getCause().getMessage().getBytes()));
             ctx.getChannel().write(response).addListener(ChannelFutureListener.CLOSE);
         } else {
+        	AdapterWorkHandler handler = ctx.getPipeline().get(AdapterWorkHandler.class);
+        	handler.handleError();
         	LOG.error("Handler error: ", e.getCause());
             ctx.getChannel().close();
         }
