@@ -28,11 +28,5 @@ public class CounterHandler extends SimpleChannelUpstreamHandler {
 		}
 		super.messageReceived(ctx, e);
 	}
-
-	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
-			throws Exception {
-		LOG.error("Handler error: ", e.getCause());
-		e.getChannel().close();
-	}
+	
 }
