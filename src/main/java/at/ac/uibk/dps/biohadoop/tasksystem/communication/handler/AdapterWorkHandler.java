@@ -4,6 +4,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ForkJoinPool;
 
 import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
@@ -71,6 +72,13 @@ public class AdapterWorkHandler extends SimpleChannelHandler {
 		LOG.error("Handler error: ", e.getCause());
 		e.getChannel().close();
 	}
+	
+	@Override
+	public void channelDisconnected(ChannelHandlerContext ctx,
+			ChannelStateEvent e) throws Exception {
+		handleError();
+		super.channelDisconnected(ctx, e);
+	}
 
 	public void handleError() {
 		if (currentTaskId != null) {
@@ -79,6 +87,7 @@ public class AdapterWorkHandler extends SimpleChannelHandler {
 			} catch (TaskException | InterruptedException e) {
 				LOG.error("Error while rescheduling task {}", currentTaskId);
 			}
+			currentTaskId = null;
 		}
 		else {
 			LOG.warn("TaskId is null, maybe the exception was raised before the first task was taken from queue?");
