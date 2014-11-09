@@ -15,7 +15,7 @@ public class WorkerParametersResolver {
 		List<String> workerParameters = new ArrayList<>();
 		List<WorkerConfiguration> configurations = Environment
 				.getBiohadoopConfiguration().getCommunicationConfiguration()
-				.getWorkerConfigurations();
+				.getWorkers();
 		for (WorkerConfiguration configuration : configurations) {
 			Class<? extends Worker> worker = configuration.getWorker();
 			Integer port = NettyServer.getPort(worker);
