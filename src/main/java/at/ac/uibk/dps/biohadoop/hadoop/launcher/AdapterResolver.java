@@ -17,10 +17,10 @@ public class AdapterResolver {
 
 	public static List<Adapter> getAdapters(
 			CommunicationConfiguration communicationConfiguration)
-			throws ResolveAdapterException {
+			throws AdapterLaunchException {
 
 		if (communicationConfiguration.getAdapters() == null) {
-			throw new ResolveAdapterException(
+			throw new AdapterLaunchException(
 					"CommunicationConfiguration is incomplete, no adapters defined");
 		}
 
@@ -30,7 +30,7 @@ public class AdapterResolver {
 				.getAdapters()) {
 
 			if (adapterConfiguration.getAdapter() == null) {
-				throw new ResolveAdapterException(
+				throw new AdapterLaunchException(
 						"AdapterConfiguration is null");
 			}
 
@@ -41,7 +41,7 @@ public class AdapterResolver {
 				adapters.add(adapter);
 			} catch (IllegalAccessException | IllegalArgumentException
 					| InstantiationException | SecurityException e) {
-				throw new ResolveAdapterException(
+				throw new AdapterLaunchException(
 						"Error while getting Adapter for AdapterConfiguration "
 								+ adapterConfiguration, e);
 			}

@@ -38,7 +38,7 @@ public class AdapterLauncher {
 				LOG.debug("Starting adapter {}", adapter);
 				adapter.start();
 			}
-		} catch (ResolveAdapterException e) {
+		} catch (AdapterLaunchException e) {
 			throw new AdapterException(e);
 		}
 	}
