@@ -10,9 +10,6 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.Adapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.AdapterConfiguration;
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.LocalAdapter;
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.LocalWorker;
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerConfiguration;
 
 public class DedicatedAdapterResolver {
 
@@ -33,13 +30,7 @@ public class DedicatedAdapterResolver {
 							"AdapterConfiguration not complete: "
 									+ dedicatedAdapterConfiguration);
 				}
-				if (isLocalAdapter(launchInformation)) {
-					List<LaunchInformation> localLaunchInformations = handleLocalAdapter(
-							communicationConfiguration, launchInformation);
-					finalLaunchInformations.addAll(localLaunchInformations);
-				} else {
-					finalLaunchInformations.add(launchInformation);
-				}
+				finalLaunchInformations.add(launchInformation);
 			} catch (IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | InstantiationException
 					| NoSuchMethodException | SecurityException e) {
@@ -67,32 +58,5 @@ public class DedicatedAdapterResolver {
 		String pipelineName = dedicatedAdapterConfiguration.getPipelineName();
 
 		return new LaunchInformation(adapter, pipelineName);
-	}
-
-	private static boolean isLocalAdapter(LaunchInformation launchInformation) {
-		return LocalAdapter.class.equals(launchInformation.getAdapter()
-				.getClass());
-	}
-
-	private static List<LaunchInformation> handleLocalAdapter(
-			CommunicationConfiguration communicationConfiguration,
-			LaunchInformation launchInformation) {
-		List<LaunchInformation> finalLaunchInformations = new ArrayList<>();
-		if (launchInformation == null) {
-			return finalLaunchInformations;
-		}
-
-		for (WorkerConfiguration workerConfiguration : communicationConfiguration
-				.getWorkerConfigurations()) {
-			boolean isLocalWorker = LocalWorker.class
-					.equals(workerConfiguration.getWorker());
-			if (isLocalWorker) {
-				Integer count = workerConfiguration.getCount();
-				for (int i = 0; i < count; i++) {
-					finalLaunchInformations.add(launchInformation);
-				}
-			}
-		}
-		return finalLaunchInformations;
 	}
 }
