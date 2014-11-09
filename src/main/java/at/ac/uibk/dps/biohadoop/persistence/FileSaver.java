@@ -21,9 +21,7 @@ public class FileSaver {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FileSaver.class);
 
-	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-	public static void save(SolverId solverId, Map<String, String> properties,
+	public static void saveRollingJson(SolverId solverId, Map<String, String> properties,
 			SolverData<?> solverData) throws FileSaveException {
 
 		String path = properties.get(FILE_SAVE_PATH);
@@ -32,42 +30,17 @@ public class FileSaver {
 					+ " not declared");
 		}
 
-		save(solverId, path, solverData);
+		FileSaveUtils.saveRolling(solverId, path, solverData);
 	}
-
-	private static void save(SolverId solverId, String path,
-			SolverData<?> solverData) throws FileSaveException {
-		String savePath = FileHandlerUtils.getSavePath(solverId, path);
-
-		YarnConfiguration yarnConfiguration = new YarnConfiguration();
-		try {
-			if (!HdfsUtil.isDirectory(yarnConfiguration, savePath)) {
-				boolean dirCreated = HdfsUtil
-						.mkDir(yarnConfiguration, savePath);
-				if (!dirCreated) {
-					throw new FileSaveException(
-							"Could not create directory with path " + savePath);
-				}
-			}
-
-			String fullPath = savePath + "/" + solverId.toString() + "_"
-					+ solverData.getIteration() + "_"
-					+ solverData.getTimestamp();
-
-			if (HdfsUtil.exists(yarnConfiguration, fullPath)) {
-				throw new FileSaveException("File " + fullPath
-						+ " already exists");
-			}
-
-			LOG.info("Persisting data for solver {} to {}", solverId, fullPath);
-
-			OutputStream os = HdfsUtil.createFile(yarnConfiguration, fullPath);
-			BufferedOutputStream bos = new BufferedOutputStream(os);
-			OBJECT_MAPPER.writeValue(bos, solverData);
-		} catch (IOException e) {
-			throw new FileSaveException("Could not save solver " + solverId
-					+ " to file: " + savePath, e);
+	
+	public static void saveJson(String filename, Object data) throws FileSaveException {
+		if (filename == null) {
+			throw new FileSaveException("Filename not set");
 		}
+
+		FileSaveUtils.saveJson(filename, data);
 	}
+
+
 
 }
