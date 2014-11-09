@@ -19,11 +19,7 @@ public class AdapterInitialDataHandler extends SimpleChannelHandler {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(AdapterInitialDataHandler.class);
 
-	private final TaskQueue taskQueue;
-
-	public AdapterInitialDataHandler(String pipelineName) {
-		taskQueue = TaskQueueService.getTaskQueue(pipelineName);
-	}
+	private final TaskQueue taskQueue = TaskQueueService.getTaskQueue();
 
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)

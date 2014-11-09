@@ -41,8 +41,7 @@ public class AdapterLauncher {
 			for (LaunchInformation launchInformation : launchInformations) {
 				LOG.debug("Starting adapter {}", launchInformation);
 				Adapter adapter = launchInformation.getAdapter();
-				String pipelineName = launchInformation.getPipelineName();
-				adapter.start(pipelineName);
+				adapter.start();
 			}
 		} catch (ResolveDedicatedAdapterException e) {
 			throw new AdapterException(e);

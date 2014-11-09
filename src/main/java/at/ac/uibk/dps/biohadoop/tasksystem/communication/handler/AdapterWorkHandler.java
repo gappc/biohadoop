@@ -24,14 +24,10 @@ public class AdapterWorkHandler extends SimpleChannelHandler {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(AdapterWorkHandler.class);
 
-	private final TaskQueue taskQueue;
+	private final TaskQueue taskQueue = TaskQueueService.getTaskQueue();
 	private final ForkJoinPool pool = new ForkJoinPool();
 
 	private TaskId currentTaskId;
-
-	public AdapterWorkHandler(String pipelineName) {
-		taskQueue = TaskQueueService.getTaskQueue(pipelineName);
-	}
 
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)

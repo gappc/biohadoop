@@ -11,12 +11,10 @@ import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.CounterHandler;
 public abstract class AbstractPipeline implements ChannelPipelineFactory {
 
 	private final ChannelGroup channels;
-	protected final String pipelineName;
 	protected final CounterHandler counterHandler;
 	
-	public AbstractPipeline(ChannelGroup channels, String pipelineName) {
+	public AbstractPipeline(ChannelGroup channels) {
 		this.channels = channels;
-		this.pipelineName = pipelineName;
 		this.counterHandler = new CounterHandler();
 	}
 	

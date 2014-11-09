@@ -14,7 +14,6 @@ import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.Adapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.AdapterConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.Worker;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerConfiguration;
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.SimpleTaskSubmitter;
 
 public class BiohadoopConfiguration {
 
@@ -79,26 +78,22 @@ public class BiohadoopConfiguration {
 		}
 
 		public Builder addDedicatedAdapter(
-				Class<? extends Adapter> dedicatedAdapter,
-				String pipelineName) {
+				Class<? extends Adapter> dedicatedAdapter) {
 			AdapterConfiguration adapterConfiguration = new AdapterConfiguration(
-					dedicatedAdapter, pipelineName);
+					dedicatedAdapter);
 			dedicatedAdapters.add(adapterConfiguration);
 			return this;
 		}
 
-		public Builder addWorker(Class<? extends Worker> worker,
-				int count) {
-			addDedicatedWorker(worker, SimpleTaskSubmitter.PIPELINE_NAME, count);
+		public Builder addWorker(Class<? extends Worker> worker, int count) {
+			addDedicatedWorker(worker, count);
 			return this;
 		}
 
-		public Builder addDedicatedWorker(
-				Class<? extends Worker> worker,
-				String pipelineName,
+		public Builder addDedicatedWorker(Class<? extends Worker> worker,
 				int count) {
 			WorkerConfiguration workerConfiguration = new WorkerConfiguration(
-					worker, pipelineName, count);
+					worker, count);
 			workerConfigurations.add(workerConfiguration);
 			return this;
 		}

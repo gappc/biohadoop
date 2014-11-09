@@ -18,12 +18,10 @@ public class DefaultAdapterResolver {
 
 		LaunchInformation launchInformation = null;
 
-		launchInformation = new LaunchInformation(new KryoAdapter(),
-				SimpleTaskSubmitter.PIPELINE_NAME);
+		launchInformation = new LaunchInformation(new KryoAdapter());
 		launchInformations.add(launchInformation);
 		
-		launchInformation = new LaunchInformation(new WebSocketAdapter(),
-				SimpleTaskSubmitter.PIPELINE_NAME);
+		launchInformation = new LaunchInformation(new WebSocketAdapter());
 		launchInformations.add(launchInformation);
 		
 		return launchInformations;

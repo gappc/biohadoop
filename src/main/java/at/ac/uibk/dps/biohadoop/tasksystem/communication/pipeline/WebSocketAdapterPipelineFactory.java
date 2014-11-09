@@ -14,8 +14,8 @@ import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.WebSocketEncode
 
 public class WebSocketAdapterPipelineFactory extends AbstractPipeline {
 
-	public WebSocketAdapterPipelineFactory(ChannelGroup channels, String pipelineName) {
-		super(channels, pipelineName);
+	public WebSocketAdapterPipelineFactory(ChannelGroup channels) {
+		super(channels);
 	}
 
 	@Override
@@ -29,8 +29,8 @@ public class WebSocketAdapterPipelineFactory extends AbstractPipeline {
 		pipeline.addLast("httpEncoder", new HttpResponseEncoder());
 		pipeline.addLast("webSocketEncoder", new WebSocketEncoder());
 		pipeline.addLast("counter", counterHandler);
-		pipeline.addLast("workHandler", new AdapterWorkHandler(pipelineName));
-		pipeline.addLast("initialDataHandler", new AdapterInitialDataHandler(pipelineName));
+		pipeline.addLast("workHandler", new AdapterWorkHandler());
+		pipeline.addLast("initialDataHandler", new AdapterInitialDataHandler());
 		return pipeline;
 	}
 }

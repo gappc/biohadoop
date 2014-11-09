@@ -18,8 +18,7 @@ public class WorkerParametersResolver {
 				.getWorkerConfigurations();
 		for (WorkerConfiguration configuration : configurations) {
 			Class<? extends Worker> worker = configuration.getWorker();
-			Integer port = NettyServer.getPort(worker,
-					configuration.getPipelineName());
+			Integer port = NettyServer.getPort(worker);
 			for (int i = 0; i < configuration.getCount(); i++) {
 				workerParameters.add(worker.getCanonicalName() + " "
 						+ HostInfo.getHostname() + " " + port);

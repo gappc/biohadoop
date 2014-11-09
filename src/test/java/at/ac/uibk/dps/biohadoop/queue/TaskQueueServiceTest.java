@@ -10,7 +10,7 @@ public class TaskQueueServiceTest {
 
 	@Test
 	public void taskQueueNotNull() {
-		assertNotNull(TaskQueueService.getTaskQueue(""));
+		assertNotNull(TaskQueueService.getTaskQueue());
 	}
 
 //	@Test

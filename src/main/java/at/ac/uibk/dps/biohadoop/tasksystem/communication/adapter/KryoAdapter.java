@@ -10,10 +10,9 @@ import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.Worker;
 public class KryoAdapter extends AbstractAdapter {
 
 	@Override
-	public void start(String pipelineName) throws AdapterException {
+	public void start() throws AdapterException {
 		ChannelGroup channels = server.getChannelGroup();
-		ChannelPipelineFactory pipelineFactory = new KryoAdapterPipelineFactory(channels, pipelineName);
-		server.setPipelineName(pipelineName);
+		ChannelPipelineFactory pipelineFactory = new KryoAdapterPipelineFactory(channels);
 		server.startServer(pipelineFactory, getMatchingWorkerClass());
 	}
 

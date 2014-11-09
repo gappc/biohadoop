@@ -25,7 +25,6 @@ public class NettyServer {
 	protected final ChannelGroup channels = new DefaultChannelGroup(this
 			.getClass().getCanonicalName() + "-server");
 
-	protected String pipelineName;
 	protected CounterHandler counterHandler = new CounterHandler();
 
 	private static final int PORT_RANGE_LOW = 30000;
@@ -34,16 +33,12 @@ public class NettyServer {
 
 	private ChannelFactory factory;
 
-	public static Integer getPort(Class<? extends Worker> workerClass, String pipelineName) {
-		return PORT_MAP.get(workerClass.getCanonicalName() + "-" + pipelineName);
+	public static Integer getPort(Class<? extends Worker> workerClass) {
+		return PORT_MAP.get(workerClass.getCanonicalName());
 	}
 	
 	public ChannelGroup getChannelGroup() {
 		return channels;
-	}
-	
-	public void setPipelineName(String pipelineName) {
-		this.pipelineName = pipelineName;	
 	}
 	
 	public void startServer(final ChannelPipelineFactory pipelineFactory, Class<? extends Worker> workerClass) {
@@ -76,7 +71,7 @@ public class NettyServer {
 	}
 	
 	private void registerPort(Class<? extends Worker> workerClass, int port) {
-		String key = workerClass.getCanonicalName() + "-" + pipelineName;
+		String key = workerClass.getCanonicalName();
 		PORT_MAP.put(key, port);
 	}
 

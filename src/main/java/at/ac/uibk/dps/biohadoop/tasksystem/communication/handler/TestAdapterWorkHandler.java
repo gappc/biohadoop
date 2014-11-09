@@ -20,11 +20,7 @@ public class TestAdapterWorkHandler extends SimpleChannelHandler {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(AdapterWorkHandler.class);
 
-	private final TaskQueue taskQueue;
-
-	public TestAdapterWorkHandler(String pipelineName) {
-		taskQueue = TaskQueueService.getTaskQueue(pipelineName);
-	}
+	private final TaskQueue taskQueue = TaskQueueService.getTaskQueue();
 
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)

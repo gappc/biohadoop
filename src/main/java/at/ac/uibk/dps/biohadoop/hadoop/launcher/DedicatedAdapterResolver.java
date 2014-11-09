@@ -47,16 +47,14 @@ public class DedicatedAdapterResolver {
 			throws NoSuchMethodException, SecurityException,
 			IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException, InstantiationException {
-		if (dedicatedAdapterConfiguration.getAdapter() == null
-				|| dedicatedAdapterConfiguration.getPipelineName() == null) {
+		if (dedicatedAdapterConfiguration.getAdapter() == null) {
 			return null;
 		}
 
 		Class<? extends Adapter> adapterClass = dedicatedAdapterConfiguration
 				.getAdapter();
 		Adapter adapter = adapterClass.newInstance();
-		String pipelineName = dedicatedAdapterConfiguration.getPipelineName();
 
-		return new LaunchInformation(adapter, pipelineName);
+		return new LaunchInformation(adapter);
 	}
 }

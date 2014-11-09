@@ -19,8 +19,8 @@ import com.esotericsoftware.kryo.Kryo;
 
 public class KryoAdapterPipelineFactory extends AbstractPipeline {
 
-	public KryoAdapterPipelineFactory(ChannelGroup channels, String pipelineName) {
-		super(channels, pipelineName);
+	public KryoAdapterPipelineFactory(ChannelGroup channels) {
+		super(channels);
 	}
 
 	@Override
@@ -31,8 +31,8 @@ public class KryoAdapterPipelineFactory extends AbstractPipeline {
 		pipeline.addLast("decoder", new KryoDecoder(kryo));
 		pipeline.addLast("encoder", new KryoEncoder(kryo, 1 * 1024, 2 * 1024 * 1024));
 		pipeline.addLast("counter", counterHandler);
-		pipeline.addLast("workHandler", new AdapterWorkHandler(pipelineName));
-		pipeline.addLast("initialDataHandler", new AdapterInitialDataHandler(pipelineName));
+		pipeline.addLast("workHandler", new AdapterWorkHandler());
+		pipeline.addLast("initialDataHandler", new AdapterInitialDataHandler());
 //		pipeline.addLast("workHandler", new TestAdapterWorkHandler(pipelineName));
 		return pipeline;
 	}
