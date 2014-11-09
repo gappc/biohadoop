@@ -66,7 +66,7 @@ public class TaskQueueTest {
 //	public void getTaskNotNull() throws InterruptedException {
 //		TaskQueue<Integer, Integer> taskQueue = new TaskQueue<>();
 //		taskQueue.add(0);
-//		SimpleTask<Integer> task = taskQueue.getTask();
+//		Task<Integer> task = taskQueue.getTask();
 //		assertNotNull(task);
 //	}
 //	
@@ -75,7 +75,7 @@ public class TaskQueueTest {
 //		int value = 234501;
 //		TaskQueue<Integer, Integer> taskQueue = new TaskQueue<>();
 //		taskQueue.add(value);
-//		SimpleTask<Integer> task = taskQueue.getTask();
+//		Task<Integer> task = taskQueue.getTask();
 //		int taskData = task.getData();
 //		assertEquals(value, taskData);
 //	}
@@ -122,7 +122,7 @@ public class TaskQueueTest {
 //		TaskQueue<Integer, Integer> taskQueue = new TaskQueue<>();
 //		taskQueue.add(0);
 //		
-//		SimpleTask<Integer> in = taskQueue.getTask();
+//		Task<Integer> in = taskQueue.getTask();
 //		
 //		taskQueue.reschedule(in.getTaskId());
 //		assertTrue(true);

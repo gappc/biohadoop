@@ -6,7 +6,7 @@ import java.util.List;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.KryoAdapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.WebSocketAdapter;
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.SimpleTaskSubmitter;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskSubmitter;
 
 public class DefaultAdapterResolver {
 

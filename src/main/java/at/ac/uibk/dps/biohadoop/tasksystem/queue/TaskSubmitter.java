@@ -1,61 +1,92 @@
 package at.ac.uibk.dps.biohadoop.tasksystem.queue;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
+
 /**
- * A <tt>TaskSubmitter</tt> is the main entry point to Biohadoops task system. It
- * provides methods to initialize the asynchronous computation of tasks.
+ * This class provides methods to add tasks to the task system
  * 
  * @author Christian Gapp
  *
+ * @param <R>
  * @param <T>
- *            The type of data, that is submitted to the Task system
  * @param <S>
- *            The result type for the {@link TaskFuture}, that is returned by
- *            this add() and addAll() methods
  */
-public interface TaskSubmitter<T, S> {
+public class TaskSubmitter<R, T, S> {
+
+	private final TaskQueue<R, T, S> taskQueue = TaskQueueService
+			.<R, T, S> getTaskQueue();
+	private final TaskConfiguration<R> taskConfiguration;
 
 	/**
-	 * Submit a piece of work, consisting of a chunk of data, to the task
-	 * system, where it can be distributed to the workers for asynchronous
-	 * computation.
+	 * Creates a {@link TaskSubmitter}, that can be used to submit Tasks
+	 * to the task system. The class defined by <tt>asyncComputableClass</tt> is
+	 * used when computing the result on a worker.
 	 * 
-	 * @param data
-	 *            chunk of data, that should be submitted to the Task system
-	 * @return {@link TaskFuture} that represents the result of an asynchronous
-	 *         computation
-	 * @throws TaskException
-	 *             if there was some error in the Task system
+	 * @param asyncComputableClass
+	 *            defines the class that is used to compute the result of a task
+	 *            on a worker
 	 */
-	public TaskFuture<S> add(T data) throws TaskException;
+	public TaskSubmitter(
+			Class<? extends AsyncComputable<R, T, S>> asyncComputableClass) {
+		this(asyncComputableClass, null);
+	}
 
 	/**
-	 * Submit a list of work items, consisting of chunks of data, to the Task
-	 * system, where it can be distributed to the workers asynchronous
-	 * computation.
+	 * Creates a {@link TaskSubmitter}, that can be used to submit Tasks
+	 * to the task system. The class defined by
+	 * <tt>asyncComputableClass</tt> is used when computing the result on a
+	 * worker. The <tt>initialData</tt> is send to a worker when it first
+	 * encounters the <tt>asyncComputableClass</tt> type of work.
 	 * 
-	 * @param datas
-	 *            Chunks of data, that should be submitted to the Task system
-	 * @return A list of {@link TaskFutures} each one representing the result of
-	 *         exactly one asynchronous computation
-	 * @throws TaskException
-	 *             if there was some error in the Task system
+	 * @param asyncComputableClass
+	 *            defines the class that is used to compute the result of a task
+	 *            on a worker
+	 * @param initialData
+	 *            is send to a worker when it first encounters the
+	 *            <tt>asyncComputableClass</tt> type of work.
 	 */
-	public List<TaskFuture<S>> addAll(List<T> datas) throws TaskException;
+	public TaskSubmitter(
+			Class<? extends AsyncComputable<R, T, S>> asyncComputableClass,
+			R initialData) {
+		String asyncComputableClassName = asyncComputableClass
+				.getCanonicalName();
+		// TODO copy initialData to prevent user from (accidentially) changing
+		// the initialData after TaskSubmitter is constructed
+		taskConfiguration = new TaskConfiguration<>(asyncComputableClassName,
+				initialData);
+	}
 
-	/**
-	 * Submit an array of work items, consisting of chunks of data, to the Task
-	 * system, where it can be distributed to the workers asynchronous
-	 * computation.
-	 * 
-	 * @param datas
-	 *            Chunks of data, that should be submitted to the Task system
-	 * @return A list of {@link TaskFutures} each one representing the result of
-	 *         exactly one asynchronous computation
-	 * @throws TaskException
-	 *             if there was some error in the Task system
-	 */
-	public List<TaskFuture<S>> addAll(T[] datas) throws TaskException;
+	public TaskFuture<S> add(T data) throws TaskException {
+		return submitTask(data);
+	}
+
+	public List<TaskFuture<S>> addAll(List<T> datas) throws TaskException {
+		List<TaskFuture<S>> taskFutures = new ArrayList<TaskFuture<S>>();
+		for (T data : datas) {
+			TaskFuture<S> taskFuture = submitTask(data);
+			taskFutures.add(taskFuture);
+		}
+		return taskFutures;
+	}
+
+	public List<TaskFuture<S>> addAll(T[] datas) throws TaskException {
+		List<TaskFuture<S>> taskFutures = new ArrayList<TaskFuture<S>>();
+		for (T data : datas) {
+			TaskFuture<S> taskFuture = submitTask(data);
+			taskFutures.add(taskFuture);
+		}
+		return taskFutures;
+	}
+
+	private TaskFuture<S> submitTask(T data) throws TaskException {
+		try {
+			return taskQueue.add(data, taskConfiguration);
+		} catch (InterruptedException e) {
+			throw new TaskException("Could not add Task", e);
+		}
+	}
 
 }

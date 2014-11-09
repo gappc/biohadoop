@@ -26,7 +26,7 @@ public class Task<T> implements Serializable {
 	}
 
 	/**
-	 * Creates a <tt>SimpleTask</tt> that is used in the Task system
+	 * Creates a {@link Task} that is used in the task system
 	 * 
 	 * @param taskId
 	 *            the {@link TaskId} for this task
