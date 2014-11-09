@@ -17,7 +17,8 @@ public class AdapterLauncher {
 			.getLogger(AdapterLauncher.class);
 
 	private final CommunicationConfiguration communicationConfiguration;
-	private final List<LaunchInformation> launchInformations = new ArrayList<>();
+	
+	private List<Adapter> adapters = new ArrayList<>();
 
 	public AdapterLauncher(BiohadoopConfiguration config) {
 		communicationConfiguration = config.getCommunicationConfiguration();
@@ -25,34 +26,27 @@ public class AdapterLauncher {
 
 	public void startAdapters() throws AdapterException {
 		try {
-			LOG.info("Adding default adapters");
-			launchInformations.addAll(DefaultAdapterResolver
-					.getDefaultAdapters(communicationConfiguration));
+			LOG.info("Adding adapters");
+			adapters = AdapterResolver.getAdapters(communicationConfiguration);
 
-			LOG.info("Adding dedicated adapters");
-			launchInformations.addAll(DedicatedAdapterResolver
-					.getDedicatedAdapters(communicationConfiguration));
-
-			if (launchInformations.size() == 0) {
-				throw new AdapterException("No usable adapters found, maybe default adapters are overwritten in config file?");
+			if (adapters.size() == 0) {
+				throw new AdapterException("No usable adapters found");
 			}
 
 			LOG.info("Starting adapters");
-			for (LaunchInformation launchInformation : launchInformations) {
-				LOG.debug("Starting adapter {}", launchInformation);
-				Adapter adapter = launchInformation.getAdapter();
+			for (Adapter adapter : adapters) {
+				LOG.debug("Starting adapter {}", adapter);
 				adapter.start();
 			}
-		} catch (ResolveDedicatedAdapterException e) {
+		} catch (ResolveAdapterException e) {
 			throw new AdapterException(e);
 		}
 	}
 
 	public void stopAdapters() throws AdapterException {
 		LOG.info("Stopping adapters");
-		for (LaunchInformation launchInformation : launchInformations) {
-			LOG.debug("Stopping adapter {}", launchInformation);
-			Adapter adapter = launchInformation.getAdapter();
+		for (Adapter adapter : adapters) {
+			LOG.debug("Stopping adapter {}", adapter);
 			adapter.stop();
 		}
 	}

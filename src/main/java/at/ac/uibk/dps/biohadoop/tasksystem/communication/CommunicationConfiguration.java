@@ -10,25 +10,25 @@ import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerConfigurat
 
 public class CommunicationConfiguration {
 
-	private final List<AdapterConfiguration> dedicatedAdapters;
+	private final List<AdapterConfiguration> adapters;
 	private final List<WorkerConfiguration> workerConfigurations;
 
 	public CommunicationConfiguration(
-			List<AdapterConfiguration> dedicatedAdapters,
+			List<AdapterConfiguration> adapters,
 			List<WorkerConfiguration> workerConfigurations) {
-		this.dedicatedAdapters = dedicatedAdapters;
+		this.adapters = adapters;
 		this.workerConfigurations = workerConfigurations;
 	}
 
 	@JsonCreator
 	public static CommunicationConfiguration create(
-			@JsonProperty("dedicatedAdapters") List<AdapterConfiguration> dedicatedAdapters,
+			@JsonProperty("adapters") List<AdapterConfiguration> adapters,
 			@JsonProperty("workerConfigurations") List<WorkerConfiguration> workerConfigurations) {
-		return new CommunicationConfiguration(dedicatedAdapters, workerConfigurations);
+		return new CommunicationConfiguration(adapters, workerConfigurations);
 	}
 
-	public List<AdapterConfiguration> getDedicatedAdapters() {
-		return dedicatedAdapters;
+	public List<AdapterConfiguration> getAdapters() {
+		return adapters;
 	}
 
 	public List<WorkerConfiguration> getWorkerConfigurations() {

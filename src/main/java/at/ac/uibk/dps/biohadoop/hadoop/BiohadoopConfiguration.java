@@ -12,6 +12,8 @@ import at.ac.uibk.dps.biohadoop.solver.SolverConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.Adapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.AdapterConfiguration;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.KryoAdapter;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.WebSocketAdapter;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.Worker;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerConfiguration;
 
@@ -63,7 +65,7 @@ public class BiohadoopConfiguration {
 	public static class Builder {
 		private List<String> libPaths = new ArrayList<>();
 		private List<SolverConfiguration> solverConfigurations = new ArrayList<>();;
-		private List<AdapterConfiguration> dedicatedAdapters = new ArrayList<>();
+		private List<AdapterConfiguration> adapters = new ArrayList<>();
 		private List<WorkerConfiguration> workerConfigurations = new ArrayList<>();
 		private Map<String, String> globalProperties = new HashMap<>();
 
@@ -77,21 +79,21 @@ public class BiohadoopConfiguration {
 			return this;
 		}
 
-		public Builder addDedicatedAdapter(
-				Class<? extends Adapter> dedicatedAdapter) {
+		public Builder addDefaultAdapters() {
+			adapters.add(new AdapterConfiguration(KryoAdapter.class));
+			adapters.add(new AdapterConfiguration(WebSocketAdapter.class));
+			return this;
+		}
+		
+		public Builder addAdapter(
+				Class<? extends Adapter> adapter) {
 			AdapterConfiguration adapterConfiguration = new AdapterConfiguration(
-					dedicatedAdapter);
-			dedicatedAdapters.add(adapterConfiguration);
+					adapter);
+			adapters.add(adapterConfiguration);
 			return this;
 		}
 
 		public Builder addWorker(Class<? extends Worker> worker, int count) {
-			addDedicatedWorker(worker, count);
-			return this;
-		}
-
-		public Builder addDedicatedWorker(Class<? extends Worker> worker,
-				int count) {
 			WorkerConfiguration workerConfiguration = new WorkerConfiguration(
 					worker, count);
 			workerConfigurations.add(workerConfiguration);
@@ -105,7 +107,7 @@ public class BiohadoopConfiguration {
 
 		public BiohadoopConfiguration build() {
 			CommunicationConfiguration communicationConfiguration = new CommunicationConfiguration(
-					dedicatedAdapters, workerConfigurations);
+					adapters, workerConfigurations);
 			return new BiohadoopConfiguration(libPaths, solverConfigurations,
 					communicationConfiguration, globalProperties);
 		}

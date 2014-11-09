@@ -24,10 +24,7 @@ public class AdapterConfiguration {
 	@Override
 	public String toString() {
 		String adapterClass = adapter != null ? adapter.getCanonicalName() : null;
-
-		StringBuilder sb = new StringBuilder();
-		sb.append("adapter=").append(adapterClass);
-		return sb.toString();
+		return "adapter=" + adapterClass;
 	}
 
 }
