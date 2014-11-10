@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.LaunchContainerRunnable;
 import at.ac.uibk.dps.biohadoop.hadoop.LocalResourceBuilder;
-import at.ac.uibk.dps.biohadoop.solver.SolverService;
+import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.AlgorithmService;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerStarter;
 
 //TODO make more parallel and use Callable instead of Thread
@@ -148,12 +148,10 @@ public class WorkerLauncher {
 					LOG.info("Waiting for " + containerCount
 							+ " containers to complete");
 
-					SolverService solverService = SolverService.getInstance();
-
 					boolean hasErrors = false;
 					int completedContainers = 0;
 					while (completedContainers < containerCount) {
-						float progress = solverService.getOverallProgress();
+						float progress = AlgorithmService.getOverallProgress();
 						AllocateResponse response = rmClient.allocate(progress);
 						LOG.debug("Waiting for {} containers", containerCount
 								- completedContainers);
@@ -244,10 +242,6 @@ public class WorkerLauncher {
 	public static void pretendToLaunchWorkers(
 			BiohadoopConfiguration biohadoopConfiguration)
 			throws WorkerLaunchException {
-//		List<String> workerParameters = WorkerParametersResolver
-//				.getAllWorkerParameters(biohadoopConfiguration
-//						.getCommunicationConfiguration());
-
 		List<String> workerParameters = WorkerParametersResolver.getWorkerParameters();
 				
 		ExecutorService executorService = Executors.newCachedThreadPool();

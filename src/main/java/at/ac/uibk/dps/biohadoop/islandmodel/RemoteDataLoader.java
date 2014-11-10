@@ -29,7 +29,7 @@ public class RemoteDataLoader<T> {
 			throw new IslandModelException(NO_SUITABLE_NODE);
 		}
 
-		String path = nodeData.getUrl() + "/" + nodeData.getSolverId();
+		String path = nodeData.getUrl() + "/" + nodeData.getAlgorithmId();
 
 		WebResource webResource = client.resource(path);
 		ClientResponse response = webResource.accept("application/json").get(
@@ -60,7 +60,7 @@ public class RemoteDataLoader<T> {
 
 		List<T> datas = new ArrayList<>();
 		for (NodeData nodeData : nodesData) {
-			String path = nodeData.getUrl() + "/" + nodeData.getSolverId();
+			String path = nodeData.getUrl() + "/" + nodeData.getAlgorithmId();
 
 			WebResource webResource = client.resource(path);
 			ClientResponse response = webResource.accept("application/json")

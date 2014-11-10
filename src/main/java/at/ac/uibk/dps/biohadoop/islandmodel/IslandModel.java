@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.islandmodel.zookeeper.NodeData;
 import at.ac.uibk.dps.biohadoop.islandmodel.zookeeper.ZooKeeperController;
-import at.ac.uibk.dps.biohadoop.solver.SolverId;
+import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.AlgorithmId;
 
 public class IslandModel {
 
@@ -22,12 +22,12 @@ public class IslandModel {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(IslandModel.class);
 
-	private static final Map<SolverId, ZooKeeperController> zooKeeperControllers = new HashMap<>();
+	private static final Map<AlgorithmId, ZooKeeperController> zooKeeperControllers = new HashMap<>();
 
-	public static void initialize(SolverId solverId)
+	public static void initialize(AlgorithmId algorithmId)
 			throws IslandModelException {
 		checkZooKeeper();
-		getZooKeeperController(solverId);
+		getZooKeeperController(algorithmId);
 	}
 
 	private static void checkZooKeeper() throws IslandModelException {
@@ -50,42 +50,42 @@ public class IslandModel {
 		}
 	}
 
-	public static void publish(SolverId solverId, Object data) {
-		IslandModelResource.publish(solverId, data);
+	public static void publish(AlgorithmId algorithmId, Object data) {
+		IslandModelResource.publish(algorithmId, data);
 	}
 	
-	public static <T>T merge(SolverId solverId,
+	public static <T>T merge(AlgorithmId algorithmId,
 			Map<String, String> properties, T data)
 			throws IslandModelException {
-		ZooKeeperController zooKeeperController = getZooKeeperController(solverId);
+		ZooKeeperController zooKeeperController = getZooKeeperController(algorithmId);
 		RemoteResultGetter<T> remoteResultGetter = getRemoteResultGetter(properties);
 		DataMerger<T> dataMerger = getDataMerger(properties);
 		List<NodeData> nodeDatas = zooKeeperController
 				.getSuitableRemoteNodesData();
 		
-		LOG.info("Merging data for solver {}", solverId);
+		LOG.info("Merging data for algorithm {}", algorithmId);
 		
 		T remoteData = remoteResultGetter.getRemoteData(nodeDatas);
 		T mergedData = dataMerger.merge(data, remoteData);
 
-		LOG.debug("{}: remoteData:        {}", solverId, remoteData);
-		LOG.debug("{}: population before: {}", solverId, data);
-		LOG.debug("{}: population after:  {}", solverId, mergedData);
+		LOG.debug("{}: remoteData:        {}", algorithmId, remoteData);
+		LOG.debug("{}: population before: {}", algorithmId, data);
+		LOG.debug("{}: population after:  {}", algorithmId, mergedData);
 
 		return mergedData;
 	}
 
-	private static ZooKeeperController getZooKeeperController(SolverId solverId)
+	private static ZooKeeperController getZooKeeperController(AlgorithmId algorithmId)
 			throws IslandModelException {
 		String hostname = getZooKeeperHostname();
 		String port = getZooKeeperPort();
 		ZooKeeperController zooKeeperController = null;
 		synchronized (zooKeeperControllers) {
-			zooKeeperController = zooKeeperControllers.get(solverId);
+			zooKeeperController = zooKeeperControllers.get(algorithmId);
 			if (zooKeeperController == null) {
-				zooKeeperController = new ZooKeeperController(solverId,
+				zooKeeperController = new ZooKeeperController(algorithmId,
 						hostname, port);
-				zooKeeperControllers.put(solverId, zooKeeperController);
+				zooKeeperControllers.put(algorithmId, zooKeeperController);
 			}
 		}
 

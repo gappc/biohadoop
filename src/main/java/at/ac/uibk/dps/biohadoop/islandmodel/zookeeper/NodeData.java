@@ -3,31 +3,31 @@ package at.ac.uibk.dps.biohadoop.islandmodel.zookeeper;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-import at.ac.uibk.dps.biohadoop.solver.SolverId;
+import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.AlgorithmId;
 
 public class NodeData {
 
 	private final String url;
-	private final SolverId solverId;
+	private final AlgorithmId algorithmId;
 
-	public NodeData(SolverId solverId, String url) {
-		this.solverId = solverId;
+	public NodeData(AlgorithmId algorithmId, String url) {
+		this.algorithmId = algorithmId;
 		this.url = url;
 	}
 
 	@JsonCreator
 	public static NodeData create(
-			@JsonProperty("solverId") SolverId solverId,
+			@JsonProperty("algorithmId") AlgorithmId algorithmId,
 			@JsonProperty("url") String url) {
-		return new NodeData(solverId, url);
+		return new NodeData(algorithmId, url);
 	}
 
 	public String getUrl() {
 		return url;
 	}
 
-	public SolverId getSolverId() {
-		return solverId;
+	public AlgorithmId getAlgorithmId() {
+		return algorithmId;
 	}
 
 }

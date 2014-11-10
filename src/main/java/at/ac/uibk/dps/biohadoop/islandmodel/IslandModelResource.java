@@ -14,7 +14,7 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.solver.SolverId;
+import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.AlgorithmId;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.mapper.JsonMapper;
 
 @Path(IslandModelResource.PATH)
@@ -25,16 +25,16 @@ public class IslandModelResource {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(IslandModelResource.class);
-	private static final Map<SolverId, Object> DATA_FOR_SOLVER = new ConcurrentHashMap<>();
+	private static final Map<AlgorithmId, Object> DATA_FOR_ALLGORITHM = new ConcurrentHashMap<>();
 
-	public static void publish(SolverId solverId, Object data) {
-		DATA_FOR_SOLVER.put(solverId, data);
+	public static void publish(AlgorithmId algorithmId, Object data) {
+		DATA_FOR_ALLGORITHM.put(algorithmId, data);
 	}
 
 	@GET
-	@Path("{solverId}")
-	public Response getSolverData(@PathParam("solverId") SolverId solverId) {
-		Object data = DATA_FOR_SOLVER.get(solverId);
+	@Path("{algorithmId}")
+	public Response getAlgorithmData(@PathParam("algorithmId") AlgorithmId algorithmId) {
+		Object data = DATA_FOR_ALLGORITHM.get(algorithmId);
 		if (data == null) {
 			return Response.noContent().build();
 		} else {

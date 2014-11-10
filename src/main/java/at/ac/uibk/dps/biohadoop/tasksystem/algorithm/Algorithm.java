@@ -2,8 +2,6 @@ package at.ac.uibk.dps.biohadoop.tasksystem.algorithm;
 
 import java.util.Map;
 
-import at.ac.uibk.dps.biohadoop.solver.SolverId;
-
 /**
  * An <tt>Algorithm</tt> defines e piece of work, that an algorithm author wants
  * to run on Biohadoop. Its only method <tt>compute</tt> is called by Biohadoop
@@ -18,7 +16,7 @@ public interface Algorithm {
 	 * This method is called by Biohadoop after the initialization. The
 	 * algorithm should be defined inside this method.
 	 * 
-	 * @param solverId
+	 * @param algorithmId
 	 *            represents the unique Id of this algorithm inside this running
 	 *            Biohadoop instance
 	 * @param properties
@@ -28,7 +26,7 @@ public interface Algorithm {
 	 *             if there was was an error during the execution of the
 	 *             algorithm
 	 */
-	public void run(SolverId solverId, Map<String, String> properties)
+	public void run(AlgorithmId algorithmId, Map<String, String> properties)
 			throws AlgorithmException;
 
 }

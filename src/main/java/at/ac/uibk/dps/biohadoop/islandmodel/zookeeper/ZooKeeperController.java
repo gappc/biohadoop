@@ -15,10 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.islandmodel.IslandModelException;
-import at.ac.uibk.dps.biohadoop.solver.SolverConfiguration;
-import at.ac.uibk.dps.biohadoop.solver.SolverId;
-import at.ac.uibk.dps.biohadoop.solver.SolverService;
 import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.Algorithm;
+import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.AlgorithmConfiguration;
+import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.AlgorithmId;
+import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.AlgorithmService;
 
 public class ZooKeeperController {
 
@@ -28,16 +28,16 @@ public class ZooKeeperController {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ZooKeeperController.class);
 
-	private static final String SOLVER_PATH = "/biohadoop/solvers";
+	private static final String ALGORITHM_PATH = "/biohadoop/algorithms";
 	private static final int TIMEOUT_SEC = 5;
 
 	private final RegistrationProvider registrationProvider;
-	private final SolverId solverId;
+	private final AlgorithmId algorithmId;
 
-	public ZooKeeperController(SolverId solverId, String hostname, String port)
+	public ZooKeeperController(AlgorithmId algorithmId, String hostname, String port)
 			throws IslandModelException {
 
-		this.solverId = solverId;
+		this.algorithmId = algorithmId;
 		final String url = hostname + ":" + port;
 
 		// Connect to ZooKeeper
@@ -64,12 +64,12 @@ public class ZooKeeperController {
 			zkConnector.unblock();
 			throw new IslandModelException(errMsg, e);
 		}
-		
+
 		try {
 			String fullPath = getFullPath();
 
 			registrationProvider = new RegistrationProvider(zooKeeper);
-			registrationProvider.registerNode(fullPath, solverId);
+			registrationProvider.registerNode(fullPath, algorithmId);
 		} catch (IOException | KeeperException | InterruptedException e) {
 			throw new IslandModelException(
 					"Error while registering to ZooKeeper at " + url, e);
@@ -77,15 +77,14 @@ public class ZooKeeperController {
 	}
 
 	private String getFullPath() {
-		SolverService solverService = SolverService.getInstance();
-		SolverConfiguration solverConfiguration = solverService
-				.getSolverConfiguration(solverId);
-		Class<? extends Algorithm> algorithmType = solverConfiguration
+		AlgorithmConfiguration algorithmConfiguration = AlgorithmService
+				.getAlgorithmConfiguration(algorithmId);
+		Class<? extends Algorithm> algorithmType = algorithmConfiguration
 				.getAlgorithm();
 
-		StringBuilder sb = new StringBuilder().append(SOLVER_PATH).append("/")
+		StringBuilder sb = new StringBuilder().append(ALGORITHM_PATH).append("/")
 				.append(algorithmType.getSimpleName()).append("/")
-				.append(solverId);
+				.append(algorithmId);
 		return sb.toString();
 	}
 
@@ -94,8 +93,8 @@ public class ZooKeeperController {
 		// remove self from list
 		NodeData self = null;
 		for (NodeData nodeData : remoteNodesData) {
-			if (solverId.equals(nodeData.getSolverId())) {
-				LOG.debug("marking self solver {} for removal", solverId);
+			if (algorithmId.equals(nodeData.getAlgorithmId())) {
+				LOG.debug("marking self algorithm {} for removal", algorithmId);
 				self = nodeData;
 			}
 		}

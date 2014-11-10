@@ -1,19 +1,16 @@
 package at.ac.uibk.dps.biohadoop.persistence;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Map;
 
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
-import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.solver.SolverData;
-import at.ac.uibk.dps.biohadoop.solver.SolverId;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.mapper.JsonMapper;
 import at.ac.uibk.dps.biohadoop.utils.HdfsUtil;
 
 public class FileLoader {
@@ -23,10 +20,7 @@ public class FileLoader {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FileLoader.class);
 
-	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-	public static SolverData<?> load(SolverId solverId,
-			Map<String, String> properties) throws FileLoadException {
+	public static <T>T load(Map<String, String> properties) throws FileLoadException {
 
 		String path = properties.get(FILE_LOAD_PATH);
 		if (path == null) {
@@ -38,13 +32,12 @@ public class FileLoader {
 		boolean isOnStartup = Boolean.parseBoolean(onStartup);
 
 		if (isOnStartup) {
-			LOG.info("Loading data for solver {}", solverId);
-			return load(solverId, path);
+			return load(path);
 		}
 		return null;
 	}
 
-	private static SolverData<?> load(SolverId solverId, String path)
+	private static <T>T load(String path)
 			throws FileLoadException {
 		String mostRecentFile = path;
 
@@ -62,45 +55,18 @@ public class FileLoader {
 						+ path);
 			}
 
-			LOG.info("Loading data for solver {} from {}", solverId,
-					mostRecentFile);
+			LOG.info("Loading data from {}", mostRecentFile);
 
 			InputStream is = HdfsUtil.openFile(yarnConfiguration,
 					mostRecentFile);
 			BufferedInputStream bis = new BufferedInputStream(is);
 
-			SolverData<?> solverData = OBJECT_MAPPER.readValue(bis,
-					SolverData.class);
-
-			saveLoadInformation(solverId, path, solverData, mostRecentFile);
-
-			return solverData;
+			return JsonMapper.OBJECT_MAPPER.readValue(bis,
+					new TypeReference<T>() {});
 		} catch (IOException e) {
 			throw new FileLoadException(
-					"Could not load solver data from path: " + mostRecentFile,
+					"Could not load algorithm data from path: " + mostRecentFile,
 					e);
-		}
-	}
-
-	private static void saveLoadInformation(SolverId solverId, String path,
-			SolverData<?> solverData, String mostRecentFile)
-			throws FileLoadException {
-		String savePath = FileHandlerUtils.getSavePath(solverId, path);
-
-		String fullPath = savePath + ".startupLoadingInfo";
-
-		YarnConfiguration yarnConfiguration = new YarnConfiguration();
-		try {
-			OutputStream os = HdfsUtil.createFile(yarnConfiguration, fullPath);
-			BufferedOutputStream bos = new BufferedOutputStream(os);
-
-			FileLoadInformation fileLoadInformation = new FileLoadInformation(
-					"Continue work with existing data", mostRecentFile,
-					solverData);
-			OBJECT_MAPPER.writeValue(bos, fileLoadInformation);
-		} catch (IOException e) {
-			throw new FileLoadException(
-					"Could not save startupLoadingInfo to file: " + fullPath, e);
 		}
 	}
 

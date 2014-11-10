@@ -9,9 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.AdapterLauncher;
-import at.ac.uibk.dps.biohadoop.hadoop.launcher.SolverLauncher;
+import at.ac.uibk.dps.biohadoop.hadoop.launcher.AlgorithmLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLauncher;
-import at.ac.uibk.dps.biohadoop.solver.SolverId;
+import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.AlgorithmId;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.HdfsUtil;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
@@ -60,20 +60,20 @@ public class BiohadoopApplicationMaster {
 			WorkerLauncher.pretendToLaunchWorkers(biohadoopConfiguration);
 		}
 
-		List<Future<SolverId>> solvers = SolverLauncher
-				.launchSolver(biohadoopConfiguration);
+		List<Future<AlgorithmId>> algorithmFutures = AlgorithmLauncher
+				.launchAlgorithm(biohadoopConfiguration);
 		
-		for (Future<SolverId> solver : solvers) {
+		for (Future<AlgorithmId> algorithmFuture : algorithmFutures) {
 			try {
-				SolverId solverId = solver.get();
-				LOG.info("Finished solver with id {}", solverId);
+				AlgorithmId algorithmId = algorithmFuture.get();
+				LOG.info("Finished algorithm with id {}", algorithmId);
 			} catch (ExecutionException e) {
 				// TODO add counter to detect errors and set Biohadoops result
 				// accordingly?
 				LOG.error("Error while running Algorithm", e.getCause());
 			}
 		}
-		LOG.info("All solvers finished");
+		LOG.info("All algorithms finished");
 
 		LOG.info("Stopping all communication");
 		adapterLauncher.stopAdapters();

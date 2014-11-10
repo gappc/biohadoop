@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.islandmodel.IslandModelResource;
-import at.ac.uibk.dps.biohadoop.solver.SolverId;
+import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.AlgorithmId;
 
 public class NodePublisher {
 
@@ -22,12 +22,12 @@ public class NodePublisher {
 			.getLogger(NodePublisher.class);
 
 	private final ZooKeeper zooKeeper;
-	private final SolverId solverId;
+	private final AlgorithmId algorithmId;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
-	public NodePublisher(ZooKeeper zooKeeper, SolverId solverId) {
+	public NodePublisher(ZooKeeper zooKeeper, AlgorithmId algorithmId) {
 		this.zooKeeper = zooKeeper;
-		this.solverId = solverId;
+		this.algorithmId = algorithmId;
 	}
 
 	public AlgorithmWatcher publish(String fullPath) throws KeeperException,
@@ -113,7 +113,7 @@ public class NodePublisher {
 		islandModelResourceUrl.append("http://").append(host).append(":")
 				.append(port).append("/rs/" + IslandModelResource.PATH);
 
-		return new NodeData(solverId, islandModelResourceUrl.toString());
+		return new NodeData(algorithmId, islandModelResourceUrl.toString());
 	}
 
 }

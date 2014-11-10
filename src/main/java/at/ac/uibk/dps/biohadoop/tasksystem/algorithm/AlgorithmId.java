@@ -1,29 +1,29 @@
-package at.ac.uibk.dps.biohadoop.solver;
+package at.ac.uibk.dps.biohadoop.tasksystem.algorithm;
 
 import java.io.Serializable;
 import java.util.UUID;
 
-public class SolverId implements Serializable {
+public class AlgorithmId implements Serializable {
 
 	private static final long serialVersionUID = 8506626310953326430L;
 	
 	private final UUID id;
 	
-	private SolverId() {
+	private AlgorithmId() {
 		this.id = UUID.randomUUID();
 	}
 	
-	private SolverId(UUID id) {
+	private AlgorithmId(UUID id) {
 		this.id = id;
 	}
 	
-	public static SolverId newInstance() {
-		return new SolverId();
+	public static AlgorithmId newInstance() {
+		return new AlgorithmId();
 	}
 
-	public static SolverId valueOf(String input) {
+	public static AlgorithmId valueOf(String input) {
 		UUID id = UUID.fromString(input);
-		return new SolverId(id);
+		return new AlgorithmId(id);
 	}
 	
 	public UUID getId() {
@@ -32,11 +32,11 @@ public class SolverId implements Serializable {
 	
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof SolverId)) {
+		if (!(obj instanceof AlgorithmId)) {
 			return false;
 		}
-		SolverId solverId = (SolverId) obj;
-		return id.equals(solverId.id);
+		AlgorithmId algorithmId = (AlgorithmId) obj;
+		return id.equals(algorithmId.id);
 	}
 	
 	@Override

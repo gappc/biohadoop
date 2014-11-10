@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.solver;
+package at.ac.uibk.dps.biohadoop.tasksystem.algorithm;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,16 +6,14 @@ import java.util.Map;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.Algorithm;
-
-public class SolverConfiguration {
+public class AlgorithmConfiguration {
 
 	private final String name;
 	private final Class<? extends Algorithm> algorithm;
 	private final Map<String, String> properties;
 
 	// TODO check if builder pattern is better suited
-	public SolverConfiguration(String name,
+	public AlgorithmConfiguration(String name,
 			Class<? extends Algorithm> algorithm,
 			Map<String, String> properties) {
 		this.name = name;
@@ -24,10 +22,10 @@ public class SolverConfiguration {
 	}
 
 	@JsonCreator
-	public static SolverConfiguration create(@JsonProperty("name") String name,
+	public static AlgorithmConfiguration create(@JsonProperty("name") String name,
 			@JsonProperty("algorithm") Class<? extends Algorithm> algorithm,
 			@JsonProperty("properties") Map<String, String> properties) {
-		return new SolverConfiguration(name, algorithm, properties);
+		return new AlgorithmConfiguration(name, algorithm, properties);
 	}
 
 	public String getName() {
@@ -57,8 +55,8 @@ public class SolverConfiguration {
 			return this;
 		}
 
-		public SolverConfiguration build() {
-			return new SolverConfiguration(algorithmName, algorithmClass, properties);
+		public AlgorithmConfiguration build() {
+			return new AlgorithmConfiguration(algorithmName, algorithmClass, properties);
 		}
 	}
 }

@@ -2,16 +2,15 @@ package at.ac.uibk.dps.biohadoop.persistence;
 
 import java.util.Map;
 
-import at.ac.uibk.dps.biohadoop.solver.SolverData;
-import at.ac.uibk.dps.biohadoop.solver.SolverId;
+import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.AlgorithmId;
 
 public class FileSaver {
 
 	public static final String FILE_SAVE_PATH = "FILE_SAVE_PATH";
 	public static final String FILE_SAVE_AFTER_ITERATION = "FILE_SAVE_AFTER_ITERATION";
 
-	public static void saveRollingJson(SolverId solverId, Map<String, String> properties,
-			SolverData<?> solverData) throws FileSaveException {
+	public static <T>void saveRollingJson(AlgorithmId algorithmId, Map<String, String> properties,
+			T data) throws FileSaveException {
 
 		String path = properties.get(FILE_SAVE_PATH);
 		if (path == null) {
@@ -19,7 +18,7 @@ public class FileSaver {
 					+ " not declared");
 		}
 
-		FileSaveUtils.saveRolling(solverId, path, solverData);
+		FileSaveUtils.saveRolling(algorithmId, path, data);
 	}
 	
 	public static void saveJson(String filename, Object data) throws FileSaveException {

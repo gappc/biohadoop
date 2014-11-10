@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooKeeper;
 
-import at.ac.uibk.dps.biohadoop.solver.SolverId;
+import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.AlgorithmId;
 
 public class RegistrationProvider {
 	
@@ -17,8 +17,8 @@ public class RegistrationProvider {
 		this.zooKeeper = zooKeeper;
 	}
 
-	public void registerNode(String path, SolverId solverId) throws KeeperException, InterruptedException, IOException {
-		NodePublisher nodePublisher = new NodePublisher(zooKeeper, solverId);
+	public void registerNode(String path, AlgorithmId algorithmId) throws KeeperException, InterruptedException, IOException {
+		NodePublisher nodePublisher = new NodePublisher(zooKeeper, algorithmId);
 		algorithmWatcher = nodePublisher.publish(path);
 	}
 
