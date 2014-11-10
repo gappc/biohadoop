@@ -4,8 +4,8 @@ import java.util.List;
 
 import at.ac.uibk.dps.biohadoop.islandmodel.zookeeper.NodeData;
 
-public interface RemoteResultGetter {
+public interface RemoteResultGetter<T> {
 
-	public Object getBestRemoteResult(List<NodeData> nodesData) throws IslandModelException;
+	public T getRemoteData(List<NodeData> nodesData) throws IslandModelException;
 	
 }
