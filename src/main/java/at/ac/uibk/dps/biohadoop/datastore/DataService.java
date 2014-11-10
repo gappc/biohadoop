@@ -41,6 +41,7 @@ public class DataService {
 		dataStore.put(option, data);
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T> T getData(SolverId solverId, Option<T> option) {
 		Map<Option<?>, Object> dataStore = null;
 		synchronized (monitor) {

@@ -2,8 +2,9 @@ package at.ac.uibk.dps.biohadoop.datastore;
 
 import java.util.TimeZone;
 
-import at.ac.uibk.dps.biohadoop.solver.SolverData;
 
+import at.ac.uibk.dps.biohadoop.solver.SolverData;
+@SuppressWarnings({"unchecked", "rawtypes"})
 public final class DataOptions {
 
 	public static final Option<SolverData> SOLVER_DATA = new Option(
