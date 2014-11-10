@@ -3,7 +3,6 @@ package at.ac.uibk.dps.biohadoop.tasksystem.communication.handler;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 import org.slf4j.Logger;
