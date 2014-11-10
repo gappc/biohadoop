@@ -9,7 +9,7 @@ package at.ac.uibk.dps.biohadoop.tasksystem.queue;
  */
 public class TaskQueueService {
 
-	private static final TaskQueue QUEUE = new TaskQueue<>();
+	private static final TaskQueue QUEUE = new TaskQueue();
 
 	private TaskQueueService() {
 		// Nothing to do
@@ -20,7 +20,7 @@ public class TaskQueueService {
 	 * 
 	 * @return the {@link TaskQueue}
 	 */
-	public static <R, T, S> TaskQueue<R, T, S> getTaskQueue() {
+	public static TaskQueue getTaskQueue() {
 		return QUEUE;
 	}
 

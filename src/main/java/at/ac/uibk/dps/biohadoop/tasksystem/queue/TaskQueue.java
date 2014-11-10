@@ -21,20 +21,16 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Christian Gapp
  *
- * @param <T>
- *            Type for the task data i.e. type of data that is used in
- *            asynchronous computation
- * @param <S>
- *            Type of the result of an asynchronous computation
  */
-public class TaskQueue<R, T, S> {
+public class TaskQueue {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TaskQueue.class);
 
-	private final BlockingQueue<Task<T>> queue = new LinkedBlockingQueue<>();
-	private final Map<TaskId, TaskQueueEntry<R, T, S>> workingSet = new ConcurrentHashMap<>();
-//	private final Counter queueSizeCounter = Metrics.getInstance().counter(
-//			MetricRegistry.name(TaskQueue.class, this + "-queue-size"));
+	private final BlockingQueue<Task<?>> queue = new LinkedBlockingQueue<>();
+	private final Map<TaskId, TaskQueueEntry> workingSet = new ConcurrentHashMap<>();
+
+	// private final Counter queueSizeCounter = Metrics.getInstance().counter(
+	// MetricRegistry.name(TaskQueue.class, this + "-queue-size"));
 
 	/**
 	 * Add a task to the task queue to make it available for asynchronous
@@ -44,29 +40,25 @@ public class TaskQueue<R, T, S> {
 	 * @param data
 	 *            that should be added to the task queue. This data is send to a
 	 *            waiting worker for computation
-	 * @param asyncComputableClassName
-	 *            defines the class that should be used by a worker to compute
-	 *            the result for this data
-	 * @param initialData
-	 *            is send to a worker the first time it encounters this
-	 *            asyncComputableClassName
+	 * @param TaskConfiguration
+	 *            defines the {@link TaskConfiguration} for this task
 	 * @return {@link TaskFuture} that represents the result of the asynchronous
 	 *         computation
 	 * @throws InterruptedException
 	 *             if adding data to the queue was not possible
 	 */
-	public TaskFuture<S> add(T data, TaskConfiguration<R> taskConfiguration)
-			throws InterruptedException {
+	public <T> TaskFuture<T> add(Object data,
+			TaskConfiguration<?> taskConfiguration) throws InterruptedException {
 		TaskId taskId = TaskId.newInstance();
 		LOG.debug("Adding task {}", taskId);
-		Task<T> task = new Task<>(taskId, taskConfiguration.getTaskTypeId(),
+		Task<?> task = new Task<>(taskId, taskConfiguration.getTaskTypeId(),
 				data);
-		TaskFutureImpl<S> taskFutureImpl = new TaskFutureImpl<>();
-		TaskQueueEntry<R, T, S> taskQueueEntry = new TaskQueueEntry<>(task,
+		TaskFutureImpl<T> taskFutureImpl = new TaskFutureImpl<>();
+		TaskQueueEntry taskQueueEntry = new TaskQueueEntry(task,
 				taskFutureImpl, taskConfiguration);
 		workingSet.put(task.getTaskId(), taskQueueEntry);
 		queue.put(task);
-//		queueSizeCounter.inc();
+		// queueSizeCounter.inc();
 		LOG.debug("Task {} was put to queue", task);
 		return taskFutureImpl;
 	}
@@ -84,22 +76,18 @@ public class TaskQueue<R, T, S> {
 	 * @param datas
 	 *            that should be added to the task queue. This datas are send to
 	 *            waiting workers for computation
-	 * @param asyncComputableClassName
-	 *            defines the class that should be used by a worker to compute
-	 *            the result for this data
-	 * @param initialData
-	 *            is send to a worker the first time it encounters this
-	 *            asyncComputableClassName
+	 * @param TaskConfiguration
+	 *            defines the {@link TaskConfiguration} for this task
 	 * @return list of {@link TaskFuture} that represents the results of the
-	 *         asynchronous computation. Exactly one element is returned for
-	 *         each element in the input list.
+	 *         asynchronous computation. One element is returned for each
+	 *         element in the input list.
 	 * @throws InterruptedException
 	 *             if adding data to the queue was not possible. At the moment
 	 *             it is not possible to tell which elements of the list have
 	 *             been submitted when the exception occurs.
 	 */
-	public List<TaskFuture<S>> addAll(List<T> datas,
-			TaskConfiguration<R> taskConfiguration) throws InterruptedException {
+	public <T, S> List<TaskFuture<S>> addAll(List<T> datas,
+			TaskConfiguration<?> taskConfiguration) throws InterruptedException {
 		LOG.debug("Adding list of tasks with size {}", datas.size());
 		List<TaskFuture<S>> taskFutures = new ArrayList<>();
 		for (T data : datas) {
@@ -122,22 +110,18 @@ public class TaskQueue<R, T, S> {
 	 * @param datas
 	 *            that should be added to the task queue. This datas are send to
 	 *            waiting workers for computation
-	 * @param asyncComputableClassName
-	 *            defines the class that should be used by a worker to compute
-	 *            the result for this data
-	 * @param initialData
-	 *            is send to a worker the first time it encounters this
-	 *            asyncComputableClassName
+	 * @param TaskConfiguration
+	 *            defines the {@link TaskConfiguration} for this task
 	 * @return list of {@link TaskFuture} that represents the results of the
-	 *         asynchronous computation. Exactly one element is returned for
-	 *         each element in the input array.
+	 *         asynchronous computation. One element is returned for each
+	 *         element in the input array.
 	 * @throws InterruptedException
 	 *             if adding data to the queue was not possible. At the moment
 	 *             it is not possible to tell which elements of the array have
 	 *             been submitted when the exception occurs.
 	 */
-	public List<TaskFuture<S>> addAll(T[] datas,
-			TaskConfiguration<R> taskConfiguration) throws InterruptedException {
+	public <T, S> List<TaskFuture<S>> addAll(T[] datas,
+			TaskConfiguration<?> taskConfiguration) throws InterruptedException {
 		LOG.debug("Adding list of tasks with size {}", datas.length);
 		List<TaskFuture<S>> taskFutures = new ArrayList<>();
 		for (T data : datas) {
@@ -148,40 +132,48 @@ public class TaskQueue<R, T, S> {
 	}
 
 	/**
-	 * Get a task from the underlying queue. If the queue was advised to
-	 * shutdown by Biohadoop, an invocation of this method interrupts the
-	 * calling thread by calling <tt>Thread.currentThread().interrupt()</tt>.
-	 * This method blocks, if the underlying queue is empty.
+	 * Get a task from the underlying queue. This method blocks, if the
+	 * underlying queue is empty.
 	 * 
 	 * @return a {@link Task} from the underlying queue
 	 * @throws InterruptedException
 	 *             if getting a task from the underlying queue is interrupted
 	 */
-	public Task<T> getTask() throws InterruptedException {
+	public Task<?> getTask() throws InterruptedException {
 		return queue.take();
 	}
-	
-	public Task<T> pollTask() throws InterruptedException {
+
+	/**
+	 * Get a task from the underlying queue. This method does not block, the
+	 * underlying queue is empty, null is returned.
+	 * 
+	 * @return a {@link Task} from the underlying queue or
+	 *         <tt>null<tt> if the queue is empty
+	 * @throws InterruptedException
+	 *             if getting a task from the underlying queue is interrupted
+	 */
+	public Task<?> pollTask() throws InterruptedException {
 		return queue.poll();
 	}
 
 	/**
-	 * Gets the <tt>initialData</tt> that was submitted along with the task,
-	 * identified by <tt>taskId</tt>. If the <tt>taskId</tt> is unknown, a
+	 * Gets the {@link TaskConfiguration} that was submitted along with the
+	 * task, identified by <tt>taskId</tt>. If the <tt>taskId</tt> is unknown, a
 	 * {@link TaskException} is thrown.
 	 * 
 	 * @param taskId
 	 *            is the unique identifier of a task
-	 * @return the <tt>initialData</tt> that was submitted along with the task,
+	 * @return the {@link TaskConfiguration} that was submitted along with the task,
 	 *         identified by <tt>taskId</tt>
 	 * @throws TaskException
 	 *             if the <tt>taskId<tt> is unknown
 	 */
-	public TaskConfiguration<R> getTaskConfiguration(TaskId taskId) throws TaskException {
+	public TaskConfiguration<?> getTaskConfiguration(TaskId taskId)
+			throws TaskException {
 		if (taskId == null) {
 			throw new TaskException("TaskId can not be null");
 		}
-		TaskQueueEntry<R, T, S> entry = workingSet.get(taskId);
+		TaskQueueEntry entry = workingSet.get(taskId);
 		if (entry == null) {
 			throw new TaskException("Could not find initial data for task "
 					+ taskId);
@@ -203,14 +195,16 @@ public class TaskQueue<R, T, S> {
 	 * @throws TaskException
 	 *             if the taskId is unknown
 	 */
-	public void storeResult(TaskId taskId, S data) throws TaskException {
+	public <S> void storeResult(TaskId taskId, S data) throws TaskException {
 		LOG.debug("Putting result for task {}", taskId);
-		TaskQueueEntry<R, T, S> taskQueueEntry = workingSet.remove(taskId);
+		TaskQueueEntry taskQueueEntry = workingSet.remove(taskId);
 		if (taskQueueEntry == null) {
 			throw new TaskException("Could not store result for task " + taskId
 					+ ", because the task id is not known");
 		}
-		TaskFutureImpl<S> taskFutureImpl = taskQueueEntry.getTaskFutureImpl();
+		@SuppressWarnings("unchecked")
+		TaskFutureImpl<S> taskFutureImpl = (TaskFutureImpl<S>) taskQueueEntry
+				.getTaskFutureImpl();
 		taskFutureImpl.set(data);
 	}
 
@@ -228,13 +222,13 @@ public class TaskQueue<R, T, S> {
 	public void reschedule(TaskId taskId) throws InterruptedException,
 			TaskException {
 		LOG.info("Rescheduling task {}", taskId);
-		TaskQueueEntry<R, T, S> taskQueueEntry = workingSet.get(taskId);
+		TaskQueueEntry taskQueueEntry = workingSet.get(taskId);
 		if (taskQueueEntry == null) {
 			throw new TaskException("Could not store result for task " + taskId
 					+ ", because the task id is not known");
 		}
 		queue.put(taskQueueEntry.getTask());
-//		queueSizeCounter.inc();
+		// queueSizeCounter.inc();
 	}
 
 }

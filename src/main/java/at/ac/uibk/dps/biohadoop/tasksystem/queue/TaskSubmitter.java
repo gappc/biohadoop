@@ -16,14 +16,13 @@ import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
  */
 public class TaskSubmitter<R, T, S> {
 
-	private final TaskQueue<R, T, S> taskQueue = TaskQueueService
-			.<R, T, S> getTaskQueue();
+	private final TaskQueue taskQueue = TaskQueueService.getTaskQueue();
 	private final TaskConfiguration<R> taskConfiguration;
 
 	/**
-	 * Creates a {@link TaskSubmitter}, that can be used to submit Tasks
-	 * to the task system. The class defined by <tt>asyncComputableClass</tt> is
-	 * used when computing the result on a worker.
+	 * Creates a {@link TaskSubmitter}, that can be used to submit Tasks to the
+	 * task system. The class defined by <tt>asyncComputableClass</tt> is used
+	 * when computing the result on a worker.
 	 * 
 	 * @param asyncComputableClass
 	 *            defines the class that is used to compute the result of a task
@@ -35,11 +34,11 @@ public class TaskSubmitter<R, T, S> {
 	}
 
 	/**
-	 * Creates a {@link TaskSubmitter}, that can be used to submit Tasks
-	 * to the task system. The class defined by
-	 * <tt>asyncComputableClass</tt> is used when computing the result on a
-	 * worker. The <tt>initialData</tt> is send to a worker when it first
-	 * encounters the <tt>asyncComputableClass</tt> type of work.
+	 * Creates a {@link TaskSubmitter}, that can be used to submit Tasks to the
+	 * task system. The class defined by <tt>asyncComputableClass</tt> is used
+	 * when computing the result on a worker. The <tt>initialData</tt> is send
+	 * to a worker when it first encounters the <tt>asyncComputableClass</tt>
+	 * type of work.
 	 * 
 	 * @param asyncComputableClass
 	 *            defines the class that is used to compute the result of a task

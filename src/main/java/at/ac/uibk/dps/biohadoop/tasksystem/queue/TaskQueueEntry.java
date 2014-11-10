@@ -5,35 +5,29 @@ package at.ac.uibk.dps.biohadoop.tasksystem.queue;
  * this map is used as a store for currently submitted tasks
  * 
  * @author Christian Gapp
- *
- * @param <T>
- *            Type for the task data i.e. type of data that is used in
- *            asynchronous computation
- * @param <S>
- *            Type of the result of an asynchronous computation
  */
-public class TaskQueueEntry<R, T, S> {
+public class TaskQueueEntry {
 
-	private final Task<T> task;
-	private final TaskFutureImpl<S> taskFuture;
-	private final TaskConfiguration<R> taskConfiguration;
+	private final Task<?> task;
+	private final TaskFutureImpl<?> taskFuture;
+	private final TaskConfiguration<?> taskConfiguration;
 
-	public TaskQueueEntry(Task<T> task, TaskFutureImpl<S> taskFuture,
-			TaskConfiguration<R> taskConfiguration) {
+	public TaskQueueEntry(Task<?> task, TaskFutureImpl<?> taskFuture,
+			TaskConfiguration<?> taskConfiguration) {
 		this.task = task;
 		this.taskFuture = taskFuture;
 		this.taskConfiguration = taskConfiguration;
 	}
 
-	public Task<T> getTask() {
+	public Task<?> getTask() {
 		return task;
 	}
 
-	public TaskFutureImpl<S> getTaskFutureImpl() {
+	public TaskFutureImpl<?> getTaskFutureImpl() {
 		return taskFuture;
 	}
 
-	public TaskConfiguration<R> getTaskConfiguration() {
+	public TaskConfiguration<?> getTaskConfiguration() {
 		return taskConfiguration;
 	}
 
