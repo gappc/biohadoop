@@ -23,6 +23,7 @@ public class Metrics {
 	
 	public static MetricsData getMetricsData() {
 		Map<String, Counter> counters = METRICS.getCounters();
+		@SuppressWarnings("rawtypes")
 		Map<String, Gauge> gauges = METRICS.getGauges();
 		Map<String, Histogram> histograms = METRICS.getHistograms();
 		Map<String, Meter> meters = METRICS.getMeters();

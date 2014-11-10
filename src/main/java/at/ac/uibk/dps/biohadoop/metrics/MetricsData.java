@@ -11,13 +11,14 @@ import com.codahale.metrics.Timer;
 public class MetricsData {
 
 	private final Map<String, Counter> counters;
+	@SuppressWarnings("rawtypes")
 	private final Map<String, Gauge> gauges;
 	private final Map<String, Histogram> histograms;
 	private final Map<String, Meter> meters;
 	private final Map<String, Timer> timers;
 
 	public MetricsData(Map<String, Counter> counters,
-			Map<String, Gauge> gauges, Map<String, Histogram> histograms,
+			@SuppressWarnings("rawtypes") Map<String, Gauge> gauges, Map<String, Histogram> histograms,
 			Map<String, Meter> meters, Map<String, Timer> timers) {
 		this.counters = counters;
 		this.gauges = gauges;
@@ -30,6 +31,7 @@ public class MetricsData {
 		return counters;
 	}
 
+	@SuppressWarnings("rawtypes")
 	public Map<String, Gauge> getGauges() {
 		return gauges;
 	}
