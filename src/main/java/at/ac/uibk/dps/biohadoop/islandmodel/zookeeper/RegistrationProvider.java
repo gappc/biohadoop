@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooKeeper;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.AlgorithmId;
+import at.ac.uibk.dps.biohadoop.algorithm.AlgorithmId;
 
 public class RegistrationProvider {
 	

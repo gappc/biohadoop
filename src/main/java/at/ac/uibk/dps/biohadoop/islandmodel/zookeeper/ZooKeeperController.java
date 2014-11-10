@@ -14,11 +14,11 @@ import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.algorithm.Algorithm;
+import at.ac.uibk.dps.biohadoop.algorithm.AlgorithmConfiguration;
+import at.ac.uibk.dps.biohadoop.algorithm.AlgorithmId;
+import at.ac.uibk.dps.biohadoop.algorithm.AlgorithmService;
 import at.ac.uibk.dps.biohadoop.islandmodel.IslandModelException;
-import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.Algorithm;
-import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.AlgorithmConfiguration;
-import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.AlgorithmId;
-import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.AlgorithmService;
 
 public class ZooKeeperController {
 

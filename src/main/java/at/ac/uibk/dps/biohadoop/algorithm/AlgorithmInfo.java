@@ -1,4 +1,4 @@
-package at.ac.uibk.dps.biohadoop.tasksystem.algorithm;
+package at.ac.uibk.dps.biohadoop.algorithm;
 
 public class AlgorithmInfo {
 

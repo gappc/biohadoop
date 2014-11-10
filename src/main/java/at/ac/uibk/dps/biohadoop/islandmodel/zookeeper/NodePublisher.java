@@ -12,9 +12,9 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.algorithm.AlgorithmId;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.islandmodel.IslandModelResource;
-import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.AlgorithmId;
 
 public class NodePublisher {
 

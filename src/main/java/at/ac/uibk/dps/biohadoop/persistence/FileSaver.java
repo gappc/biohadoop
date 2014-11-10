@@ -2,7 +2,7 @@ package at.ac.uibk.dps.biohadoop.persistence;
 
 import java.util.Map;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.AlgorithmId;
+import at.ac.uibk.dps.biohadoop.algorithm.AlgorithmId;
 
 public class FileSaver {
 

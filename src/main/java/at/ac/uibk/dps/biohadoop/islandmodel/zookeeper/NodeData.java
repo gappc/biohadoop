@@ -3,7 +3,7 @@ package at.ac.uibk.dps.biohadoop.islandmodel.zookeeper;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.AlgorithmId;
+import at.ac.uibk.dps.biohadoop.algorithm.AlgorithmId;
 
 public class NodeData {
 

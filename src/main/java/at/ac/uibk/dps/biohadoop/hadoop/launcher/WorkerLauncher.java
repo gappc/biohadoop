@@ -30,10 +30,10 @@ import org.apache.hadoop.yarn.util.Records;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.algorithm.AlgorithmService;
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
 import at.ac.uibk.dps.biohadoop.hadoop.LaunchContainerRunnable;
 import at.ac.uibk.dps.biohadoop.hadoop.LocalResourceBuilder;
-import at.ac.uibk.dps.biohadoop.tasksystem.algorithm.AlgorithmService;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerStarter;
 
 //TODO make more parallel and use Callable instead of Thread
