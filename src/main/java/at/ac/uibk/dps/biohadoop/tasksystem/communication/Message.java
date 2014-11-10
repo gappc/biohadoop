@@ -7,18 +7,18 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.Task;
 
-public class Message<T> implements Serializable {
+public class Message implements Serializable {
 
 	private static final long serialVersionUID = -6406631824326170469L;
 	private static final Logger LOG = LoggerFactory.getLogger(Message.class);
 
 	private int type;
-	private Task<T> task;
+	private Task<?> task;
 
 	public Message() {
 	}
 
-	public Message(int type, Task<T> task) {
+	public Message(int type, Task<?> task) {
 		this.type = type;
 		this.task = task;
 	}
@@ -27,7 +27,7 @@ public class Message<T> implements Serializable {
 		return type;
 	}
 
-	public Task<T> getTask() {
+	public Task<?> getTask() {
 		return task;
 	}
 

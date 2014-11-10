@@ -20,7 +20,7 @@ public class WebSocketDecoder extends OneToOneDecoder {
 			Object msg) throws Exception {
 		String input = ((TextWebSocketFrame) msg).getText();
 		LOG.debug("Decoding {}", input);
-		Message<?> message = JsonMapper.OBJECT_MAPPER.readValue(input, Message.class);
+		Message message = JsonMapper.OBJECT_MAPPER.readValue(input, Message.class);
 		return message;
 	}
 

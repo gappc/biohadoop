@@ -22,65 +22,73 @@ public class WorkerHandler extends SimpleChannelHandler {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WorkerHandler.class);
-	
-	private final Map<TaskTypeId, WorkerData> workerDatas = new HashMap<>();
+
+	private final Map<TaskTypeId, WorkerData<?, ?, ?>> workerDatas = new HashMap<>();
 	private Message lastMessage = null;
 
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)
 			throws Exception {
 		Message inputMessage = (Message) e.getMessage();
-		Task inputTask = inputMessage.getTask();
+		Task<?> inputTask = inputMessage.getTask();
 		TaskTypeId taskTypeId = inputTask.getTaskTypeId();
-		WorkerData workerData = workerDatas.get(taskTypeId);
-		
-		if (inputMessage.getType() == MessageType.INITIAL_DATA_RESPONSE.ordinal()) {
+		WorkerData<?, ?, ?> workerData = workerDatas.get(taskTypeId);
+
+		if (inputMessage.getType() == MessageType.INITIAL_DATA_RESPONSE
+				.ordinal()) {
 			LOG.info("Getting initial data for TaskTypeId {}", taskTypeId);
-			TaskConfiguration taskConfiguration = (TaskConfiguration)inputTask.getData();
 			workerData = getWorkerData(inputTask);
 			workerDatas.put(taskTypeId, workerData);
 			inputMessage = lastMessage;
 		}
-		
+
 		if (workerData == null) {
-			Task initialDataTask = new Task(inputTask.getTaskId(), taskTypeId, null);
+			Task<?> initialDataTask = new Task<>(inputTask.getTaskId(),
+					taskTypeId, null);
 			Message initialDataMessage = new Message(
 					MessageType.INITIAL_DATA_REQUEST.ordinal(), initialDataTask);
 			e.getChannel().write(initialDataMessage);
 			lastMessage = inputMessage;
 			return;
 		}
-		
+
 		inputTask = inputMessage.getTask();
 		taskTypeId = inputTask.getTaskTypeId();
-		
-		AsyncComputable asyncComputable = workerData
+
+		@SuppressWarnings("unchecked")
+		AsyncComputable<Object, Object, Object> asyncComputable = (AsyncComputable<Object, Object, Object>) workerData
 				.getAsyncComputable();
 		Object initalData = workerData.getInitialData();
 		Object data = inputTask.getData();
 
 		Object result = asyncComputable.compute(data, initalData);
 
-		Task outputTask = new Task(inputTask.getTaskId(), taskTypeId, result);
-		Message outputMessage = new Message<>(
-				MessageType.WORK_REQUEST.ordinal(), outputTask);
+		Task<?> outputTask = new Task<>(inputTask.getTaskId(), taskTypeId,
+				result);
+		Message outputMessage = new Message(MessageType.WORK_REQUEST.ordinal(),
+				outputTask);
 
 		e.getChannel().write(outputMessage);
 	}
-	
+
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
 			throws Exception {
 		LOG.error("Handler error: ", e.getCause());
 		e.getChannel().close();
 	}
-	
-	private WorkerData getWorkerData(Task task) throws Exception {
-		TaskConfiguration taskConfiguration = (TaskConfiguration)task.getData();
-		Class<? extends AsyncComputable> asyncComputableClass = (Class<? extends AsyncComputable>) Class
+
+	private <R, T, S> WorkerData<R, T, S> getWorkerData(Task<T> task)
+			throws Exception {
+		@SuppressWarnings("unchecked")
+		TaskConfiguration<R> taskConfiguration = (TaskConfiguration<R>) task
+				.getData();
+		@SuppressWarnings("unchecked")
+		Class<? extends AsyncComputable<R, T, S>> asyncComputableClass = (Class<? extends AsyncComputable<R, T, S>>) Class
 				.forName(taskConfiguration.getAsyncComputableClassName());
-		AsyncComputable asyncComputable = asyncComputableClass
+		AsyncComputable<R, T, S> asyncComputable = asyncComputableClass
 				.newInstance();
-		return new WorkerData(asyncComputable, taskConfiguration.getInitialData());
+		return new WorkerData<R, T, S>(asyncComputable,
+				taskConfiguration.getInitialData());
 	}
 }

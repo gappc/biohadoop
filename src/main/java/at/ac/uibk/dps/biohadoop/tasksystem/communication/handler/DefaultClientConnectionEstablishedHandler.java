@@ -1,8 +1,6 @@
 package at.ac.uibk.dps.biohadoop.tasksystem.communication.handler;
 
 import org.jboss.netty.channel.ChannelEvent;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
@@ -36,7 +34,7 @@ public class DefaultClientConnectionEstablishedHandler extends
 			throws Exception {
 		ctx.getPipeline().remove(this);
 		LOG.info("Connection established");
-		Message<?> message = new Message<>(MessageType.WORK_REQUEST.ordinal(), null);
+		Message message = new Message(MessageType.WORK_REQUEST.ordinal(), null);
 		e.getChannel().write(message);
 	}
 }

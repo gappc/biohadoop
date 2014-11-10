@@ -24,14 +24,14 @@ public class AdapterInitialDataHandler extends SimpleChannelHandler {
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)
 			throws Exception {
-		Message<?> inputMessage = (Message) e.getMessage();
+		Message inputMessage = (Message) e.getMessage();
 		Task<?> inputTask = inputMessage.getTask();
 		TaskConfiguration<?> taskConfiguration = taskQueue
 				.getTaskConfiguration(inputTask.getTaskId());
 		Task<?> outputTask = new Task<>(inputTask.getTaskId(),
 				taskConfiguration.getTaskTypeId(), taskConfiguration);
 
-		Message<?> outputMessage = new Message<>(
+		Message outputMessage = new Message(
 				MessageType.INITIAL_DATA_RESPONSE.ordinal(), outputTask);
 
 		e.getChannel().write(outputMessage);
