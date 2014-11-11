@@ -14,10 +14,10 @@ import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueue;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueueService;
 
-public class AdapterInitialDataHandler extends SimpleChannelHandler {
+public class EndpointInitialDataHandler extends SimpleChannelHandler {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(AdapterInitialDataHandler.class);
+			.getLogger(EndpointInitialDataHandler.class);
 
 	private final TaskQueue taskQueue = TaskQueueService.getTaskQueue();
 

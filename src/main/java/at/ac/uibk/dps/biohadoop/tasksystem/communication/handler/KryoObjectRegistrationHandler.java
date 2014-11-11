@@ -7,7 +7,7 @@ import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.AdapterException;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.endpoint.EndpointException;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoConfig;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoObjectRegistrationMessage;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoRegistrator;
@@ -26,7 +26,7 @@ public class KryoObjectRegistrationHandler extends SimpleChannelUpstreamHandler 
 		super.channelConnected(ctx, e);
 	}
 
-	private String getKryoRegistratorClassName() throws AdapterException {
+	private String getKryoRegistratorClassName() throws EndpointException {
 		Map<String, String> properties = Environment
 				.getBiohadoopConfiguration().getGlobalProperties();
 		if (properties == null) {

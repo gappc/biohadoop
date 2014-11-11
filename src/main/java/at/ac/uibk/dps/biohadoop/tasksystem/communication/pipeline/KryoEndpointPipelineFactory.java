@@ -6,9 +6,9 @@ import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.group.ChannelGroup;
 
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.AdapterException;
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.AdapterInitialDataHandler;
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.AdapterWorkHandler;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.endpoint.EndpointException;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.EndpointInitialDataHandler;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.EndpointWorkHandler;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.KryoDecoder;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.KryoEncoder;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.KryoObjectRegistrationHandler;
@@ -18,9 +18,9 @@ import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoRegistrator;
 
 import com.esotericsoftware.kryo.Kryo;
 
-public class KryoAdapterPipelineFactory extends AbstractPipeline {
+public class KryoEndpointPipelineFactory extends AbstractPipeline {
 
-	public KryoAdapterPipelineFactory(ChannelGroup channels) {
+	public KryoEndpointPipelineFactory(ChannelGroup channels) {
 		super(channels);
 	}
 
@@ -36,14 +36,14 @@ public class KryoAdapterPipelineFactory extends AbstractPipeline {
 				new KryoEncoder(kryo, KryoConfig.getBufferSize(), KryoConfig
 						.getMaxBufferSize()));
 		pipeline.addLast("counter", counterHandler);
-		pipeline.addLast("workHandler", new AdapterWorkHandler());
-		pipeline.addLast("initialDataHandler", new AdapterInitialDataHandler());
+		pipeline.addLast("workHandler", new EndpointWorkHandler());
+		pipeline.addLast("initialDataHandler", new EndpointInitialDataHandler());
 		// pipeline.addLast("workHandler", new
-		// TestAdapterWorkHandler(pipelineName));
+		// TestEndpointWorkHandler(pipelineName));
 		return pipeline;
 	}
 
-	private KryoRegistrator getKryoRegistrator() throws AdapterException {
+	private KryoRegistrator getKryoRegistrator() throws EndpointException {
 		String kryoRegistratorClassName = getKryoRegistratorClassName();
 		if (kryoRegistratorClassName == null) {
 			return null;
@@ -53,13 +53,13 @@ public class KryoAdapterPipelineFactory extends AbstractPipeline {
 					.newInstance();
 		} catch (InstantiationException | IllegalAccessException
 				| ClassNotFoundException | NoClassDefFoundError e) {
-			throw new AdapterException(
+			throw new EndpointException(
 					"Could not register objects for Kryo serialization, KryoRegistrator="
 							+ kryoRegistratorClassName, e);
 		}
 	}
 
-	private String getKryoRegistratorClassName() throws AdapterException {
+	private String getKryoRegistratorClassName() throws EndpointException {
 		Map<String, String> properties = Environment
 				.getBiohadoopConfiguration().getGlobalProperties();
 		if (properties == null) {

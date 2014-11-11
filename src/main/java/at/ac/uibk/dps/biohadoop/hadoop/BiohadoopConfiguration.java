@@ -10,10 +10,10 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 import at.ac.uibk.dps.biohadoop.algorithm.AlgorithmConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.CommunicationConfiguration;
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.Adapter;
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.AdapterConfiguration;
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.KryoAdapter;
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter.WebSocketAdapter;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.endpoint.Endpoint;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.endpoint.EndpointConfiguration;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.endpoint.KryoEndpoint;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.endpoint.WebSocketEndpoint;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.Worker;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerConfiguration;
 
@@ -65,7 +65,7 @@ public class BiohadoopConfiguration {
 	public static class Builder {
 		private List<String> libPaths = new ArrayList<>();
 		private List<AlgorithmConfiguration> algorithmConfigurations = new ArrayList<>();;
-		private List<AdapterConfiguration> adapters = new ArrayList<>();
+		private List<EndpointConfiguration> endpoints = new ArrayList<>();
 		private List<WorkerConfiguration> workerConfigurations = new ArrayList<>();
 		private Map<String, String> globalProperties = new HashMap<>();
 
@@ -79,17 +79,17 @@ public class BiohadoopConfiguration {
 			return this;
 		}
 
-		public Builder addDefaultAdapters() {
-			adapters.add(new AdapterConfiguration(KryoAdapter.class));
-			adapters.add(new AdapterConfiguration(WebSocketAdapter.class));
+		public Builder addDefaultEndpoints() {
+			endpoints.add(new EndpointConfiguration(KryoEndpoint.class));
+			endpoints.add(new EndpointConfiguration(WebSocketEndpoint.class));
 			return this;
 		}
 		
-		public Builder addAdapter(
-				Class<? extends Adapter> adapter) {
-			AdapterConfiguration adapterConfiguration = new AdapterConfiguration(
-					adapter);
-			adapters.add(adapterConfiguration);
+		public Builder addEndpoint(
+				Class<? extends Endpoint> endpoint) {
+			EndpointConfiguration endpointConfiguration = new EndpointConfiguration(
+					endpoint);
+			endpoints.add(endpointConfiguration);
 			return this;
 		}
 
@@ -107,7 +107,7 @@ public class BiohadoopConfiguration {
 
 		public BiohadoopConfiguration build() {
 			CommunicationConfiguration communicationConfiguration = new CommunicationConfiguration(
-					adapters, workerConfigurations);
+					endpoints, workerConfigurations);
 			return new BiohadoopConfiguration(libPaths, algorithmConfigurations,
 					communicationConfiguration, globalProperties);
 		}

@@ -19,10 +19,10 @@ import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskId;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueue;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueueService;
 
-public class AdapterWorkHandler extends SimpleChannelHandler {
+public class EndpointWorkHandler extends SimpleChannelHandler {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(AdapterWorkHandler.class);
+			.getLogger(EndpointWorkHandler.class);
 
 	private final TaskQueue taskQueue = TaskQueueService.getTaskQueue();
 	private final ForkJoinPool pool = new ForkJoinPool();

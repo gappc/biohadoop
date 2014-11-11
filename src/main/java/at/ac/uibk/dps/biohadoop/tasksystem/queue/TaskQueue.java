@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A queue that can be used to add tasks for asynchronous computation. The tasks
- * can then be consumed by e.g. adapters, which send them to waiting workers.
- * The workers return the results to the adapters, which use the method
+ * can then be consumed by e.g. endpoints, which send them to waiting workers.
+ * The workers return the results to the endpoints, which use the method
  * {@link #storeResult(TaskId, Object)} to store the result. Methods are
  * provided to add tasks to the internal queue, to get them out of the queue, to
  * return the result of an asynchronous computation, to reschedule a task and to
@@ -163,8 +163,8 @@ public class TaskQueue {
 	 * 
 	 * @param taskId
 	 *            is the unique identifier of a task
-	 * @return the {@link TaskConfiguration} that was submitted along with the task,
-	 *         identified by <tt>taskId</tt>
+	 * @return the {@link TaskConfiguration} that was submitted along with the
+	 *         task, identified by <tt>taskId</tt>
 	 * @throws TaskException
 	 *             if the <tt>taskId<tt> is unknown
 	 */

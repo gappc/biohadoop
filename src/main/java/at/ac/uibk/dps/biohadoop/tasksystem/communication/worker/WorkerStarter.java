@@ -24,7 +24,7 @@ public class WorkerStarter {
 			worker.start(args[1], Integer.parseInt(args[2]));
 		} catch(ConnectionRefusedException e) {
 			LOG.error(
-					"Error while connecting to Adapter for Worker {}, exiting with status code 2",
+					"Error while connecting to Endpoint for Worker {}, exiting with status code 2",
 					args[0], e);
 			System.exit(2);
 		} catch (Exception e) {

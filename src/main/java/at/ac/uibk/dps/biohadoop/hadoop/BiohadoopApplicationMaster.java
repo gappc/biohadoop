@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.algorithm.AlgorithmId;
-import at.ac.uibk.dps.biohadoop.hadoop.launcher.AdapterLauncher;
+import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.AlgorithmLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLauncher;
 import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
@@ -49,9 +49,9 @@ public class BiohadoopApplicationMaster {
 		Environment.setBiohadoopConfiguration(biohadoopConfiguration);
 		Environment.setBiohadoopConfigurationPath(args[0]);
 
-		AdapterLauncher adapterLauncher = new AdapterLauncher(
+		EndpointLauncher endpointLauncher = new EndpointLauncher(
 				biohadoopConfiguration);
-		adapterLauncher.startAdapters();
+		endpointLauncher.startEndpoints();
 
 		if (System.getProperty("local") == null) {
 			WorkerLauncher.launchWorkers(yarnConfiguration,
@@ -76,7 +76,7 @@ public class BiohadoopApplicationMaster {
 		LOG.info("All algorithms finished");
 
 		LOG.info("Stopping all communication");
-		adapterLauncher.stopAdapters();
+		endpointLauncher.stopEndpoints();
 	}
 
 	private void checkArguments(String[] args) {

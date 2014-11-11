@@ -6,15 +6,15 @@ import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.AdapterInitialDataHandler;
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.AdapterWorkHandler;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.EndpointInitialDataHandler;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.EndpointWorkHandler;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.CustomWebSocketServerProtocolHandler;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.WebSocketDecoder;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.WebSocketEncoder;
 
-public class WebSocketAdapterPipelineFactory extends AbstractPipeline {
+public class WebSocketEndpointPipelineFactory extends AbstractPipeline {
 
-	public WebSocketAdapterPipelineFactory(ChannelGroup channels) {
+	public WebSocketEndpointPipelineFactory(ChannelGroup channels) {
 		super(channels);
 	}
 
@@ -29,8 +29,8 @@ public class WebSocketAdapterPipelineFactory extends AbstractPipeline {
 		pipeline.addLast("httpEncoder", new HttpResponseEncoder());
 		pipeline.addLast("webSocketEncoder", new WebSocketEncoder());
 		pipeline.addLast("counter", counterHandler);
-		pipeline.addLast("workHandler", new AdapterWorkHandler());
-		pipeline.addLast("initialDataHandler", new AdapterInitialDataHandler());
+		pipeline.addLast("workHandler", new EndpointWorkHandler());
+		pipeline.addLast("initialDataHandler", new EndpointInitialDataHandler());
 		return pipeline;
 	}
 }

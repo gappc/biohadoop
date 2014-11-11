@@ -1,18 +1,18 @@
-package at.ac.uibk.dps.biohadoop.tasksystem.communication.adapter;
+package at.ac.uibk.dps.biohadoop.tasksystem.communication.endpoint;
 
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.group.ChannelGroup;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.pipeline.KryoAdapterPipelineFactory;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.pipeline.KryoEndpointPipelineFactory;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.KryoWorker;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.Worker;
 
-public class KryoAdapter extends AbstractAdapter {
+public class KryoEndpoint extends AbstractEndpoint {
 
 	@Override
-	public void start() throws AdapterException {
+	public void start() throws EndpointException {
 		ChannelGroup channels = server.getChannelGroup();
-		ChannelPipelineFactory pipelineFactory = new KryoAdapterPipelineFactory(channels);
+		ChannelPipelineFactory pipelineFactory = new KryoEndpointPipelineFactory(channels);
 		server.startServer(pipelineFactory, getMatchingWorkerClass());
 	}
 

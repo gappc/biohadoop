@@ -13,10 +13,10 @@ import at.ac.uibk.dps.biohadoop.tasksystem.queue.Task;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskId;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskTypeId;
 
-public class TestAdapterWorkHandler extends SimpleChannelHandler {
+public class TestEndpointWorkHandler extends SimpleChannelHandler {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(AdapterWorkHandler.class);
+			.getLogger(EndpointWorkHandler.class);
 
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)
