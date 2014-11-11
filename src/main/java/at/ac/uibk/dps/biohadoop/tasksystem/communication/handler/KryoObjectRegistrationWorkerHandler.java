@@ -5,7 +5,6 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoBuilder;
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoConfig;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoObjectRegistrationMessage;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoRegistrator;
 
@@ -35,7 +34,7 @@ public class KryoObjectRegistrationWorkerHandler extends
 						"kryoObjectRegistration",
 						"encoder",
 						new KryoEncoder(KryoBuilder.buildKryo(kryoRegistrator),
-								KryoConfig.getBufferSize(), KryoConfig
+								message.getBufferSize(), message
 										.getMaxBufferSize()));
 			}
 			ctx.getPipeline().remove(this);

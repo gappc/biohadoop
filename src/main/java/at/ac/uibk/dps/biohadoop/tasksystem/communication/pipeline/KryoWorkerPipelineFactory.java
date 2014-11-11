@@ -24,10 +24,9 @@ public class KryoWorkerPipelineFactory implements ChannelPipelineFactory {
 		KryoObjectRegistration.registerDefaultObjects(kryo);
 		ChannelPipeline pipeline = Channels.pipeline();
 		pipeline.addLast("decoder", new KryoDecoder(kryo));
-		pipeline.addLast(
-				"encoder",
-				new KryoEncoder(kryo, KryoConfig.getBufferSize(), KryoConfig
-						.getMaxBufferSize()));
+		pipeline.addLast("encoder", new KryoEncoder(kryo,
+				KryoConfig.KRYO_DEFAULT_BUFFER_SIZE,
+				KryoConfig.KRYO_DEFAULT_MAX_BUFFER_SIZE));
 		// We may need to register additional objects to Kryo. It is done
 		// through this handler, that removes itself from the pipeline after the
 		// registration is done
@@ -42,5 +41,4 @@ public class KryoWorkerPipelineFactory implements ChannelPipelineFactory {
 		// pipeline.addLast("worker", new TestWorkerHandler());
 		return pipeline;
 	}
-
 }
