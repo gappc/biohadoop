@@ -5,6 +5,7 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoBuilder;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoConfig;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoObjectRegistrationMessage;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoRegistrator;
 
@@ -21,14 +22,21 @@ public class KryoObjectRegistrationWorkerHandler extends
 				ctx.getPipeline().remove(KryoEncoder.class);
 				ctx.getPipeline().remove(KryoDecoder.class);
 
-				KryoRegistrator kryoRegistrator = (KryoRegistrator) Class.forName(
-						message.getClassName()).newInstance();
+				KryoRegistrator kryoRegistrator = (KryoRegistrator) Class
+						.forName(message.getClassName()).newInstance();
 
-				
-				ctx.getPipeline().addBefore("kryoObjectRegistration", "decoder",
-						new KryoDecoder(KryoBuilder.buildKryo(kryoRegistrator)));
-				ctx.getPipeline().addBefore("kryoObjectRegistration", "encoder",
-						new KryoEncoder(KryoBuilder.buildKryo(kryoRegistrator), 1 * 1024, 2 * 1024 * 1024));
+				ctx.getPipeline()
+						.addBefore(
+								"kryoObjectRegistration",
+								"decoder",
+								new KryoDecoder(KryoBuilder
+										.buildKryo(kryoRegistrator)));
+				ctx.getPipeline().addBefore(
+						"kryoObjectRegistration",
+						"encoder",
+						new KryoEncoder(KryoBuilder.buildKryo(kryoRegistrator),
+								KryoConfig.getBufferSize(), KryoConfig
+										.getMaxBufferSize()));
 			}
 			ctx.getPipeline().remove(this);
 		} else {

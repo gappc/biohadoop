@@ -13,6 +13,7 @@ import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.KryoDecoder;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.KryoEncoder;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.KryoObjectRegistrationHandler;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoBuilder;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoConfig;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoRegistrator;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -27,16 +28,21 @@ public class KryoAdapterPipelineFactory extends AbstractPipeline {
 	public ChannelPipeline getPipeline() throws Exception {
 		ChannelPipeline pipeline = super.getPipeline();
 		Kryo kryo = KryoBuilder.buildKryo(getKryoRegistrator());
-		pipeline.addLast("kryoObjectRegistration", new KryoObjectRegistrationHandler());
+		pipeline.addLast("kryoObjectRegistration",
+				new KryoObjectRegistrationHandler());
 		pipeline.addLast("decoder", new KryoDecoder(kryo));
-		pipeline.addLast("encoder", new KryoEncoder(kryo, 1 * 1024, 2 * 1024 * 1024));
+		pipeline.addLast(
+				"encoder",
+				new KryoEncoder(kryo, KryoConfig.getBufferSize(), KryoConfig
+						.getMaxBufferSize()));
 		pipeline.addLast("counter", counterHandler);
 		pipeline.addLast("workHandler", new AdapterWorkHandler());
 		pipeline.addLast("initialDataHandler", new AdapterInitialDataHandler());
-//		pipeline.addLast("workHandler", new TestAdapterWorkHandler(pipelineName));
+		// pipeline.addLast("workHandler", new
+		// TestAdapterWorkHandler(pipelineName));
 		return pipeline;
 	}
-	
+
 	private KryoRegistrator getKryoRegistrator() throws AdapterException {
 		String kryoRegistratorClassName = getKryoRegistratorClassName();
 		if (kryoRegistratorClassName == null) {
@@ -53,9 +59,7 @@ public class KryoAdapterPipelineFactory extends AbstractPipeline {
 		}
 	}
 
-	
-	private String getKryoRegistratorClassName()
-			throws AdapterException {
+	private String getKryoRegistratorClassName() throws AdapterException {
 		Map<String, String> properties = Environment
 				.getBiohadoopConfiguration().getGlobalProperties();
 		if (properties == null) {

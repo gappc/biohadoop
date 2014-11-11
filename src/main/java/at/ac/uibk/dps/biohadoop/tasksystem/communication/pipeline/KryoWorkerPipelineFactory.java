@@ -10,6 +10,7 @@ import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.KryoDecoder;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.KryoEncoder;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.KryoObjectRegistrationWorkerHandler;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.WorkerHandler;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoConfig;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoObjectRegistration;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -23,8 +24,10 @@ public class KryoWorkerPipelineFactory implements ChannelPipelineFactory {
 		KryoObjectRegistration.registerDefaultObjects(kryo);
 		ChannelPipeline pipeline = Channels.pipeline();
 		pipeline.addLast("decoder", new KryoDecoder(kryo));
-		pipeline.addLast("encoder", new KryoEncoder(kryo, 1 * 1024,
-				2 * 1024 * 1024));
+		pipeline.addLast(
+				"encoder",
+				new KryoEncoder(kryo, KryoConfig.getBufferSize(), KryoConfig
+						.getMaxBufferSize()));
 		// We may need to register additional objects to Kryo. It is done
 		// through this handler, that removes itself from the pipeline after the
 		// registration is done
