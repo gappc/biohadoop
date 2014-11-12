@@ -4,17 +4,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import at.ac.uibk.dps.biohadoop.metrics.Metrics;
-
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.MetricRegistry;
-
 public class AlgorithmService {
 
 	private static final Map<AlgorithmId, AlgorithmInfo> ALGORITHM_INFOS = new ConcurrentHashMap<>();
 	private static final AtomicInteger COUNTER = new AtomicInteger();
-	private static final Counter METRICS_COUNTER = Metrics.getInstance()
-			.counter(MetricRegistry.name(AlgorithmService.class, "algorithms"));
 
 	private AlgorithmService() {
 	}
@@ -24,7 +17,6 @@ public class AlgorithmService {
 		AlgorithmId algorithmId = AlgorithmId.newInstance();
 		ALGORITHM_INFOS.put(algorithmId, new AlgorithmInfo(algorithmConfig));
 		COUNTER.incrementAndGet();
-		METRICS_COUNTER.inc();
 		return algorithmId;
 	}
 

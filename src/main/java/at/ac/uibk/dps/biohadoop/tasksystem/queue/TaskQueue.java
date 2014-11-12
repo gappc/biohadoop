@@ -29,9 +29,6 @@ public class TaskQueue {
 	private final BlockingQueue<Task<?>> queue = new LinkedBlockingQueue<>();
 	private final Map<TaskId, TaskQueueEntry> workingSet = new ConcurrentHashMap<>();
 
-	// private final Counter queueSizeCounter = Metrics.getInstance().counter(
-	// MetricRegistry.name(TaskQueue.class, this + "-queue-size"));
-
 	/**
 	 * Add a task to the task queue to make it available for asynchronous
 	 * computation by a worker. This method blocks, if the underlying queue is
