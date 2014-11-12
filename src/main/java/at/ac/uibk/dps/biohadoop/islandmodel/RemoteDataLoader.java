@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codehaus.jackson.type.TypeReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +22,7 @@ public class RemoteDataLoader<T> {
 	private static final String NO_SUITABLE_NODE = "No suitable node found";
 	private static final Client client = Client.create();
 
-	public T getRemoteData(NodeData nodeData) throws IslandModelException {
+	public T getRemoteData(NodeData nodeData, Class<T> dataClass) throws IslandModelException {
 		if (nodeData == null) {
 			LOG.error(NO_SUITABLE_NODE);
 			throw new IslandModelException(NO_SUITABLE_NODE);
@@ -36,9 +35,7 @@ public class RemoteDataLoader<T> {
 				ClientResponse.class);
 		String output = response.getEntity(String.class);
 		try {
-			T data = JsonMapper.OBJECT_MAPPER.readValue(output,
-					new TypeReference<T>() {
-					});
+			T data = JsonMapper.OBJECT_MAPPER.readValue(output, dataClass);
 			if (data == null) {
 				LOG.error("No remote data found at {}", path);
 				throw new IslandModelException("No remote data found at "
@@ -51,7 +48,7 @@ public class RemoteDataLoader<T> {
 		}
 	}
 
-	public List<T> getRemoteDatas(List<NodeData> nodesData)
+	public List<T> getRemoteDatas(List<NodeData> nodesData, Class<T> dataClass)
 			throws IslandModelException {
 		if (nodesData == null || nodesData.isEmpty()) {
 			LOG.error(NO_SUITABLE_NODE);
@@ -67,9 +64,7 @@ public class RemoteDataLoader<T> {
 					.get(ClientResponse.class);
 			String output = response.getEntity(String.class);
 			try {
-				T data = JsonMapper.OBJECT_MAPPER.readValue(output,
-						new TypeReference<T>() {
-						});
+				T data = JsonMapper.OBJECT_MAPPER.readValue(output, dataClass);
 				if (data == null) {
 					LOG.error("No remote data found at {}", path);
 					throw new IslandModelException("No remote data found at "

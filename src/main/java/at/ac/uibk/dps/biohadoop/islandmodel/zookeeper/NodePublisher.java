@@ -14,7 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.algorithm.AlgorithmId;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
-import at.ac.uibk.dps.biohadoop.islandmodel.IslandModelResource;
+import at.ac.uibk.dps.biohadoop.islandmodel.server.IslandModelDataHandler;
+import at.ac.uibk.dps.biohadoop.islandmodel.server.IslandModelServer;
 
 public class NodePublisher {
 
@@ -103,15 +104,13 @@ public class NodePublisher {
 	}
 
 	private NodeData getNodeData() {
-		String host = Environment.getPrefixed(Environment.DEFAULT_PREFIX,
-				Environment.HTTP_HOST);
-		String port = Environment.getPrefixed(Environment.DEFAULT_PREFIX,
-				Environment.HTTP_PORT);
+		String host = Environment.get(IslandModelServer.ISLAND_MODEL_HOST);
+		String port = Environment.get(IslandModelServer.ISLAND_MODEL_PORT);
 
 		// TODO hardcoding http as protocol is a bad idea
 		StringBuilder islandModelResourceUrl = new StringBuilder();
 		islandModelResourceUrl.append("http://").append(host).append(":")
-				.append(port).append("/rs/" + IslandModelResource.PATH);
+				.append(port).append("/" + IslandModelDataHandler.PATH);
 
 		return new NodeData(algorithmId, islandModelResourceUrl.toString());
 	}

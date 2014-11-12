@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.algorithm.AlgorithmId;
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
+import at.ac.uibk.dps.biohadoop.islandmodel.server.IslandModelDataHandler;
+import at.ac.uibk.dps.biohadoop.islandmodel.server.IslandModelPipelineFactory;
+import at.ac.uibk.dps.biohadoop.islandmodel.server.IslandModelServer;
 import at.ac.uibk.dps.biohadoop.islandmodel.zookeeper.NodeData;
 import at.ac.uibk.dps.biohadoop.islandmodel.zookeeper.ZooKeeperController;
 
@@ -26,6 +29,8 @@ public class IslandModel {
 
 	public static void initialize(AlgorithmId algorithmId)
 			throws IslandModelException {
+		IslandModelServer server = new IslandModelServer();
+		server.startServer(new IslandModelPipelineFactory());
 		checkZooKeeper();
 		getZooKeeperController(algorithmId);
 	}
@@ -51,7 +56,7 @@ public class IslandModel {
 	}
 
 	public static void publish(AlgorithmId algorithmId, Object data) {
-		IslandModelResource.publish(algorithmId, data);
+		IslandModelDataHandler.publish(algorithmId, data);
 	}
 	
 	public static <T>T merge(AlgorithmId algorithmId,
@@ -63,9 +68,10 @@ public class IslandModel {
 		List<NodeData> nodeDatas = zooKeeperController
 				.getSuitableRemoteNodesData();
 		
-		LOG.info("Merging data for algorithm {}", algorithmId);
-		
+		LOG.debug("Requesting data for algorithmId {}", algorithmId);
 		T remoteData = remoteResultGetter.getRemoteData(nodeDatas);
+
+		LOG.info("Merging data for algorithm {}", algorithmId);
 		T mergedData = dataMerger.merge(data, remoteData);
 
 		LOG.debug("{}: remoteData:        {}", algorithmId, remoteData);
