@@ -31,7 +31,6 @@ import org.mortbay.util.ajax.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.HdfsUtil;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 
@@ -43,9 +42,6 @@ public class BiohadoopClient {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(BiohadoopClient.class);
-
-	private static final String CLASSNAME = ClassnameProvider
-			.getClassname(BiohadoopClient.class);
 
 	private final List<String> includePaths = new ArrayList<String>();
 
@@ -62,7 +58,7 @@ public class BiohadoopClient {
 			LOG.info("Client stopped after {}ms with state {}", end - start,
 					finalAppState);
 		} catch (Exception e) {
-			LOG.error("Error while running {}", CLASSNAME, e);
+			LOG.error("Error while running", e);
 			System.exit(1);
 		}
 	}

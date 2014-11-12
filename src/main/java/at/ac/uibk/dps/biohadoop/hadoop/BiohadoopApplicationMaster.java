@@ -9,10 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.algorithm.AlgorithmId;
-import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.AlgorithmLauncher;
+import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLauncher;
-import at.ac.uibk.dps.biohadoop.utils.ClassnameProvider;
 import at.ac.uibk.dps.biohadoop.utils.HdfsUtil;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 
@@ -21,14 +20,11 @@ public class BiohadoopApplicationMaster {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(BiohadoopApplicationMaster.class);
 
-	private static final String CLASSNAME = ClassnameProvider
-			.getClassname(BiohadoopApplicationMaster.class);
-
 	private YarnConfiguration yarnConfiguration = new YarnConfiguration();
 
 	public static void main(String[] args) {
 		try {
-			LOG.info("{} started at {}", CLASSNAME, HostInfo.getHostname());
+			LOG.info("Started Biohadoop at {}", HostInfo.getHostname());
 			long start = System.currentTimeMillis();
 
 			BiohadoopApplicationMaster master = new BiohadoopApplicationMaster();
@@ -36,9 +32,9 @@ public class BiohadoopApplicationMaster {
 			master.run(args);
 
 			long end = System.currentTimeMillis();
-			LOG.info("{} stopped, time: {}ms", CLASSNAME, end - start);
+			LOG.info("Biohadoop stopped, time: {}ms", end - start);
 		} catch (Exception e) {
-			LOG.error("Error while running {}", CLASSNAME, e);
+			LOG.error("Error while running Biohadoop", e);
 			System.exit(1);
 		}
 	}
@@ -62,7 +58,7 @@ public class BiohadoopApplicationMaster {
 
 		List<Future<AlgorithmId>> algorithmFutures = AlgorithmLauncher
 				.launchAlgorithm(biohadoopConfiguration);
-		
+
 		for (Future<AlgorithmId> algorithmFuture : algorithmFutures) {
 			try {
 				AlgorithmId algorithmId = algorithmFuture.get();
