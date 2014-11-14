@@ -16,20 +16,17 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.CounterHandler;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.Worker;
 import at.ac.uibk.dps.biohadoop.utils.PortFinder;
 
 public class NettyServer {
 
-	protected final ChannelGroup channels = new DefaultChannelGroup(this
-			.getClass().getCanonicalName() + "-server");
-
-	protected CounterHandler counterHandler = new CounterHandler();
-
+	private static final Logger LOG = LoggerFactory.getLogger(NettyServer.class);
 	private static final int PORT_RANGE_LOW = 30000;
 	private static final Map<String, Integer> PORT_MAP = new ConcurrentHashMap<>();
-	private final Logger LOG = LoggerFactory.getLogger(getClass());
+
+	private final ChannelGroup channels = new DefaultChannelGroup(this
+			.getClass().getCanonicalName() + "-server");
 
 	private ChannelFactory factory;
 
