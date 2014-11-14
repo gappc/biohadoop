@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.uibk.dps.biohadoop.hadoop.BiohadoopConfiguration;
+import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.CommunicationConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.endpoint.Endpoint;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.endpoint.EndpointException;
@@ -44,6 +45,7 @@ public class EndpointLauncher {
 	}
 
 	public void stopEndpoints() throws EndpointException {
+		Environment.setShutdown();
 		LOG.info("Stopping endpoint");
 		for (Endpoint endpoint : endpoints) {
 			LOG.debug("Stopping endpoint {}", endpoint);

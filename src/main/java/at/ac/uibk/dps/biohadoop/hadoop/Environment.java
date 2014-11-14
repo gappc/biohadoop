@@ -2,6 +2,7 @@ package at.ac.uibk.dps.biohadoop.hadoop;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Environment {
 
@@ -14,6 +15,7 @@ public class Environment {
 	public static final String KRYO_SOCKET_PORT = "KRYO_SOCKET_PORT";
 
 	private static final Map<String, String> environment = new ConcurrentHashMap<>();
+	private static final AtomicBoolean SHUTDOWN = new AtomicBoolean(false);
 	
 	private static BiohadoopConfiguration biohadoopConfiguration;
 	private static String biohadoopConfigurationPath;
@@ -55,4 +57,11 @@ public class Environment {
 		Environment.biohadoopConfigurationPath = biohadoopConfigurationPath;
 	}
 	
+	public static void setShutdown() {
+		SHUTDOWN.set(true);
+	}
+	
+	public static boolean isShutdown() {
+		return SHUTDOWN.get();
+	}
 }

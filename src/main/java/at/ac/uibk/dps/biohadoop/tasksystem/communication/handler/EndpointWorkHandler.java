@@ -11,6 +11,7 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.Message;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.Task;
@@ -77,6 +78,10 @@ public class EndpointWorkHandler extends SimpleChannelHandler {
 	}
 
 	public void handleError() {
+		if (Environment.isShutdown()) {
+			LOG.debug("No rescheduling done, as Biohadoop is already shutting down");
+			return;
+		}
 		if (currentTaskId != null) {
 			try {
 				taskQueue.reschedule(currentTaskId);
