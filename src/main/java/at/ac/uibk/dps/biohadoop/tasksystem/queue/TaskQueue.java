@@ -11,13 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A queue that can be used to add tasks for asynchronous computation. The tasks
- * can then be consumed by e.g. endpoints, which send them to waiting workers.
- * The workers return the results to the endpoints, which use the method
- * {@link #storeResult(TaskId, Object)} to store the result. Methods are
- * provided to add tasks to the internal queue, to get them out of the queue, to
- * return the result of an asynchronous computation, to reschedule a task and to
- * stop the queue.
+ * A queue that can be used to submit tasks for asynchronous computation. The
+ * tasks can then be consumed by e.g. endpoints, which send them to waiting
+ * workers. The workers return the results to the endpoints, which use the
+ * method {@link #storeResult(TaskId, Object)} to store the result.
  * 
  * @author Christian Gapp
  *
@@ -30,21 +27,21 @@ public class TaskQueue {
 	private final Map<TaskId, TaskQueueEntry> workingSet = new ConcurrentHashMap<>();
 
 	/**
-	 * Add a task to the task queue to make it available for asynchronous
+	 * Submit a task to the task queue to make it available for asynchronous
 	 * computation by a worker. This method blocks, if the underlying queue is
 	 * full.
 	 * 
 	 * @param data
-	 *            that should be added to the task queue. This data is send to a
-	 *            waiting worker for computation
+	 *            that should be submitted to the task queue. This data is send
+	 *            to a waiting worker for computation
 	 * @param TaskConfiguration
 	 *            defines the {@link TaskConfiguration} for this task
 	 * @return {@link TaskFuture} that represents the result of the asynchronous
 	 *         computation
 	 * @throws InterruptedException
-	 *             if adding data to the queue was not possible
+	 *             if the submission was not possible
 	 */
-	public <T> TaskFuture<T> add(Object data,
+	public <T> TaskFuture<T> submit(Object data,
 			TaskConfiguration<?> taskConfiguration) throws InterruptedException {
 		TaskId taskId = TaskId.newInstance();
 		LOG.debug("Adding task {}", taskId);
@@ -71,24 +68,24 @@ public class TaskQueue {
 	 * submitted. This method blocks, if the underlying queue is full.
 	 * 
 	 * @param datas
-	 *            that should be added to the task queue. This datas are send to
-	 *            waiting workers for computation
+	 *            that should be submitted to the task queue. This datas are
+	 *            send to waiting workers for computation
 	 * @param TaskConfiguration
 	 *            defines the {@link TaskConfiguration} for this task
 	 * @return list of {@link TaskFuture} that represents the results of the
 	 *         asynchronous computation. One element is returned for each
 	 *         element in the input list.
 	 * @throws InterruptedException
-	 *             if adding data to the queue was not possible. At the moment
-	 *             it is not possible to tell which elements of the list have
-	 *             been submitted when the exception occurs.
+	 *             if the submission was not possible. At the moment it is not
+	 *             possible to tell which elements of the list have been
+	 *             submitted when the exception occurs.
 	 */
-	public <T, S> List<TaskFuture<S>> addAll(List<T> datas,
+	public <T, S> List<TaskFuture<S>> submit(List<T> datas,
 			TaskConfiguration<?> taskConfiguration) throws InterruptedException {
 		LOG.debug("Adding list of tasks with size {}", datas.size());
 		List<TaskFuture<S>> taskFutures = new ArrayList<>();
 		for (T data : datas) {
-			TaskFuture<S> taskFutureImpl = add(data, taskConfiguration);
+			TaskFuture<S> taskFutureImpl = submit(data, taskConfiguration);
 			taskFutures.add(taskFutureImpl);
 		}
 		return taskFutures;
@@ -105,7 +102,7 @@ public class TaskQueue {
 	 * submitted. This method blocks, if the underlying queue is full.
 	 * 
 	 * @param datas
-	 *            that should be added to the task queue. This datas are send to
+	 *            that should be submitted to the task queue. This datas are send to
 	 *            waiting workers for computation
 	 * @param TaskConfiguration
 	 *            defines the {@link TaskConfiguration} for this task
@@ -113,16 +110,16 @@ public class TaskQueue {
 	 *         asynchronous computation. One element is returned for each
 	 *         element in the input array.
 	 * @throws InterruptedException
-	 *             if adding data to the queue was not possible. At the moment
+	 *             if the submission was not possible. At the moment
 	 *             it is not possible to tell which elements of the array have
 	 *             been submitted when the exception occurs.
 	 */
-	public <T, S> List<TaskFuture<S>> addAll(T[] datas,
+	public <T, S> List<TaskFuture<S>> submit(T[] datas,
 			TaskConfiguration<?> taskConfiguration) throws InterruptedException {
 		LOG.debug("Adding list of tasks with size {}", datas.length);
 		List<TaskFuture<S>> taskFutures = new ArrayList<>();
 		for (T data : datas) {
-			TaskFuture<S> taskFutureImpl = add(data, taskConfiguration);
+			TaskFuture<S> taskFutureImpl = submit(data, taskConfiguration);
 			taskFutures.add(taskFutureImpl);
 		}
 		return taskFutures;

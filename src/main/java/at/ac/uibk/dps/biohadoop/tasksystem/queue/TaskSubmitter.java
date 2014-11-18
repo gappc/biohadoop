@@ -82,7 +82,7 @@ public class TaskSubmitter<R, T, S> {
 
 	private TaskFuture<S> submitTask(T data) throws TaskException {
 		try {
-			return taskQueue.add(data, taskConfiguration);
+			return taskQueue.submit(data, taskConfiguration);
 		} catch (InterruptedException e) {
 			throw new TaskException("Could not add Task", e);
 		}
