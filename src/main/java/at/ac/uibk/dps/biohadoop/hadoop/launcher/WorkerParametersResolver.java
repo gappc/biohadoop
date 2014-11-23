@@ -16,14 +16,19 @@ public class WorkerParametersResolver {
 		List<WorkerConfiguration> configurations = Environment
 				.getBiohadoopConfiguration().getCommunicationConfiguration()
 				.getWorkers();
+		
+		int count = 0;
 		for (WorkerConfiguration configuration : configurations) {
 			Class<? extends Worker> worker = configuration.getWorker();
 			Integer port = NettyServer.getPort(worker);
 			for (int i = 0; i < configuration.getCount(); i++) {
 				workerParameters.add(worker.getCanonicalName() + " "
 						+ HostInfo.getHostname() + " " + port);
+				count++;
 			}
 		}
+		Environment.set(Environment.WORKER_COUNT, Integer.toString(count));
+		
 		return workerParameters;
 	}
 
