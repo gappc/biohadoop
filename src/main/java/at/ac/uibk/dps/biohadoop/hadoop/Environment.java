@@ -13,6 +13,8 @@ public class Environment {
 	public static final String SOCKET_PORT = "SOCKET_PORT";
 	public static final String KRYO_SOCKET_HOST = "KRYO_SOCKET_HOST";
 	public static final String KRYO_SOCKET_PORT = "KRYO_SOCKET_PORT";
+	public static final String BIOHADOOP_START_AT_NS = "BIOHADOOP_START_AT_NS";
+	public static final String WORKER_COUNT = "WORKER_COUNT";
 
 	private static final Map<String, String> environment = new ConcurrentHashMap<>();
 	private static final AtomicBoolean SHUTDOWN = new AtomicBoolean(false);
