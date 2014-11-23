@@ -24,8 +24,10 @@ public class BiohadoopApplicationMaster {
 
 	public static void main(String[] args) {
 		try {
-			LOG.info("Started Biohadoop at {}", HostInfo.getHostname());
 			long start = System.currentTimeMillis();
+			LOG.info("Started Biohadoop at {}, System.nanoTime()={}",
+					HostInfo.getHostname(), start);
+			Environment.set(Environment.BIOHADOOP_START_AT_NS, Long.toString(start));
 
 			BiohadoopApplicationMaster master = new BiohadoopApplicationMaster();
 			master.checkArguments(args);
