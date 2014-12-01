@@ -10,8 +10,8 @@ import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.KryoDecoder;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.KryoEncoder;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.KryoObjectRegistrationWorkerHandler;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.handler.WorkerHandler;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoBuilder;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoConfig;
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.kryo.KryoObjectRegistration;
 
 import com.esotericsoftware.kryo.Kryo;
 
@@ -19,9 +19,7 @@ public class KryoWorkerPipelineFactory implements ChannelPipelineFactory {
 
 	@Override
 	public ChannelPipeline getPipeline() throws Exception {
-		Kryo kryo = new Kryo();
-		kryo.setReferences(false);
-		KryoObjectRegistration.registerDefaultObjects(kryo);
+		Kryo kryo = KryoBuilder.buildKryo();
 		ChannelPipeline pipeline = Channels.pipeline();
 		pipeline.addLast("decoder", new KryoDecoder(kryo));
 		pipeline.addLast("encoder", new KryoEncoder(kryo,
