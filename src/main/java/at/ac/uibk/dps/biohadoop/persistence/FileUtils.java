@@ -33,13 +33,12 @@ public class FileUtils {
 			throw new FileLoadException("Path is null");
 		}
 
-		YarnConfiguration yarnConfiguration = new YarnConfiguration();
 		try {
-			if (!HdfsUtil.exists(yarnConfiguration, path)) {
+			if (!HdfsUtil.exists(YARN_CONFIGURATION, path)) {
 				throw new FileLoadException("File/Path does not exist: " + path);
 			}
 
-			InputStream is = HdfsUtil.openFile(yarnConfiguration, path);
+			InputStream is = HdfsUtil.openFile(YARN_CONFIGURATION, path);
 			BufferedInputStream bis = new BufferedInputStream(is);
 
 			return JsonMapper.OBJECT_MAPPER.readValue(bis, dataClass);
