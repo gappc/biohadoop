@@ -65,4 +65,15 @@ public class PropertyConverter {
 				+ " has invalid value. Valid values are: "
 				+ Arrays.toString(validVals));
 	}
+
+	public static boolean toBoolean(Map<String, String> properties, String key) throws AlgorithmException {
+		String value = null;
+		try {
+			value = properties.get(key);
+			return Boolean.parseBoolean(value);
+		} catch (Exception e) {
+			throw new AlgorithmException("Could not convert property " + key
+					+ " to double, value was " + value, e);
+		}
+	}
 }
