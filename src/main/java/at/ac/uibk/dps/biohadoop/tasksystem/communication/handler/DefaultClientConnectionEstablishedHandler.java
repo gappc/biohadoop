@@ -32,8 +32,7 @@ public class DefaultClientConnectionEstablishedHandler extends
 
 	protected void handleConnectionEstablished(ChannelHandlerContext ctx, ChannelEvent e)
 			throws Exception {
-		ctx.getPipeline().remove(this);
-		LOG.info("Connection established");
+		LOG.info("Establishing connection");
 		Message message = new Message(MessageType.WORK_REQUEST.ordinal(), null);
 		e.getChannel().write(message);
 	}

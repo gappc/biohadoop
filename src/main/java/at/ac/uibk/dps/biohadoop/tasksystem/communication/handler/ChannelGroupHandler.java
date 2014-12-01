@@ -23,7 +23,6 @@ public class ChannelGroupHandler extends SimpleChannelUpstreamHandler {
 	public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e)
 			throws Exception {
 		channels.add(e.getChannel());
-		ctx.getPipeline().remove(this);
 	}
     
 	@Override

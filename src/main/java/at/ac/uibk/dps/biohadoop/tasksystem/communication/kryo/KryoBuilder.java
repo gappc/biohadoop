@@ -4,6 +4,12 @@ import com.esotericsoftware.kryo.Kryo;
 
 public class KryoBuilder {
 
+	public static Kryo buildKryo() {
+		Kryo kryo = new Kryo();
+		kryo.setReferences(false);
+		return kryo;
+	}
+	
 	public static Kryo buildKryo(KryoRegistrator kryoRegistrator) {
 		Kryo kryo = new Kryo();
 		kryo.setReferences(false);

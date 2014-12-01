@@ -16,7 +16,7 @@ import com.esotericsoftware.kryo.io.UnsafeOutput;
  *
  */
 public class KryoEncoder extends OneToOneEncoder {
-	private final Output output;
+	private Output output;
 	private final Kryo kryo;
 
 	public KryoEncoder(Kryo kryo, int bufferSize, int maxBufferSize) {
@@ -24,6 +24,10 @@ public class KryoEncoder extends OneToOneEncoder {
 		output = new UnsafeOutput(bufferSize, maxBufferSize);
 	}
 
+	public void setBufferSizes(int bufferSize, int maxBufferSize) {
+		output = new UnsafeOutput(bufferSize, maxBufferSize);
+	}
+	
 	protected Object encode(ChannelHandlerContext ctx, Channel channel,
 			Object object) throws Exception {
 		output.clear();
