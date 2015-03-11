@@ -2,7 +2,7 @@ package at.ac.uibk.dps.biohadoop.tasksystem.queue;
 
 import java.io.Serializable;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
+import at.ac.uibk.dps.biohadoop.tasksystem.Worker;
 
 /**
  * A task, that is used by Biohadoop's Task system. Methods are provided to get
@@ -55,7 +55,7 @@ public class Task<T> implements Serializable {
 
 	/**
 	 * Gets the {@link TaskTypeId} of this task. This TaskTypeId uniquely
-	 * identifies, which {@link AsyncComputable} and initalData should be used
+	 * identifies, which {@link Worker} and initalData should be used
 	 * to compute the result of the task.
 	 * 
 	 * @return the {@link TaskTypeId}

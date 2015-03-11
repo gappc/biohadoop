@@ -1,19 +1,19 @@
 package at.ac.uibk.dps.biohadoop.tasksystem.communication.worker;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
+import at.ac.uibk.dps.biohadoop.tasksystem.Worker;
 
 public class WorkerData<R, T, S> {
 
-	private final AsyncComputable<R, T, S> asyncComputable;
+	private final Worker<R, T, S> worker;
 	private final R initialData;
 
-	public WorkerData(AsyncComputable<R, T, S> asyncComputable, R initialData) {
-		this.asyncComputable = asyncComputable;
+	public WorkerData(Worker<R, T, S> worker, R initialData) {
+		this.worker = worker;
 		this.initialData = initialData;
 	}
 
-	public AsyncComputable<R, T, S> getAsyncComputable() {
-		return asyncComputable;
+	public Worker<R, T, S> getWorker() {
+		return worker;
 	}
 
 	public R getInitialData() {

@@ -37,16 +37,4 @@ public class TestWorkerHandler extends SimpleChannelHandler {
 		e.getChannel().close();
 	}
 
-//	private <R, T, S> WorkerData<R, T, S> getWorkerData(Task<T> task) throws Exception {
-//		@SuppressWarnings("unchecked")
-//		TaskConfiguration<R> taskConfiguration = (TaskConfiguration<R>) task
-//				.getData();
-//		@SuppressWarnings("unchecked")
-//		Class<? extends AsyncComputable<R, T, S>> asyncComputableClass = (Class<? extends AsyncComputable<R, T, S>>) Class
-//				.forName(taskConfiguration.getAsyncComputableClassName());
-//		AsyncComputable<R, T, S> asyncComputable = (AsyncComputable<R, T, S>) asyncComputableClass
-//				.newInstance();
-//		return new WorkerData<R, T, S>(asyncComputable,
-//				taskConfiguration.getInitialData());
-//	}
 }

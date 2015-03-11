@@ -3,7 +3,7 @@ package at.ac.uibk.dps.biohadoop.tasksystem.queue;
 import java.util.ArrayList;
 import java.util.List;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
+import at.ac.uibk.dps.biohadoop.tasksystem.Worker;
 
 /**
  * This class provides methods to add tasks to the task system
@@ -21,40 +21,40 @@ public class TaskSubmitter<R, T, S> {
 
 	/**
 	 * Creates a {@link TaskSubmitter}, that can be used to submit Tasks to the
-	 * task system. The class defined by <tt>asyncComputableClass</tt> is used
+	 * task system. The class defined by <tt>workerClass</tt> is used
 	 * when computing the result on a worker.
 	 * 
-	 * @param asyncComputableClass
+	 * @param worker
 	 *            defines the class that is used to compute the result of a task
 	 *            on a worker
 	 */
 	public TaskSubmitter(
-			Class<? extends AsyncComputable<R, T, S>> asyncComputableClass) {
-		this(asyncComputableClass, null);
+			Class<? extends Worker<R, T, S>> worker) {
+		this(worker, null);
 	}
 
 	/**
 	 * Creates a {@link TaskSubmitter}, that can be used to submit Tasks to the
-	 * task system. The class defined by <tt>asyncComputableClass</tt> is used
+	 * task system. The class defined by <tt>workerClass</tt> is used
 	 * when computing the result on a worker. The <tt>initialData</tt> is send
-	 * to a worker when it first encounters the <tt>asyncComputableClass</tt>
+	 * to a worker when it first encounters the <tt>workerClass</tt>
 	 * type of work.
 	 * 
-	 * @param asyncComputableClass
+	 * @param workerClass
 	 *            defines the class that is used to compute the result of a task
 	 *            on a worker
 	 * @param initialData
 	 *            is send to a worker when it first encounters the
-	 *            <tt>asyncComputableClass</tt> type of work.
+	 *            <tt>workerClass</tt> type of work.
 	 */
 	public TaskSubmitter(
-			Class<? extends AsyncComputable<R, T, S>> asyncComputableClass,
+			Class<? extends Worker<R, T, S>> workerClass,
 			R initialData) {
-		String asyncComputableClassName = asyncComputableClass
+		String workerClassName = workerClass
 				.getCanonicalName();
 		// TODO copy initialData to prevent user from (accidentially) changing
 		// the initialData after TaskSubmitter is constructed
-		taskConfiguration = new TaskConfiguration<>(asyncComputableClassName,
+		taskConfiguration = new TaskConfiguration<>(workerClassName,
 				initialData);
 	}
 

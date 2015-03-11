@@ -10,7 +10,7 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.AsyncComputable;
+import at.ac.uibk.dps.biohadoop.tasksystem.Worker;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.Message;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerData;
@@ -56,12 +56,12 @@ public class WorkerHandler extends SimpleChannelHandler {
 		taskTypeId = inputTask.getTaskTypeId();
 
 		@SuppressWarnings("unchecked")
-		AsyncComputable<Object, Object, Object> asyncComputable = (AsyncComputable<Object, Object, Object>) workerData
-				.getAsyncComputable();
+		Worker<Object, Object, Object> worker = (Worker<Object, Object, Object>) workerData
+				.getWorker();
 		Object initalData = workerData.getInitialData();
 		Object data = inputTask.getData();
 
-		Object result = asyncComputable.compute(data, initalData);
+		Object result = worker.compute(data, initalData);
 
 		Task<?> outputTask = new Task<>(inputTask.getTaskId(), taskTypeId,
 				result);
@@ -84,11 +84,11 @@ public class WorkerHandler extends SimpleChannelHandler {
 		TaskConfiguration<R> taskConfiguration = (TaskConfiguration<R>) task
 				.getData();
 		@SuppressWarnings("unchecked")
-		Class<? extends AsyncComputable<R, T, S>> asyncComputableClass = (Class<? extends AsyncComputable<R, T, S>>) Class
-				.forName(taskConfiguration.getAsyncComputableClassName());
-		AsyncComputable<R, T, S> asyncComputable = asyncComputableClass
+		Class<? extends Worker<R, T, S>> workerClass = (Class<? extends Worker<R, T, S>>) Class
+				.forName(taskConfiguration.getWorkerClassName());
+		Worker<R, T, S> worker = workerClass
 				.newInstance();
-		return new WorkerData<R, T, S>(asyncComputable,
+		return new WorkerData<R, T, S>(worker,
 				taskConfiguration.getInitialData());
 	}
 }

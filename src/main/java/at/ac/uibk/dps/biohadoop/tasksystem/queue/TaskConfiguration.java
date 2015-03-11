@@ -7,16 +7,16 @@ public class TaskConfiguration<T> implements Serializable {
 	private static final long serialVersionUID = 4860155334607735732L;
 	
 	private TaskTypeId taskTypeId;
-	private String asyncComputableClassName;
+	private String workerClassName;
 	private T initialData;
 
 	public TaskConfiguration() {
 		// Needed for serialization
 	}
 	
-	public TaskConfiguration(String asyncComputableClassName, T initialData) {
-		this.taskTypeId = getTaskTypeId(asyncComputableClassName, initialData);
-		this.asyncComputableClassName = asyncComputableClassName;
+	public TaskConfiguration(String workerClassName, T initialData) {
+		this.taskTypeId = getTaskTypeId(workerClassName, initialData);
+		this.workerClassName = workerClassName;
 		this.initialData = initialData;
 	}
 	
@@ -24,8 +24,8 @@ public class TaskConfiguration<T> implements Serializable {
 		return taskTypeId;
 	}
 
-	public String getAsyncComputableClassName() {
-		return asyncComputableClassName;
+	public String getWorkerClassName() {
+		return workerClassName;
 	}
 
 	public T getInitialData() {
@@ -33,8 +33,8 @@ public class TaskConfiguration<T> implements Serializable {
 	}
 	
 	private TaskTypeId getTaskTypeId(
-			String asyncComputableClassName, T initialData) {
-		Long hash = new Long(asyncComputableClassName.hashCode() * 13);
+			String workerClassName, T initialData) {
+		Long hash = new Long(workerClassName.hashCode() * 13);
 		if (initialData != null) {
 			hash += initialData.hashCode() * 17;
 		}
