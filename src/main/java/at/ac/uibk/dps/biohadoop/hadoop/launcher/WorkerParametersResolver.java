@@ -5,7 +5,7 @@ import java.util.List;
 
 import at.ac.uibk.dps.biohadoop.hadoop.Environment;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.NettyServer;
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.Worker;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerComm;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerConfiguration;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 
@@ -19,7 +19,7 @@ public class WorkerParametersResolver {
 		
 		int count = 0;
 		for (WorkerConfiguration configuration : configurations) {
-			Class<? extends Worker> worker = configuration.getWorker();
+			Class<? extends WorkerComm> worker = configuration.getWorker();
 			Integer port = NettyServer.getPort(worker);
 			for (int i = 0; i < configuration.getCount(); i++) {
 				workerParameters.add(worker.getCanonicalName() + " "

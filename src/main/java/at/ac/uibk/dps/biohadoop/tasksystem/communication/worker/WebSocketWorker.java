@@ -10,7 +10,7 @@ import org.jboss.netty.handler.codec.http.websocketx.WebSocketVersion;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.pipeline.WebSocketWorkerPipelineFactory;
 
-public class WebSocketWorker extends AbstractWorker {
+public class WebSocketWorker extends AbstractWorkerComm {
 
 	@Override
 	public void start(String host, int port) throws WorkerException,

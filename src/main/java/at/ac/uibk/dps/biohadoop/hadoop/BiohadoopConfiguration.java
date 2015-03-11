@@ -14,7 +14,7 @@ import at.ac.uibk.dps.biohadoop.tasksystem.communication.endpoint.Endpoint;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.endpoint.EndpointConfiguration;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.endpoint.KryoEndpoint;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.endpoint.WebSocketEndpoint;
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.Worker;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerComm;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerConfiguration;
 
 public class BiohadoopConfiguration {
@@ -93,7 +93,7 @@ public class BiohadoopConfiguration {
 			return this;
 		}
 
-		public Builder addWorker(Class<? extends Worker> worker, int count) {
+		public Builder addWorker(Class<? extends WorkerComm> worker, int count) {
 			WorkerConfiguration workerConfiguration = new WorkerConfiguration(
 					worker, count);
 			workerConfigurations.add(workerConfiguration);

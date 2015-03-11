@@ -18,9 +18,9 @@ public class WorkerStarter {
 
 		try {
 			@SuppressWarnings("unchecked")
-			Class<? extends Worker> workerClass = (Class<? extends Worker>) Class
+			Class<? extends WorkerComm> workerClass = (Class<? extends WorkerComm>) Class
 					.forName(args[0]);
-			Worker worker = workerClass.newInstance();
+			WorkerComm worker = workerClass.newInstance();
 			worker.start(args[1], Integer.parseInt(args[2]));
 		} catch(ConnectionRefusedException e) {
 			LOG.error(

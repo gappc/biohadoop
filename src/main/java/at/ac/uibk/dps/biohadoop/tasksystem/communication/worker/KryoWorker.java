@@ -4,7 +4,7 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.pipeline.KryoWorkerPipelineFactory;
 
-public class KryoWorker extends AbstractWorker {
+public class KryoWorker extends AbstractWorkerComm {
 
 	@Override
 	public void start(String host, int port) throws WorkerException, ConnectionRefusedException {

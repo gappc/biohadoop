@@ -16,7 +16,7 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.Worker;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerComm;
 import at.ac.uibk.dps.biohadoop.utils.PortFinder;
 
 public class NettyServer {
@@ -30,7 +30,7 @@ public class NettyServer {
 
 	private ChannelFactory factory;
 
-	public static Integer getPort(Class<? extends Worker> workerClass) {
+	public static Integer getPort(Class<? extends WorkerComm> workerClass) {
 		return PORT_MAP.get(workerClass.getCanonicalName());
 	}
 	
@@ -38,7 +38,7 @@ public class NettyServer {
 		return channels;
 	}
 	
-	public void startServer(final ChannelPipelineFactory pipelineFactory, Class<? extends Worker> workerClass) {
+	public void startServer(final ChannelPipelineFactory pipelineFactory, Class<? extends WorkerComm> workerClass) {
 		factory = new NioServerSocketChannelFactory(
 				Executors.newCachedThreadPool(),
 				Executors.newCachedThreadPool());
@@ -67,7 +67,7 @@ public class NettyServer {
 		factory.releaseExternalResources();
 	}
 	
-	private void registerPort(Class<? extends Worker> workerClass, int port) {
+	private void registerPort(Class<? extends WorkerComm> workerClass, int port) {
 		String key = workerClass.getCanonicalName();
 		PORT_MAP.put(key, port);
 	}

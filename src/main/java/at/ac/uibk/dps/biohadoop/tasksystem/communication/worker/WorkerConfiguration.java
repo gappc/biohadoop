@@ -5,22 +5,22 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 public class WorkerConfiguration {
 
-	private final Class<? extends Worker> worker;
+	private final Class<? extends WorkerComm> worker;
 	private final Integer count;
 
-	public WorkerConfiguration(Class<? extends Worker> worker, Integer count) {
+	public WorkerConfiguration(Class<? extends WorkerComm> worker, Integer count) {
 		this.worker = worker;
 		this.count = count;
 	}
 
 	@JsonCreator
 	public static WorkerConfiguration create(
-			@JsonProperty("worker") Class<? extends Worker> worker,
+			@JsonProperty("worker") Class<? extends WorkerComm> worker,
 			@JsonProperty("count") Integer count) {
 		return new WorkerConfiguration(worker, count);
 	}
 
-	public Class<? extends Worker> getWorker() {
+	public Class<? extends WorkerComm> getWorker() {
 		return worker;
 	}
 

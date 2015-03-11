@@ -1,6 +1,6 @@
 package at.ac.uibk.dps.biohadoop.tasksystem.communication.endpoint;
 
-import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.Worker;
+import at.ac.uibk.dps.biohadoop.tasksystem.communication.worker.WorkerComm;
 
 public interface Endpoint {
 
@@ -8,6 +8,6 @@ public interface Endpoint {
 
 	public void stop() throws EndpointException;
 
-	public Class<? extends Worker> getMatchingWorkerClass();
+	public Class<? extends WorkerComm> getMatchingWorkerClass();
 	
 }
