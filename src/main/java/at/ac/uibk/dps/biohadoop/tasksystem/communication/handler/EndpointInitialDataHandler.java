@@ -11,22 +11,22 @@ import at.ac.uibk.dps.biohadoop.tasksystem.communication.Message;
 import at.ac.uibk.dps.biohadoop.tasksystem.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.Task;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskConfiguration;
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueue;
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueueService;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskBroker;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskBrokerService;
 
 public class EndpointInitialDataHandler extends SimpleChannelHandler {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(EndpointInitialDataHandler.class);
 
-	private final TaskQueue taskQueue = TaskQueueService.getTaskQueue();
+	private final TaskBroker taskBroker = TaskBrokerService.getTaskBroker();
 
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)
 			throws Exception {
 		Message inputMessage = (Message) e.getMessage();
 		Task<?> inputTask = inputMessage.getTask();
-		TaskConfiguration<?> taskConfiguration = taskQueue
+		TaskConfiguration<?> taskConfiguration = taskBroker
 				.getTaskConfiguration(inputTask.getTaskId());
 		Task<?> outputTask = new Task<>(inputTask.getTaskId(),
 				taskConfiguration.getTaskTypeId(), taskConfiguration);

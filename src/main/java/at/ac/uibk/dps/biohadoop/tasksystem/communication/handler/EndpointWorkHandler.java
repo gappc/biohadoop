@@ -17,15 +17,15 @@ import at.ac.uibk.dps.biohadoop.tasksystem.communication.MessageType;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.Task;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskException;
 import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskId;
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueue;
-import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskQueueService;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskBroker;
+import at.ac.uibk.dps.biohadoop.tasksystem.queue.TaskBrokerService;
 
 public class EndpointWorkHandler extends SimpleChannelHandler {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(EndpointWorkHandler.class);
 
-	private final TaskQueue taskQueue = TaskQueueService.getTaskQueue();
+	private final TaskBroker taskBroker = TaskBrokerService.getTaskBroker();
 	private final ForkJoinPool pool = new ForkJoinPool();
 
 	private TaskId currentTaskId;
@@ -40,14 +40,14 @@ public class EndpointWorkHandler extends SimpleChannelHandler {
 		} else if (inputMessage.getType() == MessageType.WORK_REQUEST.ordinal()) {
 			Task<?> inputTask = inputMessage.getTask();
 			if (inputTask != null) {
-				taskQueue.storeResult(inputTask.getTaskId(),
+				taskBroker.storeResult(inputTask.getTaskId(),
 						inputTask.getData());
 			}
 
 			// There may be no task available, therefore we try to get a task
 			// using non-blocking poll. If the result is null, we use a blocking
 			// approach inside a dedicated thread
-			Task<?> outputTask = taskQueue.pollTask();
+			Task<?> outputTask = taskBroker.pollTask();
 			if (outputTask != null) {
 				currentTaskId = outputTask.getTaskId();
 				Message outputMessage = new Message(
@@ -84,7 +84,7 @@ public class EndpointWorkHandler extends SimpleChannelHandler {
 		}
 		if (currentTaskId != null) {
 			try {
-				taskQueue.reschedule(currentTaskId);
+				taskBroker.reschedule(currentTaskId);
 			} catch (TaskException | InterruptedException e) {
 				LOG.error("Error while rescheduling task {}", currentTaskId);
 			}
@@ -105,7 +105,7 @@ public class EndpointWorkHandler extends SimpleChannelHandler {
 
 		@Override
 		public Object call() throws Exception {
-			Task<?> outputTask = taskQueue.getTask();
+			Task<?> outputTask = taskBroker.getTask();
 			currentTaskId = outputTask.getTaskId();
 			Message outputMessage = new Message(
 					MessageType.WORK_RESPONSE.ordinal(), outputTask);

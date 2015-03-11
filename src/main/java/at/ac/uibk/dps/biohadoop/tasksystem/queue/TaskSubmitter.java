@@ -16,7 +16,7 @@ import at.ac.uibk.dps.biohadoop.tasksystem.Worker;
  */
 public class TaskSubmitter<R, T, S> {
 
-	private final TaskQueue taskQueue = TaskQueueService.getTaskQueue();
+	private final TaskBroker taskBroker = TaskBrokerService.getTaskBroker();
 	private final TaskConfiguration<R> taskConfiguration;
 
 	/**
@@ -82,7 +82,7 @@ public class TaskSubmitter<R, T, S> {
 
 	private TaskFuture<S> submitTask(T data) throws TaskException {
 		try {
-			return taskQueue.submit(data, taskConfiguration);
+			return taskBroker.submit(data, taskConfiguration);
 		} catch (InterruptedException e) {
 			throw new TaskException("Could not add Task", e);
 		}

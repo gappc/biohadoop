@@ -19,9 +19,9 @@ import org.slf4j.LoggerFactory;
  * @author Christian Gapp
  *
  */
-public class TaskQueue {
+public class TaskBroker {
 
-	private static final Logger LOG = LoggerFactory.getLogger(TaskQueue.class);
+	private static final Logger LOG = LoggerFactory.getLogger(TaskBroker.class);
 
 	private final BlockingQueue<Task<?>> queue = new LinkedBlockingQueue<>();
 	private final Map<TaskId, TaskQueueEntry> workingSet = new ConcurrentHashMap<>();
