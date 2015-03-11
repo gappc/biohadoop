@@ -12,6 +12,9 @@ import at.ac.uibk.dps.biohadoop.algorithm.AlgorithmId;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.AlgorithmLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.EndpointLauncher;
 import at.ac.uibk.dps.biohadoop.hadoop.launcher.WorkerLauncher;
+import at.ac.uibk.dps.biohadoop.profile.Profilers;
+import at.ac.uibk.dps.biohadoop.profile.cpu.CPUProfiler;
+import at.ac.uibk.dps.biohadoop.profile.net.NetProfiler;
 import at.ac.uibk.dps.biohadoop.utils.HdfsUtil;
 import at.ac.uibk.dps.biohadoop.utils.HostInfo;
 
@@ -42,6 +45,9 @@ public class BiohadoopApplicationMaster {
 	}
 
 	public void run(String[] args) throws Exception {
+		CPUProfiler cpuProfiler = Profilers.runCPUProfiler();
+		NetProfiler networkProfiler = Profilers.runNetProfiler();
+		
 		BiohadoopConfiguration biohadoopConfiguration = BiohadoopConfigurationUtil
 				.read(yarnConfiguration, args[0]);
 		Environment.setBiohadoopConfiguration(biohadoopConfiguration);
@@ -73,6 +79,11 @@ public class BiohadoopApplicationMaster {
 		}
 		LOG.info("All algorithms finished");
 
+		cpuProfiler.logCPUData();
+		cpuProfiler.stop();
+		networkProfiler.logNetData();
+		networkProfiler.stop();
+		
 		LOG.info("Stopping all communication");
 		endpointLauncher.stopEndpoints();
 	}
